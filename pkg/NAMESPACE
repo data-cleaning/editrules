@@ -1,3 +1,0 @@
-export(editmatrix)
-export(is.editmatrix)
-export(editinfo)
