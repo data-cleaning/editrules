@@ -1,0 +1,13 @@
+Package: rules
+Type: Package
+Title: rules
+Version: 0.1
+Date: 2010-12-23
+Author: Edwin de Jonge
+Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
+Description: Geographic graphs
+License: GPL version 3
+LazyLoad: yes
+Depends: maptools
+URL: http://code.google.com/p/rules/
+Collate: 'check.R' 'editmatrix.R'
