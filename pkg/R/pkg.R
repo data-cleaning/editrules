@@ -7,6 +7,8 @@
 #' Important for the (automatic) editing proces are the rules that are violated. 
 #' 
 #' The function \code{\link{editmatrix}} reads lineair (in)equalities.
+#' Typical usage is:
+#' @example examples/editrules.R
 #' @name editrules-package 
 #' @docType package 
 NULL

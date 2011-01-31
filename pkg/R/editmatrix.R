@@ -238,7 +238,8 @@ as.editmatrix <- function(x){
 #' @method as.matrix editmatrix
 #' @param x editmatrix object
 #' @return matrix equal to editmatrix
-as.matrix.editmatrix <- function(x){
+#' @param ... further arguments passed to or from other methods.
+as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
 }
 
@@ -247,9 +248,10 @@ as.matrix.editmatrix <- function(x){
 #' @export
 #' @method print editmatrix
 #' @param x editmatrix object to be printed
-print.editmatrix <- function(x){
+#' @param ... further arguments passed to or from other methods.
+print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
-   print(as.matrix(x))
+   print(as.matrix(x,...))
    cat("\nEdit rules:\n")
    info <- editsinfo(x)
    desc <- paste("[",info$description,"]")

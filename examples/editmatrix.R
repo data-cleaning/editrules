@@ -13,3 +13,4 @@ C , z == y + 2*w   ,
 edtinf <- read.csv(textConnection(edtinf.csv))			
 em <- editmatrix(edtinf)
 print(em)
+
