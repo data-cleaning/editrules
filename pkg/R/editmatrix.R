@@ -56,18 +56,35 @@ makeEditRow <- function(edt){
   return(wgt)  
 }
 
-#' Transforms a list of R (in)equalities into a matrix with the factor or  0 for each variable
+#' Transforms a list of R (in)equalities into an edit matrix with a factor for each variable
 #'
+#' There are two forms of creating an editmatrix:
+#' \enumerate{ 
+#'    \item a \code{character} vector with (in)equalities written in R syntax
+#'    \item a \code{data.frame}(in) with three fields:
+#'       \itemize{
+#'            \item edit = a \code{character} with the name of each rule
+#'            \item edit = a \code{character} vector with (in)equalities written in R syntax
+#'            \item description = a \code{character} desribing the intention of the rule
+#'       }
+#'      Typically these rules are stored in a external csv file (or database). 
+#' }
+#'
+#' The second form is the prefered form, because it allows the documentation of constraints. This
+#' may be very useful when the incorrect observations are analyzed. 
+#'
+#' The matrix is created by getting the factors of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
 #' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
-#' @title Parse edit rules
+#' @title Reading in edit rules
 #' @export
+#' @example examples/editmatrix.R
 #' @param editsinfo \code{data.frame} containing R (in)equalities, see details for description
 #' @param editrules \code{character} vector with R (in)equalities
 #' @return an object of class "editmatrix" containing a \code{matrix} and \code{editsinfo}
 editmatrix <- function( editsinfo = NULL
-					  , editrules = NULL
-					  ){
+					       , editrules = NULL
+					       ){
 	
 	if (is.null(editsinfo)){
 	   if (is.null(editrules)){
@@ -88,7 +105,7 @@ editmatrix <- function( editsinfo = NULL
 	if (is.null(editsinfo$description)){
 	   editsinfo$description <- rep("", length(edts))
 	}
-	editsinfo <- editsinfo[c(2,1,3)]
+	editsinfo <- editsinfo[c("name","edit","description")]
 
 	stopifnot(is.language(edts))
     
@@ -124,7 +141,7 @@ is.editmatrix <- function(x){
 }
 
 
-#' retrieve editinfo on an editmatrix
+#' Retrieve editinfo on an editmatrix
 #'
 #' If \code{x} is a normal matrix, the matrix will be considered an \code{editmatrix}. The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
@@ -206,10 +223,24 @@ as.editmatrix <- function(x){
    if (is.editmatrix(x)){
       return(x)
    }
-   #TODO check for colnames
    mat <- as.matrix(x)
    structure( mat
             , class="editmatrix"
 			, editsinfo=editsinfo(mat)
 			)
+}
+
+#' print edit matrix
+#'
+#' @method print editmatrix
+#' @param x editmatrix object to be printed
+print.editmatrix <- function(x){
+   info <- editsinfo(x)
+   y <- unclass(x)
+   attr(y, "editsinfo") <- NULL
+   attr(y, "edits") <- NULL
+   cat("Edit matrix:\n")
+   print(y)
+   cat("\nEdit rules:\n")
+   print(info)
 }
