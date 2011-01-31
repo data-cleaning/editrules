@@ -1,0 +1,3 @@
+version 0.2
+- added an as.matrix function
+- improved editmatrix example

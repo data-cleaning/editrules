@@ -3,9 +3,13 @@ em <- editmatrix(editrules=c("x+3*y==2*z", "x==z"))
 print(em)
 
 #Using editsinfo to define constraints
-ei <- editsinfo(em)
-ei$name <- c("Rule A", "Rule B")
-ei$description <- c("This is rule a", "This is rule b")
+edtinf.csv <- 
+'name , edit       , description
+A , x == y         , "these variables should be equal"
+B , z + w == y + x ,
+C , z == y + 2*w   ,
+'
 
-em <- editmatrix(ei)
+edtinf <- read.csv(textConnection(edtinf.csv))			
+em <- editmatrix(edtinf)
 print(em)

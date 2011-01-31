@@ -79,9 +79,9 @@ makeEditRow <- function(edt){
 #' @title Reading in edit rules
 #' @export
 #' @example examples/editmatrix.R
-#' @param editsinfo \code{data.frame} containing R (in)equalities, see details for description
-#' @param editrules \code{character} vector with R (in)equalities
-#' @return an object of class "editmatrix" containing a \code{matrix} and \code{editsinfo}
+#' @param editsinfo \code{data.frame} with (in)equalities written in R syntax, see details for description
+#' @param editrules \code{character} vector with (in)equalities written in R syntax
+#' @return an object of class "editmatrix" which is a \code{matrix} with extra properties
 editmatrix <- function( editsinfo = NULL
 					       , editrules = NULL
 					       ){
@@ -226,8 +226,20 @@ as.editmatrix <- function(x){
    mat <- as.matrix(x)
    structure( mat
             , class="editmatrix"
-			, editsinfo=editsinfo(mat)
-			)
+			   , editsinfo=editsinfo(mat)
+			   )
+}
+
+#' Convert an editmatrix to a normal matrix
+#' 
+#' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
+#' In some case it is preferable to convert the editmatrix to a normal matrix.
+#' @export
+#' @method as.matrix editmatrix
+#' @param x editmatrix object
+#' @return matrix equal to editmatrix
+as.matrix.editmatrix <- function(x){
+   array(x, dim=dim(x), dimnames=dimnames(x))
 }
 
 #' print edit matrix
@@ -236,12 +248,13 @@ as.editmatrix <- function(x){
 #' @method print editmatrix
 #' @param x editmatrix object to be printed
 print.editmatrix <- function(x){
-   info <- editsinfo(x)
-   y <- unclass(x)
-   attr(y, "editsinfo") <- NULL
-   attr(y, "edits") <- NULL
    cat("Edit matrix:\n")
-   print(y)
+   print(as.matrix(x))
    cat("\nEdit rules:\n")
-   print(info)
+   info <- editsinfo(x)
+   desc <- paste("[",info$description,"]")
+   desc <- ifelse(info$description=="","", desc)
+   cat( paste( info$name,":", info$edit, desc, collapse="\n")
+      , "\n"
+      )
 }
