@@ -63,7 +63,7 @@ makeEditRow <- function(edt){
 #'    \item a \code{character} vector with (in)equalities written in R syntax
 #'    \item a \code{data.frame}(in) with three fields:
 #'       \itemize{
-#'            \item edit = a \code{character} with the name of each rule
+#'            \item name = a \code{character} with the name of each rule
 #'            \item edit = a \code{character} vector with (in)equalities written in R syntax
 #'            \item description = a \code{character} desribing the intention of the rule
 #'       }
@@ -232,6 +232,7 @@ as.editmatrix <- function(x){
 
 #' print edit matrix
 #'
+#' @export
 #' @method print editmatrix
 #' @param x editmatrix object to be printed
 print.editmatrix <- function(x){
