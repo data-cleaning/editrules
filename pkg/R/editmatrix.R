@@ -1,4 +1,3 @@
-# retourneert een vector met een fac van de variabelen 
 retrieveSign <- function(e, fac=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
@@ -53,26 +52,19 @@ makeEditRow <- function(edt){
      stop(paste("Invalid edit rule:", edt))
   }
   wgt  <- retrieveSign(edt)
-  
-  # op <- deparse(edt[[1]])
-  # if ( op == ">"){
-     # op <- "<"
-  # } else if (op == ">="){
-    # op <- "=<"
-  # }
-  # wgt[op] <- 1
-	
   stopifnot(length(wgt)==length(unique(names(wgt))))
   return(wgt)  
 }
 
-#' transforms a list of R equalities into a matrix with +1, -1 and 0 for each variable
+#' Transforms a list of R (in)equalities into a matrix with the factor or  0 for each variable
 #'
-#' i.e. x == y   results in  (x=-1, y=1, w=0, z=0)
-#' and x == y + w results in (x=-1, y=1, w=1, z=0)
+#' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
+#' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
+#' @title Parse edit rules
 #' @export
-#' @param editinfo data.frame containing R (in)equalities
-#' @param editrules character vector with R (in)equalities
+#' @param editsinfo \code{data.frame} containing R (in)equalities, see details for description
+#' @param editrules \code{character} vector with R (in)equalities
+#' @return an object of class "editmatrix" containing a \code{matrix} and \code{editsinfo}
 editmatrix <- function( editsinfo = NULL
 					  , editrules = NULL
 					  ){
@@ -119,27 +111,14 @@ editmatrix <- function( editsinfo = NULL
 			 , editsinfo=editsinfo
 			 , edits = edts
 			 )
-	# print(mat)
-	# edits <-sapply(edts, deparse)
-	# rownames(mat) <- edits
-	# ret <- list( matrix = mat
-	           # , edits = edits
-	           # )
-	# if (addChecks){
-		# checks <- do.call( cbind
-						 # , lapply(edts, function(edt){
-										   # eval(edt, dat)
-										# }
-								 # )
-						 # )
-	   # colnames(checks) <- edits
-	   # ret$checks <- checks
-	# }
-	# ret
 }
 
-#' check if object is an editmatrix
+#' Check if object is an editmatrix
+#' 
+#' @seealso \code{\link{editmatrix}}
 #' @export
+#' @param x object to be checked
+#' @return TRUE if \code{x} is an \code{editmatrix}
 is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
 }
@@ -147,8 +126,12 @@ is.editmatrix <- function(x){
 
 #' retrieve editinfo on an editmatrix
 #'
-#' the edit info will be derived if x is a matrix
+#' If \code{x} is a normal matrix, the matrix will be considered an \code{editmatrix}. The columns of the matrix
+#' are the variables and the rows are the edit rules (contraints).
+#' @seealso \code{\link{editmatrix}}
 #' @export
+#' @param x \code{\link{editmatrix}}  or \code{matrix} object
+#' @return \code{data.frame} with information on all edit/constraint rules
 editsinfo <- function(x){
    if (is.editmatrix(x)){
 	return(attr(x, "editsinfo"))
@@ -202,12 +185,23 @@ editsinfo <- function(x){
 			 )
 }
 
+#' Retrieve parsed R object of edit rules
+#' 
+#' @param x object of class \code{\link{editmatrix}}
+#' @return parsed R object of of the edit rules/contraints
 edits <- function(x){
    stopifnot(is.editmatrix(x))
    return(attr(x, "edits"))
 }
 
-#' transform a matrix into an edit matrix
+#' Transform a matrix into an edit matrix
+#'
+#' The columns of the matrix
+#' are the variables and the rows are the edit rules (contraints).
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#' @param x object to be transformed into an \code{\link{editmatrix}}
+#' @return an object of class \code{editmatrix}.
 as.editmatrix <- function(x){
    if (is.editmatrix(x)){
       return(x)
@@ -216,6 +210,6 @@ as.editmatrix <- function(x){
    mat <- as.matrix(x)
    structure( mat
             , class="editmatrix"
-			, editsinfo=editinfo(mat)
+			, editsinfo=editsinfo(mat)
 			)
 }
