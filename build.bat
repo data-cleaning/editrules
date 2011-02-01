@@ -3,10 +3,10 @@
 
 echo Removing building information...
 rm -rf pkg/man
-rm -f *.tar.gz
+rm -rf output
 
 echo Generate documentation...
-R -f roxygen.R
+R -q -f roxygen.R
 
 md output
 cd output

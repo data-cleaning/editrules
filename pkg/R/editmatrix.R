@@ -1,11 +1,9 @@
-CONSTANT <- "CONSTANT"
-
 retrieveSign <- function(e, fac=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
      if (is.numeric(e)){
         l <- fac*e
-        names(l) <- CONSTANT
+        names(l) <- getOption("editrules.CONSTANT", "CONSTANT")
      }
      else {
         l <- fac
@@ -68,11 +66,11 @@ makeEditRow <- function(edt){
 #' There are two forms of creating an editmatrix:
 #' \enumerate{ 
 #'    \item a \code{character} vector with (in)equalities written in R syntax
-#'    \item a \code{data.frame}(in) with three fields:
+#'    \item a \code{data.frame} with three columns:
 #'       \itemize{
 #'            \item name = a \code{character} with the name of each rule
-#'            \item edit = a \code{character} vector with (in)equalities written in R syntax
-#'            \item description = a \code{character} desribing the intention of the rule
+#'            \item edit = a \code{character} with (in)equalities written in R syntax
+#'            \item description = a \code{character} describing the intention of the rule
 #'       }
 #'      Typically these rules are stored in a external csv file (or database). 
 #' }
@@ -86,6 +84,7 @@ makeEditRow <- function(edt){
 #' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
 #' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
 #' @title Reading in edit rules
+#' @seealso \code{\link{editsinfo}} \code{\link{as.editmatrix}}
 #' @export
 #' @example examples/editmatrix.R
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
@@ -128,15 +127,15 @@ editmatrix <- function( editrules = editsinfo
 
 	mat <- matrix( 0
 	             , ncol=length(vars)
-				 , nrow=length(rowedts)
-				 , dimnames = list( edits = editsinfo$name
-				                  , var=vars
-								  )
-				 )
-				 
+                , nrow=length(rowedts)
+                , dimnames = list( edits = editsinfo$name
+                                 , var=vars
+                                 )
+                )
+
 	for (i in 1:length(rowedts)){
 	   mat[i,names(rowedts[[i]])] <- rowedts[[i]]
-    }
+   }
 	structure( mat
 	         , class="editmatrix"
 			 , editsinfo=editsinfo
@@ -157,6 +156,11 @@ is.editmatrix <- function(x){
 
 #' Retrieve editinfo on an editmatrix
 #'
+#' \code{editsinfo} returns a data.frame describing the editrules in editmatrix \code{x}. This data.frame can be used to store the
+#' editrules in a readable format, so that the editrules can be maintained and documented.
+#'
+#' The \code{\link{editmatrix}} function can use the output of \code{editsinfo} to create an \code{editmatrix}.
+#'
 #' If \code{x} is a normal matrix, the matrix will be considered an \code{editmatrix}. The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
 #' @seealso \code{\link{editmatrix}}
@@ -165,7 +169,7 @@ is.editmatrix <- function(x){
 #' @return \code{data.frame} with information on all edit/constraint rules
 editsinfo <- function(x){
    if (is.editmatrix(x)){
-	return(attr(x, "editsinfo"))
+      return(attr(x, "editsinfo"))
    }
    
    mat <- as.matrix(x)
@@ -177,7 +181,7 @@ editsinfo <- function(x){
    if (is.null(vars)){
        if ((n <- ncol(mat)) > length(letters)){
 		   vars <- character(ncol(mat))
-		   vars[1:ncol(mat)] <- letters	      
+		   vars[1:ncol(mat)] <- letters
 	   } else{
 	      vars <- letters[1:n]
 	   }
@@ -191,7 +195,7 @@ editsinfo <- function(x){
    }
    
    er <- character(nrow(mat))
-   hasConst <- match(CONSTANT, vars)
+   hasConst <- match(getOption("editrules.CONSTANT", "CONSTANT"), vars, nomatch=0)
    for (i in 1:nrow(mat)){
      r <- mat[i,]
 	  lhs <- r > 0
@@ -204,7 +208,6 @@ editsinfo <- function(x){
 	  facs[r==1] <- vars[r==1] #simplify 1's
      
      if (hasConst > 0){
-        print("Found you!")
         facs[hasConst] <- r[hasConst]
      }
 
@@ -219,8 +222,9 @@ editsinfo <- function(x){
    }
    data.frame( name=rulenames
              , edit=er
-			 , description=""
-			 )
+			    , description=""
+             , stringsAsFactors = FALSE
+			    )
 }
 
 #' Retrieve parsed R object of edit rules
