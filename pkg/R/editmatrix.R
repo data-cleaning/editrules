@@ -153,10 +153,6 @@ is.editmatrix <- function(x){
 }
 
 
-#' Retrieve parsed R object of edit rules
-#' 
-#' @param x object of class \code{\link{editmatrix}}
-#' @return parsed R object of of the edit rules/contraints
 edits <- function(x){
    stopifnot(is.editmatrix(x))
    return(attr(x, "edits"))
