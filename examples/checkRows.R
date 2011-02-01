@@ -1,7 +1,7 @@
 # Using character vector to define contraints
-em <- editmatrix(editrules=c( "x+3*y==2*z"
-                            , "x==z"
-                            )
+em <- editmatrix(c( "x+3*y==2*z"
+                  , "x==z"
+                  )
                 )
 print(em)
 

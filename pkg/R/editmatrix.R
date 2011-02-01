@@ -78,7 +78,9 @@ makeEditRow <- function(edt){
 #' }
 #'
 #' The second form is the prefered form, because it allows the documentation of constraints. This
-#' may be very useful when the incorrect observations are analyzed. 
+#' may be very useful when the incorrect observations are analyzed.
+#' If the first form is used, \code{editmatrix} internally creates the second form. This information
+#' can be retrieved by using \code{\link{editsinfo}}
 #'
 #' The matrix is created by getting the factors of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
@@ -86,24 +88,29 @@ makeEditRow <- function(edt){
 #' @title Reading in edit rules
 #' @export
 #' @example examples/editmatrix.R
-#' @param editsinfo \code{data.frame} with (in)equalities written in R syntax, see details for description
-#' @param editrules \code{character} vector with (in)equalities written in R syntax
+#' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
+#' a \code{character} with (in)equalities written in R syntax
+#' @param editsinfo deprecated
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra properties
-editmatrix <- function( editsinfo = NULL
-					       , editrules = NULL
+editmatrix <- function( editrules = editsinfo
+					       , editsinfo = NULL
 					       ){
-	
-	if (is.null(editsinfo)){
-	   if (is.null(editrules)){
-		 stop("No valid input")
-	   }
+   if (!missing(editsinfo)){
+      warning("this parameter is deprecated, please use parameter editrules")
+   }
+   
+   if (is.character(editrules)){
 	   edts <- parse(text=editrules)
 	   editsinfo <- data.frame(edit=sapply(edts, deparse))
 	}
-	else {
+	else if (is.data.frame(editrules)){
+      editsinfo <- editrules
 	   edts <- parse(text=editsinfo$edit)
 	   editsinfo$edit <- sapply(edts, deparse)
 	}
+   else {
+      stop("Invalid input")
+   }
 
 	if (is.null(editsinfo$name)){
 	   editsinfo$name <- paste("rule", seq(along.with=edts),sep=" ")
