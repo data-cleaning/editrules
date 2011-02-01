@@ -1,9 +1,16 @@
+CONSTANT <- "CONSTANT"
+
 retrieveSign <- function(e, fac=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
-      #TODO check for numerics
-      l <- fac
-	  names(l) <- as.character(e)
+     if (is.numeric(e)){
+        l <- fac*e
+        names(l) <- CONSTANT
+     }
+     else {
+        l <- fac
+        names(l) <- as.character(e)
+     }
 	  return(l)
    }
    if (length(e) == 2){
@@ -177,16 +184,24 @@ editsinfo <- function(x){
    }
    
    er <- character(nrow(mat))
+   hasConst <- match(CONSTANT, vars)
    for (i in 1:nrow(mat)){
-      r <- mat[i,]
+     r <- mat[i,]
 	  lhs <- r > 0
 	  rhs <- r < 0
 	  
 	  r <- abs(r)
 	  
 	  facs <- paste(r, "*", vars, sep="")
-	  facs[r==0] <- "" #remove 0's
+
 	  facs[r==1] <- vars[r==1] #simplify 1's
+     
+     if (hasConst > 0){
+        print("Found you!")
+        facs[hasConst] <- r[hasConst]
+     }
+
+	  facs[r==0] <- "" #remove 0's
 	  
 	  leftterm <- if (any(lhs)) paste(facs[lhs], collapse=' + ')
 	              else 0
@@ -195,7 +210,6 @@ editsinfo <- function(x){
 	               else 0
 	  er[i] <- paste(leftterm, "==", rightterm)
    }
-   
    data.frame( name=rulenames
              , edit=er
 			 , description=""

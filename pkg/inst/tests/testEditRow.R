@@ -1,1 +1,1 @@
-library(testthat)test_that("Various rows work",{   edt <- parse(text=c("x==y", "x+w ==y"))   e <- makeEditRow(edt[[1]])   print(e)})
+library(testthat)test_that("Various rows work",{   edt <- parse(text=c("x==y", "x+w ==y"))   e <- makeEditRow(edt[[1]])   #print(e)})test_that("Parsing a constant works",{   edt <- parse(text=c("x < 2"))   e <- makeEditRow(edt[[1]])   #print(e)})
