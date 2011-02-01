@@ -2,7 +2,6 @@
 
 
 echo Removing building information...
-rm -rf pkg/man
 rm -rf output
 
 echo Generate documentation...

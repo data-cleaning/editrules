@@ -1,1 +1,1 @@
-R -f autotest.R
+R -q -f autotest.R

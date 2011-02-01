@@ -7,10 +7,10 @@ Author: Edwin de Jonge
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
 Description: Facilitates reading of lineair (in)equalities, converting
     them to a matrix format (and vice versa) and checking if data is
-    valid according to these rules. This package can be useful as input
-    for automatic correction methods (imputation).
+    valid according to these rules.  This package can be useful as
+    input for automatic correction methods (imputation).
 License: GPL version 3
 LazyLoad: yes
 Depends:
 URL: http://code.google.com/p/editrules/
-Collate: 'check.R' 'editmatrix.R' 'pkg.R'
+Collate: 'check.R' 'editmatrix.R' 'editrules.R' 'pkg.R'

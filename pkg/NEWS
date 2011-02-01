@@ -1,6 +1,7 @@
 version 0.2
 - added CONSTANT parsing and generation
 - simplified editmatrix by removing one parameter (accepting both types of input)
+- renamed editsinfo to more understandable editrules
 
 version 0.1-1
 - added an as.matrix function

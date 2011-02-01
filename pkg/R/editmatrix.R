@@ -78,13 +78,13 @@ makeEditRow <- function(edt){
 #' The second form is the prefered form, because it allows the documentation of constraints. This
 #' may be very useful when the incorrect observations are analyzed.
 #' If the first form is used, \code{editmatrix} internally creates the second form. This information
-#' can be retrieved by using \code{\link{editsinfo}}
+#' can be retrieved by using \code{\link{editrules}}
 #'
 #' The matrix is created by getting the factors of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
 #' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
 #' @title Reading in edit rules
-#' @seealso \code{\link{editsinfo}} \code{\link{as.editmatrix}}
+#' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
 #' @example examples/editmatrix.R
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
@@ -100,25 +100,24 @@ editmatrix <- function( editrules = editsinfo
    
    if (is.character(editrules)){
 	   edts <- parse(text=editrules)
-	   editsinfo <- data.frame(edit=sapply(edts, deparse))
+	   editrules <- data.frame(edit=sapply(edts, deparse))
 	}
 	else if (is.data.frame(editrules)){
-      editsinfo <- editrules
-	   edts <- parse(text=editsinfo$edit)
-	   editsinfo$edit <- sapply(edts, deparse)
+	   edts <- parse(text=editrules$edit)
+	   editrules$edit <- sapply(edts, deparse)
 	}
    else {
       stop("Invalid input")
    }
 
-	if (is.null(editsinfo$name)){
-	   editsinfo$name <- paste("rule", seq(along.with=edts),sep=" ")
+	if (is.null(editrules$name)){
+	   editrules$name <- paste("rule", seq(along.with=edts),sep=" ")
 	}
 	
-	if (is.null(editsinfo$description)){
-	   editsinfo$description <- rep("", length(edts))
+	if (is.null(editrules$description)){
+	   editrules$description <- rep("", length(edts))
 	}
-	editsinfo <- editsinfo[c("name","edit","description")]
+	editrules <- editrules[c("name","edit","description")]
 
 	stopifnot(is.language(edts))
     
@@ -128,7 +127,7 @@ editmatrix <- function( editrules = editsinfo
 	mat <- matrix( 0
 	             , ncol=length(vars)
                 , nrow=length(rowedts)
-                , dimnames = list( edits = editsinfo$name
+                , dimnames = list( edits = editrules$name
                                  , var=vars
                                  )
                 )
@@ -138,9 +137,9 @@ editmatrix <- function( editrules = editsinfo
    }
 	structure( mat
 	         , class="editmatrix"
-			 , editsinfo=editsinfo
-			 , edits = edts
-			 )
+            , editrules=editrules
+            , edits = edts
+            )
 }
 
 #' Check if object is an editmatrix
@@ -153,79 +152,6 @@ is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
 }
 
-
-#' Retrieve editinfo on an editmatrix
-#'
-#' \code{editsinfo} returns a data.frame describing the editrules in editmatrix \code{x}. This data.frame can be used to store the
-#' editrules in a readable format, so that the editrules can be maintained and documented.
-#'
-#' The \code{\link{editmatrix}} function can use the output of \code{editsinfo} to create an \code{editmatrix}.
-#'
-#' If \code{x} is a normal matrix, the matrix will be considered an \code{editmatrix}. The columns of the matrix
-#' are the variables and the rows are the edit rules (contraints).
-#' @seealso \code{\link{editmatrix}}
-#' @export
-#' @param x \code{\link{editmatrix}}  or \code{matrix} object
-#' @return \code{data.frame} with information on all edit/constraint rules
-editsinfo <- function(x){
-   if (is.editmatrix(x)){
-      return(attr(x, "editsinfo"))
-   }
-   
-   mat <- as.matrix(x)
-   if (is.null(mat)){
-      stop("x should be a matrix")
-   }
-   
-   vars <- colnames(mat)
-   if (is.null(vars)){
-       if ((n <- ncol(mat)) > length(letters)){
-		   vars <- character(ncol(mat))
-		   vars[1:ncol(mat)] <- letters
-	   } else{
-	      vars <- letters[1:n]
-	   }
-   }
-   vars <- make.names(vars, unique=TRUE)
-   colnames(mat) <- vars
-
-   rulenames <- rownames(mat)
-   if (is.null(rulenames)){
-      rulenames <- paste("rule", seq(to=nrow(mat)))
-   }
-   
-   er <- character(nrow(mat))
-   hasConst <- match(getOption("editrules.CONSTANT", "CONSTANT"), vars, nomatch=0)
-   for (i in 1:nrow(mat)){
-     r <- mat[i,]
-	  lhs <- r > 0
-	  rhs <- r < 0
-	  
-	  r <- abs(r)
-	  
-	  facs <- paste(r, "*", vars, sep="")
-
-	  facs[r==1] <- vars[r==1] #simplify 1's
-     
-     if (hasConst > 0){
-        facs[hasConst] <- r[hasConst]
-     }
-
-	  facs[r==0] <- "" #remove 0's
-	  
-	  leftterm <- if (any(lhs)) paste(facs[lhs], collapse=' + ')
-	              else 0
-				  
-	  rightterm <- if (any(rhs)) paste(facs[rhs], collapse=' + ')
-	               else 0
-	  er[i] <- paste(leftterm, "==", rightterm)
-   }
-   data.frame( name=rulenames
-             , edit=er
-			    , description=""
-             , stringsAsFactors = FALSE
-			    )
-}
 
 #' Retrieve parsed R object of edit rules
 #' 
@@ -251,7 +177,7 @@ as.editmatrix <- function(x){
    mat <- as.matrix(x)
    structure( mat
             , class="editmatrix"
-			   , editsinfo=editsinfo(mat)
+			   , editrules=editrules(mat)
 			   )
 }
 
@@ -278,7 +204,7 @@ print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
    print(as.matrix(x,...))
    cat("\nEdit rules:\n")
-   info <- editsinfo(x)
+   info <- editrules(x)
    desc <- paste("[",info$description,"]")
    desc <- ifelse(info$description=="","", desc)
    cat( paste( info$name,":", info$edit, desc, collapse="\n")
