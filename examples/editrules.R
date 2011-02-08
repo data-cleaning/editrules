@@ -1,14 +1,14 @@
-# load an (external) data.frame with the edit rules
-edtinf.csv <- 
+# load a data.frame with the edit rules
+edtrules.csv <- 
 'name , edit       , description
 A , x == y         , "these variables should be equal"
 B , z + w == y + x ,
 C , z == y + 2*w   ,
 '
-edtinf <- read.csv(textConnection(edtinf.csv))			
+edtrules <- read.csv(textConnection(edtrules.csv))			
 
 # Create the editmatrix from the editrules
-em <- editmatrix(edtinf)
+em <- editmatrix(edtrules)
 print(em)
 
 #data that should conform to the constraints

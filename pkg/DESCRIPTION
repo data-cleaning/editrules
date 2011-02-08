@@ -1,12 +1,12 @@
 Package: editrules
 Type: Package
-Title: Convert readable linear (in)equalities to matrix form.
+Title: Convert readable linear (in)equalities into matrix form.
 Version: 0.2
-Date: 2010-12-23
+Date: 2011-02-06
 Author: Edwin de Jonge
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
-Description: Facilitates reading of lineair (in)equalities, converting
-    them to a matrix format (and vice versa) and checking if data is
+Description: Facilitates reading of linear (in)equalities, converting
+    them into matrix format (and vice versa) and checking if data are
     valid according to these rules.  This package can be useful as
     input for automatic correction methods (imputation).
 License: GPL version 3

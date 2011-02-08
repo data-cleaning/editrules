@@ -87,10 +87,12 @@ makeEditRow <- function(edt){
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
 #' @example examples/editmatrix.R
+#'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
-#' a \code{character} with (in)equalities written in R syntax
+#'        a \code{character} with (in)equalities written in R syntax
 #' @param editsinfo deprecated
-#' @return an object of class "editmatrix" which is a \code{matrix} with extra properties
+#'
+#' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
 editmatrix <- function( editrules = editsinfo
 					       , editsinfo = NULL
 					       ){
@@ -127,7 +129,7 @@ editmatrix <- function( editrules = editsinfo
 	mat <- matrix( 0
 	             , ncol=length(vars)
                 , nrow=length(rowedts)
-                , dimnames = list( edits = editrules$name
+                , dimnames = list( rules = editrules$name
                                  , var=vars
                                  )
                 )
@@ -152,7 +154,6 @@ is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
 }
 
-
 edits <- function(x){
    stopifnot(is.editmatrix(x))
    return(attr(x, "edits"))
@@ -162,9 +163,12 @@ edits <- function(x){
 #'
 #' The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
+#'
 #' @export
 #' @seealso \code{\link{editmatrix}}
+#'
 #' @param x object to be transformed into an \code{\link{editmatrix}}
+#'
 #' @return an object of class \code{editmatrix}.
 as.editmatrix <- function(x){
    if (is.editmatrix(x)){
@@ -181,11 +185,14 @@ as.editmatrix <- function(x){
 #' 
 #' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
 #' In some case it is preferable to convert the editmatrix to a normal matrix.
+#'
 #' @export
 #' @method as.matrix editmatrix
+#'
 #' @param x editmatrix object
-#' @return matrix equal to editmatrix
 #' @param ... further arguments passed to or from other methods.
+#'
+#' @return matrix equal to editmatrix
 as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
 }
@@ -194,6 +201,7 @@ as.matrix.editmatrix <- function(x, ...){
 #'
 #' @export
 #' @method print editmatrix
+#'
 #' @param x editmatrix object to be printed
 #' @param ... further arguments passed to or from other methods.
 print.editmatrix <- function(x, ...){
