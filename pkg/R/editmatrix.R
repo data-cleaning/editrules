@@ -23,23 +23,20 @@ retrieveSign <- function(e, fac=1){
 	  lhs <- e[[2]]
 	  rhs <- e[[3]]
 	  lsign <- rsign <- fac
-      if ( op == "=="
-	    || op == "<"
-	    || op == "=<"
-	    || op == "-"
-		 ){
+      if ( op %in% c("==", "<", "<=", "-") ){
 	    rsign <- -1 * fac
 	  } 
-	  else if ( op == ">"
-	         || op == ">="
-		      ){
+	  else if ( op %in% c(">", ">=") ){
 	    lsign <- -1 * fac
 	  }
 	  else if (op == "+"){
 	  }
 	  else if (op == "*"){
-	    #TODO check if lhs is a numeric
-	    return(retrieveSign(rhs, eval(lhs)*fac))
+	    tst <- tryCatch(as.numeric(lhs), warning=function(w) NA, error=function(e) NA)
+            if ( is.na(tst) ){
+                stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
+            }
+            return(retrieveSign(rhs, eval(lhs)*fac))
 	  }
 	  else { 
 		stop(". Operator ", op, " not implemented", "Invalid expression:", e)
