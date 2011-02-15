@@ -9,3 +9,6 @@ roxygenize( 'pkg'
           , use.Rd2 = TRUE
 		    )
 
+if (length(file.list('pkg/inst/doc')) == 0){
+   #unlink( 'pkg/inst/doc', TRUE)   
+}
