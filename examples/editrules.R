@@ -8,8 +8,8 @@ C , z == y + 2*w   ,
 edtrules <- read.csv(textConnection(edtrules.csv))			
 
 # Create the editmatrix from the editrules
-em <- editmatrix(edtrules)
-print(em)
+E <- editmatrix(edtrules)
+print(E)
 
 #data that should conform to the constraints
 dat <- data.frame( w = c(0,0,0)
@@ -18,10 +18,10 @@ dat <- data.frame( w = c(0,0,0)
                  , z = c(0,1,1)
                  )
 # valid rows?
-checkRows(em, dat)
+checkRows(E, dat)
 
 #ok, lets show the errors
-errorMatrix(em,dat)
+errorMatrix(E,dat)
 
 #or, lets list the contraints that were violated
-listErrors(em,dat)
+listErrors(E,dat)

@@ -1,6 +1,6 @@
 # Using character vector to define contraints
-em <- editmatrix(c("x+3*y==2*z", "x==z"))
-print(em)
+E <- editmatrix(c("x+3*y==2*z", "x==z"))
+print(E)
 
 #Using data.frame to define constraints
 editRules.csv <- 
@@ -11,5 +11,5 @@ C , z == y + 2*w   ,
 '
 
 editRules <- read.csv(textConnection(editRules.csv))			
-em <- editmatrix(editRules)
-print(em)
+E <- editmatrix(editRules)
+print(E)

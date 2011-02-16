@@ -1,5 +1,5 @@
 # Using character vector to define contraints
-em <- editmatrix(c( "x+3*y==2*z"
+E <- editmatrix(c( "x+3*y==2*z"
                   , "x==z"
                   )
                 )
@@ -9,4 +9,4 @@ dat <- data.frame( x = c(0,2,1)
                  , z = c(0,1,1)
                  )
 				 
-errorMatrix(em,dat)
+errorMatrix(E,dat)
