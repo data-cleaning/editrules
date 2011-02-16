@@ -1,0 +1,70 @@
+\documentclass[10pt, fleqn, a4paper]{article}
+\title{The {\tt editrules} vignette}
+\author{Edwin de Jonge and Mark van der Loo}
+\begin{document}
+\maketitle
+\begin{abstract}
+{\tt editrules} is a package to define, parse, manipulate and check linear and other
+data restrictions in a convenient way in R. The restrictions can be entered in the
+commandline or stored as text or in a database, for example.
+\end{abstract}
+
+
+\section{Introduction}
+<<echo=FALSE, keep.source=FALSE>>=
+library(editrules)
+@
+\maketitle
+
+In many applications, data processing steps are forced to obey an number of
+restrictions on the processed data.  Well-known cases include linear
+(in)equality restrictions in optimizations or the rules used in data checking
+and cleaning prior to analysis. The rules used for the purpose of data cleaning
+include, but are usually not limited to the linear (in)equalities mentioned
+before. They might include restrictions on certain value combinations of
+categorical variables for instance. These general rules are usually referred to
+as {\em edit rules}, or {\em edits} in short. For the remainder of this paper we
+will use these terms as well.
+
+{\tt editrules} is a package to define, parse and manipulate edits with {\tt R} in a
+convenient way. Moreover, it is possible to apply the rules to a dataset to obtain a
+list of edit violations per record. The current version can handle linear (in)equality
+restrictions. Future versions with more versatile edits are planned.
+
+
+\section{A simple example}
+Suppose you have the following data,
+<<keep.source=TRUE>>=
+balance <- data.frame(
+    cost      = c( 75, 300, 70),
+    profit    = c(125,  40, 10),
+    turnover  = c(200, 320, 80))
+@
+subject to the rules:
+\begin{eqnarray}
+{\rm turnover} &=& {\rm profit} + {\rm cost}\\
+\frac{\rm profit}{\rm turnover} &\leq& 0.6
+\end{eqnarray}
+In the {\tt editrules} package these rules can be cheched as follows\footnote{The extra brackets around assign statements
+are included only to force R to print the result after assignment.}.
+<<keep.source=TRUE>>=
+balance
+edits <- c(
+    "turnover == cost + profit",
+    "profit   <= 0.6*turnover")
+(E <- editmatrix(edits))
+(valid <- checkRows(E, balance))
+listErrors(E, balance)
+@
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
