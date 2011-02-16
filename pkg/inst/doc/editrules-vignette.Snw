@@ -1,4 +1,6 @@
 \documentclass[10pt, fleqn, a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb}
 \title{The {\tt editrules} vignette}
 \author{Edwin de Jonge and Mark van der Loo}
 \begin{document}
@@ -47,15 +49,50 @@ subject to the rules:
 \end{eqnarray}
 In the {\tt editrules} package these rules can be cheched as follows\footnote{The extra brackets around assign statements
 are included only to force R to print the result after assignment.}.
+The rules can be stated in a verbose manner and converted to an edit matrix with the {\tt editmatrix} function.
 <<keep.source=TRUE>>=
-balance
 edits <- c(
     "turnover == cost + profit",
     "profit   <= 0.6*turnover")
 (E <- editmatrix(edits))
+@
+Next, rows containing errors can be found and a list of errors can be generated.
+<<>>=
 (valid <- checkRows(E, balance))
 listErrors(E, balance)
 @
+\section{Verbose input of linear (in)equality constraints}
+In many statistical and optimization problems, one has to represent a set of 
+linear (in)equalities in matrix a matrix form:
+\begin{equation}
+Ax = x_0, \textrm{ and/or } Ax \leq x_0.
+\end{equation}
+However, in practice, these restrictions are often formulated verbatim and have to be translated
+to the matrix form by the statistician. The {\tt editrules} package facilitates this by allowing
+a user to write linear (in) equality constraints in {\tt R} language and translating it to an {\tt S3}
+object of type {\tt editmatrix}. Constraints can be entered as a text vector, as in the example
+above, or read from a {\tt data.frame} whith the columns:\\
+
+\begin{tabular}{ll}
+{\tt name} & {\tt character}  names an edit\\
+{\tt edit} & {\tt character}  contains the edit in the form of an R expression\\
+{\tt description} & {\tt character} a description of the edit.
+\end{tabular}\\
+
+For example, the edits in the previous section can be entered as
+<<keep.source=TRUE>>=
+(edits <- data.frame(
+    name  = c("balance","suspect"),
+    edit  = c("turnover == cost + profit", "profit <= 0.6*turnover"),
+    description = c("balance check","suspiciously high turnover")))
+@
+Translating these verbose rules can be done with the {\tt editmatrix} command.
+<<>>=
+(E <- editmatrix(edits))
+@
+Here, {\tt E} is an object of class {\tt editmatrix} which is a standard {\tt R} {\tt matrix}
+with some extra attributes to store edit information. It can be coerced to a normal {\tt matrix}
+object by {\tt as.matrix}.
 
 
 
