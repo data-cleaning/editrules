@@ -1,3 +1,4 @@
+%\VignetteIndexEntry{Editrules}
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
@@ -97,11 +98,3 @@ object by {\tt as.matrix}.
 
 
 \end{document}
-
-
-
-
-
-
-
-
