@@ -1,7 +1,7 @@
 Package: editrules
 Type: Package
 Title: Convert readable linear (in)equalities into matrix form.
-Version: 0.2
+Version: 0.3
 Date: 2011-02-06
 Author: Edwin de Jonge
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>

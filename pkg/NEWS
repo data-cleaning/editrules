@@ -1,3 +1,10 @@
+version 0.3
+- improved expression parsing
+- improved handling of wrong input for method editmatrix
+- improved handling of extra columns in editrules
+- added as.data.frame.editmatrix
+- added vignette
+
 version 0.2
 - added CONSTANT parsing and generation
 - simplified editmatrix by removing one parameter (accepting both types of input)

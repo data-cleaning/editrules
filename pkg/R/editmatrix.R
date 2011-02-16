@@ -98,29 +98,45 @@ editmatrix <- function( editrules = editsinfo
    }
    
    if (is.character(editrules)){
-	   edts <- parse(text=editrules)
-	   editrules <- data.frame(edit=sapply(edts, deparse))
+      edit <- editrules
+      name <- NULL
+      description <- NULL
+      editrules <- NULL
 	}
 	else if (is.data.frame(editrules)){
-	   edts <- parse(text=editrules$edit)
-	   editrules$edit <- sapply(edts, deparse)
+      name <- editrules$name
+      edit <- editrules$edit
+      description <- editrules$description
+
+      if (is.null(edit)){
+         stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")
+      }      
+      
+      editrules$name <- NULL
+      editrules$edit <- NULL
+      editrules$description <- NULL      
 	}
    else {
-      stop("Invalid input")
+      stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
    }
 
-	if (is.null(editrules$name)){
-	   editrules$name <- paste("rule", seq(along.with=edts),sep=" ")
+   #TODO trycatch the parsing...
+   edts <- parse(text=edit)
+   edit=sapply(edts, deparse)
+
+	if (is.null(name)){
+	   name <- paste("e", seq_along(edts),sep="")
 	}
 	
-	if (is.null(editrules$description)){
-	   editrules$description <- rep("", length(edts))
+	if (is.null(description)){
+	   description <- rep("", length(edts))
 	}
-	editrules <- editrules[c("name","edit","description")]
+   
+	editrules <- as.data.frame(cbind(name,edit,description, editrules))
 
 	stopifnot(is.language(edts))
     
-    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
+   rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
 	vars <- unique(names(unlist(rowedts)))
 
 	mat <- matrix( 0
@@ -192,6 +208,19 @@ as.editmatrix <- function(x){
 #' @return matrix equal to editmatrix
 as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
+}
+
+#' Convert an editmatrix to a \code{data.frame}
+#'
+#' Convert an editmatrix to a \code{data.frame}
+#' @export 
+#' @method as.data.frame editmatrix
+#' @param x editmatrix object
+#' @param ... further arguments passed to or from other methods.
+#'
+#' @return data.frame equal to matrix representation of \code{x}
+as.data.frame.editmatrix <- function(x, ...){
+   as.data.frame(as.matrix(x))
 }
 
 #' print edit matrix
