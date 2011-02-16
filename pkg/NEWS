@@ -3,6 +3,7 @@ version 0.3
 - improved handling of wrong input for method editmatrix
 - improved handling of extra columns in editrules
 - added as.data.frame.editmatrix
+- negative coefficients and constants were not parsed correctly
 - added vignette
 
 version 0.2
