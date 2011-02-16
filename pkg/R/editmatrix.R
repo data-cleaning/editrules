@@ -1,42 +1,48 @@
-retrieveSign <- function(e, fac=1){
+retrieveSign <- function(e, co=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
      if (is.numeric(e)){
-        l <- fac*e
+        l <- co*e
         names(l) <- getOption("editrules.CONSTANT", "CONSTANT")
      }
      else {
-        l <- fac
+        l <- co
         names(l) <- as.character(e)
      }
 	  return(l)
    }
    if (length(e) == 2){
-      op <- deparse(e[[1]])
+     op <- deparse(e[[1]])
 	  rhs <- e[[2]]
-      if (op == "("){
-	    return(retrieveSign(rhs, fac))
+     if (op == "("){
+	    return(retrieveSign(rhs, co))
 	  } 
+     else if (op == "-"){
+        return(retrieveSign(rhs, -1*co))
+     }
+	  else { 
+		stop(". Operator ", op, " not implemented", "Invalid expression:", e)
+	  }
    }
    if (length(e) == 3){
-      op <- deparse(e[[1]])
+     op <- deparse(e[[1]])
 	  lhs <- e[[2]]
 	  rhs <- e[[3]]
-	  lsign <- rsign <- fac
-      if ( op %in% c("==", "<", "<=", "-") ){
-	    rsign <- -1 * fac
+	  lsign <- rsign <- co
+     if ( op %in% c("==", "<", "<=", "-") ){
+	    rsign <- -1 * co
 	  } 
 	  else if ( op %in% c(">", ">=") ){
-	    lsign <- -1 * fac
+         lsign <- -1 * co
 	  }
 	  else if (op == "+"){
 	  }
 	  else if (op == "*"){
-	    tst <- tryCatch(as.numeric(lhs), warning=function(w) NA, error=function(e) NA)
-            if ( is.na(tst) ){
+       co <- retrieveSign(lhs, co)
+       if (!is.numeric(co)){
                 stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
-            }
-            return(retrieveSign(rhs, eval(lhs)*fac))
+       }
+       return(retrieveSign(rhs, co))
 	  }
 	  else { 
 		stop(". Operator ", op, " not implemented", "Invalid expression:", e)
@@ -77,9 +83,11 @@ makeEditRow <- function(edt){
 #' If the first form is used, \code{editmatrix} internally creates the second form. This information
 #' can be retrieved by using \code{\link{editrules}}
 #'
-#' The matrix is created by getting the factors of the variables in the equalities.
+#' The matrix is created by retrieving the coefficients of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
 #' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
+#'
+#' The edits are canonized: all edits are transformed into an E == C, E < C or E <= C form, so that in the specification of the edit rules all inequalities can be mixed, but the resulting matrix has similar sign.
 #' @title Reading in edit rules
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
@@ -137,6 +145,22 @@ editmatrix <- function( editrules = editsinfo
 	stopifnot(is.language(edts))
     
    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
+   
+   # normalize operators (the edit matrix is of form E == C or E <= C)
+   ops <- sapply( edts
+                , function(e){
+                    op <- deparse(e[[1]])
+                    if (op == ">"){
+                       "<="
+                    }
+                    else if (op == ">="){
+                       "<"
+                    }
+                    else{
+                      op
+                    }
+                  }
+                )
 	vars <- unique(names(unlist(rowedts)))
 
 	mat <- matrix( 0
@@ -154,6 +178,7 @@ editmatrix <- function( editrules = editsinfo
 	         , class="editmatrix"
             , editrules=editrules
             , edits = edts
+            , ops = ops
             )
 }
 
