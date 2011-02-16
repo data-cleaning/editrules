@@ -3,7 +3,7 @@ Type: Package
 Title: Convert readable linear (in)equalities into matrix form.
 Version: 0.3
 Date: 2011-02-06
-Author: Edwin de Jonge
+Author: Edwin de Jonge, Mark van der Loo
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
 Description: Facilitates reading of linear (in)equalities, converting
     them into matrix format (and vice versa) and checking if data are
