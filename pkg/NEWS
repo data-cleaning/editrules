@@ -7,6 +7,7 @@ version 0.3
 - added vignette
 - removed deprecated editsinfo parameter from editmatrix
 - added getOps and getCONSTANT functions for retrieving operators and constants from an editmatrix
+- checkRows is now S3 generic and overloaded for character, data.frame and editmatrix
 
 version 0.2
 - added CONSTANT parsing and generation
