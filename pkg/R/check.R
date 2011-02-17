@@ -22,7 +22,7 @@ checkRows <- function( edtmatrix
 	for (i in seq(along.with=edts)){
 	   check <- check & eval(edts[[i]], envir=dat)
 	}
-    check
+   check
 	#TODO make a matrix an do the computation on the matrix.
 } 
 
@@ -48,13 +48,13 @@ errorMatrix <- function( edtmatrix
 	edts <- edits(edtmatrix)
 	errors <- matrix( FALSE
 	                , ncol=length(edts)
-				    , nrow=nrow(dat)
-				    , dimnames=list(rownames(dat), rownames(edtmatrix))
-				    )
+				       , nrow=nrow(dat)
+				       , dimnames=list(rownames(dat), rownames(edtmatrix))
+				       )
 	for (i in seq(along.with=edts)){
 	   errors[,i] <- !eval(edts[[i]], envir=dat)
 	}
-    errors
+   errors
 }
 
 #' Lists which rows of \code{data.frame dat} violate which constraints

@@ -1,6 +1,5 @@
 @echo off
 
-
 echo Removing building information...
 rm -rf output
 

@@ -21,7 +21,7 @@ retrieveSign <- function(e, co=1){
         return(retrieveSign(rhs, -1*co))
      }
 	  else { 
-		stop(". Operator ", op, " not implemented", "Invalid expression:", e)
+		stop("Operator ", op, " not implemented", "Invalid expression:", e)
 	  }
    }
    if (length(e) == 3){
@@ -29,12 +29,9 @@ retrieveSign <- function(e, co=1){
 	  lhs <- e[[2]]
 	  rhs <- e[[3]]
 	  lsign <- rsign <- co
-     if ( op %in% c("==", "<", "<=", "-") ){
+     if ( op %in% c("==", "<", "<=", "-", ">",">=") ){
 	    rsign <- -1 * co
 	  } 
-	  else if ( op %in% c(">", ">=") ){
-         lsign <- -1 * co
-	  }
 	  else if (op == "+"){
 	  }
 	  else if (op == "*"){
@@ -95,16 +92,12 @@ makeEditRow <- function(edt){
 #'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
 #'        a \code{character} with (in)equalities written in R syntax
-#' @param editsinfo deprecated
+#' @param normalize \code{logical} specifying if all edits should be transformed (see description)
 #'
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
 editmatrix <- function( editrules = editsinfo
-					       , editsinfo = NULL
-					       ){
-   if (!missing(editsinfo)){
-      warning("this parameter is deprecated, please use parameter editrules")
-   }
-   
+                      , normalize = FALSE
+					       ){   
    if (is.character(editrules)){
       edit <- editrules
       name <- NULL
@@ -130,6 +123,8 @@ editmatrix <- function( editrules = editsinfo
 
    #TODO trycatch the parsing...
    edts <- parse(text=edit)
+   stopifnot(is.language(edts))
+   
    edit=sapply(edts, deparse)
 
 	if (is.null(name)){
@@ -140,27 +135,16 @@ editmatrix <- function( editrules = editsinfo
 	   description <- rep("", length(edts))
 	}
    
-	editrules <- as.data.frame(cbind(name,edit,description, editrules))
+	# create/update the name, edit, description vectors and keep the original other vectors
+   editrules <- as.data.frame(cbind(name,edit,description, editrules))
 
-	stopifnot(is.language(edts))
-    
-   rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
    
-   # normalize operators (the edit matrix is of form E == C or E <= C)
-   ops <- sapply( edts
-                , function(e){
-                    op <- deparse(e[[1]])
-                    if (op == ">"){
-                       "<="
-                    }
-                    else if (op == ">="){
-                       "<"
-                    }
-                    else{
-                      op
-                    }
-                  }
-                )
+	 
+   rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
+   ops <- sapply(edts, function(e){deparse(e[[1]])})
+   C <- numeric(length(ops))
+   
+   
 	vars <- unique(names(unlist(rowedts)))
 
 	mat <- matrix( 0
@@ -170,15 +154,29 @@ editmatrix <- function( editrules = editsinfo
                                  , var=vars
                                  )
                 )
+   m <- match("CONSTANT", colnames(mat), nomatch=0)
+
 
 	for (i in 1:length(rowedts)){
 	   mat[i,names(rowedts[[i]])] <- rowedts[[i]]
    }
+   
+   if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
+      cat("m : ",m,"\n")
+      C <- mat[,m]
+      #mat <- mat[,-m]
+   }
+   
+   if (normalize){
+   #TODO change ops and change matrix
+   }
+
 	structure( mat
 	         , class="editmatrix"
             , editrules=editrules
             , edits = edts
             , ops = ops
+            , C = C
             )
 }
 
@@ -205,7 +203,7 @@ edits <- function(x){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @param x object to be transformed into an \code{\link{editmatrix}}
+#' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
 #'
 #' @return an object of class \code{editmatrix}.
 as.editmatrix <- function(x){
@@ -217,6 +215,20 @@ as.editmatrix <- function(x){
             , class="editmatrix"
 			   , editrules=editrules(mat)
 			   )
+}
+
+#' Returns the constant part of a linear (in)equality
+#'
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @param E editmatrix
+#' @return \code{numeric} vector \code(C) 
+getCONSTANT <- function(E){
+  if (!is.editmatrix(E)){
+     stop("E has to be an editmatrix.")
+  }
+  attr(x, "C")
 }
 
 #' Convert an editmatrix to a normal matrix

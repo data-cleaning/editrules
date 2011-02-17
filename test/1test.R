@@ -21,6 +21,5 @@ em <- editmatrix(er)
 print(em)
 
 #negative coefficient
-E <- editmatrix("a*x > -2")
+E <- editmatrix("2*x + y > -2")
 E
-attributes(E)
