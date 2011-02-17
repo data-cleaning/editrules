@@ -15,7 +15,6 @@
 #' verbose edits are extracted and passed on to \code{checkRows.character}
 #'
 #'
-#'
 #' @aliases checkRows.character checkRows.data.frame checkRows.editmatrix
 #'
 #' @param E Edits, in \code{character}, \code{data.frame} or \code{\link{editmatrix}} representation
@@ -32,23 +31,22 @@ checkRows <- function(E, dat){
 
 #' @nord
 #' @export
-checkRows.editmatrix <- function( E
-                     , dat
-					      ){
-	stopifnot(is.data.frame(dat))
-	vars <- colnames(E) %in% names(dat)
-	if (!all(vars)){
-	   stop("Edits contain variable(s):", paste(colnames(E)[!vars], collapse=","), 
+checkRows.editmatrix <- function(E, dat){
+    stopifnot(is.data.frame(dat))
+    vars <- colnames(E) %in% names(dat)
+    if (!all(vars)){
+       stop("Edits contain variable(s):", paste(colnames(E)[!vars], collapse=","), 
             ", that are not available in the data.frame")
-	}
-	
-	edts <- edits(E)
-	check <- rep(TRUE, nrow(dat))	
-	for (i in seq(along.with=edts)){
-	   check <- check & eval(edts[[i]], envir=dat)
-	}
-    return(check)
-	#TODO make a matrix an do the computation on the matrix.
+    }
+
+    return(checkRows.character(editrules(E)$edit, dat))
+#    edts <- edits(E)
+#    check <- rep(TRUE, nrow(dat))   
+#    for (i in seq(along.with=edts)){
+#       check <- check & eval(edts[[i]], envir=dat)
+#    }
+#    return(check)
+    #TODO make a matrix an do the computation on the matrix.
 } 
 
 #' @nord
@@ -72,8 +70,7 @@ checkRows.data.frame <- function(E, dat){
     if ( !all(c("name","edit","description") %in% names(E)) ){
         stop("Invalid input data.frame see ?editMatrix for valid input format")
     }
-    E <- as.character(E$edit)
-    NextMethod("checkRows")
+    return(checkRows.character(as.character(E$edit), dat))
 }
 
 
@@ -90,21 +87,21 @@ checkRows.data.frame <- function(E, dat){
 errorMatrix <- function( edtmatrix
                        , dat
                        ){
-	stopifnot(is.editmatrix(edtmatrix), is.data.frame(dat))
-	vars <- colnames(edtmatrix) %in% names(dat)
-	if (!all(vars)){
-	   stop("Edits contain variable(s):", paste(colnames(edtmatrix)[!vars], collapse=","), ", that are not available in the data.frame")
-	}
-	
-	edts <- edits(edtmatrix)
-	errors <- matrix( FALSE
-	                , ncol=length(edts)
-				       , nrow=nrow(dat)
-				       , dimnames=list(rownames(dat), rownames(edtmatrix))
-				       )
-	for (i in seq(along.with=edts)){
-	   errors[,i] <- !eval(edts[[i]], envir=dat)
-	}
+    stopifnot(is.editmatrix(edtmatrix), is.data.frame(dat))
+    vars <- colnames(edtmatrix) %in% names(dat)
+    if (!all(vars)){
+       stop("Edits contain variable(s):", paste(colnames(edtmatrix)[!vars], collapse=","), ", that are not available in the data.frame")
+    }
+    
+    edts <- edits(edtmatrix)
+    errors <- matrix( FALSE
+                    , ncol=length(edts)
+                       , nrow=nrow(dat)
+                       , dimnames=list(rownames(dat), rownames(edtmatrix))
+                       )
+    for (i in seq(along.with=edts)){
+       errors[,i] <- !eval(edts[[i]], envir=dat)
+    }
    errors
 }
 
@@ -119,9 +116,9 @@ errorMatrix <- function( edtmatrix
 #' @return a list with per row a \code{integer} vector of the constraints that are violated 
 listErrors <- function( edtmatrix
                       , dat
-                      ){	
-	errors <- errorMatrix(edtmatrix, dat)
-	edts <- edits(edtmatrix)
-	errorlist <- apply(errors, 1, which)
-	errorlist
+                      ){    
+    errors <- errorMatrix(edtmatrix, dat)
+    edts <- edits(edtmatrix)
+    errorlist <- apply(errors, 1, which)
+    errorlist
 }
