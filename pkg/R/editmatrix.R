@@ -15,25 +15,14 @@ retrieveCoef <- function(e, co=1){
      op <- deparse(e[[1]])
       rhs <- e[[2]]
      if (op == "("){
-<<<<<<< .mine
-        return(retrieveSign(rhs, co))
-      } 
-=======
 	    return(retrieveCoef(rhs, co))
 	  } 
->>>>>>> .r32
      else if (op == "-"){
         return(retrieveCoef(rhs, -1*co))
      }
-<<<<<<< .mine
-      else { 
-        stop(". Operator ", op, " not implemented", "Invalid expression:", e)
-      }
-=======
 	  else { 
 		stop("Operator ", op, " not implemented", "Invalid expression:", e)
 	  }
->>>>>>> .r32
    }
    if (length(e) == 3){
      op <- deparse(e[[1]])
@@ -41,37 +30,16 @@ retrieveCoef <- function(e, co=1){
       rhs <- e[[3]]
       lsign <- rsign <- co
      if ( op %in% c("==", "<", "<=", "-", ">",">=") ){
-<<<<<<< .mine
-        rsign <- -1 * co
-      } 
-      else if ( op %in% c(">", ">=") ){
-         lsign <- -1 * co
-      }
-      else if (op == "+"){
-      }
-      else if (op == "*"){
-=======
 	    rsign <- -1 * co
 	  } 
 	  else if (op == "+"){
 	  }
 	  else if (op == "*"){
->>>>>>> .r32
        co <- retrieveCoef(lhs, co)
        if (!is.numeric(co)){
                 stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
        }
        return(retrieveCoef(rhs, co))
-<<<<<<< .mine
-      }
-      else { 
-        stop(". Operator ", op, " not implemented", "Invalid expression:", e)
-      }
-      return(c( retrieveSign(lhs, lsign)
-              , retrieveSign(rhs, rsign)
-          )
-        )
-=======
 	  }
 	  else { 
 		stop("Operator ", op, " not implemented", "Invalid expression:", e)
@@ -80,7 +48,6 @@ retrieveCoef <- function(e, co=1){
 		      , retrieveCoef(rhs, rsign)
 		  )
 		)
->>>>>>> .r32
    }
    stop("Invalid expression:", e)
 }
@@ -128,19 +95,9 @@ makeEditRow <- function(edt){
 #' @param normalize \code{logical} specifying if all edits should be transformed (see description)
 #'
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
-<<<<<<< .mine
-editmatrix <- function( editrules = editsinfo
-                           , editsinfo = NULL
-                           ){
-   if (!missing(editsinfo)){
-      warning("this parameter is deprecated, please use parameter editrules")
-   }
-   
-=======
 editmatrix <- function( editrules
                       , normalize = FALSE
 					       ){   
->>>>>>> .r32
    if (is.character(editrules)){
       edit <- editrules
       name <- NULL
@@ -171,15 +128,6 @@ editmatrix <- function( editrules
    edit <- sapply(edts, deparse)
    edit <- gsub(" * ","*", fixed=TRUE, edit)
    
-<<<<<<< .mine
-   if (is.null(name)){
-      name <- paste("e", seq_along(edts),sep="")
-   }
-    
-   if (is.null(description)){
-      description <- rep("", length(edts))
-   }
-=======
 	if (is.null(name)){
 	   name <- paste("e", seq_along(edit),sep="")
 	}
@@ -187,18 +135,11 @@ editmatrix <- function( editrules
 	if (is.null(description)){
 	   description <- rep("", length(edit))
 	}
->>>>>>> .r32
    
-<<<<<<< .mine
-   editrules <- as.data.frame(cbind(name,edit,description, editrules))
-
-   stopifnot(is.language(edts))
-=======
    # create/update the name, edit, description vectors and keep the original other vectors
    editrules <- data.frame( name=name,edit=edit,description=description
                           , stringsAsFactors=FALSE
                           )
->>>>>>> .r32
     
    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
    ops <- sapply(edts, function(e){deparse(e[[1]])})
@@ -216,10 +157,6 @@ editmatrix <- function( editrules
     for (i in 1:length(rowedts)){
        mat[i,names(rowedts[[i]])] <- rowedts[[i]]
    }
-<<<<<<< .mine
-    structure( mat
-             , class="editmatrix"
-=======
    
    if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
       C <- -1*mat[,m]
@@ -235,7 +172,6 @@ editmatrix <- function( editrules
    
    structure( mat
 	         , class="editmatrix"
->>>>>>> .r32
             , editrules=editrules
             , edits = edts
             , ops = ops
@@ -279,12 +215,6 @@ as.editmatrix <- function( x
       return(x)
    }
    mat <- as.matrix(x)
-<<<<<<< .mine
-   structure( mat
-            , class="editmatrix"
-               , editrules=editrules(mat)
-               )
-=======
   
    vars <- colnames(mat)
    if (is.null(vars)){
@@ -326,7 +256,6 @@ as.editmatrix <- function( x
    ei$edit <- er
    ei$name <- rownames(er)
    editmatrix(er)
->>>>>>> .r32
 }
 
 #' Convert an editmatrix to a normal matrix
