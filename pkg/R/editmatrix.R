@@ -1,4 +1,4 @@
-retrieveSign <- function(e, co=1){
+retrieveCoef <- function(e, co=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
      if (is.numeric(e)){
@@ -15,10 +15,10 @@ retrieveSign <- function(e, co=1){
      op <- deparse(e[[1]])
 	  rhs <- e[[2]]
      if (op == "("){
-	    return(retrieveSign(rhs, co))
+	    return(retrieveCoef(rhs, co))
 	  } 
      else if (op == "-"){
-        return(retrieveSign(rhs, -1*co))
+        return(retrieveCoef(rhs, -1*co))
      }
 	  else { 
 		stop("Operator ", op, " not implemented", "Invalid expression:", e)
@@ -35,17 +35,17 @@ retrieveSign <- function(e, co=1){
 	  else if (op == "+"){
 	  }
 	  else if (op == "*"){
-       co <- retrieveSign(lhs, co)
+       co <- retrieveCoef(lhs, co)
        if (!is.numeric(co)){
                 stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
        }
-       return(retrieveSign(rhs, co))
+       return(retrieveCoef(rhs, co))
 	  }
 	  else { 
-		stop(". Operator ", op, " not implemented", "Invalid expression:", e)
+		stop("Operator ", op, " not implemented", "Invalid expression:", e)
 	  }
-	  return(c( retrieveSign(lhs, lsign)
-		      , retrieveSign(rhs, rsign)
+	  return(c( retrieveCoef(lhs, lsign)
+		      , retrieveCoef(rhs, rsign)
 		  )
 		)
    }
@@ -56,7 +56,7 @@ makeEditRow <- function(edt){
   if (length(edt) != 3){
      stop(paste("Invalid edit rule:", edt))
   }
-  wgt  <- retrieveSign(edt)
+  wgt  <- retrieveCoef(edt)
   stopifnot(length(wgt)==length(unique(names(wgt))))
   return(wgt)  
 }
@@ -95,7 +95,7 @@ makeEditRow <- function(edt){
 #' @param normalize \code{logical} specifying if all edits should be transformed (see description)
 #'
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
-editmatrix <- function( editrules = editsinfo
+editmatrix <- function( editrules
                       , normalize = FALSE
 					       ){   
    if (is.character(editrules)){
@@ -125,25 +125,25 @@ editmatrix <- function( editrules = editsinfo
    edts <- parse(text=edit)
    stopifnot(is.language(edts))
    
-   edit=sapply(edts, deparse)
-
+   edit <- sapply(edts, deparse)
+   edit <- gsub(" * ","*", fixed=TRUE, edit)
+   
 	if (is.null(name)){
-	   name <- paste("e", seq_along(edts),sep="")
+	   name <- paste("e", seq_along(edit),sep="")
 	}
 	
 	if (is.null(description)){
-	   description <- rep("", length(edts))
+	   description <- rep("", length(edit))
 	}
    
-	# create/update the name, edit, description vectors and keep the original other vectors
-   editrules <- as.data.frame(cbind(name,edit,description, editrules))
-
-   
-	 
+   # create/update the name, edit, description vectors and keep the original other vectors
+   editrules <- data.frame( name=name,edit=edit,description=description
+                          , stringsAsFactors=FALSE
+                          )
+    
    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
    ops <- sapply(edts, function(e){deparse(e[[1]])})
    C <- numeric(length(ops))
-   
    
 	vars <- unique(names(unlist(rowedts)))
 
@@ -154,24 +154,23 @@ editmatrix <- function( editrules = editsinfo
                                  , var=vars
                                  )
                 )
-   m <- match("CONSTANT", colnames(mat), nomatch=0)
-
-
 	for (i in 1:length(rowedts)){
 	   mat[i,names(rowedts[[i]])] <- rowedts[[i]]
    }
    
    if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
-      cat("m : ",m,"\n")
-      C <- mat[,m]
-      #mat <- mat[,-m]
+      C <- -1*mat[,m]
+      mat <- mat[,-m, drop=FALSE]
    }
    
    if (normalize){
    #TODO change ops and change matrix
    }
 
-	structure( mat
+	names(ops) <- name
+   names(C) <- name
+   
+   structure( mat
 	         , class="editmatrix"
             , editrules=editrules
             , edits = edts
@@ -204,31 +203,59 @@ edits <- function(x){
 #' @seealso \code{\link{editmatrix}}
 #'
 #' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
+#' @param C Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
+#' @param ops Operators, \code{character} with the equality operators, defaults to "=="
 #'
 #' @return an object of class \code{editmatrix}.
-as.editmatrix <- function(x){
+as.editmatrix <- function( x
+                         , C = numeric(nrow(mat))
+                         , ops = rep("==", nrow(mat))
+                         ){
    if (is.editmatrix(x)){
       return(x)
    }
    mat <- as.matrix(x)
-   structure( mat
-            , class="editmatrix"
-			   , editrules=editrules(mat)
-			   )
-}
-
-#' Returns the constant part of a linear (in)equality
-#'
-#' @export
-#' @seealso \code{\link{editmatrix}}
-#'
-#' @param E editmatrix
-#' @return \code{numeric} vector \code(C) 
-getCONSTANT <- function(E){
-  if (!is.editmatrix(E)){
-     stop("E has to be an editmatrix.")
-  }
-  attr(x, "C")
+  
+   vars <- colnames(mat)
+   if (is.null(vars)){
+       if ((n <- ncol(mat)) > length(letters)){
+		   vars <- character(n)
+		   vars[1:n] <- letters
+	   } else{
+	      vars <- letters[1:n]
+	   }
+   }
+   colnames(mat) <- make.names(vars, unique=TRUE)
+   
+   nC <- ncol(mat) + 1
+   er <- character(nrow(mat))
+   for (i in 1:nrow(mat)){
+     r <- c(mat[i,], -C[i])
+	  lhs <- r > 0
+	  rhs <- r < 0
+     
+	  r <- abs(r)
+	  
+	  facs <- paste(r, "*", vars, sep="")
+     
+	  facs[r==1] <- vars[r==1] #simplify 1's
+     
+	  facs[r==0] <- "" #remove 0's
+	  
+     #replace constant term
+     facs[nC] <- C[i]
+     
+	  leftterm <- if (any(lhs)) paste(facs[lhs], collapse=' + ')
+	              else 0
+				  
+	  rightterm <- if (any(rhs)) paste(facs[rhs], collapse=' + ')
+	               else 0
+	  er[i] <- paste(leftterm, ops[i], rightterm)
+   }
+   ei <- data.frame(edit=er)
+   ei$edit <- er
+   ei$name <- rownames(er)
+   editmatrix(er)
 }
 
 #' Convert an editmatrix to a normal matrix
@@ -269,7 +296,9 @@ as.data.frame.editmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
-   print(as.matrix(x,...))
+   m <- as.matrix(x)
+   m <- cbind(m, CONSTANT=getCONSTANT(x))
+   print(m, ...)
    cat("\nEdit rules:\n")
    info <- editrules(x)
    desc <- paste("[",info$description,"]")

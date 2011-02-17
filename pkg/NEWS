@@ -6,6 +6,7 @@ version 0.3
 - negative coefficients and constants were not parsed correctly
 - added vignette
 - removed deprecated editsinfo parameter from editmatrix
+- added getOps and getCONSTANT functions for retrieving operators and constants from an editmatrix
 
 version 0.2
 - added CONSTANT parsing and generation
