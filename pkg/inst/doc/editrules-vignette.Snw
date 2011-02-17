@@ -8,8 +8,8 @@
 \maketitle
 \begin{abstract}
 {\tt editrules} is a package to define, parse, manipulate and check linear and other
-data restrictions in a convenient way in R. The restrictions can be entered in the
-commandline or stored as text or in a database, for example.
+data restrictions in R. Verbose restrictions can be entered at the
+commandline or stored as a (text) file or a database.
 \end{abstract}
 
 
@@ -19,20 +19,21 @@ library(editrules)
 @
 \maketitle
 
-In many applications, data processing steps are forced to obey an number of
-restrictions on the processed data.  Well-known cases include linear
-(in)equality restrictions in optimizations or the rules used in data checking
-and cleaning prior to analysis. The rules used for the purpose of data cleaning
-include, but are usually not limited to the linear (in)equalities mentioned
-before. They might include restrictions on certain value combinations of
-categorical variables for instance. These general rules are usually referred to
-as {\em edit rules}, or {\em edits} in short. For the remainder of this paper we
-will use these terms as well.
+Data processing methods always impose restrictions on the type and format of
+data that may enter the method. Well-known cases include linear (in)equality
+restrictions in optimizations or the rules used in data checking and cleaning
+prior to analysis. Rules used for the purpose of data cleaning include, but are
+usually not limited to the linear (in)equalities mentioned before. They might
+include restrictions on certain value combinations of categorical variables for
+instance. These restrictions are usually referred to as {\em edit rules}, or
+{\em edits} in short. For the remainder of this paper we will use these terms
+as well.
 
-{\tt editrules} is a package to define, parse and manipulate edits with {\tt R} in a
-convenient way. Moreover, it is possible to apply the rules to a dataset to obtain a
-list of edit violations per record. The current version can handle linear (in)equality
-restrictions. Future versions with more versatile edits are planned.
+{\tt editrules} is a package to define, parse and manipulate edits with {\tt R}
+in a convenient way. Moreover, it is possible to apply edits to a dataset to
+obtain a list of edit violations per record. The current version can handle
+linear (in)equality restrictions. Future versions with more versatile edits are
+planned.
 
 
 \section{A simple example}
@@ -43,25 +44,28 @@ balance <- data.frame(
     profit    = c(125,  40, 10),
     turnover  = c(200, 320, 80))
 @
-subject to the rules:
+subject to the linear restrictions:
 \begin{eqnarray}
 {\rm turnover} &=& {\rm profit} + {\rm cost}\\
 \frac{\rm profit}{\rm turnover} &\leq& 0.6
 \end{eqnarray}
-In the {\tt editrules} package these rules can be cheched as follows\footnote{The extra brackets around assign statements
+In the {\tt editrules} package these rules can be checked as follows\footnote{The extra brackets around assign statements
 are included only to force R to print the result after assignment.}.
-The rules can be stated in a verbose manner and converted to an edit matrix with the {\tt editmatrix} function.
 <<keep.source=TRUE>>=
-edits <- c(
+E <- editmatrix(c(
     "turnover == cost + profit",
-    "profit   <= 0.6*turnover")
-(E <- editmatrix(edits))
+    "profit   <= 0.6*turnover"))
 @
-Next, rows containing errors can be found and a list of errors can be generated.
+Find out which record violates any edit:
 <<>>=
 (valid <- checkRows(E, balance))
+@
+and list the errors.
+<<>>=
 listErrors(E, balance)
 @
+So the first record violates edit {\tt e2}, the second record violates {\tt e1} and the third record is clean.
+
 \section{Verbose input of linear (in)equality constraints}
 In many statistical and optimization problems, one has to represent a set of 
 linear (in)equalities in matrix a matrix form:
@@ -70,7 +74,7 @@ Ax = x_0, \textrm{ and/or } Ax \leq x_0.
 \end{equation}
 However, in practice, these restrictions are often formulated verbatim and have to be translated
 to the matrix form by the statistician. The {\tt editrules} package facilitates this by allowing
-a user to write linear (in) equality constraints in {\tt R} language and translating it to an {\tt S3}
+a user to write linear (in)equality constraints in {\tt R} language and translating it to an {\tt S3}
 object of type {\tt editmatrix}. Constraints can be entered as a text vector, as in the example
 above, or read from a {\tt data.frame} whith the columns:\\
 
@@ -84,8 +88,10 @@ For example, the edits in the previous section can be entered as
 <<keep.source=TRUE>>=
 (edits <- data.frame(
     name  = c("balance","suspect"),
-    edit  = c("turnover == cost + profit", "profit <= 0.6*turnover"),
-    description = c("balance check","suspiciously high turnover")))
+    edit  = c("turnover == cost + profit", 
+              "profit <= 0.6*turnover"),
+    description = c("balance check",
+                    "suspiciously high turnover")))
 @
 Translating these verbose rules can be done with the {\tt editmatrix} command.
 <<>>=
@@ -93,7 +99,7 @@ Translating these verbose rules can be done with the {\tt editmatrix} command.
 @
 Here, {\tt E} is an object of class {\tt editmatrix} which is a standard {\tt R} {\tt matrix}
 with some extra attributes to store edit information. It can be coerced to a normal {\tt matrix}
-object by {\tt as.matrix}.
+object with {\tt as.matrix}.
 
 
 
