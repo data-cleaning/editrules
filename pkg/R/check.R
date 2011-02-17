@@ -35,11 +35,7 @@ checkRows.editmatrix <- function( E
 	for (i in seq(along.with=edts)){
 	   check <- check & eval(edts[[i]], envir=dat)
 	}
-<<<<<<< .mine
     return(check)
-=======
-   check
->>>>>>> .r32
 	#TODO make a matrix an do the computation on the matrix.
 } 
 
