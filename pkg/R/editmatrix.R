@@ -55,7 +55,7 @@ retrieveCoef <- function(e, co=1){
 }
 
 parseGuard <- function(g){
-  op <- as.character(edt[[1]])
+  op <- as.character(g[[1]])
   if (op %in% c( COPS
                , "||"
                , "&&"
@@ -64,7 +64,7 @@ parseGuard <- function(g){
      ){
   }
   else {
-     stop("Invalid condition syntax: ", e)
+     stop("Invalid condition syntax: ", g)
   }
 }
 
