@@ -33,14 +33,14 @@ editsinfo <- function(x){
 #'
 #' @param E editmatrix
 #' @return \code{numeric} vector \code{C}
-getCONSTANT <- function(E){
+getC <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
   attr(E, "C")
 }
 
-#' Returns the operator part of a linear (in)equality
+#' Returns the operator part of a linear (in)equality \code{editmatrix} E
 #'
 #' @export
 #' @seealso \code{\link{editmatrix}}

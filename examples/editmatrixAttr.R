@@ -8,7 +8,7 @@ print(E)
 editrules(E)
                  
 # get constants of inequalities (i.e. c(0, 2))                
-getCONSTANT(E)
+getC(E)
 
 # get operators of inequalities (i.e. c("==",">"))
 getOps(E)

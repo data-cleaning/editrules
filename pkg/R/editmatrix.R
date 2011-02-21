@@ -81,10 +81,12 @@ makeEditRow <- function(edt){
 #' can be retrieved by using \code{\link{editrules}}
 #'
 #' The matrix is created by retrieving the coefficients of the variables in the equalities.
-#' i.e. \code{x == y}   results in  \code{c(x=-1, y=1, w=0, z=0)}
-#' and \code{x == y + w} results in \code{c(x=-1, y=1, w=1, z=0)}
+#' i.e. \code{x == y}   results in  \code{c(x=1, y=-1)}
+#' and \code{x == y + w} results in \code{c(x=1, y=-1, w=-1)}
 #'
-#' The edits are canonized: all edits are transformed into an E == C, E < C or E <= C form, so that in the specification of the edit rules all inequalities can be mixed, but the resulting matrix has similar sign.
+#' By default the editmatrix is created using the comparison operators (\code{==,<=,>=,<,>}) in the edits. If option \code{normalize=TRUE} is used all 
+#' edits are transformed into an E == C, E < C or E <= C form, so that in the specification of the edit rules all inequalities can be mixed, 
+#' but the resulting matrix has similar sign.
 #' @title Reading in edit rules
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
@@ -204,7 +206,7 @@ edits <- function(x){
 #'
 #' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
 #' @param C Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
-#' @param ops Operators, \code{character} with the equality operators, defaults to "=="
+#' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
 #'
 #' @return an object of class \code{editmatrix}.
 as.editmatrix <- function( x
@@ -261,7 +263,7 @@ as.editmatrix <- function( x
 #' Convert an editmatrix to a normal matrix
 #' 
 #' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
-#' In some case it is preferable to convert the editmatrix to a normal matrix.
+#' In some cases it is preferable to convert the editmatrix to a normal matrix.
 #'
 #' @export
 #' @method as.matrix editmatrix
@@ -297,7 +299,7 @@ as.data.frame.editmatrix <- function(x, ...){
 print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
    m <- as.matrix(x)
-   m <- cbind(m, CONSTANT=getCONSTANT(x))
+   m <- cbind(m, CONSTANT=getC(x))
    print(m, ...)
    cat("\nEdit rules:\n")
    info <- editrules(x)
