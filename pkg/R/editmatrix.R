@@ -1,3 +1,5 @@
+COPS <- c("==","<","<=",">",">=")
+
 retrieveCoef <- function(e, co=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
@@ -29,7 +31,7 @@ retrieveCoef <- function(e, co=1){
       lhs <- e[[2]]
       rhs <- e[[3]]
       lsign <- rsign <- co
-     if ( op %in% c("==", "<", "<=", "-", ">",">=") ){
+     if ( op %in% c(COPS, "-")){
 	    rsign <- -1 * co
 	  } 
 	  else if (op == "+"){
@@ -52,12 +54,35 @@ retrieveCoef <- function(e, co=1){
    stop("Invalid expression:", e)
 }
 
+parseGuard <- function(g){
+  op <- as.character(edt[[1]])
+  if (op %in% c( COPS
+               , "||"
+               , "&&"
+               ,"%in%"
+               )
+     ){
+  }
+  else {
+     stop("Invalid condition syntax: ", e)
+  }
+}
+
 makeEditRow <- function(edt){
-  if (length(edt) != 3){
+  op <- as.character(edt[[1]])
+  if (op == "if"){
+     stop("Conditional edit rules are not (yet) supported.", edt)
+     guard <- edt[[2]]
+     parseGuard(guard)
+     edt <- edt[[3]]
+     op <- as.character(edt[[1]])  
+  }
+  if (!(op %in% COPS)){
      stop(paste("Invalid edit rule:", edt))
   }
-  wgt  <- retrieveCoef(edt)
-  stopifnot(length(wgt)==length(unique(names(wgt))))
+  wgt <- retrieveCoef(edt)
+  # simplify the coefficients by summing them
+  wgt <- tapply(wgt, names(wgt), sum)
   return(wgt)  
 }
 
@@ -160,13 +185,26 @@ editmatrix <- function( editrules
        mat[i,names(rowedts[[i]])] <- rowedts[[i]]
    }
    
+   if (normalize){ 
+      for (i in 1:nrow(mat)){
+         if (ops[i] == ">="){
+            mat[i,] <- -mat[i,]
+            ops[i] <- "<"
+         }
+         else if (ops[i] == ">"){
+            mat[i,] <- -mat[i,]
+            ops[i] <- "<="
+         }
+      }
+   }
+
    if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
       C <- -1*mat[,m]
       mat <- mat[,-m, drop=FALSE]
    }
    
    if (normalize){
-   #TODO change ops and change matrix
+      return(as.editmatrix(mat,C=C, ops=ops, normalize=FALSE))
    }
 
 	names(ops) <- name
@@ -207,11 +245,13 @@ edits <- function(x){
 #' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
 #' @param C Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
 #' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
+#' @param ... further parameters will be given to \code{editmatrix}
 #'
 #' @return an object of class \code{editmatrix}.
 as.editmatrix <- function( x
                          , C = numeric(nrow(mat))
                          , ops = rep("==", nrow(mat))
+                         , ...
                          ){
    if (is.editmatrix(x)){
       return(x)
@@ -257,7 +297,7 @@ as.editmatrix <- function( x
    ei <- data.frame(edit=er)
    ei$edit <- er
    ei$name <- rownames(er)
-   editmatrix(er)
+   editmatrix(er,...)
 }
 
 #' Convert an editmatrix to a normal matrix
