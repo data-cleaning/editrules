@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Editrules}
+%\VignetteIndexEntry{Editrules, define and check linear data restrictions}
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
@@ -70,7 +70,7 @@ So the first record violates edit {\tt e2}, the second record violates {\tt e1} 
 In many statistical and optimization problems, one has to represent a set of 
 linear (in)equalities in matrix a matrix form:
 \begin{equation}
-Ax = x_0, \textrm{ and/or } Ax \leq x_0.
+Ax = x_0, \textrm{ and/or } Ax \lt x_0 \textrm{ and/or } Ax \leq x_0.
 \end{equation}
 However, in practice, these restrictions are often formulated verbatim and have to be translated
 to the matrix form by the statistician. The {\tt editrules} package facilitates this by allowing
@@ -101,6 +101,41 @@ Here, {\tt E} is an object of class {\tt editmatrix} which is a standard {\tt R}
 with some extra attributes to store edit information. It can be coerced to a normal {\tt matrix}
 object with {\tt as.matrix}.
 
+The edit matrix {\tt E} contains information on following system of linear (in)equalities.
+\begin{equation}
+Ex = C
+\end{equation}
 
+\begin{equation}
+Ex \leq C
+\end{equation}
+
+\begin{equation}
+Ex < C
+\end{equation}
+
+
+{\tt getC} retrieves the constant part of the system of linear (in)equalities.
+<<>>=
+getC(E)
+@
+
+{\tt getOps} retrieves the comparison operator part of the system of linear (in) equalities.
+<<>>=
+getOps(E)
+@
+
+It can be used to check if all {\tt ops} are the same or split {\tt E} into several smaller edit matrices.
+
+If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be transformed into {\tt ==},{\tt <} and/or {\tt \leq } form. This option facilitates the mixed specification of edits.
+
+{\tt getVars} retrieves the variables that are part of the linear (in) equalities.
+<<>>=
+getVars(E)
+@
+
+An important step in data correction and imputation is error location. Determining which variables are used in violated edits is a necessary part. This can be easily done using {\tt getVars} and {\tt errorMatrix}.
+
+TODO EXAMPLE
 
 \end{document}

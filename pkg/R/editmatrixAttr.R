@@ -56,3 +56,20 @@ getOps <- function(E){
   }
   attr(E, "ops")
 }
+
+#' Returns the variable names of an (in)equality \code{editmatrix} E
+#'
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @example examples/editmatrixAttr.R
+#' 
+#' @param E editmatrix
+#'
+#' @return \code{character} vector with the names of the variables. 
+getVars <- function(E){
+  if (!is.editmatrix(E)){
+     stop("E has to be an editmatrix.")
+  }
+  colnames(E)
+}

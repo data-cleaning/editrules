@@ -12,3 +12,6 @@ getC(E)
 
 # get operators of inequalities (i.e. c("==",">"))
 getOps(E)
+
+# get variables of inequalities (i.e. c("x","y","z"))
+getVars(E)
