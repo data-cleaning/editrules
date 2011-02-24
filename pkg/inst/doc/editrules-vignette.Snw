@@ -70,7 +70,7 @@ So the first record violates edit {\tt e2}, the second record violates {\tt e1} 
 In many statistical and optimization problems, one has to represent a set of 
 linear (in)equalities in matrix a matrix form:
 \begin{equation}
-Ax = x_0, \textrm{ and/or } Ax \lt x_0 \textrm{ and/or } Ax \leq x_0.
+Ax = x_0, \textrm{ and/or } Ax = x_0 \textrm{ and/or } Ax \leq x_0.
 \end{equation}
 However, in practice, these restrictions are often formulated verbatim and have to be translated
 to the matrix form by the statistician. The {\tt editrules} package facilitates this by allowing
@@ -127,7 +127,7 @@ getOps(E)
 
 It can be used to check if all {\tt ops} are the same or split {\tt E} into several smaller edit matrices.
 
-If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be transformed into {\tt ==},{\tt <} and/or {\tt \leq } form. This option facilitates the mixed specification of edits.
+If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be transformed into {\tt ==},{\tt <} and/or ${\tt \leq }$ form. This option facilitates the mixed specification of edits.
 
 {\tt getVars} retrieves the variables that are part of the linear (in) equalities.
 <<>>=

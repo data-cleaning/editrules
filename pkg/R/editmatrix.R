@@ -269,6 +269,7 @@ as.editmatrix <- function( x
    }
    colnames(mat) <- make.names(vars, unique=TRUE)
    
+   #print(mat)
    nC <- ncol(mat) + 1
    er <- character(nrow(mat))
    for (i in 1:nrow(mat)){
@@ -349,3 +350,7 @@ print.editmatrix <- function(x, ...){
       , "\n"
       )
 }
+
+
+
+

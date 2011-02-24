@@ -40,12 +40,6 @@ checkRows.editmatrix <- function(E, dat){
     }
 
     return(checkRows.character(editrules(E)$edit, dat))
-#    edts <- edits(E)
-#    check <- rep(TRUE, nrow(dat))   
-#    for (i in seq(along.with=edts)){
-#       check <- check & eval(edts[[i]], envir=dat)
-#    }
-#    return(check)
     #TODO make a matrix an do the computation on the matrix.
 } 
 
@@ -76,34 +70,52 @@ checkRows.data.frame <- function(E, dat){
 
 #' Check which rows of \code{data.frame dat} violate which constraints
 #'
+#' This is an S3 generic function for checking rows of a \code{data.frame} against
+#' a number of edit restrictions. The edits can be entered either in \code{character}
+#' \code{data.frame} or \code{editmatrix} format. The returned value is a logical matrix
+#' with dimension (number of records )\eqn{times}(number of edits), indicating which
+#' record violates (\code{TRUE}) which edit.
+#'
 #' This function can be used as an input for automatic corrections methods.
-#' This method will fail if \code{edtmatrix} contains variables that are not available in \code{dat}
+#' This method will fail if \code{E} contains variables that are not available in \code{dat}
+#' 
+#' @aliases errorMatrix.character errorMatrix.data.frame errorMatrix.editmatrix
 #' @example examples/errorMatrix.R
 #' @export
-#' @seealso listErrors
-#' @param edtmatrix \code{\link{editmatrix}} containing the constraints for \code{dat}
+#' @seealso \code{\link{listErrors}}, \code{\link{checkRows}}
+#' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
 #' @param dat \code{data.frame} with data that should be checked
 #' @return a logical matrix where each row indicates which contraints are violated
-errorMatrix <- function( edtmatrix
-                       , dat
-                       ){
-    stopifnot(is.editmatrix(edtmatrix), is.data.frame(dat))
-    vars <- colnames(edtmatrix) %in% names(dat)
-    if (!all(vars)){
-       stop("Edits contain variable(s):", paste(colnames(edtmatrix)[!vars], collapse=","), ", that are not available in the data.frame")
-    }
-    
-    edts <- edits(edtmatrix)
-    errors <- matrix( FALSE
-                    , ncol=length(edts)
-                       , nrow=nrow(dat)
-                       , dimnames=list(rownames(dat), rownames(edtmatrix))
-                       )
-    for (i in seq(along.with=edts)){
-       errors[,i] <- !eval(edts[[i]], envir=dat)
-    }
-   errors
+errorMatrix <- function(E, dat){
+    UseMethod("errorMatrix")
 }
+
+
+#' @nord
+#' @export
+errorMatrix.character <- function(E, dat){
+    ed <- tryCatch(parse(text=E), error=function(e){
+        stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))})
+    M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
+        stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
+    return(M)
+}
+
+#' @nord
+#' @export
+errorMatrix.editmatrix <- function(E, dat){
+    return(errorMatrix.character(editrules(E)$edit, dat))
+}
+
+#' @nord
+#' @export
+errorMatrix.data.frame <- function(E, dat){
+    if ( !all(c("name","edit","description") %in% names(E)) ){
+        stop("Invalid input data.frame see ?editMatrix for valid input format")
+    }
+    return(errorMatrix.character(as.character(E$edit), dat))
+}
+
 
 #' Lists which rows of \code{data.frame dat} violate which constraints
 #'

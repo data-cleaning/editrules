@@ -13,4 +13,4 @@ License: GPL version 3
 LazyLoad: yes
 Depends:
 URL: http://code.google.com/p/editrules/
-Collate: 'check.R' 'editmatrix.R' 'editmatrixAttr.R' 'pkg.R'
+Collate: 'check.R' 'editmatrixAttr.R' 'editmatrix.R' 'pkg.R'
