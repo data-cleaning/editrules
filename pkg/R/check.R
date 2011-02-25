@@ -47,8 +47,7 @@ checkRows.editmatrix <- function(E, dat){
 #' @export
 checkRows.character <- function(E, dat){
     
-    ed <- tryCatch(parse(text=E), error=function(e){
-        stop(paste("Not all edits can be parsed, parser returns", e$message,sep="\n"))})
+    ed <- parseEdits(E)
     check <- !logical(nrow(dat))
     for ( i in 1:length(E)){
         check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
@@ -94,8 +93,7 @@ errorMatrix <- function(E, dat){
 #' @nord
 #' @export
 errorMatrix.character <- function(E, dat){
-    ed <- tryCatch(parse(text=E), error=function(e){
-        stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))})
+    ed <- parseEdits(E)
     M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
     return(M)
@@ -121,16 +119,40 @@ errorMatrix.data.frame <- function(E, dat){
 #'
 #' This function can be used as an input for automatic corrections methods.
 #' @example examples/listErrors.R
-#' @seealso errorMatrix
 #' @export
-#' @param edtmatrix \code{\link{editmatrix}} containing the constraints for \code{dat}
+#' @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
 #' @param dat \code{data.frame} with data that should be checked
+#' @seealse \code{\link{errorMatrix}} \code{\link{checkRows}}
 #' @return a list with per row a \code{integer} vector of the constraints that are violated 
-listErrors <- function( edtmatrix
-                      , dat
-                      ){    
-    errors <- errorMatrix(edtmatrix, dat)
-    edts <- edits(edtmatrix)
+listErrors <- function(E, dat){    
+    errors <- errorMatrix(E, dat)
     errorlist <- apply(errors, 1, which)
-    errorlist
+    return(apply(errors, 1, which))
 }
+
+
+#' Parse a character vector of edits
+#'
+#' This function wraps the native \code{\link{parse}} function in a \code{\link{tryCatch}}.
+#' The function is \code{editrules} internal. It tries to give a meaningfull error message when
+#' parsing fails for some reason.
+#'
+#' @param E \code{character}
+#' @return The edits in \code{E} parsed to R expressions.
+#'
+parseEdits <- function(E){
+     return(
+        tryCatch(parse(text=E), 
+            error=function(e){
+                stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
+            }
+        )
+    )
+}
+
+
+
+
+
+
+
