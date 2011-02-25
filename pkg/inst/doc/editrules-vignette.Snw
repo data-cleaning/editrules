@@ -10,6 +10,7 @@
 {\tt editrules} is a package to define, parse, manipulate and check linear and other
 data restrictions in R. Verbose restrictions can be entered at the
 commandline or stored as a (text) file or a database.
+This vignette is under construction.
 \end{abstract}
 
 
