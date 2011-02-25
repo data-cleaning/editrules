@@ -8,5 +8,6 @@ dat <- data.frame( x = c(0,2,1)
                  , y = c(0,0,1)
                  , z = c(0,1,1)
                  )
+print(dat)
 				 
 errorMatrix(E,dat)

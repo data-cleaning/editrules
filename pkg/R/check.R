@@ -67,7 +67,7 @@ checkRows.data.frame <- function(E, dat){
 }
 
 
-#' Check which rows of \code{data.frame dat} violate which constraints
+#' Retrieve which rows of \code{data.frame dat} violate which constraints
 #'
 #' This is an S3 generic function for checking rows of a \code{data.frame} against
 #' a number of edit restrictions. The edits can be entered either in \code{character}
@@ -122,7 +122,7 @@ errorMatrix.data.frame <- function(E, dat){
 #' @export
 #' @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
 #' @param dat \code{data.frame} with data that should be checked
-#' @seealse \code{\link{errorMatrix}} \code{\link{checkRows}}
+#' @seealso \code{\link{errorMatrix}} \code{\link{checkRows}}
 #' @return a list with per row a \code{integer} vector of the constraints that are violated 
 listErrors <- function(E, dat){    
     errors <- errorMatrix(E, dat)
@@ -149,10 +149,3 @@ parseEdits <- function(E){
         )
     )
 }
-
-
-
-
-
-
-

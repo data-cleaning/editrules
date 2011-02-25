@@ -1,11 +1,11 @@
-#' Retrieve editrules from an editmatrix
+#' Retrieve readables editrules from an editmatrix
 #'
 #' \code{editrules} returns a data.frame describing the editrules in editmatrix \code{x}. This data.frame can be used to store the
 #' editrules in a readable format, so that the editrules can be maintained and documented.
 #'
 #' The \code{\link{editmatrix}} function can use the output of \code{editrules} to create an \code{editmatrix}.
 #'
-#' If \code{x} is a normal matrix, the matrix will be considered an \code{editmatrix}. The columns of the matrix
+#' If \code{x} is a normal matrix, the matrix will be coerced to an \code{editmatrix}. The columns of the matrix
 #' are the variables and the rows are the edit rules (constraints).
 #' @example examples/editmatrixAttr.R
 #' @aliases editrules editsinfo

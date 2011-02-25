@@ -86,7 +86,13 @@ makeEditRow <- function(edt){
   return(wgt)  
 }
 
-#' Transforms a list of R (in)equalities into an edit matrix with a factor for each variable
+#' Transforms a list of R (in)equalities into an edit matrix.
+#'
+#' Transforms a list of R (in)equalities into an edit matrix with coefficients for each variable, and a constant (\code{C})
+#' and operator (\code{ops}) for each edit rule.
+#'
+#' Each row in the resulting editmatrix represents an linear (in) equality.
+#' Each column in the resulting editmatrix represents a variable.
 #'
 #' There are two forms of creating an editmatrix:
 #' \enumerate{ 
@@ -112,7 +118,7 @@ makeEditRow <- function(edt){
 #' By default the editmatrix is created using the comparison operators (\code{==,<=,>=,<,>}) in the edits. If option \code{normalize=TRUE} is used all 
 #' edits are transformed into an E == C, E < C or E <= C form, so that in the specification of the edit rules all inequalities can be mixed, 
 #' but the resulting matrix has similar sign.
-#' @title Reading in edit rules
+#' @title Create an editmatrix
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
 #' @example examples/editmatrix.R
@@ -234,10 +240,14 @@ edits <- function(x){
    return(attr(x, "edits"))
 }
 
-#' Transform a matrix into an edit matrix
+#' Coerce to an edit matrix. This method will derive editrules from a matrix.
 #'
+#' \code{as.editmatrix} interpretes the matrix as an editmatrix and derives readable edit rules. 
 #' The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
+#' 
+#' If only argument \code{x} is given (the default), the resulting editmatrix is of the form \eqn{Ex=0}. 
+#' This can be influenced by using the parameters \code{C} and \code{ops}.
 #'
 #' @export
 #' @seealso \code{\link{editmatrix}}
@@ -301,10 +311,12 @@ as.editmatrix <- function( x
    editmatrix(er,...)
 }
 
-#' Convert an editmatrix to a normal matrix
+#' Coerce an editmatrix to a normal matrix
 #' 
 #' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
 #' In some cases it is preferable to convert the editmatrix to a normal matrix.
+#
+#' Please note that coercion only returns the coefficient matrix part of the editmatrix, not the \code{C} or \code{ops} part.
 #'
 #' @export
 #' @method as.matrix editmatrix
@@ -312,22 +324,29 @@ as.editmatrix <- function( x
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #'
-#' @return matrix equal to editmatrix
+#' @return coefficient matrix of editmatrix
 as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
 }
 
-#' Convert an editmatrix to a \code{data.frame}
+#' Coerce an editmatrix to a \code{data.frame}
 #'
-#' Convert an editmatrix to a \code{data.frame}
+#' Coerces an editmatrix to a \code{data.frame}. Useful for storing/viewing the matrix representation of editrules.
 #' @export 
 #' @method as.data.frame editmatrix
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #'
-#' @return data.frame equal to matrix representation of \code{x}
+#' @return data.frame with the coefficient matrix representation of \code{x}, a C column and a operator column.
 as.data.frame.editmatrix <- function(x, ...){
-   as.data.frame(as.matrix(x))
+   dat <- as.data.frame(as.matrix(x))
+   nms <- make.names( c(names(dat), "C", "Ops")
+                    , unique=TRUE
+                    )
+   n <- length(nms)
+   dat[[nms[n-1]]] <- getC(x)
+   dat[[nms[n]]] <- getOps(x)
+   dat
 }
 
 #' print edit matrix

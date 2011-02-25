@@ -23,7 +23,3 @@ ef <- data.frame(
     edit=e, 
     description=c("descr1","descr2"))
 checkRows(ef,women)
-
-
-
-

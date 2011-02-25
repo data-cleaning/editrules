@@ -1,10 +1,18 @@
 #' Facilitates reading of linear (in)equalities and
 #'    converting them to a matrix format (and vice versa)
 #' 
-#' Edit rules facilitates the reading/parsing of so called "edit rules" or constraints. These are linear (in)equalities used for checking
-#' statistical data. If an observation (row) passes these rules it is considered valid or plausible. 
-#' If an observation doesn't pass the rules then it should be checked and eventually edited.
-#' Important for the (automatic) editing proces are the rules that are violated. 
+#' The package \code{editrules} facilitates the reading/parsing of so called "edit rules" or constraints. These are linear (in)equalities used for checking
+#' statistical data. 
+#' Often the specification of edit rules and their implementation in software is cumbersome. In many cases a restriction matrix 
+#' is created manually. With \code{editrules} these rules can be specified in R syntax and can be managed and documented.
+#' The documented form can be easily translated into a constraint matrix form, useful for automatic detection and correction 
+#' methods.
+#' 
+#' If an observation passes the edit rules it is considered valid or plausible. 
+#' If an observation doesn't pass the rules then it should be further checked and eventually edited.
+#' Important for the (automatic) editing proces are the rules that are violated. \code{editrules} helps to detect which rules are 
+#' violated and which variables are involved in the violated edits.
+#'
 #' 
 #' The function \code{\link{editmatrix}} reads linear (in)equalities.
 #' Typical usage is:
