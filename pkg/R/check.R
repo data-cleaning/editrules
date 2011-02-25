@@ -22,7 +22,7 @@
 #' @return a logical vector with \code{length} equal to \code{nrow(dat)}. If a row is violates 
 #'      no edit restrictions, \code{TRUE} otherwise \code{FALSE}
 #'
-#' @seealso errorMatrix
+#' @seealso violatedEdits
 #' @example examples/checkRows.R
 #' @export
 checkRows <- function(E, dat){
@@ -78,54 +78,57 @@ checkRows.data.frame <- function(E, dat){
 #' This function can be used as an input for automatic corrections methods.
 #' This method will fail if \code{E} contains variables that are not available in \code{dat}
 #' 
-#' @aliases errorMatrix.character errorMatrix.data.frame errorMatrix.editmatrix
-#' @example examples/errorMatrix.R
+#' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
+#' @example examples/violatedEdits.R
 #' @export
-#' @seealso \code{\link{listErrors}}, \code{\link{checkRows}}
+#' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
 #' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
 #' @param dat \code{data.frame} with data that should be checked
+#' @param ... further arguments that can be used by methods implementing this generic function
 #' @return a logical matrix where each row indicates which contraints are violated
-errorMatrix <- function(E, dat){
-    UseMethod("errorMatrix")
+violatedEdits <- function(E, dat, ...){
+    UseMethod("violatedEdits")
 }
 
 
 #' @nord
 #' @export
-errorMatrix.character <- function(E, dat){
+violatedEdits.character <- function(E, dat, name=NULL, ...){
     ed <- parseEdits(E)
     M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
-    return(M)
+    colnames(M) <- name
+    return(!M)
 }
 
 #' @nord
 #' @export
-errorMatrix.editmatrix <- function(E, dat){
-    return(errorMatrix.character(editrules(E)$edit, dat))
+violatedEdits.editmatrix <- function(E, dat, ...){
+    er <- editrules(E)
+    return(violatedEdits.character(er$edit, dat, er$name))
 }
 
 #' @nord
 #' @export
-errorMatrix.data.frame <- function(E, dat){
+violatedEdits.data.frame <- function(E, dat, ...){
     if ( !all(c("name","edit","description") %in% names(E)) ){
-        stop("Invalid input data.frame see ?editMatrix for valid input format")
+        stop("Invalid input data.frame see ?editmatrix for valid input format")
     }
-    return(errorMatrix.character(as.character(E$edit), dat))
+    return(violatedEdits.character(as.character(E$edit), dat, E$name))
 }
 
 
 #' Lists which rows of \code{data.frame dat} violate which constraints
 #'
 #' This function can be used as an input for automatic corrections methods.
-#' @example examples/listErrors.R
+#' @example examples/listViolatedEdits.R
 #' @export
 #' @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
 #' @param dat \code{data.frame} with data that should be checked
-#' @seealso \code{\link{errorMatrix}} \code{\link{checkRows}}
+#' @seealso \code{\link{violatedEdits}} \code{\link{checkRows}}
 #' @return a list with per row a \code{integer} vector of the constraints that are violated 
-listErrors <- function(E, dat){    
-    errors <- errorMatrix(E, dat)
+listViolatedEdits <- function(E, dat){    
+    errors <- violatedEdits(E, dat)
     errorlist <- apply(errors, 1, which)
     return(apply(errors, 1, which))
 }

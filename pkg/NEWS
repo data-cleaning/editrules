@@ -1,4 +1,4 @@
-version 0.3
+version 0.4
 - improved expression parsing
 - improved handling of wrong input for method editmatrix
 - improved handling of extra columns in editrules
@@ -9,6 +9,7 @@ version 0.3
 - added getOps and getCONSTANT functions for retrieving operators and constants from an editmatrix
 - checkRows is now S3 generic and overloaded for character, data.frame and editmatrix
 - added simplification of constraints (coefficients will be summed)
+- renamed errormatrix into violatedEdits
 
 version 0.2
 - added CONSTANT parsing and generation

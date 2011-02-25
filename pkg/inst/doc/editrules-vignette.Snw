@@ -62,7 +62,7 @@ Find out which record violates any edit:
 @
 and list the errors.
 <<>>=
-listErrors(E, balance)
+listViolatedEdits(E, balance)
 @
 So the first record violates edit {\tt e2}, the second record violates {\tt e1} and the third record is clean.
 
@@ -134,8 +134,6 @@ If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be
 getVars(E)
 @
 
-An important step in data correction and imputation is error location. Determining which variables are used in violated edits is a necessary part. This can be easily done using {\tt getVars} and {\tt errorMatrix}.
-
-TODO EXAMPLE
+An important step in data correction and imputation is error location. Determining which variables are used in violated edits is a necessary part. This can be easily done using {\tt getVars} and {\tt violatedEdits}.
 
 \end{document}

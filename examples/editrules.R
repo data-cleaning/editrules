@@ -24,7 +24,7 @@ print(dat)
 checkRows(E, dat)
 
 #ok, lets show the errors
-errorMatrix(E,dat)
+violatedEdits(E,dat)
 
 #or, lets list the contraints that were violated
-listErrors(E,dat)
+listViolatedEdits(E,dat)
