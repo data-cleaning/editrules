@@ -1,3 +1,6 @@
+version 0.4-1
+- long edit rules (> 60) failed, the upper limit for editrules is right now 500
+
 version 0.4
 - improved expression parsing
 - improved handling of wrong input for method editmatrix

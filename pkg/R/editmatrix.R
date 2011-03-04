@@ -158,7 +158,7 @@ editmatrix <- function( editrules
          stop(paste("The edits could not be parsed. Parser returned\n",e$message))})   
    stopifnot(is.language(edts))
    
-   edit <- sapply(edts, deparse)
+   edit <- sapply(edts, deparse, width.cutoff=500)
    edit <- gsub(" * ","*", fixed=TRUE, edit)
    
 	if (is.null(name)){
@@ -369,7 +369,3 @@ print.editmatrix <- function(x, ...){
       , "\n"
       )
 }
-
-
-
-
