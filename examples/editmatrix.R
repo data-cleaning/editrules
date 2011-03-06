@@ -2,6 +2,10 @@
 E <- editmatrix(c("x+3*y==2*z", "x==z"))
 print(E)
 
+# select rows from an editmatrix:
+E <- editmatrix(c("x+3*y==2*z", "x >= z"))
+E[getOps(E) == "=="]
+
 
 #Using data.frame to define constraints
 E.csv <- 
@@ -15,3 +19,9 @@ print(E.df)
 
 E <- editmatrix(E.df)
 print(E)
+
+
+
+
+
+
