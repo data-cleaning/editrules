@@ -216,14 +216,55 @@ editmatrix <- function( editrules
 	names(ops) <- name
    names(C) <- name
    
+    neweditmatrix(
+        mat       = mat,
+        editrules = editrules,
+        edits     = edts,
+        ops       = ops,
+        C         = C)
+}
+
+#' Create an \code{editmatrix} object from its constituing attributes.
+#'
+#' @param mat An object of class \code{matrix}
+#' @param editrules the editrules \code{data.frame}
+#' @param edits The parsed edits
+#' @param ops a character vector with the comparison operator of every edit.
+#' @param C \code{numeric} constant vector
+#' @return an S3 object of class \code{editmatrix} 
+neweditmatrix <- function(mat, editrules, edits, ops, C){
    structure( mat
-	         , class="editmatrix"
+            , class="editmatrix"
             , editrules=editrules
-            , edits = edts
+            , edits = edits
             , ops = ops
             , C = C
             )
 }
+
+
+# NOTE: cannot export subscript function directly because Roxygen removes backticks in export
+# directive. Added explicitly in build.bash
+
+#' Row index operator for \code{editmatrix}.
+#'
+#' Use this operator to select edits from an editmatrix object.
+#'
+#' @usage `[.editmatrix`(x,i,...)
+#' @param x an object of class \code{\link{editmatrix}}
+#' @param i the row index in the edit matrix
+#' @param ... arguments to be passed to other methods. Currently ignored.
+#' @rdname editmatrix-subscript
+`[.editmatrix` <- function(x,i,...){
+    neweditmatrix(
+        mat = as.matrix(x)[i, , drop=FALSE],
+        editrules = editrules(x)[i, ,drop=FALSE],
+        edits = edits(x)[i],
+        ops = getOps(x)[i],
+        C   = getC(x)[i])
+}
+
+
 
 #' Check if object is an editmatrix
 #' 
