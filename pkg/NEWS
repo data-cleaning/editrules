@@ -1,5 +1,6 @@
 version 0.4-1
 - long edit rules (> 60) failed, the upper limit for editrules is right now 500
+- added row subscript operator for object of class editmatrix
 
 version 0.4
 - improved expression parsing
