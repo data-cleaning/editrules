@@ -195,11 +195,11 @@ editmatrix <- function( editrules
       for (i in 1:nrow(mat)){
          if (ops[i] == ">="){
             mat[i,] <- -mat[i,]
-            ops[i] <- "<"
+            ops[i] <- "<="
          }
          else if (ops[i] == ">"){
             mat[i,] <- -mat[i,]
-            ops[i] <- "<="
+            ops[i] <- "<"
          }
       }
    }
