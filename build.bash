@@ -6,6 +6,8 @@ rm -rf output
 
 echo "Generate documentation..."
 R -q -f roxygen.R
+echo "export(\`[.editmatrix\`)" >> pkg/NAMESPACE
+
 
 mkdir output
 cd output

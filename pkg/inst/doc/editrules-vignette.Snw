@@ -127,6 +127,15 @@ getOps(E)
 @
 
 It can be used to check if all {\tt ops} are the same or split {\tt E} into several smaller edit matrices.
+Splitting an {\tt editmatrix} can be done with normal subsetting.
+<<>>=
+E[getOps(E)== "<="]
+@
+Note that using a second index is pointless, since it is not clear what this would mean for the {\tt editrules}
+of the editmatrix.
+
+
+
 
 If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be transformed into {\tt ==},{\tt <} and/or ${\tt \leq }$ form. This option facilitates the mixed specification of edits.
 
