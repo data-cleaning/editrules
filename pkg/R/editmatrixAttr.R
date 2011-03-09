@@ -40,6 +40,21 @@ getC <- function(E){
   attr(E, "C")
 }
 
+#' Returns the coefficient matrix of linear (in)equalities
+#'
+#' @example examples/editmatrixAttr.R
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @param E editmatrix
+#' @return \code{numeric} vector \code{C}
+getMatrix <- function(E){
+  if (!is.editmatrix(E)){
+     stop("E has to be an editmatrix.")
+  }
+  as.matrix(E)
+}
+
 #' Returns the operator part of a linear (in)equality \code{editmatrix} E
 #'
 #' @export

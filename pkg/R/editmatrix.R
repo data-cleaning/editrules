@@ -224,8 +224,9 @@ editmatrix <- function( editrules
         C         = C)
 }
 
-#' Create an \code{editmatrix} object from its constituing attributes.
+#' Create an \code{editmatrix} object from its constituing attributes. 
 #'
+#' This function is for internal purposes, please use \code{\link{editmatrix}} for creating an editmatrix object.
 #' @param mat An object of class \code{matrix}
 #' @param editrules the editrules \code{data.frame}
 #' @param edits The parsed edits
@@ -250,9 +251,10 @@ neweditmatrix <- function(mat, editrules, edits, ops, C){
 #'
 #' Use this operator to select edits from an editmatrix object.
 #'
-#' @usage `[.editmatrix`(x,i,...)
+#' @usage `[.editmatrix`(x,i,j,...)
 #' @param x an object of class \code{\link{editmatrix}}
 #' @param i the row index in the edit matrix
+#' @param j the column index in the edit matrix
 #' @param ... arguments to be passed to other methods. Currently ignored.
 #' @rdname editmatrix-subscript
 `[.editmatrix` <- function(x, i, j, ...){

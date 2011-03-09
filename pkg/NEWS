@@ -1,6 +1,7 @@
 version 0.4-1
 - long edit rules (> 60) failed, the upper limit for editrules is right now 500
 - added row subscript operator for object of class editmatrix
+- added getMatrix, same functionality as as.matrix, but more symetric with respect to getOps, getC and getVars
 
 version 0.4
 - improved expression parsing
