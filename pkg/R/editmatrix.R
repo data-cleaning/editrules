@@ -255,9 +255,9 @@ neweditmatrix <- function(mat, editrules, edits, ops, C){
 #' @param i the row index in the edit matrix
 #' @param ... arguments to be passed to other methods. Currently ignored.
 #' @rdname editmatrix-subscript
-`[.editmatrix` <- function(x,i,...){
+`[.editmatrix` <- function(x, i, j, ...){
     neweditmatrix(
-        mat = as.matrix(x)[i, , drop=FALSE],
+        mat = as.matrix(x)[i, j, drop=FALSE],
         editrules = editrules(x)[i, ,drop=FALSE],
         edits = edits(x)[i],
         ops = getOps(x)[i],

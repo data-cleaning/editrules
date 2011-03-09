@@ -1,6 +1,6 @@
 Package: editrules
 Type: Package
-Title:R package for parsing and manipulating edit rules
+Title: R package for parsing and manipulating edit rules
 Version: 0.4-1
 Date: 2011-02-06
 Author: Edwin de Jonge, Mark van der Loo
