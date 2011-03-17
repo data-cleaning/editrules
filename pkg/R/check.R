@@ -97,6 +97,7 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
     ed <- parseEdits(E)
     M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
+    if ( is.vector(M) )  M <- array(M, dim=c(1,length(M)))
     colnames(M) <- name
     return(!M)
 }
