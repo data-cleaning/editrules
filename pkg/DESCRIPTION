@@ -1,7 +1,7 @@
 Package: editrules
 Type: Package
 Title: R package for parsing and manipulating edit rules
-Version: 0.4-2
+Version: 0.5
 Date: 2011-02-06
 Author: Edwin de Jonge, Mark van der Loo
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
@@ -13,4 +13,5 @@ License: GPL version 3
 LazyLoad: yes
 Depends:
 URL: http://code.google.com/p/editrules/
-Collate: 'check.R' 'editmatrixAttr.R' 'editmatrix.R' 'pkg.R' 'reduce.R'
+Collate: 'check.R' 'editmatrix.R' 'editmatrixAttr.R' 'findBlocks.R'
+    'pkg.R' 'reduce.R'

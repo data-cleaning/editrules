@@ -1,10 +1,10 @@
-#' Reduce an editmatrix by removing empty rows and columns
+#' Reduce an (edit)matrix by removing empty rows and columns
 #'
 #' @nord
-#' @param E editmatrix object
+#' @param E an object that is coerceable to a \code{matrix}
 removeEmpty  <- function(E){
-  stopifnot(is.editmatrix(E))
-  B <- E != 0
+  m <- as.matrix(E)
+  B <- m != 0
   vars <- (colSums(B) != 0)
   edits <- (rowSums(B) != 0)
   E[edits, vars]
