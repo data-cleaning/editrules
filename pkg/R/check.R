@@ -83,7 +83,7 @@ checkRows.data.frame <- function(E, dat){
 #' @export
 #' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
 #' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
-#' @param dat \code{data.frame} with data that should be checked
+#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a data.frame
 #' @param ... further arguments that can be used by methods implementing this generic function
 #' @return a logical matrix where each row indicates which contraints are violated
 violatedEdits <- function(E, dat, ...){
@@ -95,6 +95,9 @@ violatedEdits <- function(E, dat, ...){
 #' @export
 violatedEdits.character <- function(E, dat, name=NULL, ...){
     ed <- parseEdits(E)
+    if (is.vector(dat) && !is.null(names(dat))){
+       dat <- data.frame(t(dat))
+    }
     M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
     if ( is.vector(M) )  M <- array(M, dim=c(1,length(M)))

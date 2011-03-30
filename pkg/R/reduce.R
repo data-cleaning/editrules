@@ -7,7 +7,7 @@ removeEmpty  <- function(E){
   B <- m != 0
   vars <- (colSums(B) != 0)
   edits <- (rowSums(B) != 0)
-  E[edits, vars]
+  E[edits, vars, drop=FALSE]
 }
 
 #' Reduce an editmatrix by removing redundant rows
@@ -45,7 +45,7 @@ fillVariable <- function(E, var, value){
    
    m <- getMatrix(E)
    varedits <- m[,v] != 0
-   varedits <- rowSums(m[varedits,]) == 1
+   varedits <- rowSums(m[varedits,,drop=FALSE]) == 1
    
    if (any(varedits)){
    
