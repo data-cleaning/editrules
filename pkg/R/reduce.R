@@ -27,7 +27,7 @@ reduceMatrix <- function(E){
    #sort the matrix
    
    # detect if coefficient row e is equal to row e+1
-   
+   E
 }
 
 #' Reduce an editmatrix by setting a variable to a value
