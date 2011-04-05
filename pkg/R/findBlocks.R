@@ -1,4 +1,4 @@
-#' Break a matrix in blocks
+#' Break a matrix into blocks
 #'
 #' @example examples/findBlocks.R
 #' @nord
@@ -17,26 +17,41 @@ findBlocks <- function(M){
                     any(B[i,] & x)
                    }
                   )
-       x <- colSums(B[b,,drop=FALSE]) > 0 #this another way of "or"ring all found rows
+       x <- colSums(B[b,,drop=FALSE]) > 0 #this is another way of "or"ring all found rows
      }
      b
    }
+   
+   
    m <- as.matrix(M)
    
    D <- m != 0
+   
    row.names(D) <- 1:nrow(D)
    
    #remove empty rows
    b <- rowSums(D) == 0
    D <- D[!b,,drop=FALSE]
+   
+   # create a list which will contain the blocks
    blocks <- list()
    L <- 1
+   
+   # detect and remove blocks until no blocks are left
    while (nrow(D) > 0){
+      
+      # find block
       b <- block(D)
+      
+      # store the original row numbers of the detected block
       blocks[[L]] <- as.integer(row.names(D)[b])
       L <- L + 1
+      
+      # remove the detected block
       D <- D[!b,,drop=FALSE]
-    }
+   }
+   
+   #return decomposed original matrix 
    lapply( blocks
          , function(b){
               removeEmpty(M[b,,drop=FALSE])
