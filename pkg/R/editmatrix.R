@@ -306,52 +306,37 @@ as.editmatrix <- function( x
                          , ops = rep("==", nrow(mat))
                          , ...
                          ){
-   if (is.editmatrix(x)){
-      return(x)
-   }
-   mat <- as.matrix(x)
+    if (is.editmatrix(x)){
+        return(x)
+    }    
+    mat <- as.matrix(x)
   
-   vars <- colnames(mat)
-   if (is.null(vars)){
-       if ((n <- ncol(mat)) > length(letters)){
-		   vars <- character(n)
-		   vars[1:n] <- letters
-	   } else{
-	      vars <- letters[1:n]
-	   }
-   }
-   colnames(mat) <- make.names(vars, unique=TRUE)
+    vars <- colnames(mat)
+    n <- ncol(mat)
+    if (is.null(vars))  vars <- paste(rep("x",n),1:n,sep="")
+
+    colnames(mat) <- make.names(vars, unique=TRUE)
    
-   #print(mat)
-   nC <- ncol(mat) + 1
-   er <- character(nrow(mat))
-   for (i in 1:nrow(mat)){
-     r <- c(mat[i,], -C[i])
-	  lhs <- r > 0
-	  rhs <- r < 0
-     
-	  r <- abs(r)
-	  
-	  facs <- paste(r, "*", vars, sep="")
-     
-	  facs[r==1] <- vars[r==1] #simplify 1's
-     
-	  facs[r==0] <- "" #remove 0's
-	  
-     #replace constant term
-     facs[nC] <- -C[i]
-     
-	  leftterm <- if (any(lhs)) paste(facs[lhs], collapse=' + ')
-	              else 0
-				  
-	  rightterm <- if (any(rhs)) paste(facs[rhs], collapse=' + ')
-	               else 0
-	  er[i] <- paste(leftterm, ops[i], rightterm)
-   }
-   ei <- data.frame(edit=er)
-   ei$edit <- er
-   ei$name <- rownames(er)
-   editmatrix(er,...)
+    nC <- ncol(mat) + 1
+    er <- character(nrow(mat))
+
+    left <- right <- character(nrow(mat)) 
+    for ( i in 1:nrow(mat) ){
+        r <- mat[i,]
+        lhs <- r > 0
+        rhs <- r < 0
+        left[i] <- if(any(lhs)) { paste(paste(r[lhs], "*", vars[lhs],sep=""),collapse=" + ") } else ""
+        right[i] <-if(any(rhs))  { paste(paste(-r[rhs], "*",vars[rhs],sep=""),collapse=" + ") } else ""
+    }
+    left <- gsub("1\\*","",left)
+    right <- gsub("1\\*","",right)
+    const <- ifelse(C==0,"",paste("+", C))
+    right <- ifelse(right=="" & const == "","0", right)
+    left <- ifelse(left=="" & const == "","0", left)
+    er <- paste(left,ops,right,const)    
+ 
+    if (!is.null(rownames(mat)))  er <- data.frame(edit=er, name=rownames(mat))
+    editmatrix(er,...)
 }
 
 #' Coerce an editmatrix to a normal matrix
