@@ -1,5 +1,6 @@
 version 0.5
-- added findBlocks, break up a matrix in its constrituating blocks
+- fixed breakage at single record input of violatedEdits
+- added findBlocks, break up a matrix in its constituing blocks
 
 version 0.4-1
 - long edit rules (> 60 characters) failed, the upper limit for editrules is right now 500

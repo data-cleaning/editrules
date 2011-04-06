@@ -339,7 +339,7 @@ as.editmatrix <- function( x
 	  facs[r==0] <- "" #remove 0's
 	  
      #replace constant term
-     facs[nC] <- C[i]
+     facs[nC] <- -C[i]
      
 	  leftterm <- if (any(lhs)) paste(facs[lhs], collapse=' + ')
 	              else 0
