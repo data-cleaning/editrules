@@ -330,10 +330,11 @@ as.editmatrix <- function( x
     }
     left <- gsub("1\\*","",left)
     right <- gsub("1\\*","",right)
-    const <- ifelse(C==0,"",paste("+", C))
-    right <- ifelse(right=="" & const == "","0", right)
-    left <- ifelse(left=="" & const == "","0", left)
-    er <- paste(left,ops,right,const)    
+    I <- right == ""
+    right[I]  <- paste(right[I], C[I])
+    right[!I] <- paste(right[!I], ifelse(C[!I] == 0,"",paste("+",C[!I])))
+    left <- ifelse(left=="", "0", left)
+    er <- paste(left,ops,right)    
  
     if (!is.null(rownames(mat)))  er <- data.frame(edit=er, name=rownames(mat))
     editmatrix(er,...)

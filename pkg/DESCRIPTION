@@ -14,4 +14,4 @@ LazyLoad: yes
 Depends:
 URL: http://code.google.com/p/editrules/
 Collate: 'check.R' 'editmatrixAttr.R' 'editmatrix.R' 'findBlocks.R'
-    'fm.R' 'pkg.R' 'reduce.R'
+    'impliedEdits.R' 'pkg.R' 'reduce.R'
