@@ -112,11 +112,9 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
     eq <- which(eq);
     #normalize matrix, every row has coefficient 1 or -1 for var
     m[I,] <- m[I,] / coefs[I]
+    ml <- list()
+    ol <- character(0)
     equpper <- c(eq, upper)
-    ml <- lapply(which(!I),function(i){m[i,]})
-    ol <- ops[!I]
-    # ml <- list()
-    # ol <- character(0)
     for (lb in lower){
        mlb <- m[lb,]
        ml <- append(ml, lapply( equpper
@@ -142,17 +140,21 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
     #print(ol)
     
     names(ml) <- paste("d", seq_along(ml), sep="")
+    
+    ml <- append(ml,lapply(which(!I),function(i){m[i,]}))
+    ol <- c(ol,ops[!I])
+    
     m <- do.call(rbind,ml)
     as.editmatrix(m[,-ncol(m),drop=FALSE], m[,ncol(m)], ol)
 }
 
-# E <- editmatrix(c(
-   # "y -z == 10",
-   # "x + y -z == 1",
-   # "2*x == y",
-   # "2*z - x < u +2",
-   # "x+y <= z"),
-   # normalize=TRUE)
+E <- editmatrix(c(
+   "y -z == 10",
+   "x + y -z == 1",
+   "2*x == y",
+   "2*z - x < u +2",
+   "x+y <= z"),
+   normalize=TRUE)
 
-# fourierMotzkin(E,"x")
-# implyNumericEdits(E,"x")
+fourierMotzkin(E,"x")
+implyNumericEdits(E,"x")
