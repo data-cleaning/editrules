@@ -1,3 +1,6 @@
+version 0.6 
+- Added a normalize function
+
 version 0.5
 - fixed breakage at single record input of violatedEdits
 - added findBlocks, break up a matrix in its constituing blocks

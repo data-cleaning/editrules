@@ -15,3 +15,13 @@ getOps(E)
 
 # get variables of inequalities (i.e. c("x","y","z"))
 getVars(E)
+
+# isNormalized
+isNormalized(E)
+
+#normalized E
+E <- normalize(E)
+E
+
+# is het now normalized?
+isNormalized(E)

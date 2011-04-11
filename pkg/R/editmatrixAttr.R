@@ -88,3 +88,49 @@ getVars <- function(E){
   }
   colnames(E)
 }
+
+#' Check if an editmatrix is normalized
+#'
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @example examples/editmatrixAttr.R
+#' 
+#' @param E editmatrix
+#'
+#' @return TRUE if editmatrix was normalized or created with \code{normalize=TRUE} 
+isNormalized <- function(E){
+  if (!is.editmatrix(E)){
+     stop("E has to be an editmatrix.")
+  }
+  attr(E, "normalized") == TRUE
+}
+
+#' Normalizes an editmatrix
+#'
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @example examples/editmatrixAttr.R
+#' 
+#' @param E editmatrix
+#'
+#' @return if E was normalized, the original editmatrix is returned, otherwise 
+#' a new normalized editmatrix will be returned 
+normalize <- function(E){
+  if (isNormalized(E)){
+     return(E)
+  }
+  mat <- getMatrix(E)
+  ops <- getOps(E)
+  C <- getC(E)
+  
+  geq <- ops == ">="
+  gt <- ops == ">"
+  mat[geq | gt,] <- -mat[geq | gt,]
+  C[geq | gt] <- -C[geq | gt]
+  ops[geq] <- "<="
+  ops[gt] <- "<"      
+
+  as.editmatrix(mat, C, ops)
+}

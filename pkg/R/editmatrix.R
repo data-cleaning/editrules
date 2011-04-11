@@ -182,26 +182,22 @@ editmatrix <- function( editrules
 
     mat <- matrix( 0
                  , ncol=length(vars)
-                , nrow=length(rowedts)
-                , dimnames = list( rules = editrules$name
-                                 , var=vars
-                                 )
-                )
+                 , nrow=length(rowedts)
+                 , dimnames = list( rules = editrules$name
+                                  , var=vars
+                                  )
+                 )
+                 
     for (i in 1:length(rowedts)){
        mat[i,names(rowedts[[i]])] <- rowedts[[i]]
-   }
+    }
    
-   if (normalize){ 
-      for (i in 1:nrow(mat)){
-         if (ops[i] == ">="){
-            mat[i,] <- -mat[i,]
-            ops[i] <- "<="
-         }
-         else if (ops[i] == ">"){
-            mat[i,] <- -mat[i,]
-            ops[i] <- "<"
-         }
-      }
+   if (normalize){
+      geq <- ops == ">="
+      gt <- ops == ">"
+      mat[geq | gt,] <- -mat[geq | gt,]
+      ops[geq] <- "<="
+      ops[gt] <- "<"      
    }
 
    if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
@@ -213,7 +209,7 @@ editmatrix <- function( editrules
       return(as.editmatrix(mat,C=C, ops=ops, normalize=FALSE))
    }
 
-	names(ops) <- name
+   names(ops) <- name
    names(C) <- name
    
     neweditmatrix(
@@ -221,7 +217,8 @@ editmatrix <- function( editrules
         editrules = editrules,
         edits     = edts,
         ops       = ops,
-        C         = C)
+        C         = C,
+        normalized = normalize)
 }
 
 #' Create an \code{editmatrix} object from its constituing attributes. 
@@ -232,14 +229,16 @@ editmatrix <- function( editrules
 #' @param edits The parsed edits
 #' @param ops a character vector with the comparison operator of every edit.
 #' @param C \code{numeric} constant vector
+#' @param normalized \code{logical} TRUE or FALSE
 #' @return an S3 object of class \code{editmatrix} 
-neweditmatrix <- function(mat, editrules, edits, ops, C){
+neweditmatrix <- function(mat, editrules, edits, ops, C, normalized=FALSE){
    structure( mat
             , class="editmatrix"
             , editrules=editrules
             , edits = edits
             , ops = ops
             , C = C
+            , normalized = normalized
             )
 }
 
@@ -398,8 +397,3 @@ print.editmatrix <- function(x, ...){
       , "\n"
       )
 }
-
-
-
-
-
