@@ -102,7 +102,7 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
     # ops <- getOps(E)[I]
     m <- cbind(m[,,drop=FALSE], C)
     
-    eq <- ops == "=="
+    eq <- I & (ops == "==")
     
     upper <- which(!eq & coefs > 0)
     lower <- which(!eq & coefs < 0)
@@ -140,6 +140,7 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
        ol <- c(ol, ops[equpper])                   
     }
     #print(ol)
+    
     names(ml) <- paste("d", seq_along(ml), sep="")
     m <- do.call(rbind,ml)
     as.editmatrix(m[,-ncol(m),drop=FALSE], m[,ncol(m)], ol)
@@ -154,4 +155,4 @@ E <- editmatrix(c(
    normalize=TRUE)
 
 fourierMotzkin(E,"x")
-#implyNumericEdits(E,"x")
+implyNumericEdits(E,"x")
