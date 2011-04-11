@@ -126,7 +126,7 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
        ol <- c(ol, ifelse(ops[equpper] != "<", ops[lb], ops[equpper]))
     }
     
-    for (eb in equpper){
+    for (eb in eq){
        equpper <- equpper[-1]
        meb <- m[eb,]
        ml <- append(ml, lapply( equpper
