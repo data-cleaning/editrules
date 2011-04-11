@@ -148,13 +148,13 @@ fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
     as.editmatrix(m[,-ncol(m),drop=FALSE], m[,ncol(m)], ol)
 }
 
-E <- editmatrix(c(
-   "y -z == 10",
-   "x + y -z == 1",
-   "2*x == y",
-   "2*z - x < u +2",
-   "x+y <= z"),
-   normalize=TRUE)
+# E <- editmatrix(c(
+   # "y -z == 10",
+   # "x + y -z == 1",
+   # "2*x == y",
+   # "2*z - x < u +2",
+   # "x+y <= z"),
+   # normalize=TRUE)
 
-fourierMotzkin(E,"x")
-implyNumericEdits(E,"x")
+# fourierMotzkin(E,"x")
+# implyNumericEdits(E,"x")
