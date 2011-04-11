@@ -81,12 +81,77 @@ implyNumericEdits <- function(E, var, assumeNormalized=TRUE){
 
 }
 
-#E <- editmatrix(c(
-#    "x + y -z == 1",
-#    "2*x == y",
-#    "2*z - x < u +2",
-#    "x+y <= z"),
-#    normalize=TRUE)
-#
-#implyNumericEdits(E,"x")
+# derive implicit numerical edits by fourier-motzkin elimination.
+# alternative implementation
+fourierMotzkin <- function(E, var, assumeNormalized=TRUE){
+    if (!assumeNormalized) E <- normalize(E)
+    vars <- getVars(E)
+    
+    if (!var %in% vars){
+       stop("var:", var," is not a variable of editmatrix")
+    }
+    
+    m <- getMatrix(E)
+    ops <- getOps(E)
+    C <- getC(E)
+    
+    coefs <- m[,var]
+    I <- coefs != 0
+    
+    # coefs <- coefs[I]
+    # ops <- getOps(E)[I]
+    m <- cbind(m[,,drop=FALSE], C)
+    
+    eq <- ops == "=="
+    
+    upper <- which(!eq & coefs > 0)
+    lower <- which(!eq & coefs < 0)
+    
+    coefs[!eq] <- abs(coefs[!eq])
+    
+    eq <- which(eq);
+    #normalize matrix, every row has coefficient 1 or -1 for var
+    m[I,] <- m[I,] / coefs[I]
+    equpper <- c(eq, upper)
+    ml <- lapply(which(!I),function(i){m[i,]})
+    ol <- ops[!I]
+    # ml <- list()
+    # ol <- character(0)
+    for (lb in lower){
+       mlb <- m[lb,]
+       ml <- append(ml, lapply( equpper
+                              , function(b){
+                                    mlb + m[b,]
+                                }
+                              )
+                   )
+       ol <- c(ol, ifelse(ops[equpper] != "<", ops[lb], ops[equpper]))
+    }
+    
+    for (eb in equpper){
+       equpper <- equpper[-1]
+       meb <- m[eb,]
+       ml <- append(ml, lapply( equpper
+                              , function(b){
+                                   m[b,] - meb
+                                }
+                              )
+                   )
+       ol <- c(ol, ops[equpper])                   
+    }
+    #print(ol)
+    names(ml) <- paste("d", seq_along(ml), sep="")
+    m <- do.call(rbind,ml)
+    as.editmatrix(m[,-ncol(m),drop=FALSE], m[,ncol(m)], ol)
+}
 
+E <- editmatrix(c(
+   "y -z == 10",
+   "x + y -z == 1",
+   "2*x == y",
+   "2*z - x < u +2",
+   "x+y <= z"),
+   normalize=TRUE)
+
+fourierMotzkin(E,"x")
+#implyNumericEdits(E,"x")
