@@ -55,7 +55,7 @@ retrieveCoef <- function(e, co=1){
 }
 
 parseGuard <- function(g){
-  op <- as.character(g[[1]])
+  op <- deparse(g[[1]])
   if (op %in% c( COPS
                , "||"
                , "&&"
@@ -73,11 +73,12 @@ makeEditRow <- function(edt){
   if (op == "if"){
      stop("Conditional edit rules are not (yet) supported.", edt)
      guard <- edt[[2]]
+     print(eval(guard[[3]]))
      parseGuard(guard)
      edt <- edt[[3]]
-     op <- as.character(edt[[1]])  
+     op <- as.character(edt[[1]])
   }
-  if (!(op %in% COPS)){
+  else if (!(op %in% COPS)){
      stop(paste("Invalid edit rule:", edt))
   }
   wgt <- retrieveCoef(edt)
@@ -365,15 +366,15 @@ as.matrix.editmatrix <- function(x, ...){
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #'
-#' @return data.frame with the coefficient matrix representation of \code{x}, a C column and a operator column.
+#' @return data.frame with the coefficient matrix representation of \code{x}, an operator column and CONSTANT column.
 as.data.frame.editmatrix <- function(x, ...){
    dat <- as.data.frame(as.matrix(x))
-   nms <- make.names( c(names(dat), "C", "Ops")
+   nms <- make.names( c(names(dat), "Ops", "CONSTANT")
                     , unique=TRUE
                     )
    n <- length(nms)
-   dat[[nms[n-1]]] <- getC(x)
-   dat[[nms[n]]] <- getOps(x)
+   dat[[nms[n-1]]] <- getOps(x)
+   dat[[nms[n]]] <- getC(x)
    dat
 }
 
@@ -386,9 +387,7 @@ as.data.frame.editmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
-   m <- as.matrix(x)
-   m <- cbind(m, CONSTANT=getC(x))
-   print(m, ...)
+   print(as.data.frame(x), ...)
    cat("\nEdit rules:\n")
    info <- editrules(x)
    desc <- paste("[",info$description,"]")
