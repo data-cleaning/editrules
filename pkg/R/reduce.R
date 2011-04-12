@@ -37,7 +37,7 @@ reduceMatrix <- function(E){
 #' @param var \code{character} with name of variable
 #' @param value \code{numeric} with value of variable
 #' @return reduced edit matrix or NULL if \code{value} is invalid with editmatrix
-fillVariable <- function(E, var, value){
+replaceValue <- function(E, var, value){
    v <- match(var, getVars(E), nomatch=0)
    if (v==0){
       stop("Parameter var (", var, ") is not a variable of editmatrix E")
