@@ -8,6 +8,8 @@
 #' @param A Augmented \code{link{matrix}} [A,b] with real coefficients
 #' @param J Vector of column names or indices in A
 #' @param normalize If TRUE, the rows of A are renormalized by dividing them
+#' @param operators Optional character vector with < or <= for each row of A. 
+#' @tol Tolerance in when checking for zero coefficients
 #'  by their maximum absulute value after each elimination step.
 #'
 #' @references
