@@ -1,6 +1,3 @@
-
-
-
 #' Fourier motzkin elimination 
 #' 
 #' Eliminate variables from the real system Ax < b (or Ax <= b) by treating 
@@ -10,7 +7,7 @@
 #'
 #' @param A Augmented \code{link{matrix}} [A,b] with real coefficients
 #' @param J Vector of column names or indices in A
-#' @param normalize If TRUE, the rows of A are renormalized by deviding them
+#' @param normalize If TRUE, the rows of A are renormalized by dividing them
 #'  by their maximum absulute value after each elimination step.
 #'
 #' @references
@@ -21,48 +18,66 @@
 #' The American Mathematical Monthly 93, 681-695
 #'
 #'
-fourierMotzkin <- function(A, J=1, normalize=TRUE){
-# TODO take account of < ,<= and == 
+fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps) , normalize=TRUE){
+# TODO take account of  == 
+        # valid operators?
+    if ( !all(operators %in% c("<","<=") ))
+        stop("Invalid operator: only < and <= are allowed")
+    if ( !is.null(operators) && length(operators) != nrow(A) )
+        stop("Number of operators not equal to number of rows in system.")
 
-	fm <- function(A, j, tol=sqrt(.Machine$double.eps)){
-	
-	    Apos <- A[A[,j] > tol, , drop=FALSE]
-	    Azero <- A[abs(A[,j]) < tol,,drop=FALSE]
-	    Aneg <- A[A[,j] < -tol, , drop=FALSE]
-	
-	    # nothing to eliminate?
-	    if (nrow(Apos) == 0 || nrow(Aneg) == 0 ) 
-	        return(A)    
-	
-
-	    Atop <- do.call(rbind, lapply(1:nrow(Aneg),function(i){   
-	            aneg <- c(
-	                Aneg[i,vars,drop=FALSE]/abs(Aneg[i,j]),
-	                Aneg[i,-vars,drop=FALSE])
-	            t(apply(Apos, 1, 
-	                function(a) c(a[vars] + a[j]*aneg[vars], a[-vars] | aneg[-vars])
-	            ))
-	        })
-	    )
-        eliminated <<- TRUE
-	    rbind(Atop[,,drop=FALSE],Azero)
-	}
+    fm <- function(A, j, ops ){
+           
+        iPos <- A[,j] > tol
+        iNot <- abs(A[,j]) < tol
+        iNeg <- A[,j] < -tol
+        # nothing to eliminate?
+        if (!any(iPos)  || !any(iNeg) )  return(FALSE)    
+    
+        APos <- A[iPos, , drop=FALSE]
+        ANot <- A[iNot, ,drop=FALSE]
+        ANeg <- A[iNeg, , drop=FALSE]
+        
+        ATop <- do.call(rbind, lapply(1:nrow(ANeg),function(i){   
+            aneg <- c(
+                ANeg[i,vars,drop=FALSE]/abs(ANeg[i,j]),
+                ANeg[i,-vars,drop=FALSE]
+            )
+            t(apply(APos, 1, 
+                function(a) c(a[vars] + a[j]*aneg[vars], a[-vars] | aneg[-vars])
+            ))
+        }))
+        A <<- rbind(ATop[,,drop=FALSE],ANot)
+        if ( !is.null(ops) ){
+            operators <<- c(as.vector(
+                outer(ops[iNeg], operators[iPos], 
+                    function(o1,o2) ifelse(o1=="<=",o2,o1)
+                )
+            ), ops[iNot])
+        }
+        return(TRUE)
+    }
     
     vars <- 1:ncol(A)
     A <- cbind(A,diag(rep(1,nrow(A))))
     colnames(A)[-vars] <- rownames(A)
     nEliminated <- 0
     for ( j in J ){
-        eliminated <- FALSE
-        A <- fm(A[,,drop=FALSE], j)
-        if ( eliminated ){ 
+        if( fm(A, j, operators) ){
             nEliminated <- nEliminated+1
             redundant <- rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
-            if (any(redundant)) A <- A[!redundant,,drop=FALSE]
+            if (any(redundant)){
+                A <- A[!redundant,,drop=FALSE]
+                operators <- operators[!redundant]
+            }
             if ( normalize ) A[,vars] <- t(apply(A[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
         }   
     }
-    A[,vars,drop=FALSE]
+    if ( is.null(operators) ){
+        return(A[,vars,drop=FALSE])
+    } else {
+        return(list(A=A,operators=operators))
+    }
 }
 
 
