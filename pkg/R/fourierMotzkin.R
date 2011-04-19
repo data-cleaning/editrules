@@ -8,9 +8,9 @@
 #' @param A Augmented \code{link{matrix}} [A,b] with real coefficients
 #' @param J Vector of column names or indices in A
 #' @param normalize If TRUE, the rows of A are renormalized by dividing them
-#' @param operators Optional character vector with < or <= for each row of A. 
-#' @tol Tolerance in when checking for zero coefficients
 #'  by their maximum absulute value after each elimination step.
+#' @param operators Optional character vector with < or <= for each row of A. 
+#' @param tol Tolerance used in checking for zero coefficients
 #'
 #' @references
 #' D.A. Kohler (1967) Projections of convex polyhedral sets, Operational Research
@@ -28,7 +28,7 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
     if ( !is.null(operators) && length(operators) != nrow(A) )
         stop("Number of operators not equal to number of rows in system.")
 
-    fm <- function(A, j, ops ){
+    fm <- function(j){
            
         iPos <- A[,j] > tol
         iNot <- abs(A[,j]) < tol
@@ -50,9 +50,9 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
             ))
         }))
         A <<- rbind(ATop[,,drop=FALSE],ANot)
-        if ( !is.null(ops) ){
+        if ( !is.null(operators) ){
             operators <<- c(as.vector(
-                outer(ops[iNeg], operators[iPos], 
+                outer(operators[iNeg], operators[iPos], 
                     function(o1,o2) ifelse(o1=="<=",o2,o1)
                 )
             ), ops[iNot])
@@ -65,7 +65,7 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
     colnames(A)[-vars] <- rownames(A)
     nEliminated <- 0
     for ( j in J ){
-        if( fm(A, j, operators) ){
+        if( fm(j) ){
             nEliminated <- nEliminated+1
             redundant <- rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
             if (any(redundant)){
@@ -73,31 +73,31 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
                 operators <- operators[!redundant]
             }
             if ( normalize ) A[,vars] <- t(apply(A[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
-        }   
+        }  
     }
     if ( is.null(operators) ){
         return(A[,vars,drop=FALSE])
     } else {
-        return(list(A=A,operators=operators))
+        return(list(A=A[,vars,drop=FALSE],operators=operators))
     }
 }
 
 
-#V <- matrix(rnorm(110),nrow=10,dimnames=list(
-#        rules=paste(rep("e",10),1:10,sep=""),
-#        variables=paste(rep("x",11),1:11,sep="")))
+V <- matrix(rnorm(110),nrow=10,dimnames=list(
+        rules=paste(rep("e",10),1:10,sep=""),
+        variables=paste(rep("x",11),1:11,sep="")))
 
-#E <- editmatrix(c(
-#    "4*x1 - 5*x2 - 3*x3 + z <= 0",
-#    "-x1 + x2 -x3 <= 2",
-#    "x1 + x2 + 2*x3 <= 3",
-#    "-x1 <= 0",
-#    "-x2 <= 0",
-#    "-x3 <= 0"))
-#A <- cbind(getMatrix(E), getC(E))
+E <- editmatrix(c(
+    "4*x1 - 5*x2 - 3*x3 + z <= 0",
+    "-x1 + x2 -x3 <= 2",
+    "x1 + x2 + 2*x3 <= 3",
+    "-x1 <= 0",
+    "-x2 <= 0",
+    "-x3 <= 0"))
+A <- cbind(getMatrix(E), getC(E))
 
     
-#fourierMotzkin(A,1:2)
+P2 <- fourierMotzkin(A,1:2)
 
 
 
