@@ -1,5 +1,20 @@
 
-
+#' Choice point: a binary search program
+#'
+#' \code{choicepoint} creates a binary search program that can be started by calling the searchNext function
+#' It walks a binary tree depth first. For all left nodes \code{choiceLeft} is evaluated, for all right nodes 
+#' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
+#' If \code{isSolution} evaluates to \code{FALSE} it stop the current node and go the next serach node 
+#'  
+#' @export 
+#' @example examples/choicepoint.R
+#' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.
+#' @param choiceLeft \code{expression} that will be evaluated for a left node
+#' @param choiceRight \code{expression} that will be evaluated for a right node
+#' @param list \code{list} with variables that will be added to the search environment
+#' @param ... variables that will be added to the search environment
+#' 
+#' @return choicepoint object
 choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    
    isSolution <- substitute(isSolution)
@@ -88,6 +103,10 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    structure(e, class="choicepoint")
 }
 
+#' print a choicepoint
+#'
+#' @method print choicepoint
+#' @param x choicepoint object to be printed
 print.choicepoint <- function(x){
    print(ls.str(x$state))
 }

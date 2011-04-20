@@ -378,6 +378,25 @@ as.data.frame.editmatrix <- function(x, ...){
    dat
 }
 
+
+#' Get character representation of editmatrix
+#'
+#' @export
+#' @method as.character editmatrix
+#'
+#' @param x editmatrix object to be printed
+#' @param ... further arguments passed to or from other methods.
+as.character.editmatrix <- function(x, ...){
+   #TODO move code to generate editrule representation into this function
+   txt <- editrules(x)$edit
+   names(txt) <- rownames(x)
+   txt
+}
+
+as.expression.editmatrix <- function(x, ...){
+  parse(text=as.character(x))
+}
+
 #' print edit matrix
 #'
 #' @export

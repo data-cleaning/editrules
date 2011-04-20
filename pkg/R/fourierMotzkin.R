@@ -83,25 +83,18 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
 }
 
 
-V <- matrix(rnorm(110),nrow=10,dimnames=list(
-        rules=paste(rep("e",10),1:10,sep=""),
-        variables=paste(rep("x",11),1:11,sep="")))
+# V <- matrix(rnorm(110),nrow=10,dimnames=list(
+        # rules=paste(rep("e",10),1:10,sep=""),
+        # variables=paste(rep("x",11),1:11,sep="")))
 
-E <- editmatrix(c(
-    "4*x1 - 5*x2 - 3*x3 + z <= 0",
-    "-x1 + x2 -x3 <= 2",
-    "x1 + x2 + 2*x3 <= 3",
-    "-x1 <= 0",
-    "-x2 <= 0",
-    "-x3 <= 0"))
-A <- cbind(getMatrix(E), getC(E))
+# E <- editmatrix(c(
+    # "4*x1 - 5*x2 - 3*x3 + z <= 0",
+    # "-x1 + x2 -x3 <= 2",
+    # "x1 + x2 + 2*x3 <= 3",
+    # "-x1 <= 0",
+    # "-x2 <= 0",
+    # "-x3 <= 0"))
+# A <- cbind(getMatrix(E), getC(E))
 
     
-P2 <- fourierMotzkin(A,1:2)
-
-
-
-
-
-
-
+# P2 <- fourierMotzkin(A,1:2)

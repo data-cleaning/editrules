@@ -8,9 +8,9 @@
 #' If \code{x} is a normal matrix, the matrix will be coerced to an \code{editmatrix}. The columns of the matrix
 #' are the variables and the rows are the edit rules (constraints).
 #' @example examples/editmatrixAttr.R
-#' @aliases editrules editsinfo
+#' @aliases editrules
 #' @seealso \code{\link{editmatrix}}
-#' @export editrules editsinfo
+#' @export editrules
 #' @param x \code{\link{editmatrix}}  or \code{matrix} object
 #' @return \code{data.frame} with information on all edit rules / constraints
 editrules <- function(x){
@@ -18,11 +18,6 @@ editrules <- function(x){
       return(attr(x, "editrules"))
    }
    editrules(as.editmatrix(x))
-}
-
-editsinfo <- function(x){
-   warning("Deprecated function, please use editrules")
-   editrules(x)
 }
 
 #' Returns the constant part of a linear (in)equality
@@ -49,10 +44,23 @@ getC <- function(E){
 #' @param E editmatrix
 #' @return \code{numeric} vector \code{C}
 getMatrix <- function(E){
+  warning("This function is deprecated. Please use the function getCoef")
+  getCoef(E)
+}
+
+#' Returns the coefficient matrix of linear (in)equalities
+#'
+#' @example examples/editmatrixAttr.R
+#' @export
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @param E editmatrix
+#' @return \code{numeric} vector \code{C}
+getCoef <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  as.matrix(E)
+  unclass(E)[,,drop=FALSE]
 }
 
 #' Returns the operator part of a linear (in)equality \code{editmatrix} E
