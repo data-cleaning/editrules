@@ -4,7 +4,8 @@
 #' \code{choicepoint} creates a binary search program that can be started by calling the searchNext function
 #' It walks a binary tree depth first. For all left nodes \code{choiceLeft} is evaluated, for all right nodes 
 #' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
-#' If \code{isSolution} evaluates to \code{FALSE} it stop the current node and go the next serach node 
+#' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next serach node
+#' If \code{isSolution} evaluates to NULL it will continue to search deaper.
 #'  
 #' @export 
 #' @example examples/choicepoint.R
@@ -26,6 +27,7 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       
       depth <- 0
       maxwidth <- 2
+      #TODO add maxdepth as parameter to this function
       maxdepth <- 100
       
       state <- new.env(parent=e)
