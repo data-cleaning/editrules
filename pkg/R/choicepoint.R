@@ -27,14 +27,13 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       
       reset <- function(){
          state <- root
+         depth <- 0
          
          state$.width <- 1
          state$.path <- NULL
          
-         l <- c(list, list(...))
-         
-         if (length(l) > 0){
-            list2env(l, state)
+         if (length(init) > 0){
+            list2env(init, state)
          }
          
          e$state <- state
@@ -115,7 +114,7 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       maxdepth <- 100
       currentSolution <- NULL
       root <- new.env(parent=e)
-      init <- list
+      init <- c(list, list(...))
       reset()
    })
    
@@ -152,7 +151,7 @@ iter.choicepoint <- function(x){
       }
       sol
    }
-   class(x) <- c("abstractiter","iter")
+   class(x) <- c("abstractiter","iter", "choicepoint")
    x
 }
 

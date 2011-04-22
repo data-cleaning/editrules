@@ -52,13 +52,20 @@ checkRows.editmatrix <- function(E, dat){
 #' @nord
 #' @export
 checkRows.character <- function(E, dat){
-    checkRows(editmatrix(E),dat)
+   ed <- parseEdits(E)
+    check <- !logical(nrow(dat))
+    for ( i in 1:length(E)){
+        check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
+            stop(paste("Edit",ed[[i]],"can not be checked. Evaluation returned",e$message,sep="\n" ))
+        })
+    }
+    return(check)
 }
 
 #' @nord
 #' @export
 checkRows.data.frame <- function(E, dat){
-    checkRows(editmatrix(E),dat)
+    checkRows(as.character(E$edit),dat)
 }
 
 

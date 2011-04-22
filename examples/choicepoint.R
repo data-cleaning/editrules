@@ -22,7 +22,5 @@ cp$reset()
 if (require(iterators)){
    it <- iter(cp)
    nextElem(it)
-   nextElem(it)
+   #nextElem(it)
 }
-
-
