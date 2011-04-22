@@ -89,7 +89,7 @@ makeEditRow <- function(edt){
 
 #' Transforms a list of R (in)equalities into an edit matrix.
 #'
-#' Transforms a list of R (in)equalities into an edit matrix with coefficients for each variable, and a constant (\code{C})
+#' Transforms a list of R (in)equalities into an edit matrix with coefficients for each variable, and a constant (\code{b})
 #' and operator (\code{ops}) for each edit rule.
 #'
 #' Each row in the resulting editmatrix represents an linear (in) equality.
@@ -117,7 +117,7 @@ makeEditRow <- function(edt){
 #' and \code{x == y + w} results in \code{c(x=1, y=-1, w=-1)}
 #'
 #' By default the editmatrix is created using the comparison operators (\code{==,<=,>=,<,>}) in the edits. If option \code{normalize=TRUE} is used all 
-#' edits are transformed into an E == C, E < C or E <= C form, so that in the specification of the edit rules all inequalities can be mixed, 
+#' edits are transformed into an A == b, A < b or A <= b form, so that in the specification of the edit rules all inequalities can be mixed, 
 #' but the resulting matrix has similar sign.
 #' @title Create an editmatrix
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
@@ -177,11 +177,11 @@ editmatrix <- function( editrules
     
    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
    ops <- sapply(edts, function(e){deparse(e[[1]])})
-   C <- numeric(length(ops))
+   b <- numeric(length(ops))
    
     vars <- unique(names(unlist(rowedts)))
 
-    mat <- matrix( 0
+    A <- matrix( 0
                  , ncol=length(vars)
                  , nrow=length(rowedts)
                  , dimnames = list( rules = editrules$name
@@ -190,55 +190,55 @@ editmatrix <- function( editrules
                  )
                  
     for (i in 1:length(rowedts)){
-       mat[i,names(rowedts[[i]])] <- rowedts[[i]]
+       A[i,names(rowedts[[i]])] <- rowedts[[i]]
     }
    
    if (normalize){
       geq <- ops == ">="
       gt <- ops == ">"
-      mat[geq | gt,] <- -mat[geq | gt,]
+      A[geq | gt,] <- -A[geq | gt,]
       ops[geq] <- "<="
       ops[gt] <- "<"      
    }
 
-   if ((m  <- match("CONSTANT", colnames(mat), nomatch=0))){
-      C <- -1*mat[,m]
-      mat <- mat[,-m, drop=FALSE]
+   if ((m  <- match("CONSTANT", colnames(A), nomatch=0))){
+      b <- -1*A[,m]
+      A <- A[,-m, drop=FALSE]
    }
    
    if (normalize){
-      return(as.editmatrix(mat,C=C, ops=ops, normalize=FALSE))
+      return(as.editmatrix(A,b=b, ops=ops, normalize=FALSE))
    }
 
    names(ops) <- name
-   names(C) <- name
+   names(b) <- name
    
-    neweditmatrix(
-        mat       = mat,
-        editrules = editrules,
-        edits     = edts,
-        ops       = ops,
-        C         = C,
-        normalized = normalize)
+   neweditmatrix(
+      A       = A,
+      editrules = editrules,
+      edits     = edts,
+      ops       = ops,
+      b         = b,
+      normalized = normalize)
 }
 
 #' Create an \code{editmatrix} object from its constituing attributes. 
 #'
 #' This function is for internal purposes, please use \code{\link{editmatrix}} for creating an editmatrix object.
-#' @param mat An object of class \code{matrix}
+#' @param A An object of class \code{matrix}
 #' @param editrules the editrules \code{data.frame}
 #' @param edits The parsed edits
 #' @param ops a character vector with the comparison operator of every edit.
-#' @param C \code{numeric} constant vector
+#' @param b \code{numeric} constant vector
 #' @param normalized \code{logical} TRUE or FALSE
 #' @return an S3 object of class \code{editmatrix} 
-neweditmatrix <- function(mat, editrules, edits, ops, C, normalized=FALSE){
-   structure( mat
+neweditmatrix <- function(A, editrules, edits, ops, b, normalized=FALSE){
+   structure( A
             , class="editmatrix"
             , editrules=editrules
             , edits = edits
             , ops = ops
-            , C = C
+            , b = b
             , normalized = normalized
             )
 }
@@ -259,11 +259,11 @@ neweditmatrix <- function(mat, editrules, edits, ops, C, normalized=FALSE){
 #' @rdname editmatrix-subscript
 `[.editmatrix` <- function(x, i, j, ...){
     neweditmatrix(
-        mat = as.matrix(x)[i, j, drop=FALSE],
+        A = as.matrix(x)[i, j, drop=FALSE],
         editrules = editrules(x)[i, ,drop=FALSE],
         edits = edits(x)[i],
         ops = getOps(x)[i],
-        C   = getC(x)[i])
+        b   = getb(x)[i])
 }
 
 
@@ -290,39 +290,39 @@ edits <- function(x){
 #' are the variables and the rows are the edit rules (contraints).
 #' 
 #' If only argument \code{x} is given (the default), the resulting editmatrix is of the form \eqn{Ex=0}. 
-#' This can be influenced by using the parameters \code{C} and \code{ops}.
+#' This can be influenced by using the parameters \code{b} and \code{ops}.
 #'
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
 #' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
-#' @param C Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
+#' @param b Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
 #' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
 #' @param ... further parameters will be given to \code{editmatrix}
 #'
 #' @return an object of class \code{editmatrix}.
-as.editmatrix <- function( x
-                         , C = numeric(nrow(mat))
-                         , ops = rep("==", nrow(mat))
+as.editmatrix <- function( A
+                         , b = numeric(nrow(A))
+                         , ops = rep("==", nrow(A))
                          , ...
                          ){
-    if (is.editmatrix(x)){
-        return(x)
+    if (is.editmatrix(A)){
+        return(A)
     }    
-    mat <- as.matrix(x)
+    A <- as.matrix(A)
   
-    vars <- colnames(mat)
-    n <- ncol(mat)
+    vars <- colnames(A)
+    n <- ncol(A)
     if (is.null(vars))  vars <- paste(rep("x",n),1:n,sep="")
 
-    colnames(mat) <- make.names(vars, unique=TRUE)
+    colnames(A) <- make.names(vars, unique=TRUE)
    
-    nC <- ncol(mat) + 1
-    er <- character(nrow(mat))
+    nC <- ncol(A) + 1
+    er <- character(nrow(A))
 
-    left <- right <- character(nrow(mat)) 
-    for ( i in 1:nrow(mat) ){
-        r <- mat[i,]
+    left <- right <- character(nrow(A)) 
+    for ( i in 1:nrow(A) ){
+        r <- A[i,]
         lhs <- r > 0
         rhs <- r < 0
         left[i] <- if(any(lhs)) { paste(paste(r[lhs], "*", vars[lhs],sep=""),collapse=" + ") } else ""
@@ -331,12 +331,12 @@ as.editmatrix <- function( x
     left <- gsub("1\\*","",left)
     right <- gsub("1\\*","",right)
     I <- right == ""
-    right[I]  <- paste(right[I], C[I])
-    right[!I] <- paste(right[!I], ifelse(C[!I] == 0,"",paste("+",C[!I])))
+    right[I]  <- paste(right[I], b[I])
+    right[!I] <- paste(right[!I], ifelse(b[!I] == 0,"",paste("+",b[!I])))
     left <- ifelse(left=="", "0", left)
     er <- paste(left,ops,right)    
  
-    if (!is.null(rownames(mat)))  er <- data.frame(edit=er, name=rownames(mat))
+    if (!is.null(rownames(A)))  er <- data.frame(edit=er, name=rownames(A))
     editmatrix(er,...)
 }
 
@@ -345,7 +345,7 @@ as.editmatrix <- function( x
 #' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
 #' In some cases it is preferable to convert the editmatrix to a normal matrix.
 #
-#' Please note that coercion only returns the coefficient matrix part of the editmatrix, not the \code{C} or \code{ops} part.
+#' Please note that coercion only returns the coefficient matrix part of the editmatrix, not the \code{b} or \code{ops} part.
 #'
 #' @export
 #' @method as.matrix editmatrix
@@ -374,7 +374,7 @@ as.data.frame.editmatrix <- function(x, ...){
                     )
    n <- length(nms)
    dat[[nms[n-1]]] <- getOps(x)
-   dat[[nms[n]]] <- getC(x)
+   dat[[nms[n]]] <- getb(x)
    dat
 }
 

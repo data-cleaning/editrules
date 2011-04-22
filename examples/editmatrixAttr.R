@@ -7,8 +7,11 @@ print(E)
 # get editrules, useful for storing and maintaining the rules external from your script
 editrules(E)
                  
+# get coeficient matrix of inequalities
+getA(E)
+
 # get constants of inequalities (i.e. c(0, 2))                
-getC(E)
+getb(E)
 
 # get operators of inequalities (i.e. c("==",">"))
 getOps(E)

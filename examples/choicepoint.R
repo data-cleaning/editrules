@@ -5,11 +5,24 @@ cp <- choicepoint( isSolution= {
                                }
                  , choiceLeft = { x <- x - 1; y <- y}
                  , choiceRight = { y <- y - 1; x <- x}
-                 , x=1
+                 , x=2
                  , y=1
                  )
 
+cp$searchNext(VERBOSE=TRUE)
+cp$searchNext(VERBOSE=TRUE)
+
+# next search will return NULL because there is no more solution
 cp$searchNext()
 
-# next search fails because there is no more solution
-#cp$searchNext()
+
+cp$reset()
+
+# choicepoint also works with iterators
+if (require(iterators)){
+   it <- iter(cp)
+   nextElem(it)
+   nextElem(it)
+}
+
+

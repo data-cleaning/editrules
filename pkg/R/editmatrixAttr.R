@@ -20,43 +20,43 @@ editrules <- function(x){
    editrules(as.editmatrix(x))
 }
 
-#' Returns the constant part of a linear (in)equality
+getC <- function(E){
+  warning("This function is deprecated. Please use the function getb")
+  getb(E)
+}
+
+#' Returns the constant part \code{b} of a linear (in)equality
 #'
 #' @example examples/editmatrixAttr.R
-#' @export
+#' @aliases getb getC
+#' @export getb getC
 #' @seealso \code{\link{editmatrix}}
 #'
 #' @param E editmatrix
-#' @return \code{numeric} vector \code{C}
-getC <- function(E){
+#' @return \code{numeric} vector \code{b}
+getb <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  attr(E, "C")
+  attr(E, "b")
 }
 
-#' Returns the coefficient matrix of linear (in)equalities
-#'
-#' @example examples/editmatrixAttr.R
-#' @export
-#' @seealso \code{\link{editmatrix}}
-#'
-#' @param E editmatrix
-#' @return \code{numeric} vector \code{C}
+
 getMatrix <- function(E){
-  warning("This function is deprecated. Please use the function getCoef")
-  getCoef(E)
+  warning("This function is deprecated. Please use the function getA")
+  getA(E)
 }
 
-#' Returns the coefficient matrix of linear (in)equalities
+#' Returns the coefficient matrix \code{A} of linear (in)equalities
 #'
 #' @example examples/editmatrixAttr.R
-#' @export
+#' @export getA getMatrix
 #' @seealso \code{\link{editmatrix}}
+#' @aliases getA getMatrix
 #'
 #' @param E editmatrix
-#' @return \code{numeric} vector \code{C}
-getCoef <- function(E){
+#' @return \code{numeric} matrix \code{A}
+getA <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
@@ -129,16 +129,16 @@ normalize <- function(E){
   if (isNormalized(E)){
      return(E)
   }
-  mat <- getMatrix(E)
+  A <- getMatrix(E)
   ops <- getOps(E)
-  C <- getC(E)
+  b <- getb(E)
   
   geq <- ops == ">="
   gt <- ops == ">"
-  mat[geq | gt,] <- -mat[geq | gt,]
-  C[geq | gt] <- -C[geq | gt]
+  A[geq | gt,] <- -A[geq | gt,]
+  b[geq | gt] <- -b[geq | gt]
   ops[geq] <- "<="
   ops[gt] <- "<"      
 
-  as.editmatrix(mat, C, ops)
+  as.editmatrix(A, b, ops)
 }
