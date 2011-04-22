@@ -14,10 +14,11 @@
 #' @param x \code{\link{editmatrix}}  or \code{matrix} object
 #' @return \code{data.frame} with information on all edit rules / constraints
 editrules <- function(x){
-   if (is.editmatrix(x)){
-      return(attr(x, "editrules"))
-   }
-   editrules(as.editmatrix(x))
+   x <- as.editmatrix(x)
+   edit <- as.character(x)
+   er <- data.frame(name=names(edit), edit=edit, stringsAsFactors=FALSE)
+   er$description <- attr(x, "description")
+   er
 }
 
 getC <- function(E){
@@ -38,7 +39,9 @@ getb <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  attr(E, "b")
+  E <- unclass(E)
+  E[,ncol(E)]
+  #attr(E, "b")
 }
 
 
@@ -60,7 +63,7 @@ getA <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  unclass(E)[,,drop=FALSE]
+  unclass(E)[,-ncol(E),drop=FALSE]
 }
 
 #' Returns the operator part of a linear (in)equality \code{editmatrix} E
@@ -94,7 +97,7 @@ getVars <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  colnames(E)
+  colnames(E)[-ncol(E)]
 }
 
 #' Check if an editmatrix is normalized
@@ -129,16 +132,15 @@ normalize <- function(E){
   if (isNormalized(E)){
      return(E)
   }
-  A <- getMatrix(E)
+  
+  A <- unclass(E)
   ops <- getOps(E)
-  b <- getb(E)
   
   geq <- ops == ">="
   gt <- ops == ">"
   A[geq | gt,] <- -A[geq | gt,]
-  b[geq | gt] <- -b[geq | gt]
   ops[geq] <- "<="
   ops[gt] <- "<"      
 
-  as.editmatrix(A, b, ops)
+  neweditmatrix(A, ops, normalized=TRUE)
 }

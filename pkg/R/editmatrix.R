@@ -4,7 +4,7 @@ retrieveCoef <- function(e, co=1){
    #stopifnot(is.language(e))
    if (length(e) == 1){
      if (is.numeric(e)){
-        l <- co*e
+        l <- co*e   #the resulting matrix is augmented so b has a -
         names(l) <- getOption("editrules.CONSTANT", "CONSTANT")
      }
      else {
@@ -145,11 +145,7 @@ editmatrix <- function( editrules
 
       if (is.null(edit)){
          stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")
-      }      
-      
-      editrules$name <- NULL
-      editrules$edit <- NULL
-      editrules$description <- NULL      
+      }            
     }
    else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
@@ -157,6 +153,7 @@ editmatrix <- function( editrules
 
    edts <- tryCatch(parse(text=edit), error=function(e){
          stop(paste("The edits could not be parsed. Parser returned\n",e$message))})   
+
    stopifnot(is.language(edts))
    
    edit <- sapply(edts, deparse, width.cutoff=500)
@@ -165,26 +162,17 @@ editmatrix <- function( editrules
 	if (is.null(name)){
 	   name <- paste("e", seq_along(edit),sep="")
 	}
-	
-	if (is.null(description)){
-	   description <- rep("", length(edit))
-	}
    
-   # create/update the name, edit, description vectors and keep the original other vectors
-   editrules <- data.frame( name=name,edit=edit,description=description
-                          , stringsAsFactors=FALSE
-                          )
-    
-   rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
-   ops <- sapply(edts, function(e){deparse(e[[1]])})
-   b <- numeric(length(ops))
+    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
+    ops <- sapply(edts, function(e){deparse(e[[1]])})
    
     vars <- unique(names(unlist(rowedts)))
+    vars <- c(vars[vars!="CONSTANT"], "CONSTANT")
 
     A <- matrix( 0
                  , ncol=length(vars)
                  , nrow=length(rowedts)
-                 , dimnames = list( rules = editrules$name
+                 , dimnames = list( rules = name
                                   , var=vars
                                   )
                  )
@@ -192,6 +180,7 @@ editmatrix <- function( editrules
     for (i in 1:length(rowedts)){
        A[i,names(rowedts[[i]])] <- rowedts[[i]]
     }
+    A[,ncol(A)] <- -A[,ncol(A)]
    
    if (normalize){
       geq <- ops == ">="
@@ -200,45 +189,26 @@ editmatrix <- function( editrules
       ops[geq] <- "<="
       ops[gt] <- "<"      
    }
-
-   if ((m  <- match("CONSTANT", colnames(A), nomatch=0))){
-      b <- -1*A[,m]
-      A <- A[,-m, drop=FALSE]
-   }
    
-   if (normalize){
-      return(as.editmatrix(A,b=b, ops=ops, normalize=FALSE))
-   }
-
    names(ops) <- name
-   names(b) <- name
-   
-   neweditmatrix(
-      A       = A,
-      editrules = editrules,
-      edits     = edts,
-      ops       = ops,
-      b         = b,
-      normalized = normalize)
+   E <- neweditmatrix(A, ops=ops, normalized=normalize)
+   if (!is.null(description)){
+      attr(E, "description") <- description
+   }
+   E
 }
 
 #' Create an \code{editmatrix} object from its constituing attributes. 
 #'
 #' This function is for internal purposes, please use \code{\link{editmatrix}} for creating an editmatrix object.
-#' @param A An object of class \code{matrix}
-#' @param editrules the editrules \code{data.frame}
-#' @param edits The parsed edits
+#' @param A An augmented code{matrix} of the form \code{A|b}
 #' @param ops a character vector with the comparison operator of every edit.
-#' @param b \code{numeric} constant vector
 #' @param normalized \code{logical} TRUE or FALSE
 #' @return an S3 object of class \code{editmatrix} 
-neweditmatrix <- function(A, editrules, edits, ops, b, normalized=FALSE){
+neweditmatrix <- function(A, ops, normalized=FALSE){
    structure( A
             , class="editmatrix"
-            , editrules=editrules
-            , edits = edits
             , ops = ops
-            , b = b
             , normalized = normalized
             )
 }
@@ -260,10 +230,8 @@ neweditmatrix <- function(A, editrules, edits, ops, b, normalized=FALSE){
 `[.editmatrix` <- function(x, i, j, ...){
     neweditmatrix(
         A = as.matrix(x)[i, j, drop=FALSE],
-        editrules = editrules(x)[i, ,drop=FALSE],
-        edits = edits(x)[i],
-        ops = getOps(x)[i],
-        b   = getb(x)[i])
+        ops = getOps(x)[i]
+        )
 }
 
 
@@ -309,35 +277,15 @@ as.editmatrix <- function( A
     if (is.editmatrix(A)){
         return(A)
     }    
-    A <- as.matrix(A)
-  
     vars <- colnames(A)
-    n <- ncol(A)
-    if (is.null(vars))  vars <- paste(rep("x",n),1:n,sep="")
-
-    colnames(A) <- make.names(vars, unique=TRUE)
-   
-    nC <- ncol(A) + 1
-    er <- character(nrow(A))
-
-    left <- right <- character(nrow(A)) 
-    for ( i in 1:nrow(A) ){
-        r <- A[i,]
-        lhs <- r > 0
-        rhs <- r < 0
-        left[i] <- if(any(lhs)) { paste(paste(r[lhs], "*", vars[lhs],sep=""),collapse=" + ") } else ""
-        right[i] <-if(any(rhs))  { paste(paste(-r[rhs], "*",vars[rhs],sep=""),collapse=" + ") } else ""
+    if (is.null(vars)){
+       colnames(A) <- make.names(paste("x", 1:ncol(A), sep=""), unique=TRUE)
     }
-    left <- gsub("1\\*","",left)
-    right <- gsub("1\\*","",right)
-    I <- right == ""
-    right[I]  <- paste(right[I], b[I])
-    right[!I] <- paste(right[!I], ifelse(b[!I] == 0,"",paste("+",b[!I])))
-    left <- ifelse(left=="", "0", left)
-    er <- paste(left,ops,right)    
- 
-    if (!is.null(rownames(A)))  er <- data.frame(edit=er, name=rownames(A))
-    editmatrix(er,...)
+    if (is.null(rownames(A))){
+       rownames(A) <- paste("e", 1:nrow(A), sep="")
+    }
+    A <- cbind(as.matrix(A), CONSTANT=b)
+    neweditmatrix(A=A, ops=ops)    
 }
 
 #' Coerce an editmatrix to a normal matrix
@@ -345,7 +293,7 @@ as.editmatrix <- function( A
 #' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
 #' In some cases it is preferable to convert the editmatrix to a normal matrix.
 #
-#' Please note that coercion only returns the coefficient matrix part of the editmatrix, not the \code{b} or \code{ops} part.
+#' Please note that coercion returns the augmented matrix \code{A|b} and not the \code{ops} part.
 #'
 #' @export
 #' @method as.matrix editmatrix
@@ -368,7 +316,7 @@ as.matrix.editmatrix <- function(x, ...){
 #'
 #' @return data.frame with the coefficient matrix representation of \code{x}, an operator column and CONSTANT column.
 as.data.frame.editmatrix <- function(x, ...){
-   dat <- as.data.frame(as.matrix(x))
+   dat <- as.data.frame(getA(x))
    nms <- make.names( c(names(dat), "Ops", "CONSTANT")
                     , unique=TRUE
                     )
@@ -387,14 +335,53 @@ as.data.frame.editmatrix <- function(x, ...){
 #' @param x editmatrix object to be printed
 #' @param ... further arguments passed to or from other methods.
 as.character.editmatrix <- function(x, ...){
-   #TODO move code to generate editrule representation into this function
-   txt <- editrules(x)$edit
+   A <- getA(x)
+   b <- getb(x)
+   vars <- getVars(x)
+   ops <- getOps(x)
+
+   n <- ncol(A)
+
+   nC <- ncol(A) + 1
+   er <- character(nrow(A))
+
+   left <- right <- character(nrow(A)) 
+   for ( i in 1:nrow(A) ){
+     r <- A[i,]
+     lhs <- r > 0
+     rhs <- r < 0
+#     left[i] <- if(any(lhs)) { paste(paste(r[lhs], "*", vars[lhs],sep=""),collapse=" + ") } else ""
+     left[i] <- if(any(lhs)) { paste(r[lhs], "*", vars[lhs],sep="",collapse=" + ") } else ""
+     right[i] <-if(any(rhs))  { paste(-r[rhs], "*",vars[rhs],sep="",collapse=" + ") } else ""
+   }
+   left <- gsub("1\\*","",left)
+   right <- gsub("1\\*","",right)
+
+   right <- ifelse( right==""
+                  , b
+                  , ifelse(b == 0, right, paste(right,b,sep=" + "))
+                  )
+   left <- ifelse(left=="", "0", left)
+   txt <- paste(left,ops,right)    
    names(txt) <- rownames(x)
    txt
 }
 
+#' Get expression representation of editmatrix
+#'
+#' @export
+#' @method as.expression editmatrix
+#'
+#' @param x editmatrix object to be parsed
+#' @param ... further arguments passed to or from other methods.
 as.expression.editmatrix <- function(x, ...){
-  parse(text=as.character(x))
+  return(
+     tryCatch(parse(text=as.character(x)), 
+         error=function(e){
+             stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
+         }
+     )
+ )
 }
 
 #' print edit matrix

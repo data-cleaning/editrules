@@ -33,37 +33,32 @@ checkRows <- function(E, dat){
 #' @export
 checkRows.editmatrix <- function(E, dat){
     stopifnot(is.data.frame(dat))
-    vars <- colnames(E) %in% names(dat)
+    vars <- getVars(E) %in% names(dat)
     if (!all(vars)){
        stop("Edits contain variable(s):", paste(colnames(E)[!vars], collapse=","), 
             ", that are not available in the data.frame")
     }
-
-    return(checkRows.character(editrules(E)$edit, dat))
-    #TODO make a matrix an do the computation on the matrix.
+    
+    check <- !logical(nrow(dat))
+    ed <- as.expression(E)
+    for ( i in 1:length(ed)){
+        check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
+            stop(paste("Edit",ed[[i]],"can not be checked. Evaluation returned",e$message,sep="\n" ))
+        })
+    }
+    return(check)    
 } 
 
 #' @nord
 #' @export
 checkRows.character <- function(E, dat){
-    
-    ed <- parseEdits(E)
-    check <- !logical(nrow(dat))
-    for ( i in 1:length(E)){
-        check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
-            stop(paste("Edit",ed[[i]],"can not be checked. Evaluation returned",e$message,sep="\n" ))
-        })
-    }
-    return(check)
+    checkRows(editmatrix(E),dat)
 }
 
 #' @nord
 #' @export
 checkRows.data.frame <- function(E, dat){
-    if ( !all(c("name","edit","description") %in% names(E)) ){
-        stop("Invalid input data.frame see ?editMatrix for valid input format")
-    }
-    return(checkRows.character(as.character(E$edit), dat))
+    checkRows(editmatrix(E),dat)
 }
 
 

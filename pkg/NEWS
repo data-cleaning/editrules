@@ -1,5 +1,7 @@
 version 0.6 
 - Added a normalize function
+- rewrote internal representation of editmatrix, it is now an augemented matrix (A|b)
+- BREAKING CHANGE: clean up of notation/syntax/naming convention: constants are named b, coefficients are named A
 
 version 0.5
 - fixed breakage at single record input of violatedEdits
