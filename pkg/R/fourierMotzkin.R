@@ -1,3 +1,4 @@
+#' @nord
 #' Fourier motzkin elimination 
 #' 
 #' Eliminate variables from the real system Ax < b (or Ax <= b) by treating 

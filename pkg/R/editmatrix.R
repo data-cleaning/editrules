@@ -89,7 +89,7 @@ makeEditRow <- function(edt){
 
 #' Transforms a list of R (in)equalities into an edit matrix.
 #'
-#' Transforms a list of R (in)equalities into an edit matrix with coefficients for each variable, and a constant (\code{b})
+#' Transforms a list of R (in)equalities into an edit matrix with coefficients (\code{A}) for each variable, and a constant (\code{b})
 #' and operator (\code{ops}) for each edit rule.
 #'
 #' Each row in the resulting editmatrix represents an linear (in) equality.
@@ -289,13 +289,13 @@ edits <- function(x){
 #' The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
 #' 
-#' If only argument \code{x} is given (the default), the resulting editmatrix is of the form \eqn{Ex=0}. 
+#' If only argument \code{x} is given (the default), the resulting editmatrix is of the form \eqn{Ax=0}. 
 #' This can be influenced by using the parameters \code{b} and \code{ops}.
 #'
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @param x object to be transformed into an \code{\link{editmatrix}}. \code{x} will be coerced to a matrix.
+#' @param A object to be transformed into an \code{\link{editmatrix}}. \code{A} will be coerced to a matrix.
 #' @param b Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
 #' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
 #' @param ... further parameters will be given to \code{editmatrix}

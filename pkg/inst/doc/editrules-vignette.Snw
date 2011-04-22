@@ -104,21 +104,25 @@ object with {\tt as.matrix}.
 
 The edit matrix {\tt E} contains information on following system of linear (in)equalities.
 \begin{equation}
-Ex = C
+Ax = b
 \end{equation}
 
 \begin{equation}
-Ex \leq C
+Ax \leq b
 \end{equation}
 
 \begin{equation}
-Ex < C
+Ax < b
 \end{equation}
 
-
-{\tt getC} retrieves the constant part of the system of linear (in)equalities.
+{\tt getA} retrieves the matrix part of the system of linear (in)equalities.
 <<>>=
-getC(E)
+getA(E)
+@
+
+{\tt getb} retrieves the constant part of the system of linear (in)equalities.
+<<>>=
+getb(E)
 @
 
 {\tt getOps} retrieves the comparison operator part of the system of linear (in) equalities.
@@ -133,9 +137,6 @@ E[getOps(E)== "<="]
 @
 Note that using a second index is pointless, since it is not clear what this would mean for the {\tt editrules}
 of the editmatrix.
-
-
-
 
 If an {\tt editmatrix} is created with {\tt normalize = TRUE}, all edits will be transformed into {\tt ==},{\tt <} and/or ${\tt \leq }$ form. This option facilitates the mixed specification of edits.
 
