@@ -55,7 +55,7 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
                 outer(operators[iNeg], operators[iPos], 
                     function(o1,o2) ifelse(o1=="<=",o2,o1)
                 )
-            ), ops[iNot])
+            ), operators[iNot])
         }
         return(TRUE)
     }
