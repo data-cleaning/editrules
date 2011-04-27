@@ -9,7 +9,7 @@ Description: Facilitates reading of linear (in)equalities, converting
     them into matrix format (and vice versa) and checking if data are
     valid according to these rules.  This package can be used as input
     for automatic correction methods (imputation).
-Version: 0.4-1
+Version: 0.6
 URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
 Depends:
