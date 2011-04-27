@@ -1,16 +1,23 @@
-#' @nord
-#' Fourier motzkin elimination 
+#' Gaussian or Fourier-Motzkin elimination 
 #' 
-#' Eliminate variables from the real system Ax < b (or Ax <= b) by treating 
-#' the augmented matrix [A,b] with Fourier-Motzkin elimination. A trick
-#' of Kohler (1967) is used to reduce the number of redundant rows.
+#' Eliminate variables from a set of linear restrictions of the form
+#' \eqn{{\bf a}\cdot {\bf x} \odot b} with \eqn{\odot\in\{<,<=,==\}}
+#' represented as an augmented matrix [A,b] with Fourier-Motzkin and/or Gaussian 
+#' elimination. 
+#' 
+#' A variable is eliminated by exploiting an equality when possible, otherwise
+#' Fourier-Motzkin elimination is performed to eliminate the variable from the set
+#' of inequalities. An observation of Kohler (1967) is used to reduce the number of 
+#' redundant rows, as well as obvious redundancies amounting to 0 < 1. A warning 
+#' is emitted when the system becomes obviously unfeasable (1 < 0). No exact feasability
+#' test is performed (as this has the same complexity as completely solving the system).
 #'
 #'
-#' @param A Augmented \code{link{matrix}} [A,b] with real coefficients
+#' @param A Augmented \code{matrix} [A,b] with real coefficients
 #' @param J Vector of column names or indices in A
-#' @param normalize If TRUE, the rows of A are renormalized by dividing them
+#' @param renormalize If TRUE, the rows of A are renormalized by dividing them
 #'  by their maximum absulute value after each elimination step.
-#' @param operators Optional character vector with < or <= for each row of A. 
+#' @param operators Optional character vector with \code{"<"},\code{"<="} or \code{"=="} for each row of A. 
 #' @param tol Tolerance used in checking for zero coefficients
 #'
 #' @references
@@ -20,8 +27,9 @@
 #' H.P. Williams (1986) Fourier's method of linear programming and its dual,
 #' The American Mathematical Monthly 93, 681-695
 #'
-#'
-fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps) , normalize=TRUE){
+#' @export
+fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps) , 
+        renormalize=TRUE){
     # valid operators?
     if ( !all(operators %in% c("<","<=","==") ))
         stop("Invalid operator: only < and <= are allowed")
@@ -84,20 +92,65 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
     for ( j in J ){
         if( fm(j) ){
             nEliminated <- nEliminated+1
-            redundant <- rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
+            redundant <- isObviouslyRedundant(A,operators,tol) |  rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
             if (any(redundant)){
                 A <- A[!redundant,,drop=FALSE]
                 operators <- operators[!redundant]
             }
-            if ( normalize ) A[,vars] <- t(apply(A[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
+            if ( renormalize ) A[,vars] <- t(apply(A[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
         }  
     }
+    if (isObviouslyUnfeasable(A, operators, tol=tol)) warning("System is unfeasable")
     if ( is.null(operators) ){
         return(A[,vars,drop=FALSE])
     } else {
         return(list(A=A[,vars,drop=FALSE],operators=operators))
     }
 }
+
+
+#' Check for obvious contradictions in set of (in)equalities
+#' 
+#' If any of the rows of the system Ax <operators> b is obviously constradictory the function 
+#' returns TRUE, otherwise FALSE. Obvious inconsistencies may arise during elimination processes.
+#' 
+#' @param A Augmented matrix [A,b]
+#' @param operators character vector with elements \code{"<"}, \code{"<="} or \code{"=="}. 
+#' @param tol Tolerance for checking against zero.
+#'
+#' @nord
+isObviouslyUnfeasable <- function(A, operators = NULL, tol=sqrt(.Machine$double.eps)){
+    if ( is.null(operators) ) return(FALSE)
+    b <- ncol(A)
+    zeroCoef <- rowSums(abs(A[,-b,drop=FALSE])) < tol        
+    if ( any(zeroCoef & operators %in% c("<", "<=") &  A[,b,drop=FALSE] < -tol) || 
+         any(zeroCoef & operators == c("==") &  abs(A[,b,drop=FALSE]) > tol)) return(TRUE)
+    return(FALSE)
+}
+
+
+#' Find obvious redundancies in set of (in)equalities
+#'
+#' The function returns a logical vector which is TRUE at any row of the system 
+#' Ax <operators> b which is obviously redundant. Obvious redundancies may arise
+#' durining elimination processes.
+#' 
+#' @param A Augmented matrix [A,b]
+#' @param operators character vector with elements \code{"<"}, \code{"<="} or \code{"=="}. 
+#' @param tol Tolerance for checking against zero.
+#'
+#' @nord
+isObviouslyRedundant <- function(A, operators=NULL, tol=sqrt(.Machine$double.eps)){
+    if ( is.null(operators) ) return(logical(nrow(A)))
+    b <- ncol(A)
+    zeroCoef <- rowSums(abs(A[,-b,drop=FALSE])) < tol
+    return(as.vector(
+        zeroCoef & operators %in% c("==","<=")  & abs(A[,b,drop=FALSE]) < tol |
+        zeroCoef & operators %in% c("<", "<=")  & A[,b,drop=FALSE] > tol
+    ))
+}
+
+
 
 
 # V <- matrix(rnorm(110),nrow=10,dimnames=list(
@@ -111,7 +164,7 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
     # "-x1 <= 0",
     # "-x2 <= 0",
     # "-x3 <= 0"))
-# A <- cbind(getMatrix(E), getC(E))
+# A <- cbind(getA(E), getb(E))
 
     
 # P2 <- fourierMotzkin(A,1:2)
