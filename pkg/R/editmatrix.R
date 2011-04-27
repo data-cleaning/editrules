@@ -281,7 +281,8 @@ as.editmatrix <- function( A
     if (is.null(vars)){
        colnames(A) <- make.names(paste("x", 1:ncol(A), sep=""), unique=TRUE)
     }
-    if (is.null(rownames(A))){
+    rn <- rownames(A)
+    if ( is.null(rn) || length(unique(rn)) != length(rn) ){
        rownames(A) <- paste("e", 1:nrow(A), sep="")
     }
     A <- cbind(as.matrix(A), CONSTANT=b)
