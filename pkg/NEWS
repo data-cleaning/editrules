@@ -1,4 +1,5 @@
 version 0.6 
+- Added fourierMotzkin elimination function
 - Added a normalize function
 - rewrote internal representation of editmatrix, it is now an augemented matrix (A|b)
 - BREAKING CHANGE: clean up of notation/syntax/naming convention: constants are named b, coefficients are named A
