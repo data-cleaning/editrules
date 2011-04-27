@@ -22,15 +22,31 @@
 #'
 #'
 fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps) , normalize=TRUE){
-# TODO take account of  == 
-        # valid operators?
-    if ( !all(operators %in% c("<","<=") ))
+    # valid operators?
+    if ( !all(operators %in% c("<","<=","==") ))
         stop("Invalid operator: only < and <= are allowed")
     if ( !is.null(operators) && length(operators) != nrow(A) )
         stop("Number of operators not equal to number of rows in system.")
 
     fm <- function(j){
-           
+    
+        I <- operators == "==" & abs(A[,j]) > tol
+        if (any(I)){ #solvable from an equality?
+            i <- which(I)[1]
+            p <- A[i,vars]/A[i,j]
+            v <- A[i,-vars]
+            A   <<- t(
+                apply(A[-i,],1, 
+                    function(a){
+                        c(a[vars] - a[j]*p, a[-vars]| v )
+                    }
+                )
+            )
+            operators <<- operators[-i]       
+            return(TRUE)
+        }
+
+        # j does not occur in equality, eliminate from inequalities. 
         iPos <- A[,j] > tol
         iNot <- abs(A[,j]) < tol
         iNeg <- A[,j] < -tol

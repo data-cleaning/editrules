@@ -12,22 +12,25 @@ removeEmpty  <- function(E){
 
 #' Partially reduce an editmatrix
 #'
+#'
+#' DEFUNCT AND UNFINISHED!
 #' This routine reduces an editmatrix in the following way:
 #' \itemize{
 #'  \item{The set of equalities are transformed to reduced row echelon form and rows 
 #'        with zeros are removed}
 #' \item{inequalities containing obvious truths (0<1) are removed}
 #' }
-#' If 
-#'
+#' 
+#' 
 #' matrix should be normalized, i.e. the operators should have similar sign
 #' @nord
 #' @param E normalized editmatrix object
+#' @param tol tolerance
 #' @return An \code{\link{editmatrix}} object, with linear redundant edits removed, or
 #'      an empty \code{\link{editmatrix}} if E contains an inconsistent set of edits.
-reduceMatrix <- function(E){
-    A <- getMatrix(E)
-    C <- getC(E)
+reduceMatrix <- function(E, tol){
+    A <- getA(E)
+    C <- getb(E)
     ops <- getOps(E)
       
     # reduced echelon form for equality edits
@@ -37,7 +40,7 @@ reduceMatrix <- function(E){
     A[eq,] <- Ared[,1:(ncol(Ared)-1),drop=FALSE]
     # round near-zero coefficients
     A[!eq, ] <- ifelse(abs(A[!eq,,drop=FALSE]) < tol,0,A[!eq, ])
-    C[!eq] <- ifelse( abs(C[!eq]) < eps, 0, C[!eq])
+    C[!eq] <- ifelse( abs(C[!eq]) < tol, 0, C[!eq])
 
     # return empty editmatrix if inconsistency is encountered
     Azero <- colSums(A!=0) == 0
@@ -93,16 +96,16 @@ rref <- function(A, tol=sqrt(.Machine$double.eps)){
 #' Check consistency of editmatrix
 #'
 #' Check whether any record can obey the rules in an editmatrix
-#'
+#' DEFUNCT AND UNFINISHED!
 #' @param E editmatrix
 #' @return TRUE or FALSE
-#'
+#' @nord
 is.consistent <- function(E){
     consistency = TRUE
-
+    ops <- getOps(E)
     ineq <- ops != "=="
     eps <- sqrt(.Machine$double.eps)
-
+    A <- getA(E)
     # check whether E has inconistent inequalities
     if ( any( colSums( abs(A[ineq,,drop=FALSE]) > eps ) == 0  & C[ineq] > 0 ) )
         consistency = FALSE
