@@ -10,13 +10,47 @@ E <- editmatrix(c(
      "-x3 <= 0"))
 # get augmented matrix from editmatrix:
 A <- as.matrix(E)
-
-# setting renormalize=FALSE to reproduce the numbers from Williams.
+ops <- getOps(E)
 # eliminate 1st variable
-(P1 <- fourierMotzkin(A, 1, renormalize=FALSE))
+(P1 <- fourierMotzkin(A, 1, ops, renormalize=FALSE))
 # eliminate 2 variables. Note that redundant rows have been eliminated
-(P2 <- fourierMotzkin(A, c("x1","x2"), renormalize=FALSE))
+(P2 <- fourierMotzkin(A, c("x1","x2"), ops, renormalize=FALSE))
 # finally, the answer:
-(P3 <- fourierMotzkin(A, 1:3, renormalize=FALSE))
+(P3 <- fourierMotzkin(A, 1:3, ops, renormalize=FALSE))
+
+# An  example with an equality and two inequalities
+# The only thing to do is solving for x in e1 and substitute in e3.
+(E <- editmatrix(c(
+    "2*x + y == 1",
+    "y > 0",
+    "x > 0"),normalize=TRUE))
+A <- as.matrix(E)
+L <- fourierMotzkin(A,"x",operators=getOps(E))
+as.editmatrix(L$A[,1:2],L$A[,3],L$operators)
+
+
+# This example has two equalities, and it's solution is the origin (x,y)=(0,0)
+(E <- editmatrix(c(
+    "y <= 1 - x",
+    "y >= -1 + x",
+    "x == y",
+    "y ==-2*x" ),normalize=TRUE))
+A <- as.matrix(E)
+ops <- getOps(E)
+
+source("fourierMotzkin.R")
+L <- fourierMotzkin(A,"x", ops)
+rownames(L$A) <- NULL
+as.editmatrix(L$A[,1:2],L$A[,3],L$operators)
+
+
+
+
+
+
+
+
+
+
 
 

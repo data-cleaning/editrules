@@ -31,8 +31,8 @@
 #' 
 #'
 #' @export
-fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps) , 
-        renormalize=TRUE){
+fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps), 
+        renormalize=FALSE){
     # valid operators?
     if ( !all(operators %in% c("<","<=","==") ))
         stop("Invalid operator: only < and <= are allowed")
@@ -40,52 +40,70 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
         stop("Number of operators not equal to number of rows in system.")
 
     fm <- function(j){
-    
-        I <- operators == "==" & abs(A[,j]) > tol
-        if (any(I)){ #solvable from an equality?
-            i <- which(I)[1]
-            p <- A[i,vars]/A[i,j]
-            v <- A[i,-vars]
-            A   <<- t(
-                apply(A[-i,],1, 
-                    function(a){
-                        c(a[vars] - a[j]*p, a[-vars]| v )
-                    }
-                )
-            )
-            operators <<- operators[-i]       
-            return(TRUE)
-        }
-
-        # j does not occur in equality, eliminate from inequalities. 
-        iPos <- A[,j] > tol
+        eliminated <- FALSE
         iNot <- abs(A[,j]) < tol
-        iNeg <- A[,j] < -tol
-        # nothing to eliminate?
-        if (!any(iPos)  || !any(iNeg) )  return(FALSE)    
-    
-        APos <- A[iPos, , drop=FALSE]
         ANot <- A[iNot, ,drop=FALSE]
-        ANeg <- A[iNeg, , drop=FALSE]
         
-        ATop <- do.call(rbind, lapply(1:nrow(ANeg),function(i){   
-            aneg <- c(
-                ANeg[i,vars,drop=FALSE]/abs(ANeg[i,j]),
-                ANeg[i,-vars,drop=FALSE]
-            )
-            t(apply(APos, 1, 
-                function(a) c(a[vars] + a[j]*aneg[vars], a[-vars] | aneg[-vars])
-            ))
-        }))
-        A <<- rbind(ATop[,,drop=FALSE],ANot)
+        iEq <- logical(nrow(A))
+        if ( !is.null(operators) ) iEq <- operators == "=="
+
+        # gaussian elimination step:
+        Aeq <- A[!iNot &  iEq,,drop=FALSE]
+        # equalities -> inequalities
+        opin <- c()
+        Ain <- A[logical(0),,drop=FALSE]
+        if ( any(iEq & !iNot) && any(!iEq & !iNot) ){
+            Ain <- A[!iNot & !iEq,,drop=FALSE]
+            Ain <- do.call(rbind, lapply(1:nrow(Aeq), function(i){
+                v <- Aeq[i,-vars]
+                a <- Aeq[i,vars]/Aeq[i,j]
+                t(apply(Ain, 1,function(b) c(b[vars] - b[j]*a, v|b[-vars])))   
+            }))
+            if (!is.null(operators) ) opin <- rep(operators[!iNot & operators != "=="],nrow(Aeq))
+            eliminated <- TRUE
+        }
+        # equality -> equalities
+        opeq <- c()
+        if (nrow(Aeq) >= 2){
+            v <- Aeq[1,-vars]
+            a <- Aeq[1,vars]/Aeq[1,j]
+            Aeq <- t(apply(Aeq[-1,,drop=FALSE], 1, function(b) c(b[vars] - b[j]*a, v | b[-vars] )))
+            if( !is.null(operators) ) opeq <- rep("==", nrow(Aeq))
+            eliminated <- TRUE
+        } else {
+            Aeq <- A[logical(0),,drop=FALSE]
+        } 
+
+        # Fourier-Motzkin step inequalities -> inequalities
+        iPos <- A[,j] > tol  & !iEq
+        iNeg <- A[,j] < -tol & !iEq
+        # nothing to eliminate?
+        ATop <- A[logical(0),,drop=FALSE]
+        if ( any(iPos)  && any(iNeg) ){ 
+            APos <- A[iPos, , drop=FALSE]
+            ANeg <- A[iNeg, , drop=FALSE]
+            
+            ATop <- do.call(rbind, lapply(1:nrow(ANeg),function(i){   
+                aneg <- c(
+                    ANeg[i,vars,drop=FALSE]/abs(ANeg[i,j]),
+                    ANeg[i,-vars,drop=FALSE]
+                )
+                t(apply(APos, 1, 
+                    function(a) c(a[vars] + a[j]*aneg[vars], a[-vars] | aneg[-vars])
+                ))
+            }))
+            eliminated <- TRUE
+        }
+#    print(list(Aeq=Aeq,Ain=Ain,ATop=ATop,ANot=ANot))
+        A <<- rbind(Aeq, Ain, ATop, ANot)
         if ( !is.null(operators) ){
-            operators <<- c(as.vector(
+            operators <<- c(opeq, opin, as.vector(
                 outer(operators[iNeg], operators[iPos], 
                     function(o1,o2) ifelse(o1=="<=",o2,o1)
                 )
             ), operators[iNot])
         }
-        return(TRUE)
+        return(eliminated)
     }
     
     vars <- 1:ncol(A)
@@ -95,7 +113,7 @@ fourierMotzkin <- function(A, J=1, operators=NULL, tol=sqrt(.Machine$double.eps)
     for ( j in J ){
         if( fm(j) ){
             nEliminated <- nEliminated+1
-            redundant <- isObviouslyRedundant(A,operators,tol) |  rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
+            redundant <- isObviouslyRedundant(A[,vars,drop=FALSE],operators,tol) |  rowSums(A[,-vars,drop=FALSE]) > nEliminated + 1
             if (any(redundant)){
                 A <- A[!redundant,,drop=FALSE]
                 operators <- operators[!redundant]
