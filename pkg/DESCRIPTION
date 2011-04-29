@@ -14,5 +14,4 @@ URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
 Depends:
 Collate: 'check.R' 'choicepoint.R' 'editmatrixAttr.R' 'editmatrix.R'
-    'findBlocks.R' 'fourierMotzkin.R' 'impliedEdits.R' 'pkg.R'
-    'reduce.R'
+    'eliminate.R' 'findBlocks.R' 'pkg.R' 'reduce.R'

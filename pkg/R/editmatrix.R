@@ -204,12 +204,14 @@ editmatrix <- function( editrules
 #' @param A An augmented code{matrix} of the form \code{A|b}
 #' @param ops a character vector with the comparison operator of every edit.
 #' @param normalized \code{logical} TRUE or FALSE
+#' @param ... optional attributes
 #' @return an S3 object of class \code{editmatrix} 
-neweditmatrix <- function(A, ops, normalized=FALSE){
+neweditmatrix <- function(A, ops, normalized=FALSE,...){
    structure( A
             , class="editmatrix"
             , ops = ops
             , normalized = normalized
+            , ...
             )
 }
 

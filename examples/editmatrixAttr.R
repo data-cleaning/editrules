@@ -10,6 +10,9 @@ editrules(E)
 # get coeficient matrix of inequalities
 getA(E)
 
+# get augmented matrix of linear edit set
+getAb(E)
+
 # get constants of inequalities (i.e. c(0, 2))                
 getb(E)
 
