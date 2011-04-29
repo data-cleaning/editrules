@@ -8,16 +8,16 @@ eliminate <- function(E, var, assumeNormalized=TRUE){
         return(E)
     }
     
-    m <- getMatrix(E)
+    m <- as.matrix(E)
     ops <- getOps(E)
-    C <- getC(E)
+    C <- getb(E)
     
     coefs <- m[,var]
     I <- coefs != 0
     
     # coefs <- coefs[I]
     # ops <- getOps(E)[I]
-    m <- cbind(m[,,drop=FALSE], C)
+    # m <- cbind(m[,,drop=FALSE], C)
     
     eq <- I & (ops == "==")
     

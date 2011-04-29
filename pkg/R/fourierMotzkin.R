@@ -41,7 +41,7 @@ fourierMotzkin <- function(E, variables=1, tol=sqrt(.Machine$double.eps), renorm
 #' @nord
 #' @export
 fourierMotzkin.editmatrix <- function(E, variables=1, tol=sqrt(.Machine$double.eps), renormalize=FALSE, ...){
-    if ( !isNormalized(E) ) E <- normalize(E)
+#    if ( !isNormalized(E) ) E <- normalize(E)
     fm <- fourierMotzkin.matrix(E=as.matrix(E), variables,  tol, renormalize, operators=getOps(E),...)
     n <- ncol(E)
     as.editmatrix(fm$E[,1:(n-1),drop=FALSE],fm$E[,n],fm$operators) 
@@ -120,14 +120,14 @@ fourierMotzkin.matrix <- function(E, variables=1, tol=sqrt(.Machine$double.eps),
     for ( j in variables ){
         if( fm(j) ){
             nEliminated <- nEliminated+1
-            redundant <- isObviouslyRedundant(E[,vars,drop=FALSE],operators,tol) |  
-                rowSums(E[,-vars,drop=FALSE]) > nEliminated + 1
-            E <- E[!redundant,,drop=FALSE]
-            operators <- operators[!redundant]
-            if ( renormalize ) E[,vars] <- t(apply(E[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
+#            redundant <- isObviouslyRedundant(E[,vars,drop=FALSE],operators,tol) |  
+#                rowSums(E[,-vars,drop=FALSE]) > nEliminated + 1
+#            E <- E[!redundant,,drop=FALSE]
+#            operators <- operators[!redundant]
+#            if ( renormalize ) E[,vars] <- t(apply(E[,vars,drop=FALSE],1,function(a) a/max(abs(a))))
         }  
     }
-    if (isObviouslyUnfeasable(E[,vars,drop=FALSE], operators, tol=tol)) warning("System is unfeasable")
+#    if (isObviouslyUnfeasable(E[,vars,drop=FALSE], operators, tol=tol)) warning("System is unfeasable")
     return(list(E=E[,vars,drop=FALSE],operators=operators))
 }
 
