@@ -66,6 +66,20 @@ getA <- function(E){
   unclass(E)[,-ncol(E),drop=FALSE]
 }
 
+
+#' Returns augmented matrix representation of edit set.
+#'
+#' @example examples/editmatrixAttr.R
+#' @seealso \code{\link{editmatrix}}
+#'
+#' @param E editmatrix
+#' @return \code{numeric} matrix \code{A}
+#' @export 
+getAb <- function(E){
+    if (!is.editmatrix(E))  stop("E has to be an editmatrix.")
+    unclass(E)[,,drop=FALSE]
+}
+
 #' Returns the operator part of a linear (in)equality \code{editmatrix} E
 #'
 #' @export
@@ -119,6 +133,9 @@ isNormalized <- function(E){
 
 #' Normalizes an editmatrix
 #'
+#' An set of linear edits of the form \eqn{{\bf a}\cdot{\bf x}\odot b} with 
+#' is called normalized when all  \eqn{\odot\in\{==,\leq,<\}} 
+#'
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
@@ -126,7 +143,7 @@ isNormalized <- function(E){
 #' 
 #' @param E editmatrix
 #'
-#' @return if E was normalized, the original editmatrix is returned, otherwise 
+#' @return If E was normalized, the original editmatrix is returned, otherwise 
 #' a new normalized editmatrix will be returned 
 normalize <- function(E){
   if (isNormalized(E)){
