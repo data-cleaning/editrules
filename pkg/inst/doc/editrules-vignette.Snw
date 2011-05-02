@@ -7,6 +7,8 @@
 \begin{document}
 \maketitle
 \begin{abstract}
+{\em This vignette is far from finished. Version 1.0 fo the package will have
+the full vignette.}
 {\tt editrules} is a package to define, parse, manipulate and check linear and other
 data restrictions in R. Verbose restrictions can be entered at the
 commandline or stored as a (text) file or a database.

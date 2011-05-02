@@ -5,11 +5,12 @@ Title: R package for parsing and manipulating edit rules
 Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
-Description: Facilitates reading and manipulation of linear (in)equalities, converting
-    them into matrix format (and vice versa) and checking if data are
-    valid according to these rules. Sets of linear edits can be manipulated using
-    Fourier-Motzkin elimination and variable substitution and solving error localization
-    problems based on the generalized principle of Felligi and Holt. 
+Description: Facilitates reading and manipulation of linear
+    (in)equalities, converting them into matrix format (and vice versa)
+    and checking if data are valid according to these rules. Sets of
+    linear edits can be manipulated using Fourier-Motzkin elimination
+    and variable substitution and solving error localization problems
+    based on the generalized principle of Felligi and Holt.
 Version: 0.6
 URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
