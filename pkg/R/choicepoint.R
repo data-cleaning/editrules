@@ -7,7 +7,7 @@
 #' If \code{isSolution} evaluates to NULL it will continue to search deaper.
 #' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next serach node
 #'  
-#' @nord
+#'
 #' @example examples/choicepoint.R
 #' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.
 #' @param choiceLeft \code{expression} that will be evaluated for a left node
@@ -16,6 +16,7 @@
 #' @param ... variables that will be added to the search environment
 #' 
 #' @return choicepoint object
+#' @export
 choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    
    isSolution <- substitute(isSolution)
@@ -124,7 +125,7 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
 
 #' print a choicepoint
 #'
-#' @nord
+#' @export
 #' @method print choicepoint
 #' @param x choicepoint object to be printed
 #' @param ... other parameters passed to print method
@@ -138,7 +139,7 @@ print.choicepoint <- function(x, ..., VERBOSE=FALSE){
 #' iterate over all solutions of a \code{\link{choicepoint}}
 #' This method is identical to calling \code{$searchNext} on a \code{choicepoint}
 #' 
-#' @nord
+#' @export
 #' @method iter choicepoint
 #' @param x \code{\link{choicepoint}} object
 #' @return choicepoint iterator
@@ -156,16 +157,3 @@ iter.choicepoint <- function(x){
    x
 }
 
-# cp <- choicepoint( isSolution= { if (y==0) return(TRUE)
-                                 # if (x == 0) return(FALSE)
-                                 # NULL
-                               # }
-                 # , choiceLeft = {x <- x-1;y <- y}
-                 # , choiceRight = {y <- y - 1; x <- x;}
-                 # , x=2
-                 # , y=1
-                 # )
-
-# cp$searchNext(VERBOSE=TRUE)
-# cp$searchNext(VERBOSE=TRUE)
-# cp$searchNext(VERBOSE=TRUE)

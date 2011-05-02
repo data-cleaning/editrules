@@ -10,55 +10,6 @@ removeEmpty  <- function(E){
   E[edits, vars, drop=FALSE]
 }
 
-#' Partially reduce an editmatrix
-#'
-#'
-#' DEFUNCT AND UNFINISHED!
-#' This routine reduces an editmatrix in the following way:
-#' \itemize{
-#'  \item{The set of equalities are transformed to reduced row echelon form and rows 
-#'        with zeros are removed}
-#' \item{inequalities containing obvious truths (0<1) are removed}
-#' }
-#' 
-#' 
-#' matrix should be normalized, i.e. the operators should have similar sign
-#' @nord
-#' @param E normalized editmatrix object
-#' @param tol tolerance
-#' @return An \code{\link{editmatrix}} object, with linear redundant edits removed, or
-#'      an empty \code{\link{editmatrix}} if E contains an inconsistent set of edits.
-reduceMatrix <- function(E, tol){
-    A <- getA(E)
-    C <- getb(E)
-    ops <- getOps(E)
-      
-    # reduced echelon form for equality edits
-    eq <- ops == "=="
-    Ared <- rref(cbind(A[eq,,drop=FALSE], C[eq]))
-    C[eq] <- Ared[,ncol(Ared)]
-    A[eq,] <- Ared[,1:(ncol(Ared)-1),drop=FALSE]
-    # round near-zero coefficients
-    A[!eq, ] <- ifelse(abs(A[!eq,,drop=FALSE]) < tol,0,A[!eq, ])
-    C[!eq] <- ifelse( abs(C[!eq]) < tol, 0, C[!eq])
-
-    # return empty editmatrix if inconsistency is encountered
-    Azero <- colSums(A!=0) == 0
-    
-    consistent <- TRUE
-    if (eq          & Azero & C != 0 ||
-        ops == "<"  & Azero & C <= 0 ||
-        ops == "<=" & Azero & C < 0)
-        return(E[integer(0),])
-    
-    # remove tautologies
-    tautology <- eq & Azero & C == 0 ||
-        ops == "<"    & Azero & C >= 0 ||
-        ops == "<="   & Azero & C > 0
-
-    return(E[!tautology,])
-}
-
 
 #' Write a system of equations in reduced row echelon form
 #'
@@ -93,36 +44,23 @@ rref <- function(A, tol=sqrt(.Machine$double.eps)){
 }
 
 
-#' Check consistency of editmatrix
+
+#' Reduce an editmatrix by substituting a variable
 #'
-#' Check whether any record can obey the rules in an editmatrix
-#' DEFUNCT AND UNFINISHED!
-#' @param E editmatrix
-#' @return TRUE or FALSE
-#' @nord
-is.consistent <- function(E){
-    consistency = TRUE
-    ops <- getOps(E)
-    ineq <- ops != "=="
-    eps <- sqrt(.Machine$double.eps)
-    A <- getA(E)
-    # check whether E has inconistent inequalities
-    if ( any( colSums( abs(A[ineq,,drop=FALSE]) > eps ) == 0  & C[ineq] > 0 ) )
-        consistency = FALSE
-    # TODO check for inconsistencies in equalities
-
-
-}
-
-
-
-#' Reduce an editmatrix by setting a variable to a value
+#' Given a set of linear restrictions \eqn{E: {\bf Ax}\odot {\bf b}} with \eqn{\odot\in\{<,\leq,==\}},
+#' and matrix \eqn{{\bf A}} with columns \eqn{{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_n}.
+#' Substituting variable \eqn{x_j} with a value \eqn{\tilde{\bf x}_j} means setting \eqn{{\bf a}_j=0}
+#' and \eqn{{\bf b}={\bf a}_j\tilde{x}_j}.
 #'
-#' @nord
+#' Note that the resulting \code{\link{editmatrix}} may be inconsistent because of inconsistencies in
+#' \eqn{\tilde{\bf x}}.
+#' 
 #' @param E \code{editmatrix} object
 #' @param var \code{character} with name of variable
 #' @param value \code{numeric} with value of variable
-#' @return reduced edit matrix or NULL if \code{value} is invalid with editmatrix
+#' @return reduced edit matrix 
+#'
+#' @export
 replaceValue <- function(E, var, value){
     v <- match(var, getVars(E), nomatch=0)
     if (v==0){

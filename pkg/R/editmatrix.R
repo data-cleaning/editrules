@@ -410,16 +410,14 @@ print.editmatrix <- function(x, ...){
 #' \code{link{str}} method for editmatrix object
 #'
 #'
-#' @param E \code{\link{editmatrix}} object
+#' @param object \code{\link{editmatrix}} object
 #' @param ... methods to pass to other methods
 #' @export
-str.editmatrix <- function(E,...){
-    ivar <- rowSums(abs(E)) > 0
-    vars <- paste(getVars(E)[ivar],collapse=", ")
-    if (nchar(vars) > 20 ) vars <-  paste(trim(vars,16),"...") 
-    
-    s <- paste("editmatrix with", ncol(E), "edits containing variables",vars,"\n")
-    cat(s)
+str.editmatrix <- function(object,...){
+    ivar <- rowSums(abs(object)) > 0
+    vars <- paste(getVars(object)[ivar],collapse=", ")
+    if (nchar(vars) > 20 ) vars <-  paste(strtrim(vars,16),"...") 
+    cat(paste("editmatrix with", ncol(object), "edits containing variables",vars,"\n"))
 }
 
 
