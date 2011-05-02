@@ -5,7 +5,7 @@
 #' It walks a binary tree depth first. For all left nodes \code{choiceLeft} is evaluated, for all right nodes 
 #' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
 #' If \code{isSolution} evaluates to NULL it will continue to search deaper.
-#' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next serach node
+#' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next search node
 #'  
 #'
 #' @example examples/choicepoint.R
@@ -38,7 +38,15 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
          }
          
          e$state <- state
-      }      
+      }
+      
+      searchAll <- function(..., VERBOSE=FALSE){
+         solutions <- list()
+         while (!is.null(sol <- searchNext())){
+            solutions[[length(solutions)+1]] <- sol
+         }
+         return(solutions)
+      }
             
       searchNext <- function(..., VERBOSE=FALSE){
          state <- e$state
