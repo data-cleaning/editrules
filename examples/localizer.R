@@ -1,5 +1,7 @@
 
 source("localize.R")
+source("choicepoint.R")
+source("reduce.R")
 
 
 E <- editmatrix(c("p + c == t"))

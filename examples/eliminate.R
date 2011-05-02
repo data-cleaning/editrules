@@ -40,9 +40,8 @@ eliminate(E,"x", fancynames=TRUE)
     "y >= -1 + x",
     "y == 2 - x",
     "y == -2 + x" ),normalize=TRUE))
-eliminate(E,"x", fancynames=TRUE)
-
-
+# this happens to result in an obviously unfeasable system:
+isObviouslyUnfeasable(eliminate(E,"x"))
 
 
 

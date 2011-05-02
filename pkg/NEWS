@@ -1,4 +1,5 @@
 version 0.6 
+- overloaded str function for editmatrix object
 - Added fourierMotzkin elimination function
 - Added a normalize function
 - rewrote internal representation of editmatrix, it is now an augemented matrix (A|b)

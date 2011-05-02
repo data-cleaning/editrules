@@ -27,7 +27,10 @@ localizeErrors <- function(E, x, weight){
             w <- sum(weight[adapt])
         },
         choiceRight = {
-            E <- replaceValue(E,x[totreat[1]])
+            print(E)
+            print(totreat)
+            E <- replaceValue(E,totreat[1] ,x[totreat[1]])
+            adapt[totreat[1]] <- FALSE
             totreat <- totreat[-1]
         },
         E = E,

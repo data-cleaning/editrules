@@ -121,6 +121,7 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    structure(e, class="choicepoint")
 }
 
+
 #' print a choicepoint
 #'
 #' @nord

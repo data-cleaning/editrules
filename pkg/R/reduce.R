@@ -124,31 +124,16 @@ is.consistent <- function(E){
 #' @param value \code{numeric} with value of variable
 #' @return reduced edit matrix or NULL if \code{value} is invalid with editmatrix
 replaceValue <- function(E, var, value){
-   v <- match(var, getVars(E), nomatch=0)
-   if (v==0){
-      stop("Parameter var (", var, ") is not a variable of editmatrix E")
-   }
-   
-   m <- getMatrix(E)
-   varedits <- m[,v] != 0
-   varedits <- rowSums(m[varedits,,drop=FALSE]) == 1
-   
-   if (any(varedits)){
-   
-      ops <- getOps(E)
-      C <- getC(E)
-      
-      check <- sapply( which(varedits)
-                     , function(i){
-                         do.call(ops[i], 0, C[i])
-                       }
-                     )
-      if (!all(check)){
-         return(NULL)
-      }
-   }
-   attr(E,"C") <- getC(E) - (m[,v] * value)   
-   E[,v] <- 0
-   
-   removeEmpty(E)
+    v <- match(var, getVars(E), nomatch=0)
+    if (v==0){
+        stop("Parameter var (", var, ") is not a variable of editmatrix E")
+    }
+    
+    ib <- ncol(E)
+    E[ ,ib] <- E[ ,ib] - E[ ,v]*value
+    E[,v] <- 0
+    E
 }
+
+
+
