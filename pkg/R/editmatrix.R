@@ -201,7 +201,7 @@ editmatrix <- function( editrules
 #' Create an \code{editmatrix} object from its constituing attributes. 
 #'
 #' This function is for internal purposes, please use \code{\link{editmatrix}} for creating an editmatrix object.
-#' @param A An augmented code{matrix} of the form \code{A|b}
+#' @param A An augmented \code{matrix} of the form \code{A|b}
 #' @param ops a character vector with the comparison operator of every edit.
 #' @param normalized \code{logical} TRUE or FALSE
 #' @param ... optional attributes
@@ -246,11 +246,6 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 #' @return TRUE if \code{x} is an \code{editmatrix}
 is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
-}
-
-edits <- function(x){
-   stopifnot(is.editmatrix(x))
-   return(attr(x, "edits"))
 }
 
 #' Coerce to an edit matrix. This method will derive editrules from a matrix.
@@ -353,7 +348,6 @@ as.character.editmatrix <- function(x, ...){
      r <- A[i,]
      lhs <- r > 0
      rhs <- r < 0
-#     left[i] <- if(any(lhs)) { paste(paste(r[lhs], "*", vars[lhs],sep=""),collapse=" + ") } else ""
      left[i] <- if(any(lhs)) { paste(r[lhs], "*", vars[lhs],sep="",collapse=" + ") } else ""
      right[i] <-if(any(rhs))  { paste(-r[rhs], "*",vars[rhs],sep="",collapse=" + ") } else ""
    }
