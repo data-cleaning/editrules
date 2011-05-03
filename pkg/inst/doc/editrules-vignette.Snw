@@ -40,10 +40,6 @@
 \begin{abstract}
 {\em This vignette is far from finished. Version 1.0 fo the package will have
 the full vignette.}
-{\tt editrules} is a package to define, parse, manipulate and check linear and other
-data restrictions in R. Verbose restrictions can be entered at the
-commandline or stored as a (text) file or a database.
-This vignette is under construction.
 \end{abstract}
 
 <<echo=FALSE, keep.source=FALSE>>=
@@ -69,8 +65,8 @@ Any such restriction is of the form
 \end{equation}
 where $\bf x$ is a numerical data record, ${\bf a}$, ${\bf x}\in \mathbb{R}^n$
 and $b\in \mathbb{R}$. In data editing literature, data restriction rules
-refered to as {\em edits}, or {\em edit rules}. We will call edits, written
-in the form \eqref{edit}, edits in {\em normal form}. 
+are refered to as {\em edits}, or {\em edit rules}. We will call edits, written
+in the form of Eq.\ \eqref{edit}, edits in {\em normal form}. 
 
 Large complex surveys are often endowed with dozens or even hundreds of edit
 rules.  For example, the Dutch Structural Business Survey, which aims to report
@@ -78,11 +74,10 @@ on the financial structure of companies in the Netherlands, contains on the
 order of 100 variables, endowed with a similar number of linear equality and
 inequality restrictions.
 
-Defining and manipulating large edit sets can be a daunting task without
-convenient tools. Also, in practice on will frequently encounter records not
-obeying all edit rules, which gives rise to the error localization problem:
-which variables contain the errors that cause a record to violate certain
-edits?
+Defining and manipulating large edit sets can be a daunting task , while 
+edit violations gives rise to the error localization problem, which can quite
+simply be stated as {\em which variables contain the errors that cause a record to violate certain
+edits rules?}.
 
 The {\tt editrules} package for the R statistical computing environment
 \citep{R-core:2011} aims to provide an environment to conveniently define,
@@ -95,7 +90,6 @@ correction of corrupt variables. Certain causes of error, such as sign flips,
 typing errors or rounding errors can be detected and are closely related to
 their resolution. The reader is referred to the {\tt deducorrect} package
 \citep{loo:2011, scholtus:2008, scholtus:2009} for treating such errors. 
-
 
 The following chapters demonstrates the functionality of the {\tt editrules}
 package with coded examples as well a description of of the underlying theory and
@@ -118,7 +112,7 @@ a set of linear edits is stored as an {\tt editmatrix} object.  This
 object stores the linear relations as an augmented matrix $[{\bf
 A},{\bf b}]$, where $\bf A$ is the matrix obtained by combining the  ${\bf a}$
 vecors of Eq.\ \eqref{nonnormaledit} in rows of $\bf A$ and constants  $b$ in $\bf b$. A
-second attribute stores the comparison operators as a character vector.
+second attribute holds the comparison operators as a {\tt character} vector.
 Formally, we denote that every {\tt editmatrix} $E$ is defined by
 \begin{equation}
 E = \left\langle [\mathbf{A},\mathbf{b}],\boldsymbol{\odot}\right\rangle 
@@ -127,18 +121,15 @@ E = \left\langle [\mathbf{A},\mathbf{b}],\boldsymbol{\odot}\right\rangle
 \end{equation}
 where $n$ is the number of variables, $m$ the number of edit rules and the notation
 $\langle \:,\:\rangle$ denotes a combination of objects.
-
 Retrieval functions for various parts of an {\tt editmatrix} are available, 
 see Table \ref{simplemanipulations} for an overview.
-Most functions of the {\tt editrules} package expect {\tt E} to be
-in normal form. This is achieved by the optional argument {\tt
-normalize=TRUE} in the previous statement.  Alternatively, an {\tt editmatrix}
-can be normalized by with the {\tt normalize} function.  The function {\tt
-isNormalized} can be used to test whether an {\tt editmatrix} is normalized.
-
 Defining augmented matrices by hand is tedious and prone to error, which is why
-the {\tt editmatrix} function derives edit matrices from a textual representation
-of edit rules. As an example, consider the set of variables
+the {\tt editmatrix} function  derives edit matrices from a textual representation
+of edit rules. Since most functions of the {\tt editrules} package expect {\tt E} to be
+in normal form (that is $\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix}
+function by default transforms all linear edits ot normal form.
+
+As an example, consider the set of variables
 \begin{center}
 \begin{tabular}{ll}
 turnover       & $t$ \\
@@ -150,6 +141,7 @@ profit         & $p$, \\
 \end{center}
 subject to the rules
 \begin{eqnarray}
+\label{e1}
 t   &=& c_t + p\\
 c_t &=& c_h + c_p\\ 
 p &\leq& 0.6t\\
@@ -158,12 +150,13 @@ c_p&\leq& 0.3t\\
 t   &>& 0\\
 c_h &>& 0\\
 c_p &>& 0\\
+\label{e9}
 c_t &>& 0.
 \end{eqnarray}
 Clearly, these can be written in the form of Eq.\ \eqref{edit}.  Here, the
-equality restrictions correspond to balance accounts, the 3rd, 4th and 5th can
-be considered sanity checks and the last four edits demand positivity of
-certain variables.  Figure \ref{emfromtext} shows how these edit rules can be
+equality restrictions correspond to balance accounts, the 3rd, 4th and 5th
+restrictions are sanity checks and the last four edits demand positivity.  
+Figure \ref{emfromtext} shows how these edit rules can be
 transformed from a textual representation to a matrix representation with the
 {\tt editmatrix} function.
 %
@@ -187,7 +180,7 @@ The option {\tt normalize=TRUE} ensures that all operators are either ${\tt <}$,
 \end{Rcode}
 %
 
-As Figure \ref{emfromtext} shows, the editmatrix object is shown on the console
+As Figure \ref{emfromtext} shows, the {\tt editmatrix} object is shown on the console
 as a matrix, as well as a set of textual edit rules. The {\tt editrules}
 package is capable of coercing a set of R expressions to an {\tt editmatrix}
 and {\em vice versa}. To coerce text to a matrix, the {\tt editmatrix} function
@@ -225,14 +218,25 @@ and {\tt description} (a comment stating the intent of the rule). All must be of
 %
 
 The ability to read edit sets from a {\tt data.frame} facilitates defining and
-maintaining the rules outside of the R environment, by storing them in a
-user-filled database for example. Note that manipulating and combining edits,
-for example through elimination methods will cause {\tt editrules} to drop or
+maintaining the rules outside of the R environment by storing them in a
+user-filled database or textfile. Manipulating and combining edits, for example
+through variable elimination methods will cause {\tt editrules} to drop or
 change the names and drop the comments, as they become meaningless after
 certain manipulations.
 
-\subsection{Some simple manipulations}
-
+\subsection{Basic manipulations and edit checking}
+Table \ref{simplemanipulations} shows simple manipulation functions available
+for an {\tt editmatrix}. Basic manipulations include retrieval functions for
+the augmented matrix, coefficient matrix, constant vector and operators of an
+{\tt editmatrix}. Furthermore there are functions to test for and transform to
+normality, as well as a function which normalizes an {\tt editmatrix}. The function
+{\tt violatedEdits} expects an {\tt editmatrix} and a {\tt data.frame} or a named numeric
+vector. It returns a {\tt logical} {\tt array} where every row indicates which 
+edits are violated ({\tt TRUE}) by records in the {\tt data.frame}. Figure \ref{violatedEdits}
+demonstrates the result of checking two records against the editrules defined in Eqs.\ \eqref{e1}-
+\eqref{e9}.
+%
+%
 \begin{table}
 \begin{threeparttable}
 \caption{Simple manipulation functions for objects of class {\tt editmatrix}}
@@ -244,16 +248,40 @@ function                      & description\\
 {\tt getA(E)}                 & Get matrix $\bf A$\\
 {\tt getb(E)}                 & Get constant vector $\bf b$\\
 {\tt getAb(E)}                & Get augmented matrix $[{\bf A},{\bf b}]$\\
-{\tt getOps}                  & Get comparison operators\\
+{\tt getOps(E)}               & Get comparison operators\\
+{\tt E[i,]}                   & Select edit(s) (only row selection implemented)\\
+{\tt as.editmatrix(A,b,ops)}   & Create an {\tt editmatrix} from it's attributes\\
+{\tt normalize(E)}            & Transform {\tt E} to normal form\\
+{\tt isNormalized(E)}         & Check whether {\tt E} is in normal form\\
 {\tt violatedEdits(E, x)}     & Check which edits are violated by ${\bf x}$\\
 \hline
 \end{tabular}
 \end{threeparttable}
 \end{table}
+%
+%
+\begin{Rcode}
+<<keep.source=true>>=
+# define two records in a data.frame
+dat <- data.frame(
+  t = c(1000, 1200),
+ ct = c(400,  200),
+ ch = c(100,  350),
+ cp = c(500,  575),
+ p =  c(500,  652 ))
+# check for violated edits
+violatedEdits(E,dat)
+@
+\caption{Checking which edits are violated for every record in a {\tt data.frame}.
+The first record violates {\tt e1} and {\tt e2}, the second record violates {\tt e1},{\tt e2}, and {\tt e4}.}
+\label{violatedEdits}
+\end{Rcode}
+%
+%
+Indexing of edits is restricted to selection only. No assignment can be made to indexed {\tt editmatrix} objects.
 
 
 
-Edit checking, retrieving the matrix, operators and coefficients, indexing,...
 
 
 
@@ -263,6 +291,15 @@ Edit checking, retrieving the matrix, operators and coefficients, indexing,...
 
 \subsection{Value substitution}
 
+\begin{algorithm}
+\caption{{\sc replaceValue}$(E,x,j)$}
+\begin{algorithmic}
+\Require $E=\langle [{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_j ,\ldots, {\bf a}_n],{\bf b}],\boldsymbol{\odot}\rangle$, 
+    $x\in\mathbb{R}$, $j\in \{1,2,\ldots n\}$
+\Ensure $\left\langle\left[{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_{j-1},{\bf 0},{\bf a}_{j+1},\ldots {\bf a}_n\right],
+    {\bf b}-{\bf a}_jx],\boldsymbol{\odot}\right\rangle$
+\end{algorithmic}
+\end{algorithm}
 \subsection{Gaussian elimination}
 
 \subsection{Fourier-Motzkin elimination}
