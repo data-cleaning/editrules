@@ -1,4 +1,6 @@
 version 0.6 
+- Added cp.editmatrix which solves error localization under generalized Fellegi-Holt paradigm
+- option normalize=TRUE for editmatrix is now the default
 - overloaded str function for editmatrix object
 - Added fourierMotzkin elimination function
 - Added a normalize function

@@ -2,12 +2,22 @@
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
+\usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
+
+
+\usepackage{float}
+ 
+\floatstyle{boxed}
+\newfloat{Rcode}{t}{rco}
+\floatname{Rcode}{Figure}
+ 
+
 
 % stimulate latex to put multiple floats on a page.
 \setcounter{topnumber}{2}
@@ -98,14 +108,37 @@ the {\tt editrules} package.
 \section{Defining and testing numerical restrictions}
 
 \subsection{The {\tt editmatrix} object}
-For computational processing, a set of edits of the form in Eq.\ \eqref{edit}
-is most conveniently represented in matrix form. Defining such matrices
-in code is tedious and prone to error. The {\tt editmatrix} function can be used
-to verbosely define a set of linear relations in any of the forms
+For computational processing, a set of edits of the form 
 \begin{equation}
 {\bf a}\cdot{\bf x} \odot b\textrm{ with }\odot\in\{<,\leq,=,\geq,>\}.
+\label{nonnormaledit}
 \end{equation}
-For example, suppose we have record set with the variables
+is most conveniently represented as a matrix.  In the {\tt editrules} package,
+a set of linear edits is stored as an {\tt editmatrix} object.  This 
+object stores the linear relations as an augmented matrix $[{\bf
+A},{\bf b}]$, where $\bf A$ is the matrix obtained by combining the  ${\bf a}$
+vecors of Eq.\ \eqref{nonnormaledit} in rows of $\bf A$ and constants  $b$ in $\bf b$. A
+second attribute stores the comparison operators as a character vector.
+Formally, we denote that every {\tt editmatrix} $E$ is defined by
+\begin{equation}
+E = \left\langle [\mathbf{A},\mathbf{b}],\boldsymbol{\odot}\right\rangle 
+\textrm{ with } [{\bf A},{\bf b}]\in \mathbb{R}^{m\times{n+1}},\:
+\boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^{m},
+\end{equation}
+where $n$ is the number of variables, $m$ the number of edit rules and the notation
+$\langle \:,\:\rangle$ denotes a combination of objects.
+
+Retrieval functions for various parts of an {\tt editmatrix} are available, 
+see Table \ref{simplemanipulations} for an overview.
+Most functions of the {\tt editrules} package expect {\tt E} to be
+in normal form. This is achieved by the optional argument {\tt
+normalize=TRUE} in the previous statement.  Alternatively, an {\tt editmatrix}
+can be normalized by with the {\tt normalize} function.  The function {\tt
+isNormalized} can be used to test whether an {\tt editmatrix} is normalized.
+
+Defining augmented matrices by hand is tedious and prone to error, which is why
+the {\tt editmatrix} function derives edit matrices from a textual representation
+of edit rules. As an example, consider the set of variables
 \begin{center}
 \begin{tabular}{ll}
 turnover       & $t$ \\
@@ -127,38 +160,46 @@ c_h &>& 0\\
 c_p &>& 0\\
 c_t &>& 0.
 \end{eqnarray}
-Here, the equality restrictions correspond to balance accounts, the 3rd, 4th and 5th can be considered
-sanity checks and the last four edits demand positivity of certain variables. Such a set of edits
-is stored as an {\tt editmatrix} object. It can be declared as follows:
+Clearly, these can be written in the form of Eq.\ \eqref{edit}.  Here, the
+equality restrictions correspond to balance accounts, the 3rd, 4th and 5th can
+be considered sanity checks and the last four edits demand positivity of
+certain variables.  Figure \ref{emfromtext} shows how these edit rules can be
+transformed from a textual representation to a matrix representation with the
+{\tt editmatrix} function.
+%
+\begin{Rcode}
 <<keep.source=true>>=
-(E <- editmatrix(c(
-"t == ct + p",
+E <- editmatrix(c(
+"t  == ct + p" ,
 "ct == ch + cp",
-"p <= 0.6*t",
+"p  <= 0.6*t",
 "cp <= 0.3*t",
 "ch <= 0.3*t",
-"t >0",
-"ch > 0",
-"cp > 0",
-"ct > 0"), normalize=TRUE))
+"t  >  0",
+"ch >  0",
+"cp >  0",
+"ct >  0"), normalize=TRUE)
+E
 @ 
-The {\tt editmatrix} object stores the linear relations as an
-augmented matrix $[{\bf A},{\bf b}]$ and a character vector containing the
-operators. Most functions of the {\tt editrules} package expect {\tt E} to be
-in normal form. This is achieved by the optional argument {\tt
-normalize=TRUE} in the previous statement.  Alternatively, an {\tt editmatrix}
-can be normalized by with the {\tt normalize} function.  The function {\tt
-isNormalized} can be used to test whether an {\tt editmatrix} is normalized.
+\caption{Defining an {\tt editmatrix} from a {\tt character} vector containing verbose edit statements.
+The option {\tt normalize=TRUE} ensures that all operators are either ${\tt <}$, ${\tt \leq}$ or ${\tt ==}$.}
+\label{emfromtext}
+\end{Rcode}
+%
 
-As can be seen, the editmatrix object is presented as a matrix, as well as a
-set of textual edit rules. The {\tt editrules} package is capable of coercing
-a set of R expressions to an {\tt editmatrix} and {\em vice versa}. Internally,
-the {\tt editmatrix} function processes the parsetree of the textual 
-R expressions as provided by the R internal {\tt parse} function.
+As Figure \ref{emfromtext} shows, the editmatrix object is shown on the console
+as a matrix, as well as a set of textual edit rules. The {\tt editrules}
+package is capable of coercing a set of R expressions to an {\tt editmatrix}
+and {\em vice versa}. To coerce text to a matrix, the {\tt editmatrix} function
+processes the R language parsetree of the textual R expressions as provided by
+the R internal {\tt parse} function. To coerce the matrix representation to
+textual representation, an R character string is derived from the matrix which
+can be parsed to a language object.
 
 In the example, the edits were automatically named {\tt e1}, {\tt e2}, $\ldots$, {\tt e9}. It is
 possible to name and comment edits by reading them from a {\tt data.frame}. 
 
+\begin{Rcode}[t]
 <<keep.source=true>>=
 # generate a csv text string
 E.csv <- 
@@ -177,7 +218,12 @@ E.df <- read.csv(textConnection(E.csv))
 # transform to an editmatrix
 editmatrix(E.df)
 @
+\caption{Declaring an editmatrix with a {\tt data.frame}. The input {\tt data.frame} is required to have three columns named
+{\tt name},(edit name, stored as rowname of augmented matrix) {\tt edit} (textual representation of the edit rule) 
+and {\tt description} (a comment stating the intent of the rule). All must be of type {\tt character}.}
+\end{Rcode}
 %
+
 The ability to read edit sets from a {\tt data.frame} facilitates defining and
 maintaining the rules outside of the R environment, by storing them in a
 user-filled database for example. Note that manipulating and combining edits,
@@ -187,8 +233,27 @@ certain manipulations.
 
 \subsection{Some simple manipulations}
 
-Edit checking, retrieving the matrix, operators and coefficients...
+\begin{table}
+\begin{threeparttable}
+\caption{Simple manipulation functions for objects of class {\tt editmatrix}}
+\label{simplemanipulations}
+\begin{tabular}{ll}
+\hline
+function                      & description\\
+\hline
+{\tt getA(E)}                 & Get matrix $\bf A$\\
+{\tt getb(E)}                 & Get constant vector $\bf b$\\
+{\tt getAb(E)}                & Get augmented matrix $[{\bf A},{\bf b}]$\\
+{\tt getOps}                  & Get comparison operators\\
+{\tt violatedEdits(E, x)}     & Check which edits are violated by ${\bf x}$\\
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
 
+
+
+Edit checking, retrieving the matrix, operators and coefficients, indexing,...
 
 
 
@@ -211,6 +276,8 @@ Edit checking, retrieving the matrix, operators and coefficients...
 \subsection{Error localization with {\tt cp.editmatrix}}
 
 \section{Conclusions}
+
+\newpage
 
 \bibliographystyle{chicago}
 \bibliography{editrules}

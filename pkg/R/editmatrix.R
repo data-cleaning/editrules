@@ -130,7 +130,7 @@ makeEditRow <- function(edt){
 #'
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
 editmatrix <- function( editrules
-                      , normalize = FALSE
+                      , normalize = TRUE
 					       ){   
    if (is.character(editrules)){
       edit <- editrules
