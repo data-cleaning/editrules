@@ -1,6 +1,9 @@
 
+# simple edit manipulation with categorical edits.
+# m, 04.05.2011
 
-
+# Define levels of categorical variables
+# returns S3 class data.model (ragged array of character vecors)
 #' @nord
 data.model <- function(...){
     L <- list(...)
@@ -39,7 +42,8 @@ print.data.model <- function(x,...){
     str(x)
 }
 
-# retrieve list of column indices for edit array.
+#
+# column indices in editarray, for every variable
 editindex <- function(dm){
     S <- as.character(stack(D)[,2])
     sapply(names(D), function(n) which(n==S)) 
@@ -53,7 +57,9 @@ print.editarray <- function(x, ...){
     print(unclass(x)[,])
 }
 
-
+#' editarray: logical array where every column corresponds to one
+#' level of one variable. Every row is an edit. Every edit denotes
+#' a *forbidden* combination.
 #' @nord
 neweditarray <- function(E, ind, names=rownames(E), levels=colnames(E)){
     if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
@@ -64,7 +70,7 @@ neweditarray <- function(E, ind, names=rownames(E), levels=colnames(E)){
     )
 }
 
-#' 
+#' Generate a single edit restriction
 #'
 #'
 #' @param ... edit restrictions in the form <var>=c("val1", "val2")
@@ -92,7 +98,7 @@ forbid <- function(dm, ..., name=NULL){
 }
 
 
-#' combine 1-d edit rows to an edit array
+#' combine edit restrictions to an array
 #'
 #' @param ... objects of class \code{\link{editarray}}
 #'
@@ -114,7 +120,8 @@ getlevels <- function(E) colnames(E)
 getnames <- function(E) rownames(E)
 
 
-# verboden: doorsnede <-> or, vereniging <-> and
+# combine editarray by generating variable "var"
+# intersection <-> or, union <-> and
 combine <- function(E,var){ 
     ind <- getInd(E)
     lev <- getlevels(E)
@@ -144,7 +151,8 @@ E <- editarray(
 # derive a new edit, using "age" as generating variable.
 combine(E,"age")
 
-
+# should yield the same as this:
+forbid(D, pregnant="yes", age=c("child","old age"))
 
 
 
