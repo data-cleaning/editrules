@@ -70,10 +70,10 @@ getA <- function(E){
 #' Returns augmented matrix representation of edit set.
 #'
 #' @example examples/editmatrixAttr.R
-#' @seealso \code{\link{editmatrix}}
+#' @seealso \code{\link{editmatrix}} \code{\link{as.matrix.editmatrix}}
 #'
 #' @param E editmatrix
-#' @return \code{numeric} matrix \code{A}
+#' @return \code{numeric} matrix \code{A|b}
 #' @export 
 getAb <- function(E){
     if (!is.editmatrix(E))  stop("E has to be an editmatrix.")
@@ -128,7 +128,9 @@ isNormalized <- function(E){
   if (!is.editmatrix(E)){
      stop("E has to be an editmatrix.")
   }
-  attr(E, "normalized") == TRUE
+  
+  attr(E, "normalized") == TRUE ||
+  all(getOps(E) %in% c("==","<","<="))
 }
 
 #' Normalizes an editmatrix

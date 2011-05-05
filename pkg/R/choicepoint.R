@@ -6,7 +6,6 @@
 #' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
 #' If \code{isSolution} evaluates to NULL it will continue to search deaper.
 #' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next search node
-#'  
 #'
 #' @example examples/choicepoint.R
 #' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.

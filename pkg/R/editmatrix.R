@@ -191,10 +191,8 @@ editmatrix <- function( editrules
    }
    
    names(ops) <- name
-   E <- neweditmatrix(A, ops=ops, normalized=normalize)
-   if (!is.null(description)){
-      attr(E, "description") <- description
-   }
+   E <- neweditmatrix(A, ops=ops, normalized=all(ops %in% c("==","<","<=")))
+   attr(E, "description") <- description
    E
 }
 
@@ -299,7 +297,7 @@ as.editmatrix <- function( A
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #'
-#' @return coefficient matrix of editmatrix
+#' @return augmented matrix of editmatrix
 as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
 }
@@ -401,7 +399,7 @@ print.editmatrix <- function(x, ...){
 }
 
 
-#' \code{link{str}} method for editmatrix object
+#' \code{\link{str}} method for editmatrix object
 #'
 #'
 #' @param object \code{\link{editmatrix}} object

@@ -15,5 +15,6 @@ Version: 0.6
 URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
 Depends:
-Collate: 'check.R' 'choicepoint.R' 'cpeditmatrix.R' 'editmatrixAttr.R'
-    'editmatrix.R' 'eliminate.R' 'findBlocks.R' 'pkg.R' 'reduce.R'
+Collate: 'catedit.R' 'check.R' 'choicepoint.R' 'cpeditmatrix.R'
+    'editmatrix.R' 'editmatrixAttr.R' 'eliminate.R' 'findBlocks.R'
+    'pkg.R' 'reduce.R'
