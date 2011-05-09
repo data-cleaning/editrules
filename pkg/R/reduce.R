@@ -11,6 +11,37 @@ removeEmpty  <- function(E){
 }
 
 
+#' Bring an (edit) matrix to reduced row echelon form.
+#'
+#' If E is a matrix, a matrix in reduced row echelon form is returned.
+#' If E is an \code{\link{editmatrix}} the equality part of E is transformed
+#' to reduced row echelon form.
+#'
+#' @aliases echelon.editmatrix echelon.matrix
+#'
+#' @param E a matrix or editmatrix
+#' @param ... options to pass on to further methods.
+#' @export
+echelon <- function(E,...){
+    UseMethod("echelon")
+}
+
+#' @export
+#' @nord
+echelon.editmatrix <- function(E,...){
+    o <- getOps(E)
+    # nothing to eliminate?
+    eq <- o == "=="
+    if ( sum(eq) <= 1 ) return(E,...)
+    Ab <- getAb(E)
+    Ab <- rbind(
+        echelon.matrix(Ab[eq,,drop=FALSE]),
+        Ab[!eq,,drop=FALSE]
+    )
+    neweditmatrix(Ab,o[c(eq,!eq)])
+
+}
+
 #' Write a system of equations in reduced row echelon form
 #'
 #' This function is based on the code of John Fox, see
@@ -19,28 +50,29 @@ removeEmpty  <- function(E){
 #' @param A a matrix
 #' @return the matrix in Reduced row echelon form
 #' @nord
-rref <- function(A, tol=sqrt(.Machine$double.eps)){
-    n <- nrow(A)
-    m <- ncol(A)
+#' @export
+echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps),...){
+    n <- nrow(E)
+    m <- ncol(E)
     for (i in 1:min(c(m, n))){
-        col <- A[,i]
+        col <- E[,i]
         col[1:n < i] <- 0
     # find maximum pivot in current column at or below current row
         which <- which.max(abs(col))
-        pivot <- A[which, i]
+        pivot <- E[which, i]
         if (abs(pivot) <= tol) next     # check for 0 pivot
-        if (which > i) A[c(i, which),] <- A[c(which, i),]  # exchange rows
-        A[i,] <- A[i,]/pivot            # pivot
-        row <- A[i,]
-        A <- A - outer(A[,i], row)      # sweep
-        A[i,] <- row                    # restore current row
+        if (which > i) E[c(i, which),] <- E[c(which, i),]  # exchange rows
+        E[i,] <- E[i,]/pivot            # pivot
+        row <- E[i,]
+        E <- E - outer(E[,i], row)      # sweep
+        E[i,] <- row                    # restore current row
     }
     for (i in 1:n){
-        if (max(abs(A[i,1:m])) <= tol)
-            A[c(i,n),] <- A[c(n,i),] # 0 rows to bottom
+        if (max(abs(E[i,1:m])) <= tol)
+            E[c(i,n),] <- E[c(n,i),] # 0 rows to bottom
     }
-    A[abs(A) <= tol] <- 0
-    return(A) 
+    E[abs(E) <= tol] <- 0
+    return(E) 
 }
 
 

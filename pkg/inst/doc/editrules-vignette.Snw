@@ -118,16 +118,17 @@ Formally, we denote that every {\tt editmatrix} $E$ is defined by
 E = \left\langle [\mathbf{A},\mathbf{b}],\boldsymbol{\odot}\right\rangle 
 \textrm{ with } [{\bf A},{\bf b}]\in \mathbb{R}^{m\times{n+1}},\:
 \boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^{m},
+\label{editset}
 \end{equation}
 where $n$ is the number of variables, $m$ the number of edit rules and the notation
 $\langle \:,\:\rangle$ denotes a combination of objects.
 Retrieval functions for various parts of an {\tt editmatrix} are available, 
-see Table \ref{simplemanipulations} for an overview.
+see Table \ref{simplemanipulations} (p.\ \pageref{simplemanipulations}) for an overview.
 Defining augmented matrices by hand is tedious and prone to error, which is why
 the {\tt editmatrix} function  derives edit matrices from a textual representation
-of edit rules. Since most functions of the {\tt editrules} package expect {\tt E} to be
-in normal form (that is $\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix}
-function by default transforms all linear edits ot normal form.
+of edit rules. Since most functions of the {\tt editrules} package expect an 
+{\tt editmatrix} in normal form (that is $\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix}
+function by default transforms all linear edits to normal form.
 
 As an example, consider the set of variables
 \begin{center}
@@ -175,7 +176,7 @@ E <- editmatrix(c(
 E
 @ 
 \caption{Defining an {\tt editmatrix} from a {\tt character} vector containing verbose edit statements.
-The option {\tt normalize=TRUE} ensures that all operators are either ${\tt <}$, ${\tt \leq}$ or ${\tt ==}$.}
+The option {\tt normalize=TRUE} ensures that all comparison operators are either ${\tt <}$, ${\tt \leq}$ or ${\tt ==}$.}
 \label{emfromtext}
 \end{Rcode}
 %
@@ -228,13 +229,12 @@ certain manipulations.
 Table \ref{simplemanipulations} shows simple manipulation functions available
 for an {\tt editmatrix}. Basic manipulations include retrieval functions for
 the augmented matrix, coefficient matrix, constant vector and operators of an
-{\tt editmatrix}. Furthermore there are functions to test for and transform to
-normality, as well as a function which normalizes an {\tt editmatrix}. The function
-{\tt violatedEdits} expects an {\tt editmatrix} and a {\tt data.frame} or a named numeric
-vector. It returns a {\tt logical} {\tt array} where every row indicates which 
-edits are violated ({\tt TRUE}) by records in the {\tt data.frame}. Figure \ref{violatedEdits}
-demonstrates the result of checking two records against the editrules defined in Eqs.\ \eqref{e1}-
-\eqref{e9}.
+{\tt editmatrix}. There are functions to test for and transform to normality.
+The function {\tt violatedEdits} expects an {\tt editmatrix} and a {\tt
+data.frame} or a named numeric vector. It returns a {\tt logical} {\tt array}
+where every row indicates which edits are violated ({\tt TRUE}) by records in
+the {\tt data.frame}. Figure \ref{violatedEdits} demonstrates the result of
+checking two records against the editrules defined in Eqs.\ \eqref{e1}--\eqref{e9}.
 %
 %
 \begin{table}
@@ -278,19 +278,38 @@ The first record violates {\tt e1} and {\tt e2}, the second record violates {\tt
 \end{Rcode}
 %
 %
-Indexing of edits is restricted to selection only. No assignment can be made to indexed {\tt editmatrix} objects.
-
-
-
-
-
-
+Indexing of edits with the {\tt [} operator is restricted to selection only. 
+No assignment can be made to indexed {\tt editmatrix} objects. In stead, 
+{\tt as.editmatrix} should be used.
 
 
 \section{Manipulation of linear restrictions}
+There are two fundamental operations possible on edit sets, both of which
+(possibly) reduce the number of variables involved in the edit set. The first,
+most simple one is when a value is substituted into an edit. The second
+possibility is variable elimination. For a set of linear equalities, one can
+apply Gaussian elimination, while for sets of inequalities or mixed sets of
+equalities and inequalities Fourier-Motzkin elimination is applied. While
+varible substitution and Gaussian elimination guarantee that the eliminated
+variable is not involved in the derived edit set anymore, this is not
+necessarily the case for Fourier-Motzkin elimination.
 
 \subsection{Value substitution}
-
+Given a set of $m$ linear edits as defined in Eq.\ \eqref{editset}. For
+any record $\bf x$ it must hold that
+\begin{equation}
+{\bf Ax}\boldsymbol{\odot}  {\bf b},\quad \boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^m.
+\label{subst}
+\end{equation}
+Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
+replacing the $j^{\th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
+${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
+replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
+purposes, Algorithm \ref{replaceValue} spells out the substitution routine.
+The function is named {\tt replaceValues} since {\tt substitute} is another
+function defined in R-base.
+%
+%
 \begin{algorithm}
 \caption{{\sc replaceValue}$(E,x,j)$}
 \begin{algorithmic}
@@ -300,7 +319,15 @@ Indexing of edits is restricted to selection only. No assignment can be made to 
     {\bf b}-{\bf a}_jx],\boldsymbol{\odot}\right\rangle$
 \end{algorithmic}
 \end{algorithm}
+
+
 \subsection{Gaussian elimination}
+The well-known Gaussian elimination routine has been implemented here as a utility function,
+enabeling users to reduce the equality part of their edit matrices to reduced row echelon form.
+
+
+
+
 
 \subsection{Fourier-Motzkin elimination}
 
