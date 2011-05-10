@@ -48,7 +48,6 @@ library(editrules)
 \maketitle
 
 \tableofcontents
-
 \newpage
 
 \section{Introduction}
@@ -99,7 +98,7 @@ all code shown in this paper can be executed from the R commandline after loadin
 the {\tt editrules} package.
 
 
-\section{Defining and testing numerical restrictions}
+\section{Defining and checking numerical restrictions}
 
 \subsection{The {\tt editmatrix} object}
 For computational processing, a set of edits of the form 
@@ -249,11 +248,13 @@ function                      & description\\
 {\tt getb(E)}                 & Get constant vector $\bf b$\\
 {\tt getAb(E)}                & Get augmented matrix $[{\bf A},{\bf b}]$\\
 {\tt getOps(E)}               & Get comparison operators\\
-{\tt E[i,]}                   & Select edit(s) (only row selection implemented)\\
-{\tt as.editmatrix(A,b,ops)}   & Create an {\tt editmatrix} from it's attributes\\
+{\tt E[i,]}                   & Select edit(s) \\
+{\tt as.editmatrix(A,b,ops)}  & Create an {\tt editmatrix} from it's attributes\\
 {\tt normalize(E)}            & Transform {\tt E} to normal form\\
 {\tt isNormalized(E)}         & Check whether {\tt E} is in normal form\\
 {\tt violatedEdits(E, x)}     & Check which edits are violated by ${\bf x}$\\
+{\tt isObviouslyRedundant(E)} & Check for tautologies in rows of {\tt E}\\
+{\tt isObviouslyUnfeasible(E)}   & Check for contradictions in rows of {\tt E}\\
 \hline
 \end{tabular}
 \end{threeparttable}
@@ -282,6 +283,52 @@ Indexing of edits with the {\tt [} operator is restricted to selection only.
 No assignment can be made to indexed {\tt editmatrix} objects. In stead, 
 {\tt as.editmatrix} should be used.
 
+\subsection{Obvious redundancy and infeasibility}
+When manipulating linear edit sets by value substitution and/or variable
+elimination, the edit set can become polluted with redundant edits or, when
+variable values are substituted, become infeasible. 
+
+A system of inequalities $\bf Ax\leq b$ is called infeasible when there is no
+real vecor $\bf x$ satisfying it. It is a consequence of Farkas' lemma
+(\cite{farkas:1902}, but see \cite{schrijver:1998} and/or \cite{kuhn:1956}) on
+feasibility of sytems of linear equalities, that  a system is infeasible if and
+only if $0\leq -1$ can be derived by taking positive linear combinations of the
+rows of the augmented matrix $[{\bf A},{\bf b}]$. The function {\tt
+isObiouslyinfeasible} returns a {\tt logical} indicating whether such a
+contradiction is present. Subsitution of values may also lead to equalities of
+the form $0=1$, which also indicate that the system has become infeasible.
+Being obviously infeasible is sufficient for an {\tt editmatrix} to be
+infeasible, but not necessary. Algorithm \ref{isObviouslyInfeasible} gives the
+pseudocode for reference purposes.
+%
+\begin{algorithm}
+\caption{{\sc isObviouslyInfeasible(E)}}
+\label{isObviouslyInfeasible}
+\begin{algorithmic}
+\Require an {\tt editmatrix} $E$
+\State  $v \leftarrow$ {\sc FALSE}
+\For {${\bf a}\cdot {\bf x}\odot b\in E$}
+ \If{$\bf a=0$}
+\State
+\Endif
+\EndFor
+\State $v\leftarrow$ {\sc TRUE}
+\EndIf 
+\Ensure $v$ \Comment{{\tt logical} indicating if $E$ is obviously infeasible.}
+\end{algorithmic}
+\end{algorithm}
+
+When new edits are derived, either by value substitution or by variable elimination,
+redundant rules of the form $0<1$ or $0=0$ can be generated. The function {\tt isObviouslyRedundant}
+detects such rules and returns a {\tt logical} vector indicating which rows of an {\tt editmatrix}
+are redundant.
+
+
+
+
+
+
+
 
 \section{Manipulation of linear restrictions}
 There are two fundamental operations possible on edit sets, both of which
@@ -293,6 +340,8 @@ equalities and inequalities Fourier-Motzkin elimination is applied. While
 varible substitution and Gaussian elimination guarantee that the eliminated
 variable is not involved in the derived edit set anymore, this is not
 necessarily the case for Fourier-Motzkin elimination.
+
+
 
 \subsection{Value substitution}
 Given a set of $m$ linear edits as defined in Eq.\ \eqref{editset}. For
@@ -306,12 +355,14 @@ replacing the $j^{\th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
 replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
 purposes, Algorithm \ref{replaceValue} spells out the substitution routine.
-The function is named {\tt replaceValues} since {\tt substitute} is another
-function defined in R-base.
+The function was named {\tt replaceValue} since {\tt substitute} is already
+defined in the R-base. Figure \ref{RreplaceValue} shows how {\tt replaceValue}
+can be called from the R environment.
 %
 %
-\begin{algorithm}
-\caption{{\sc replaceValue}$(E,x,j)$}
+\begin{algorithm}[t]
+\caption{{\sc replaceValue}$(E,j,x)$}
+\label{replaceValue}
 \begin{algorithmic}
 \Require $E=\langle [{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_j ,\ldots, {\bf a}_n],{\bf b}],\boldsymbol{\odot}\rangle$, 
     $x\in\mathbb{R}$, $j\in \{1,2,\ldots n\}$
@@ -320,13 +371,31 @@ function defined in R-base.
 \end{algorithmic}
 \end{algorithm}
 
+\begin{Rcode}
+<<>>=
+replaceValue(E,"t",10)
+@
+\caption{Substituting the value 10 for the turnover variable using the {\tt replaceValue} function.}
+\label{RreplaceValue}
+\end{Rcode}
+
 
 \subsection{Gaussian elimination}
 The well-known Gaussian elimination routine has been implemented here as a utility function,
 enabeling users to reduce the equality part of their edit matrices to reduced row echelon form.
+The {\tt echelon} function has been overloaded to take either an R {\tt matrix} or an {\tt editmatrix}
+as argument. In the latter case, the equalities are transformed to reduced row echelon form, while
+inequalities are left untreated. 
 
 
-
+\begin{Rcode}
+\small
+<<>>=
+echelon(E)
+@
+\caption{The {\tt echelon} function transforms the linear equalities of an editmatrix to
+reduced row echelon form. See Figure \ref{emfromtext} for the original definition of {\tt E}.}
+\end{Rcode}
 
 
 \subsection{Fourier-Motzkin elimination}
