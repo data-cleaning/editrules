@@ -51,11 +51,11 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
     names(adapt) <- names(x)
 
     # Eliminate missing variables.
-    for ( v in getVars(E)[adapt] ) E <- eliminate(E,v)
+    for ( v in getVars(E)[adapt] ) E <- eliminateFM(E,v)
 
     choicepoint(
         isSolution = {
-            if ( isObviouslyUnfeasable(E) || wt > wsol ) return(FALSE)
+            if ( isObviouslyInfeasible(E) || wt > wsol ) return(FALSE)
             if (length(totreat) == 0){
                 wsol <<- wt
                 return(TRUE)
@@ -69,7 +69,7 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
             w <- wt
         },
         choiceRight = {
-            E <- eliminate(E, totreat[1])
+            E <- eliminateFM(E, totreat[1])
             adapt[totreat[1]] <- TRUE
             totreat <- totreat[-1]
             wt <<- sum(weight[adapt])

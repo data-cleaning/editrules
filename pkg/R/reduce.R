@@ -38,7 +38,7 @@ echelon.editmatrix <- function(E,...){
         echelon.matrix(Ab[eq,,drop=FALSE]),
         Ab[!eq,,drop=FALSE]
     )
-    neweditmatrix(Ab,o[c(eq,!eq)])
+    neweditmatrix(Ab,c(o[eq],o[!eq]))
 
 }
 
@@ -102,7 +102,7 @@ replaceValue <- function(E, var, value){
     ib <- ncol(E)
     E[ ,ib] <- E[ ,ib] - E[ ,v]*value
     E[,v] <- 0
-    E
+    E[!isObviouslyRedundant(E),]
 }
 
 

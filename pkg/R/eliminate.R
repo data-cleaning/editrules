@@ -14,7 +14,7 @@
 #' 
 #' @example examples/eliminate.R
 #'
-#' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyUnfeasable}}
+#' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyInfeasible}}
 #' @references
 #' D.A. Kohler (1967) Projections of convex polyhedral sets, Operational Research
 #' Center Report , ORC 67-29, University of California, Berkely.
@@ -22,7 +22,7 @@
 #' H.P. Williams (1986) Fourier's method of linear programming and its dual,
 #' The American Mathematical Monthly 93, 681-695
 #' @export
-eliminate <- function(E, var, fancynames=FALSE){
+eliminateFM <- function(E, var, fancynames=FALSE){
     if (!isNormalized(E)) E <- normalize(E)
     vars <- getVars(E)
 
@@ -96,7 +96,7 @@ eliminate <- function(E, var, fancynames=FALSE){
     m <- rbind(ml,mu,me,m[!I,,drop=FALSE])
     d <- rbind(dl,du,de,d[!I,,drop=FALSE])
     o <- c(ol,ou,oe,ops[!I])
-    redundant <- rowSums(d) > n + 1 | isObviouslyRedundant(m,o)
+    redundant <- rowSums(d) > n + 1 | isObviouslyRedundant.matrix(m,o)
 
     m <- m[!redundant,,drop=FALSE]
     d <- d[!redundant,,drop=FALSE]
@@ -123,9 +123,9 @@ eliminate <- function(E, var, fancynames=FALSE){
 #' 
 #' @param E An \code{link{editmatrix}} 
 #' @param tol Tolerance for checking against zero.
-#' @seealso \code{\link{eliminate}} \code{\link{editmatrix}}
+#' @seealso \code{\link{eliminateFM}} \code{\link{editmatrix}}
 #' @export
-isObviouslyUnfeasable <- function(E, tol=sqrt(.Machine$double.eps)){
+isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
     A <- getAb(E)
     operators <- getOps(E)
     b <- ncol(A)
@@ -136,26 +136,61 @@ isObviouslyUnfeasable <- function(E, tol=sqrt(.Machine$double.eps)){
 }
 
 
+
 #' Find obvious redundancies in set of (in)equalities
 #'
 #' The function returns a logical vector which is TRUE at any row of the system 
-#' Ax <operators> b which is obviously redundant. Obvious redundancies may arise
-#' durining elimination processes.
-#' 
-#' @param A Augmented matrix [A,b]
-#' @param operators character vector with elements \code{"<"}, \code{"<="} or \code{"=="}. 
-#' @param tol Tolerance for checking against zero.
+#' Ax <operators> b which is obviously redundant. Obvious redundancies, amounting
+#' to statements as 0==0 or 0 < 1 may arise durining elimination processes.
 #'
-#' @nord
-isObviouslyRedundant <- function(A, operators, tol=sqrt(.Machine$double.eps)){
-    b <- ncol(A)
-    zeroCoef <- rowSums(abs(A[,-b,drop=FALSE])) < tol
+#' 
+#'  
+#' @param E Augmented matrix A|b or editmatrix
+#' @param ... parameters to be passed to other methods. 
+#' 
+#'
+#' @seealso \code{\link{isObviouslyRedundant.matrix}}, \code{\link{isObviouslyRedundant.editmatrix}}
+#' @export 
+isObviouslyRedundant <- function(E, ...){
+    UseMethod("isObviouslyRedundant")
+}
+
+#' Redundancy check, \code{matrix} method
+#'
+#'
+#' @method isObviouslyRedundant matrix
+#'
+#' @param E Augmented matrix [A|b] or \code{\link{editmatrix}}
+#' @param ... parameters to be passed to other methods. 
+#' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
+#' @param tol tolerance to check for zeros.
+#'
+#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
+#' @S3method isObviouslyRedundant matrix
+isObviouslyRedundant.matrix <- function(E, operators, tol=sqrt(.Machine$double.eps),...){
+    b <- ncol(E)
+    zeroCoef <- rowSums(abs(E[,-b,drop=FALSE])) < tol
     return(as.vector(
-        zeroCoef & operators %in% c("==","<=")  & abs(A[,b,drop=FALSE]) < tol |
-        zeroCoef & operators %in% c("<", "<=")  & A[,b,drop=FALSE] > tol
+        zeroCoef & operators %in% c("==","<=")  & abs(E[,b,drop=FALSE]) < tol |
+        zeroCoef & operators %in% c("<", "<=")  & E[,b,drop=FALSE] > tol
     ))
 }
 
+
+#' Redundancy check, \code{editmatrix} method
+#'
+#'
+#' @method isObviouslyRedundant editmatrix
+#'
+#' @param E Augmented matrix [A|b] or \code{\link{editmatrix}}
+#' @param ... parameters to be passed to other methods. Currently, only \code{tol} is implemented (see \code{\link{isObviouslyRedundant.matrix}}).
+#'
+#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.matrix}}
+#'
+#' @S3method isObviouslyRedundant editmatrix
+isObviouslyRedundant.editmatrix <- function(E, ...){
+    isObviouslyRedundant.matrix(getAb(E),getOps(E), ...)
+}
 
 
 

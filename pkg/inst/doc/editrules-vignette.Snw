@@ -286,7 +286,11 @@ No assignment can be made to indexed {\tt editmatrix} objects. In stead,
 \subsection{Obvious redundancy and infeasibility}
 When manipulating linear edit sets by value substitution and/or variable
 elimination, the edit set can become polluted with redundant edits or, when
-variable values are substituted, become infeasible. 
+variable values are substituted, become infeasible. The {\tt editrules} 
+package has two methods available which check for easily detectable
+redundancies or infeasibility. The fourier-motzkin elimination method
+has auxilary built-in redundancy removal, which is described in Section
+\ref{sfouriermotzkin}.
 
 A system of inequalities $\bf Ax\leq b$ is called infeasible when there is no
 real vecor $\bf x$ satisfying it. It is a consequence of Farkas' lemma
@@ -302,26 +306,45 @@ infeasible, but not necessary. Algorithm \ref{isObviouslyInfeasible} gives the
 pseudocode for reference purposes.
 %
 \begin{algorithm}
-\caption{{\sc isObviouslyInfeasible(E)}}
+\caption{{\sc isObviouslyInfeasible($E$)}}
 \label{isObviouslyInfeasible}
 \begin{algorithmic}
-\Require an {\tt editmatrix} $E$
-\State  $v \leftarrow$ {\sc FALSE}
+\Require a normalized {\tt editmatrix} $E$
 \For {${\bf a}\cdot {\bf x}\odot b\in E$}
  \If{$\bf a=0$}
-\State
-\Endif
+  \If {$(\odot\in\{=\}\land b\not=0)\lor(\odot\in\{\leq,<\}\land b<0)$} 
+    \State \Return {\sc true}
+  \EndIf
+ \EndIf
 \EndFor
-\State $v\leftarrow$ {\sc TRUE}
-\EndIf 
-\Ensure $v$ \Comment{{\tt logical} indicating if $E$ is obviously infeasible.}
+\State\Return {\sc false}
+\Ensure \Comment{{\tt logical} indicating if $E$ is obviously infeasible.}
+\end{algorithmic}
+\end{algorithm}
+%
+\begin{algorithm}
+\caption{{\sc isObviouslyRedundant($E$)}}
+\label{isObviouslyRedundant}
+\begin{algorithmic}
+\Require a normalized {\tt editmatrix} $E$, with $m$ edits
+\State  ${\bf v} \leftarrow$ ({\sc false})$^{\times{m}}$
+\State $i\leftarrow 0$
+\For {${\bf a}\cdot {\bf x}\odot b\in E$}
+\State $i\leftarrow i+1$
+ \If{$\bf a=0$}
+  \If {$(\odot\in\{=\}\land b=0)\lor(\odot\in\{\leq,<\}\land b>0)$} 
+    \State $v_i\leftarrow${\sc true}
+  \EndIf
+ \EndIf
+\EndFor
+\Ensure ${\bf v}$ \Comment{{\tt logical} vector indicating which rows of $E$ are obviously redundant.}
 \end{algorithmic}
 \end{algorithm}
 
 When new edits are derived, either by value substitution or by variable elimination,
-redundant rules of the form $0<1$ or $0=0$ can be generated. The function {\tt isObviouslyRedundant}
+redundant rules of the form $0 \leq 1$ or $0=0$ can be generated. The function {\tt isObviouslyRedundant}
 detects such rules and returns a {\tt logical} vector indicating which rows of an {\tt editmatrix}
-are redundant.
+are redundant. Pseudocode is given in Algorithm \ref{isObviouslyRedundant}.
 
 
 
@@ -337,7 +360,7 @@ most simple one is when a value is substituted into an edit. The second
 possibility is variable elimination. For a set of linear equalities, one can
 apply Gaussian elimination, while for sets of inequalities or mixed sets of
 equalities and inequalities Fourier-Motzkin elimination is applied. While
-varible substitution and Gaussian elimination guarantee that the eliminated
+variable substitution and Gaussian elimination guarantee that the eliminated
 variable is not involved in the derived edit set anymore, this is not
 necessarily the case for Fourier-Motzkin elimination.
 
@@ -399,6 +422,7 @@ reduced row echelon form. See Figure \ref{emfromtext} for the original definitio
 
 
 \subsection{Fourier-Motzkin elimination}
+\label{sfouriermotzkin}
 
 \section{Error localization for numerical data}
 
