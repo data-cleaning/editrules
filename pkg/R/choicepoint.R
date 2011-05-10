@@ -1,21 +1,30 @@
 
 #' Choice point: a binary search program
 #'
-#' \code{choicepoint} creates a binary search program that can be started by calling the searchNext function
+#' \code{choicepoint} creates a binary search program that can be started by calling the \code{$searchNext} function
 #' It walks a binary tree depth first. For all left nodes \code{choiceLeft} is evaluated, for all right nodes 
 #' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
 #' If \code{isSolution} evaluates to NULL it will continue to search deaper.
 #' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next search node
 #'
+#' \subsection{Methods}{
+#'   \describe{
+#'      \item{\code{$searchNext(..., VERBOSE=FALSE)}}{Search next solution, can be called repeatedly until there is no solution left. Named variables will be added to the search environment, this feature can be used to direct the search in subsequent calls to \code{searchNext}. VERBOSE=TRUE will print all intermediate search steps and results. It can be used to debug the expressions in the choicepoint}
+#'      \item{\code{$searchAll(..., VERBOSE=FALSE)}}{Return all solutions as a list}
+#'      \item{\code{$reset()}}{Resets the \code{choicepoint} to its initial state.}
+#'   }
+#' }
 #' @example examples/choicepoint.R
+#'
 #' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.
 #' @param choiceLeft \code{expression} that will be evaluated for a left node
 #' @param choiceRight \code{expression} that will be evaluated for a right node
 #' @param list \code{list} with variables that will be added to the search environment
-#' @param ... variables that will be added to the search environment
+#' @param ... named variables that will be added to the search environment
 #' 
-#' @return choicepoint object
+#' @return choicepoint object, see Methods for a description of the methods
 #' @export
+#'
 choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    
    isSolution <- substitute(isSolution)
@@ -144,17 +153,20 @@ print.choicepoint <- function(x, ..., VERBOSE=FALSE){
 #' iterate over all solutions of a \code{\link{choicepoint}}
 #'
 #' iterate over all solutions of a \code{\link{choicepoint}}
-#' This method is identical to calling \code{$searchNext} on a \code{choicepoint}
+#' This method is identical to calling \code{$searchNext} on a \code{choicepoint}. Please note that iterating
+#' a choicepoint changes the state of a choicepoint.
 #' 
 #' @export
 #' @method iter choicepoint
 #' @param x \code{\link{choicepoint}} object
+#' @param ... extra parameters that will given to the \code{searchNext()} function
 #' @return choicepoint iterator
-iter.choicepoint <- function(x){
+#' @seealso \code{\link{iter}} from the package iterators
+iter.choicepoint <- function(x, ...){
    # TODO add stop iteration
    
    x$nextElem <- function(){ 
-      sol <- x$searchNext()
+      sol <- x$searchNext(...)
       if (is.null(sol)){
          stop("StopIteration", call.=FALSE)
       }
