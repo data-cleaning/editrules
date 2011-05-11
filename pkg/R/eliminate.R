@@ -103,7 +103,7 @@ eliminateFM <- function(E, var, fancynames=FALSE){
     if ( fancynames ){
         rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
     } else {
-        rownames(m) <- paste("e",1:nrow(m))
+        rownames(m) <- paste("e",1:nrow(m),sep="")
     }
 
     neweditmatrix(
@@ -130,8 +130,8 @@ isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
     operators <- getOps(E)
     b <- ncol(A)
     zeroCoef <- rowSums(abs(A[,-b,drop=FALSE])) < tol        
-    if ( any(zeroCoef & operators %in% c("<", "<=") &  A[,b,drop=FALSE] < -tol) || 
-         any(zeroCoef & operators == c("==") &  abs(A[,b,drop=FALSE]) > tol)) return(TRUE)
+    if ( any(zeroCoef & operators %in% c("<", "<=") &  A[,b] < -tol) || 
+         any(zeroCoef & operators == c("==") &  abs(A[,b]) > tol)) return(TRUE)
     return(FALSE)
 }
 
@@ -171,8 +171,8 @@ isObviouslyRedundant.matrix <- function(E, operators, tol=sqrt(.Machine$double.e
     b <- ncol(E)
     zeroCoef <- rowSums(abs(E[,-b,drop=FALSE])) < tol
     return(as.vector(
-        zeroCoef & operators %in% c("==","<=")  & abs(E[,b,drop=FALSE]) < tol |
-        zeroCoef & operators %in% c("<", "<=")  & E[,b,drop=FALSE] > tol
+        zeroCoef & operators %in% c("==","<=")  & abs(E[,b]) < tol |
+        zeroCoef & operators %in% c("<", "<=")  & E[,b] > tol
     ))
 }
 
@@ -191,8 +191,3 @@ isObviouslyRedundant.matrix <- function(E, operators, tol=sqrt(.Machine$double.e
 isObviouslyRedundant.editmatrix <- function(E, ...){
     isObviouslyRedundant.matrix(getAb(E),getOps(E), ...)
 }
-
-
-
-
-

@@ -100,10 +100,7 @@ replaceValue <- function(E, var, value){
     }
     
     ib <- ncol(E)
-    E[ ,ib] <- E[ ,ib] - E[ ,v]*value
+    E[,ib] <- E[ ,ib] - E[ ,v]*value
     E[,v] <- 0
     E[!isObviouslyRedundant(E),]
 }
-
-
-

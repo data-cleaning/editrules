@@ -47,52 +47,50 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
-    totreat <- names(x)[!adapt]
     names(adapt) <- names(x)
 
-    # Eliminate missing variables.
-    for ( v in getVars(E)[adapt] ) E <- eliminateFM(E,v)
+    #order decreasing by weight
+    o <- order(weight, decreasing=TRUE)
+    totreat <- names(x)[o[!adapt]]
 
-    choicepoint(
+    # Eliminate missing variables.
+    vars <- getVars(E)
+    for (v in vars[adapt & names(x) %in% vars]) E <- eliminateFM(E,v)
+
+    cp <- choicepoint(
         isSolution = {
-            if ( isObviouslyInfeasible(E) || wt > wsol ) return(FALSE)
+            w <- sum(weight[adapt])
+            if ( isObviouslyUnfeasable(E) || w > wsol ) return(FALSE)
             if (length(totreat) == 0){
-                wsol <<- wt
+                wsol <<- w
+                adapt <- adapt # neccessary because adapt won't be in the solution if it is not really changed.
+                # remove totreat, not necessary in solution
+                # other option would be to rename totreat into .totreat, because .names are not exported unless VERBOSE is set to TRUE
+                rm(totreat)
+                
                 return(TRUE)
             }
         },
         choiceLeft = {
-            E <- replaceValue(E,totreat[1] ,x[totreat[1]])
-            adapt[totreat[1]] <- FALSE
+            .var <- totreat[1]
+            E <- replaceValue(E, .var , x[.var])
+            adapt[.var] <- FALSE
             totreat <- totreat[-1]
-            wt <<- sum(weight[adapt])
-            w <- wt
         },
         choiceRight = {
-            E <- eliminateFM(E, totreat[1])
-            adapt[totreat[1]] <- TRUE
+            .var <- totreat[1]
+            E <- eliminateFM(E, .var)
+            adapt[.var] <- TRUE
             totreat <- totreat[-1]
-            wt <<- sum(weight[adapt])
-            w <- wt
         },
         E = E,
         x = x,
         totreat = totreat,
         adapt = adapt,
-        wt = sum(adapt),
         weight = weight,
         wsol = sum(weight)
-    ) 
+    )
+    #TODO add searchBest
+    
+    cp
 }
-
-
-
-
-
-
-
-
-
-
-
-

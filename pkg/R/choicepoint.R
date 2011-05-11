@@ -35,8 +35,8 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    with(e,{
       
       reset <- function(){
-         state <- root
-         depth <- 0
+         e$state <- root
+         e$depth <- 0
          
          state$.width <- 1
          state$.path <- NULL
@@ -45,12 +45,11 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
             list2env(init, state)
          }
          
-         e$state <- state
       }
       
       searchAll <- function(..., VERBOSE=FALSE){
          solutions <- list()
-         while (!is.null(sol <- searchNext())){
+         while (!is.null(sol <- searchNext(..., VERBOSE))){
             solutions[[length(solutions)+1]] <- sol
          }
          return(solutions)
@@ -90,15 +89,16 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
             sol <- eval(isSolution, state)
             
             if (VERBOSE){
+               cat("***********************************************************************\n")
                cat("path:",paste(state$.path, collapse="->", sep=""),", solution : ", sol,"\n")
-               print(ls.str(state))
+               print(ls.str(envir=state))
             }
          }
          e$state <- up(state)
          
          if (sol) {
             currentSolution <<- state
-            return(as.list(state))
+            return(as.list(state, all.names=VERBOSE))
          }
       }
       
