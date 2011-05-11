@@ -161,7 +161,7 @@ print.choicepoint <- function(x, ..., VERBOSE=FALSE){
 #' @param x \code{\link{choicepoint}} object
 #' @param ... extra parameters that will given to the \code{searchNext()} function
 #' @return choicepoint iterator
-#' @seealso \code{\link{iter}} from the package iterators
+#' @seealso \code{iter} from the package iterators
 iter.choicepoint <- function(x, ...){
    # TODO add stop iteration
    

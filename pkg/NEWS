@@ -1,9 +1,15 @@
-version 0.6 
+version 0.6
+- Edit rule coercions: as.expression as.character as.editmatrix as.data.frame
+- Transform equality restrictions to reduced row echelon form
+- Obvious (in)feasibility and redundancy checks for linear edit rules
+- The following functions are deprecated, and give a warning: getC, getMatrix (warnings will become errors in the next release).
 - Added cp.editmatrix which solves error localization under generalized Fellegi-Holt paradigm
-- option normalize=TRUE for editmatrix is now the default
-- overloaded str function for editmatrix object
-- Added fourierMotzkin elimination function
+- Added choicepoint algorithm for generic binary search
+- Option normalize=TRUE for editmatrix is now the default
+- Overloaded str function for editmatrix object
+- Added fully vectorized Fourier-Motzkin elimination function with redundancy removal
 - Added a normalize function
+- Exported and documented replaceValue
 - rewrote internal representation of editmatrix, it is now an augemented matrix (A|b)
 - BREAKING CHANGE: clean up of notation/syntax/naming convention: constants are named b, coefficients are named A
 

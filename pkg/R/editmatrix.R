@@ -342,7 +342,7 @@ as.character.editmatrix <- function(x, ...){
    er <- character(nrow(A))
 
    left <- right <- character(nrow(A)) 
-   for ( i in 1:nrow(A) ){
+   for ( i in seq_along(rownames(A)) ){
      r <- A[i,]
      lhs <- r > 0
      rhs <- r < 0

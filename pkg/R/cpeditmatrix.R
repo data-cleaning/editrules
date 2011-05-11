@@ -1,6 +1,6 @@
 #' Localize errors in numerical data
-#'
-#'
+#' 
+#' 
 #' Returns a \code{\link{choicepoint}} object for error localization in numerical data.
 #' The returned choicepoint containts methods to search depth-first to the least weighted
 #' number of variables that need to be adapted so that all restrictions in E can be 
@@ -56,11 +56,11 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
     # Eliminate missing variables.
     vars <- getVars(E)
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminateFM(E,v)
-
+    wsol <- sum(weight)
     cp <- choicepoint(
         isSolution = {
             w <- sum(weight[adapt])
-            if ( isObviouslyUnfeasable(E) || w > wsol ) return(FALSE)
+            if ( isObviouslyInfeasible(E) || w > wsol ) return(FALSE)
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt # neccessary because adapt won't be in the solution if it is not really changed.
@@ -88,7 +88,7 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
         totreat = totreat,
         adapt = adapt,
         weight = weight,
-        wsol = sum(weight)
+        wsol = wsol 
     )
     #TODO add searchBest
     

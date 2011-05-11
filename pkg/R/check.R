@@ -110,6 +110,7 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 #' @nord
 #' @export
 violatedEdits.editmatrix <- function(E, dat, ...){
+# TODO make a real matrix method, add tol argument.
     er <- editrules(E)
     return(violatedEdits.character(er$edit, dat, er$name))
 }
