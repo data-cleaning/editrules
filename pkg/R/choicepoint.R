@@ -49,7 +49,7 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       
       searchAll <- function(..., VERBOSE=FALSE){
          solutions <- list()
-         while (!is.null(sol <- searchNext(..., VERBOSE))){
+         while (!is.null(sol <- searchNext(..., VERBOSE=VERBOSE))){
             solutions[[length(solutions)+1]] <- sol
          }
          return(solutions)

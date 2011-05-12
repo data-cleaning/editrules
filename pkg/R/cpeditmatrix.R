@@ -90,7 +90,16 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
         weight = weight,
         wsol = wsol 
     )
-    #TODO add searchBest
     
+    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    with(cp,{
+       # quick coding: only the last solution is returned, there may be other solutions with equal weight
+       # maybe we should do a random permutation of the variables (with equal weight) so all best solutions have the
+       # same probability of being returned. Other solution is to return a list of solutions
+       searchBest <- function(..., VERBOSE=FALSE){
+           l <- searchAll(...,VERBOSE=VERBOSE)
+           if (length(l)) return(l[[length(l)]])
+       }
+    })
     cp
 }
