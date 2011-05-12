@@ -119,15 +119,16 @@ E = \left\langle [\mathbf{A},\mathbf{b}],\boldsymbol{\odot}\right\rangle
 \boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^{m},
 \label{editset}
 \end{equation}
-where $n$ is the number of variables, $m$ the number of edit rules and the notation
-$\langle \:,\:\rangle$ denotes a combination of objects.
-Retrieval functions for various parts of an {\tt editmatrix} are available, 
-see Table \ref{simplemanipulations} (p.\ \pageref{simplemanipulations}) for an overview.
+where $n$ is the number of variables, $m$ the number of edit rules and the
+notation $\langle \:,\:\rangle$ denotes a combination of objects.  Retrieval
+functions for various parts of an {\tt editmatrix} are available, see Table
+\ref{simplemanipulations} (p.\ \pageref{simplemanipulations}) for an overview.
 Defining augmented matrices by hand is tedious and prone to error, which is why
-the {\tt editmatrix} function  derives edit matrices from a textual representation
-of edit rules. Since most functions of the {\tt editrules} package expect an 
-{\tt editmatrix} in normal form (that is $\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix}
-function by default transforms all linear edits to normal form.
+the {\tt editmatrix} function  derives edit matrices from a textual
+representation of edit rules. Since most functions of the {\tt editrules}
+package expect an {\tt editmatrix} in normal form (that is
+$\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix} function by default
+transforms all linear edits to normal form.
 
 As an example, consider the set of variables
 \begin{center}

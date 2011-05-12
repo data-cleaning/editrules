@@ -44,36 +44,30 @@ echelon.editmatrix <- function(E,...){
 
 #' Write a system of equations in reduced row echelon form
 #'
-#' This function is based on the code of John Fox, see
-#' http://socserv.socsci.mcmaster.ca/jfox/Courses/R-programming/matrixDemos.R
 #'
-#' @param A a matrix
+#' @param E a matrix
+#' @param tol tolerance for checking zero elements in E
 #' @return the matrix in Reduced row echelon form
 #' @nord
 #' @export
-echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps),...){
-    n <- nrow(E)
-    m <- ncol(E)
-    for (i in 1:min(c(m, n))){
-        col <- E[,i]
-        col[1:n < i] <- 0
-    # find maximum pivot in current column at or below current row
-        which <- which.max(abs(col))
-        pivot <- E[which, i]
-        if (abs(pivot) <= tol) next     # check for 0 pivot
-        if (which > i) E[c(i, which),] <- E[c(which, i),]  # exchange rows
-        E[i,] <- E[i,]/pivot            # pivot
-        row <- E[i,]
-        E <- E - outer(E[,i], row)      # sweep
-        E[i,] <- row                    # restore current row
+echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
+    k <- min(ncol(E),nrow(E))
+    I <- 1:nrow(E)
+    for ( i in 1:k ){
+        I1 <- which(I >= i)
+        ip <- I1[which.max(abs(E[I1,i]))]
+        p <- E[ip,]
+        if ( abs(p[i]) < tol ) next
+        if ( ip > i ) E[c(ip,i),] <- E[c(i,ip),]
+        E[-i,] <- E[-i,] - outer(E[-i,i],p/p[i])
     }
-    for (i in 1:n){
-        if (max(abs(E[i,1:m])) <= tol)
-            E[c(i,n),] <- E[c(n,i),] # 0 rows to bottom
-    }
-    E[abs(E) <= tol] <- 0
-    return(E) 
+    d <- diag(E)
+    id <- abs(d) > tol
+    E[id,] <- E[id,]/d[id]
+    I0 <- rowSums(abs(E) < tol) == ncol(E)
+    rbind(E[!I0,,drop=FALSE],E[I0,,drop=FALSE])
 }
+
 
 
 
