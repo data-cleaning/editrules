@@ -375,7 +375,7 @@ any record $\bf x$ it must hold that
 \label{subst}
 \end{equation}
 Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
-replacing the $j^{\th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
+replacing the $j^{\rm th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
 replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
 purposes, Algorithm \ref{replaceValue} spells out the substitution routine.
@@ -405,11 +405,43 @@ replaceValue(E,"t",10)
 
 
 \subsection{Gaussian elimination}
-The well-known Gaussian elimination routine has been implemented here as a utility function,
-enabeling users to reduce the equality part of their edit matrices to reduced row echelon form.
-The {\tt echelon} function has been overloaded to take either an R {\tt matrix} or an {\tt editmatrix}
-as argument. In the latter case, the equalities are transformed to reduced row echelon form, while
-inequalities are left untreated. 
+The well-known Gaussian elimination routine has been implemented here as a
+utility function, enabeling users to reduce the equality part of their edit
+matrices to reduced row echelon form.  The {\tt echelon} function has been
+overloaded to take either an R {\tt matrix} or an {\tt editmatrix} as argument.
+In the latter case, the equalities are transformed to reduced row echelon form,
+while inequalities are left untreated. Gaussian elimination is explained in
+many textbooks. Algorithm \ref{echelon} is written in a notation which is
+particularly close to our R implementation and Figure \ref{Rechelon} shows 
+the call to the R function.
+%
+%
+\begin{algorithm}[t]
+\caption{{\sc echelon($E$)}}
+\label{echelon}
+\begin{algorithmic}
+\Require An {\tt editmatrix} of the form $\langle [{\bf A}|{\bf b}],=\rangle$, $[{\bf A|b}]\in \mathbb{R}^{m\times {n+1}}$, $m\leq n+1$.
+\State $I\leftarrow \{1,2,\ldots,m\}$
+\State $J\leftarrow \{1,2,\ldots,n+1\}$
+\For {$j\in I$} \Comment{eliminate variables}
+\State $i\leftarrow \arg\max_{i'\in\{j,j+1,\ldots,m\}}|A_{i'j}|$
+\If {$|A_{ij}|>0$}
+\If {$i > j$} 
+\State Swap rows $i$ and $j$ of $[{\bf A|b}]$.
+\EndIf
+\State $[{\bf A|b}]_{I\backslash j,J}\leftarrow [{\bf A|b}]_{I\backslash j,J} - 
+    [{\bf A|b}]_{I\backslash j,j}\otimes [{\bf A|b}]_{j,J}A_{jj}^{-1}$ 
+\EndIf
+\EndFor
+\For {$i\in I$} \Comment{Normalize diagonal}
+\If {$A_{ii}\not=0$} 
+\State $[{\bf A|b}]_{i,J} \leftarrow [{\bf A|b}]_{i,J} A_{ii}^{-1}$
+\EndIf
+\EndFor
+\State Move rows of $[{\bf A|b}]$ with all zeros to bottom.
+\Ensure $E$, transformed to reduced row echelon form.
+\end{algorithmic}
+\end{algorithm}
 
 
 \begin{Rcode}
@@ -419,6 +451,7 @@ echelon(E)
 @
 \caption{The {\tt echelon} function transforms the linear equalities of an editmatrix to
 reduced row echelon form. See Figure \ref{emfromtext} for the original definition of {\tt E}.}
+\label{Rechelon}
 \end{Rcode}
 
 
