@@ -19,6 +19,9 @@
 #'
 #' Every subsequent call leads either to \code{NULL}, in which case all solutions have been found,
 #' or a new solution with a weight \code{w} not higher than the weight of the last found solution.
+#' 
+#' Alternatively \code{<choicepoint>$searchBest()} will return the last solution found directly: 
+#' the solution has the lowest weight (but there may be more solutions with equal weight).
 #'
 #' The choicepoint is prepared such that missing data in the input record \code{x} is already
 #' set to adapt, and missing variables have been eliminated already.
