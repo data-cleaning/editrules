@@ -4,7 +4,7 @@
 \usepackage{amsmath, amssymb}
 \usepackage{threeparttable}
 \usepackage{natbib}
-\usepackage{algpseudocode}
+\usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -411,9 +411,9 @@ matrices to reduced row echelon form.  The {\tt echelon} function has been
 overloaded to take either an R {\tt matrix} or an {\tt editmatrix} as argument.
 In the latter case, the equalities are transformed to reduced row echelon form,
 while inequalities are left untreated. Gaussian elimination is explained in
-many textbooks. Algorithm \ref{echelon} is written in a notation which is
-particularly close to our R implementation and Figure \ref{Rechelon} shows 
-the call to the R function.
+many textbooks. Algorithm \ref{echelon} is written in a notation which is close
+to our R implementation in the sence that it involves just one explicit loop. 
+Figure \ref{Rechelon} demonstrates a call to the R function.
 %
 %
 \begin{algorithm}[t]
@@ -424,20 +424,15 @@ the call to the R function.
 \State $I\leftarrow \{1,2,\ldots,m\}$
 \State $J\leftarrow \{1,2,\ldots,n+1\}$
 \For {$j\in I$} \Comment{eliminate variables}
-\State $i\leftarrow \arg\max_{i'\in\{j,j+1,\ldots,m\}}|A_{i'j}|$
+\State $i\leftarrow \arg\max_{i^\prime\,:\,j\leq i^\prime\leq m}|A_{i^\prime j}|$
 \If {$|A_{ij}|>0$}
 \If {$i > j$} 
 \State Swap rows $i$ and $j$ of $[{\bf A|b}]$.
 \EndIf
-\State $[{\bf A|b}]_{I\backslash j,J}\leftarrow [{\bf A|b}]_{I\backslash j,J} - 
-    [{\bf A|b}]_{I\backslash j,j}\otimes [{\bf A|b}]_{j,J}A_{jj}^{-1}$ 
+\State $[{\bf A|b}]_{I\backslash j,J}\leftarrow [{\bf A|b}]_{I\backslash j,J} - [{\bf A|b}]_{I\backslash j,j}\otimes [{\bf A|b}]_{j,J}A_{jj}^{-1}$ 
 \EndIf
 \EndFor
-\For {$i\in I$} \Comment{Normalize diagonal}
-\If {$A_{ii}\not=0$} 
-\State $[{\bf A|b}]_{i,J} \leftarrow [{\bf A|b}]_{i,J} A_{ii}^{-1}$
-\EndIf
-\EndFor
+\State Divide each row $[{\bf A|b}]_{i,J}$ by $A_{ii}$ when $A_{ii}\not=0$
 \State Move rows of $[{\bf A|b}]$ with all zeros to bottom.
 \Ensure $E$, transformed to reduced row echelon form.
 \end{algorithmic}
@@ -457,28 +452,120 @@ reduced row echelon form. See Figure \ref{emfromtext} for the original definitio
 
 \subsection{Fourier-Motzkin elimination}
 \label{sfouriermotzkin}
+Fourier-Motzkin elimination [\cite{fourier:1826,motzkin:1936}, but see
+\cite{williams:1986} for an elaborate or \cite{schrijver:1998} for a consice
+description] is an extension of Gaussian elimination to solving systems of
+linear inequalities. While Gaussian elimination is based on the reversible
+operations of row permutation and linear combination, Fourier-Motzkin
+elimination is based on the irreversible action of taking positive combinations
+of rows.
+
+A full Fourier-Motzkin operation on a system of inequalities involves
+eliminating variables (where possible) one by one from the augmented matrix
+$[{\bf A|b}]$. Eliminating a single variable is an important step in the error
+localization algorithms elaborted in Section \ref{errorlocalization}. 
+
+Consider a system of inequalities ${\bf Ax}\leq {\bf b}$.  The $j^{\rm th}$
+variable  is eliminated by generating a positive combination of every row of
+$[{\bf A|b}]$ where $A_{ij}>0$ with every row of $[{\bf A|b}]$ where $A_{ij}<0$
+such that for the resulting row the $j^{\rm th}$ coefficient equals zero. Rows
+of $[{\bf A|b}]$ for which $A_{ij}=0$ are copied to the resulting system. If
+the system does not contain rows for which $A_{ij}>0$ and rows for which
+$A_{ij}<0$, an elimination operation leaves the system unchanged. 
+
+Mixed systems with linear restrictions of the form ${\bf a}\cdot {\bf x}\odot
+b$ with $\odot\in\{<,\leq,=\}$ can in principle be transformed to a form where
+every $\odot \in\{\leq\}$. However, it is more efficient to take the comparison
+operators into account when combining rows. In that case, new rules are derived
+by first solving the the $j^{\rm th}$ from each equality and substituting them in
+each inequality. Next, inequalities are treated as stated before. When
+inequalities are combined where one comparison operator is $<$ and the other is
+$\leq$, it is not difficult to show that $<$ becomes the operator for the
+resulting inequality.
+
+It is a basic result of the theory of linear inequalities that the system
+resulting from a single variable elimination is equivalent to the original
+system (that is, they have the same solution set $\{\bf x\}$). In fact, $k$
+elimination steps can generate up to $\mathcal{O}(m^k)$ new rows ($m$ being the
+original number of rows), of which many are redundant. Since the number of
+redundant rows increases fast during elimination, removing (most of) them is
+highly desirable. In our implementation, we use the property that if $k$
+variables have been eliminated, any row derived from more than $k+1$ rows of
+the original system is redundant. This result was originally stated by
+\cite{cernikov:1963} and rediscovered by \cite{kohler:1967}. A proof can also be
+found in \cite{williams:1986}. For the implementation in R, an {\tt editmatrix}
+is augmented with an integer $h$, recording the number of eliminations and a 
+{\tt logical} array $\bf H$, which records for each edit
+from which original edit it was derived. Obviously, ${\bf H}$ is {\sc true} only on 
+the diagonal when $h=0$. It is worth mentioning that by using R's vectorized indices
+and recycling properties, it is possible to avoid any explicit looping in the
+elimination process. Algorithm \ref{eliminateFM} gives an overview of the algorithm
+where explicit loops are included for readability.
+%
+%
+\begin{algorithm}[t]
+\caption{{\sc eliminateFM}$(E,j)$. In the actual implementation all explicit loops are avoided by
+making use of R's recycling properties and vectorized indices.}
+\label{eliminateFM}
+\begin{algorithmic}
+\Require A normalized {\tt editmatrix} $E=\langle [{\bf A|b}],\boldsymbol{\odot},{\bf H},h\rangle$, and a variable index $j$.
+\If {${\bf H}=\varnothing$}
+\State ${\bf H}\leftarrow {\rm diag}(${\sc true}$)^m$
+\State $h\leftarrow 0$
+\EndIf
+\State $J\leftarrow \{1,2,\ldots, n+1\}$
+\State $I_0\leftarrow \{i\,:\, A_{ij}=0 \}$
+\State $I_=\leftarrow \{i\,:\, \odot_i \in\{=\}\}\backslash I_0$
+\State $I_+\leftarrow \{i\,:\, A_{ij}>0 \}\backslash I_=$
+\State $I_-\leftarrow \{i\,:\, A_{ij}<0 \}\backslash I_=$
+\For {$i\in \{1,2,\ldots,m\}\backslash I_{0}$} \Comment{All rows get $j^{\rm th}$ coefficient in $\{-1,0,1\}$}
+\If {$\odot_i\in \{<,\leq\}$}
+\State  $[{\bf A|b}]_{i,J}\leftarrow [{\bf A|b}]_{i,J}|A_{ii}|^{-1}$
+\Else
+\State  $[{\bf A|b}]_{i,J}\leftarrow [{\bf A|b}]_{i,J}A_{ii}^{-1}$
+\EndIf
+\EndFor
+\State \Comment{Substitute equalities and inequalities with positive $j^{\rm th}$ coefficient in inequalities
+with negative $j^{th}$ coefficient:}
+\For {$(i,j)\in (I_=\cup I_+) \times I_-$} 
+\State $k\leftarrow k+1$
+\State $[\tilde{\bf A}|\tilde{\bf b}]_{k,J}\leftarrow[{\bf A|b}]_{i,J} + [{\bf A|b}]_{j,J}$
+\State $\tilde{\bf H}_{k,J}\leftarrow {\bf H}_{i,J}\lor{\bf H}_{j,J}$
+\State {\bf if} {${\odot_i}\in\{<\}$ } {\bf then} $\tilde{\odot}_k\leftarrow \odot_i$ {\bf else} $\tilde{\odot}_k\leftarrow\odot_j$
+\EndFor
+\State\Comment{Substitute equalities in inequalities with positive $j^{\rm th}$ coefficient}
+\For {$(i,j)\in I_+\times I_=$}
+\State $k\leftarrow k+1$
+\State $[\tilde{\bf A}|\tilde{\bf b}]_{k,J}\leftarrow[{\bf A|b}]_{i,J} - [{\bf A|b}]_{j,J}$
+\State $\tilde{\bf H}_{k,J}\leftarrow {\bf H}_{i,J}\lor{\bf H}_{j,J}$
+\State $\tilde{\odot}_k\leftarrow \odot_i$
+\EndFor
+\For {$\{(i,j)\in I_=^{\times 2}\,:\,j>i\}$}\Comment{Substitute equalities in equalities}
+\State $k\leftarrow k+1$
+\State $[\tilde{\bf A}|\tilde{\bf b}]_{k,J}\leftarrow[{\bf A|b}]_{i,J} - [{\bf A|b}]_{j,J}$
+\State $\tilde{\bf H}_{k,J}\leftarrow {\bf H}_{i,J}\lor{\bf H}_{j,J}$
+\State $\tilde{\odot}_k\leftarrow \odot_i$
+\EndFor
+\State $\tilde{E}\leftarrow\left\langle\left[\tilde{\bf A}|\tilde{\bf b}]',[{\bf A|b}]_{I_0}'\right]',(\tilde{\boldsymbol{\odot}},\boldsymbol{\odot}_{I_0}),\tilde{\bf H},h+1\right\rangle$
+\State Remove edit rules of  $\tilde{E}$ which have more than $h+1$ elements of ${\bf H}_{i,J}$ {\sc true}
+\State Remove edit rules of $\tilde{E}$ for which {\sc isObviouslyRedundant}$(\tilde{E})$ is {\sc true}
+\Ensure {\tt editmatrix} $\tilde{E}$ with variable $j$ eliminated and updated history
+\end{algorithmic}
+\end{algorithm}
+
+\begin{Rcode}[t]
+<<>>=
+eliminateFM(E,"t")
+@
+\caption{Eliminating {\tt t} from the editmatrix with the {\tt eliminateFM} function}
+\end{Rcode}
 
 \section{Error localization for numerical data}
+\label{errorlocalization}
 
 \subsection{The generalized Fellegi-Holt paradigm}
 
 \subsection{General binary search with the {\tt choicepoint} algorithm}
-Many problems with edits can be handled using a branch and bound solution. For the problem of error localization can be solved by assuming every variable value to be either correct or incorrect. Each choice results in a different editmatrix that can be checked for feasibility. 
-{\tt editrules} offers an generic approach for programming a branch and bound program completely in R: {\tt choicepoint}. 
-
-
-The term ''choicepoint'' is borrowed from the programming language prolog (reference). It models the choice of 'binding' a variable to a value. In prolog, the prolog engine generates choice points. In {\tt editrules} a {\tt choicepoint} models a general binary search program, which is similar: a choicepoint will search for the next solution until no solution is left.
-
-solution
-leftnode
-rightnode
-
-TODO example
-
-
-\begin{itemize}
-
-\end{itemize}
 
 \subsection{Error localization with {\tt cp.editmatrix}}
 
