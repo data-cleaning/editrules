@@ -463,6 +463,22 @@ reduced row echelon form. See Figure \ref{emfromtext} for the original definitio
 \subsection{The generalized Fellegi-Holt paradigm}
 
 \subsection{General binary search with the {\tt choicepoint} algorithm}
+Many problems with edits can be handled using a branch and bound solution. For the problem of error localization can be solved by assuming every variable value to be either correct or incorrect. Each choice results in a different editmatrix that can be checked for feasibility. 
+{\tt editrules} offers an generic approach for programming a branch and bound program completely in R: {\tt choicepoint}. 
+
+
+The term ''choicepoint'' is borrowed from the programming language prolog (reference). It models the choice of 'binding' a variable to a value. In prolog, the prolog engine generates choice points. In {\tt editrules} a {\tt choicepoint} models a general binary search program, which is similar: a choicepoint will search for the next solution until no solution is left.
+
+solution
+leftnode
+rightnode
+
+TODO example
+
+
+\begin{itemize}
+
+\end{itemize}
 
 \subsection{Error localization with {\tt cp.editmatrix}}
 

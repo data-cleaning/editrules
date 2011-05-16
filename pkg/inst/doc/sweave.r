@@ -1,2 +1,2 @@
 
-Sweave("deducorrect-vignette.Snw")
+Sweave("editrules-vignette.Snw")
