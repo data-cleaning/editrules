@@ -191,3 +191,39 @@ isObviouslyRedundant.matrix <- function(E, operators, tol=sqrt(.Machine$double.e
 isObviouslyRedundant.editmatrix <- function(E, ...){
     isObviouslyRedundant.matrix(getAb(E),getOps(E), ...)
 }
+
+#' Check consistency of editmatrix 
+#'
+#' Applies fourier-motzkin elimination untill either all
+#' variables are eliminated or the editmatrix becomes obviously
+#' infeasible. The check rests on the theorem that a set of linear
+#' inequalities is infeasible if and only if  0 < -1 can be derived from it. 
+#'
+#' @param E an \code{\link{editmatrix}}
+#' @param warn logical: should a warning be raised when system is infeasible?
+#' @return TRUE or FALSE
+#'
+#'
+#' @export
+isFeasible <- function(E, warn=TRUE){
+    vars <- getVars(E)
+    vars2 <- vars
+    feasible <- TRUE
+    while( feasible && length(vars) > 0 ){
+        E <- eliminateFM(E,vars[1])
+        vars <- vars[-1]
+        feasible <- !isObviouslyInfeasible(E)
+        if ( !feasible && warn )
+            warning(
+                paste("system becomes obviously infeasible after eliminating",
+                paste(vars2[!(vars2 %in% vars)],collapse=", "))
+            ) 
+    }
+    return(feasible)
+}
+
+
+
+
+
+
