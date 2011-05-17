@@ -22,8 +22,12 @@ findBlocks <- function(M){
      b
    }
    
-   
-   m <- as.matrix(M)
+   if (is.editmatrix(M)){
+      m <- getA(M)
+   }
+   else {
+      m <- as.matrix(M)
+   }
    
    D <- m != 0
    
