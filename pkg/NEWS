@@ -1,3 +1,7 @@
+version 0.6-1
+- Added full feasibility check for editmatrix: isFeasible
+- removed bug from findBlocks and exported.
+
 version 0.6
 - Edit rule coercions: as.expression as.character as.editmatrix as.data.frame
 - Transform equality restrictions to reduced row echelon form

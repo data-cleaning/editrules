@@ -141,13 +141,21 @@ isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
 #'
 #' The function returns a logical vector which is TRUE at any row of the system 
 #' Ax <operators> b which is obviously redundant. Obvious redundancies, amounting
-#' to statements as 0==0 or 0 < 1 may arise durining elimination processes.
-#'
+#' to statements as 0==0 or 0 < 1 may arise durining elimination processes. The 
+#' function also checks for duplicate rows in the augmented matrix [A|b]
 #' 
-#'  
+#' Extra paramters:
+#' \itemize{
+#' \item{tol: tolerance to check for zeros, default square root of machine accuracy}
+#' \item{duplicates: logical, check for duplicate rows?, default \code{TRUE}}
+#' \item{duplicates.tol: tolerance for duplicate search, standard: \code{tol}}
+#' }
 #' @param E Augmented matrix A|b or editmatrix
 #' @param ... parameters to be passed to other methods. 
 #' 
+#'
+#'
+#'
 #'
 #' @seealso \code{\link{isObviouslyRedundant.matrix}}, \code{\link{isObviouslyRedundant.editmatrix}}
 #' @export 
@@ -164,16 +172,29 @@ isObviouslyRedundant <- function(E, ...){
 #' @param ... parameters to be passed to other methods. 
 #' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
 #' @param tol tolerance to check for zeros.
+#' @param duplicates logical: check for duplicate rows?
+#' @param duplicates.tol tolerance for duplicate search
 #'
 #' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
 #' @S3method isObviouslyRedundant matrix
-isObviouslyRedundant.matrix <- function(E, operators, tol=sqrt(.Machine$double.eps),...){
+isObviouslyRedundant.matrix <- function(
+    E, 
+    operators, 
+    tol=sqrt(.Machine$double.eps), 
+    duplicates=TRUE, 
+    duplicates.tol=tol,
+    ... ){
     b <- ncol(E)
     zeroCoef <- rowSums(abs(E[,-b,drop=FALSE])) < tol
-    return(as.vector(
+    v <- as.vector(
         zeroCoef & operators %in% c("==","<=")  & abs(E[,b]) < tol |
         zeroCoef & operators %in% c("<", "<=")  & E[,b] > tol
-    ))
+    )
+    if (duplicates){
+        if ( duplicates.tol > 0 )  E <- round(E, ceiling(-log10(duplicates.tol)))
+        v <- v | (duplicated.matrix(E) & duplicated.default(operators))
+    }
+    return(v)
 }
 
 
@@ -223,6 +244,16 @@ isFeasible <- function(E, warn=TRUE){
 }
 
 
+#' Check for duplicate edit rules
+#'
+#' @param x an \code{\link{editmatrix}}
+#' @param ... options to be passed to other methods
+#' @return logical vector
+#' @S3method duplicated editmatrix
+#' @export
+duplicated.editmatrix <- function(x,...){
+    duplicated.matrix(getAb(x)) & duplicated.default(getOps(x))
+}
 
 
 

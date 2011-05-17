@@ -9,7 +9,7 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
-
+\DeclareMathOperator*{\argmin}{\arg\!\min}
 
 \usepackage{float}
  
@@ -73,9 +73,10 @@ on the financial structure of companies in the Netherlands, contains on the
 order of 100 variables, endowed with a similar number of linear equality and
 inequality restrictions.
 
-Defining and manipulating large edit sets can be a daunting task , while 
-edit violations gives rise to the error localization problem, which can quite
-simply be stated as {\em which variables contain the errors that cause a record to violate certain
+Defining and manipulating large edit sets can be a daunting task when
+implemented directly as matrix representations. Also, edit violations give
+rise to the error localization problem, which can quite simply be stated as
+{\em which variables contain the errors that cause a record to violate certain
 edits rules?}.
 
 The {\tt editrules} package for the R statistical computing environment
@@ -239,7 +240,8 @@ checking two records against the editrules defined in Eqs.\ \eqref{e1}--\eqref{e
 %
 \begin{table}
 \begin{threeparttable}
-\caption{Simple manipulation functions for objects of class {\tt editmatrix}}
+\caption{Simple manipulation functions for objects of class {\tt editmatrix}. Only the
+mandatory arguments are shown, refer to the built-in documentation for optional arguments.}
 \label{simplemanipulations}
 \begin{tabular}{ll}
 \hline
@@ -254,7 +256,8 @@ function                      & description\\
 {\tt normalize(E)}            & Transform {\tt E} to normal form\\
 {\tt isNormalized(E)}         & Check whether {\tt E} is in normal form\\
 {\tt violatedEdits(E, x)}     & Check which edits are violated by ${\bf x}$\\
-{\tt isObviouslyRedundant(E)} & Check for tautologies in rows of {\tt E}\\
+{\tt duplicated(E)}           & Check for duplicates in rows of {\tt E}\\
+{\tt isObviouslyRedundant(E)} & Check for tautologies and duplicates in  {\tt E}\\
 {\tt isObviouslyUnfeasible(E)}& Check for contradictions in rows of {\tt E}\\
 {\tt isFeasible}              & Complete feasibility check for {\tt E}\\ 
 \hline
@@ -312,7 +315,7 @@ Fourier-Motzkin elimination (Section \ref{sfouriermotzkin}), and checks for obvi
 infeasibilities. If no obvious inconsistencies are found after the last
 variable has been eliminated, the system is consistent.
 %
-\begin{algorithm}
+\begin{algorithm}[t]
 \caption{{\sc isObviouslyInfeasible($E$)}}
 \label{isObviouslyInfeasible}
 \begin{algorithmic}
@@ -330,29 +333,39 @@ variable has been eliminated, the system is consistent.
 \end{algorithm}
 %
 %
-\begin{algorithm}
-\caption{{\sc isObviouslyRedundant($E$)}}
+\begin{algorithm}[t]
+\caption{{\sc isObviouslyRedundant}($E$, duplicates, $\varepsilon$)}
 \label{isObviouslyRedundant}
 \begin{algorithmic}
-\Require a normalized {\tt editmatrix} $E$, with $m$ edits
+\Require a normalized {\tt editmatrix} $E$, with $m$ edits, a boolean ``duplicates'', and a tolerance $\varepsilon$.
 \State  ${\bf v} \leftarrow$ ({\sc false})$^{\times{m}}$
-\State $i\leftarrow 0$
-\For {${\bf a}\cdot {\bf x}\odot b\in E$}
-\State $i\leftarrow i+1$
+\For {${\bf a}_i\cdot {\bf x}\odot b_i\in E$}
  \If{$\bf a=0$}
   \If {$(\odot\in\{=\}\land b=0)\lor(\odot\in\{\leq,<\}\land b>0)$} 
     \State $v_i\leftarrow${\sc true}
   \EndIf
  \EndIf
 \EndFor
+\If {duplicates}
+\For {$\{({\bf a}_i\cdot {\bf x}\odot_i b_i,\,{\bf a}_j\cdot {\bf x}\odot_j b_j)   \in E\times E\,:\, j>i\}$ }
+    \If {$|({\bf a}_i,b_i)-({\bf a}_j,b_j)|\leq \varepsilon$ elementwise $\land\: \odot_i=\odot_j$}
+        \State $v_j\leftarrow${\sc true} 
+    \EndIf  
+\EndFor
+\EndIf
 \Ensure ${\bf v}$ \Comment{{\tt logical} vector indicating which rows of $E$ are obviously redundant.}
 \end{algorithmic}
 \end{algorithm}
 
-When new edits are derived, either by value substitution or by variable elimination,
-redundant rules of the form $0 \leq 1$ or $0=0$ can be generated. The function {\tt isObviouslyRedundant}
-detects such rules and returns a {\tt logical} vector indicating which rows of an {\tt editmatrix}
-are redundant. Pseudocode is given in Algorithm \ref{isObviouslyRedundant}.
+When new edits are derived, either by value substitution or by variable
+elimination, redundant rules of the form $0 \leq 1$ or $0=0$ can be generated.
+The function {\tt isObviouslyRedundant} detects such rules and returns a {\tt
+logical} vector indicating which rows of an {\tt editmatrix} are redundant.
+By default, the function detects row duplicates (within an adjustable tolerance),
+but this may be swithched of by providing the option {\tt duplicates=FALSE}.
+Pseudocode is given in Algorithm \ref{isObviouslyRedundant}. The actual implementation
+avoids explicit loops and makes use of R's built-in {\tt duplicated} function,
+which is also overloaded for {\tt editmatrix} (see Table \ref{simplemanipulations}).
 
 
 
@@ -396,9 +409,10 @@ can be called from the R environment.
 \caption{{\sc replaceValue}$(E,j,x)$}
 \label{replaceValue}
 \begin{algorithmic}
-\Require $E=\langle [{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_j ,\ldots, {\bf a}_n],{\bf b}],\boldsymbol{\odot}\rangle$, 
+\Require $E=\langle [{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_j ,\ldots, {\bf a}_n]|{\bf b}],\boldsymbol{\odot}\rangle$, 
     $x\in\mathbb{R}$, $j\in \{1,2,\ldots n\}$
-\Ensure $\left\langle\left[{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_{j-1},{\bf 0},{\bf a}_{j+1},\ldots {\bf a}_n\right],
+\State\Comment{Note that here, the subscripts of ${\bf a}$ denote the column index of {\bf A}}
+\Ensure $\left\langle\left[{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_{j-1},{\bf 0},{\bf a}_{j+1},\ldots {\bf a}_n\right]|
     {\bf b}-{\bf a}_jx],\boldsymbol{\odot}\right\rangle$
 \end{algorithmic}
 \end{algorithm}
@@ -452,7 +466,7 @@ Figure \ref{Rechelon} demonstrates a call to the R function.
 <<>>=
 echelon(E)
 @
-\caption{The {\tt echelon} function transforms the linear equalities of an editmatrix to
+\caption{Transforming linear equalities of an editmatrix to
 reduced row echelon form. See Figure \ref{emfromtext} for the original definition of {\tt E}.}
 \label{Rechelon}
 \end{Rcode}
@@ -559,7 +573,7 @@ with negative $j^{th}$ coefficient:}
 \State $\tilde{\bf H}_{k,J}\leftarrow {\bf H}_{i,J}\lor{\bf H}_{j,J}$
 \State $\tilde{\odot}_k\leftarrow \odot_i$
 \EndFor
-\State $\tilde{E}\leftarrow\left\langle\left[\tilde{\bf A}|\tilde{\bf b}]',[{\bf A|b}]_{I_0}'\right]',(\tilde{\boldsymbol{\odot}},\boldsymbol{\odot}_{I_0}),\tilde{\bf H},h+1\right\rangle$
+\State $\tilde{E}\leftarrow\left\langle\left[\tilde{\bf A}|\tilde{\bf b}]',[{\bf A|b}]_{I_0,J}'\right]',(\tilde{\boldsymbol{\odot}},\boldsymbol{\odot}_{I_0}),\tilde{\bf H},h+1\right\rangle$
 \State Remove edit rules of  $\tilde{E}$ which have more than $h+1$ elements of ${\bf H}_{i,J}$ {\sc true}
 \State Remove edit rules of $\tilde{E}$ for which {\sc isObviouslyRedundant}$(\tilde{E})$ is {\sc true}
 \Ensure {\tt editmatrix} $\tilde{E}$ with variable $j$ eliminated and updated history
@@ -581,8 +595,44 @@ iteration to ensure that the derivation history is updated at every step.}
 
 \section{Error localization for numerical data}
 \label{errorlocalization}
-\cite{waal:2011}
-\subsection{The generalized Fellegi-Holt paradigm}
+While checking whether a numerical record violates any imposed restrictions
+(within a certain limit) is easy, finding out which variable(s) of the record
+cause the violation(s) can be far from trivial. When possible, the cause of the
+violation, should be sought out, since it leads immediately to repair
+suggestions. The {\tt deducorrect} package \citep{loo:2011} mentioned above
+offers functionality to detect and repair common errors like typing errors,
+rounding errors and sign errors. Although not directly available in R, methods
+for detecting repairing unit measure errors or other systematic errors have
+been described in literature and may readily be implemented in R (see
+\cite{waal:2011} Chapter 2 for an overview). 
+
+After systematic errors with detectable causes in a data set have been
+resolved, one may assume that remaining errors are distributed randomly (but
+not necessarily uniformly) over one or more of the variables. In that case,
+error localisation based on the (generalized) principle of Fellegi and Holt can
+be applied.
+
+
+\subsection{The generalized Fellegi-Holt paradigm} In line with the good
+practice of altering source data as little as possible, the paradigm of
+\cite{fellegi:1976} advises to edit an as small amount of variables as
+possible, under the condition that after editing, every edit rule can be
+obeyed. A small generalization of this principle says that a weighted number
+of variables should be minimized. More formally, the principle yields the
+following problem. Given a record ${\bf x}$, violating a number of edits
+in an edit matrix $E$ (see Eqn. \eqref{editset}).
+
+\begin{eqnarray}
+\lefteqn{G = \argmin_{g\subset \{1,2,\ldots,n\}} \sum_{j\in g}w_j\delta(x_j,\tilde{x}_j),}\nonumber\\
+ && \textrm{such that a solution } \tilde{\bf x}\textrm{ exists for} \nonumber\\
+&& \sum_{j\in G} {A_{ij}}\tilde{x}_{j} \odot_i b_i-\sum_{j\not\in G}A_{ij}x_j,\quad i\in \{1,2,\ldots,m\}.
+\end{eqnarray}
+
+
+
+
+
+
 
 \subsection{General binary search with the {\tt choicepoint} algorithm}
 

@@ -1,10 +1,10 @@
 #' Break a matrix into blocks
 #'
 #' @example examples/findBlocks.R
-#' @nord
 #'
 #' @param M \code{matrix} or \code{editmatrix} that will be broken in blocks
 #' @return list with seperate matrix blocks
+#' @export
 findBlocks <- function(M){
    
    block <- function(B){
