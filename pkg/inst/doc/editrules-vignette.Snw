@@ -617,26 +617,55 @@ be applied.
 practice of altering source data as little as possible, the paradigm of
 \cite{fellegi:1976} advises to edit an as small amount of variables as
 possible, under the condition that after editing, every edit rule can be
-obeyed. A small generalization of this principle says that a weighted number
+obeyed. A generalization of this principle says that a weighted number
 of variables should be minimized. More formally, the principle yields the
 following problem. Given a record ${\bf x}$, violating a number of edits
-in an edit matrix $E$ (see Eqn. \eqref{editset}).
-
+in an edit matrix $E$ (see Eqn. \eqref{editset}) with $m$ rules and $n$ variables, 
+find $G$ such that
+%
 \begin{eqnarray}
 \lefteqn{G = \argmin_{g\subset \{1,2,\ldots,n\}} \sum_{j\in g}w_j\delta(x_j,\tilde{x}_j),}\nonumber\\
- && \textrm{such that a solution } \tilde{\bf x}\textrm{ exists for} \nonumber\\
+ && \textrm{such that a solution } \tilde{\bf x}\in\mathbb{R}^{|G|}\textrm{ exists for} \nonumber\\
 && \sum_{j\in G} {A_{ij}}\tilde{x}_{j} \odot_i b_i-\sum_{j\not\in G}A_{ij}x_j,\quad i\in \{1,2,\ldots,m\}.
+\label{fhproblem}
 \end{eqnarray}
+%
+In other words, for every variable in $\bf x$, we have to deceide wheter to
+adapt it or not. Variables which are not adapted will be replaced with their
+value $x_j$ while variables that will be adapted will have to bereplaced by a
+value $\tilde{x}_j$, which has to to be determined. The solution to
+\eqref{fhproblem} need not be unique, but there is always at least one
+solution unless the edit rules in $E$ are contradictory. 
 
+The minimization \eqref{fhproblem} amounts to a binary search problem, of which
+the search space increases as $2^n$ ($n$ the number of variables).
+\cite{waal:2003} and \cite{waal:2011} describe a branch-and-bound binary search
+algorithm which generates all minimal weight solutions. It works by generating
+the following binary tree: the root node contains $E$ and $\bf x$ and weight
+$w=0$.  Both left and right nodes receive a copy of the objects in their
+parents. In the left child node, $x_1$ is assumed correct and its value is
+substituted in $E$. In the right child node, $x_1$ is assumed to contain an
+error and it is eliminated from $E$ by Fourier-Motzkin elimination. The weight
+$w$ in the right node is increased by $w_1$. Each child node gets a left and
+right child node where $x_2$ is substituted or eliminated, and so on untill
+every variable has been treated.  Every path from root to leave represents one
+element of the search space. A branch is pruned when $E$
+contains obvious inconsistencies, so no combinations not satisfying the
+condition in \eqref{fhproblem} are generated. If a solution, with certain
+weight $w$ is found, branches developed later, receiving a higher weight are
+pruned as well.
 
-
-
-
-
+The following subsection \eqref{schoicepoint} describes a flexible binairy
+search algorithm, which we implememted to support general binary search
+problems. Subsection \ref{scpeditmatrix} describes its application to the
+branch-and-bound algorithm mentioned above.
 
 \subsection{General binary search with the {\tt choicepoint} algorithm}
+\label{schoicepoint}
+
 
 \subsection{Error localization with {\tt cp.editmatrix}}
+\label{scpeditmatrix}
 
 \section{Conclusions}
 
