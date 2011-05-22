@@ -45,8 +45,8 @@ print.data.model <- function(x,...){
 #
 # column indices in editarray, for every variable
 editindex <- function(dm){
-    S <- as.character(stack(D)[,2])
-    sapply(names(D), function(n) which(n==S)) 
+    S <- as.character(stack(dm)[,2])
+    sapply(names(dm), function(n) which(n==S)) 
 }
 
 
@@ -86,12 +86,12 @@ forbid <- function(dm, ..., name=NULL){
         stop("edit contains variables not in data.model")
     
     d <- sum(dim(dm))
-    e <- array(logical(d),dim=c(1,d))
+    e <- !array(logical(d),dim=c(1,d))
     colnames(e) <- c(dm,recursive=TRUE)
     rownames(e) <- name
     I <- editindex(dm) 
     for ( x in names(L) ){
-        e[ 1, I[[x]][ D[[x]] %in% L[[x]] ] ] <- TRUE
+        e[ 1, I[[x]][ !(dm[[x]] %in% L[[x]]) ] ] <- FALSE
     }
 
     neweditarray(e, ind = I, names=name, levels=c(dm,recursive=TRUE))
@@ -111,7 +111,7 @@ editarray <- function(...){
 getInd <- function(E) attr(E,"ind")
 
 #' @nord
-getArr <- function(E) E[,]
+getArr <- function(E) E[,,drop=FALSE]
 
 
 #' @nord
@@ -121,7 +121,7 @@ getnames <- function(E) rownames(E)
 
 
 # combine editarray by generating variable "var"
-# intersection <-> or, union <-> and
+# intersection <-> and, union <-> or
 combine <- function(E,var){ 
     ind <- getInd(E)
     lev <- getlevels(E)
@@ -135,24 +135,77 @@ combine <- function(E,var){
     neweditarray(e,ind, levels=lev)
 }
 
+# determine which edits in an editmatrix contain a certain variable.
+contains <- function(E,var){
+    I <- getInd(E)[[var]]
+    V <- getArr(E)[,I,drop=FALSE]
+    rowSums(V) < length(getInd(E)[[var]])
+}
 
-# define a data.model
+
+# eliminate one category from a logical array
+eliminateCol <- function(A, J, j){
+    j1 <- A[,J[j]]
+    j2 <- !j1
+    n1 <- sum(j1)
+    n2 <- sum(j2)
+    if (n1==0 || n2==0) return(A)
+    I1 <- rep(which(j1), times=n2)
+    I2 <- rep(which(j2), each=n1)
+    B <- array(FALSE,dim=c(n1*n2,ncol(A)))
+    B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
+    B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
+    B
+}
+
+# TODO  1. prove that this works (does it?) 
+#       2. redundancy removal
+#       3. robustness for empty arrays etc.
+eliminateCat <- function(E, var){
+    J <- getInd(E)[[var]]
+    A <- getArr(E)
+    for ( j in 1:length(J)) A <- eliminateCol(A,J,j)
+    neweditarray(A,getInd(E), levels=getlevels(E))
+}
+
+# example from method series
 D <- data.model(
-    sex = c("male","female"),
-    pregnant = c("yes","no"),
-    age = c("child","adult","old age")
+    civilStatus = c("married","unmarried","widowed","divorced"),
+    age = c("< 16",">= 16"),
+    positionInHousehold = c("marriage partner","child","other")
 )
+
+# edits:
+#   1. you cannot be married under 16 yrs
+#   2. you cannot be a marriage partner in the household if you're not married
+E <- editarray(
+    forbid(D, age = "< 16", civilStatus = "married"),
+    forbid(D, civilStatus = c("unmarried", "widowed","divorced"), 
+        positionInHousehold = "marriage partner")
+)
+
+# derived edit, by eliminating civilStatus: you cannot be a marriage
+# partner in a household whe you're under 16:
+eliminateCat(E,"civilStatus")
+
+
+
+#D <- data.model(
+#    sex = c("male","female"),
+#    pregnant = c("yes","no"),
+#    age = c("child","adult","old age")
+#)
 
 # define some edits
-E <- editarray(
-    forbid(D, sex="male", pregnant="yes", name="e1"),
-    forbid(D, age=c("child", "old age"), pregnant="yes", name="e2")
-)
+#E <- editarray(
+#    forbid(D, sex="male", pregnant="yes", name="e1"),
+#    forbid(D, age=c("child", "old age"), pregnant="yes", name="e2")
+#)
 # derive a new edit, using "age" as generating variable.
-combine(E,"age")
+#combine(E,"age")
 
 # should yield the same as this:
-forbid(D, pregnant="yes", age=c("child","old age"))
+#forbid(D, pregnant="yes", age=c("child","old age"))
 
 
 
