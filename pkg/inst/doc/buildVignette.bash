@@ -4,12 +4,12 @@
 #        buildVignette.bash categorical  
 
 arg=\'editrules-$1\'
-echo $arg
+
 
 R -e "Sweave($arg)"
-latex editrules-linear.tex
-bibtex editrules-linear
-latex editrules-linear.tex
-pdflatex editrules-linear.tex
+latex editrules-$1.tex
+bibtex editrules-$1
+latex editrules-$1.tex
+pdflatex editrules-$1.tex
 
 

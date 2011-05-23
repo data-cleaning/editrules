@@ -1,5 +1,4 @@
-
-%\VignetteIndexEntry{Linear edit manipulation and error localization with the editrules package}
+%\VignetteIndexEntry{Categorical edit manipulation and error localization with the editrules package}
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
@@ -34,15 +33,13 @@
 \hyphenation{time-stamp}
 
 
-\title{Linear edit manipulation and error localization with the {\tt editrules} package}
+\title{Categorical edit manipulation and error localization with the {\tt editrules} package}
 \author{Mark van der Loo and Edwin de Jonge}
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is far from finished. Version 1.0 fo the package will have
+{\em This vignette is far from finished. Version 2.0 fo the package will have
 the full vignette.}
 \end{abstract}
-\begin{document}
-\maketitle
 
 \end{document}

@@ -144,7 +144,7 @@ contains <- function(E,var){
 
 
 # eliminate one category from a logical array
-eliminateCol <- function(A, J, j){
+eliminateCat <- function(A, J, j){
     j1 <- A[,J[j]]
     j2 <- !j1
     n1 <- sum(j1)
@@ -158,15 +158,55 @@ eliminateCol <- function(A, J, j){
     B
 }
 
-# TODO  1. prove that this works (does it?) 
-#       2. redundancy removal
-#       3. robustness for empty arrays etc.
-eliminateCat <- function(E, var){
+# TODO  1. prove that this works --DONE 23.05.2011
+#       2. redundancy removal    --DONE. 23.05.2011
+#       3. robustness for empty arrays etc. --Needs testing
+eliminateVar <- function(E, var){
     J <- getInd(E)[[var]]
     A <- getArr(E)
-    for ( j in 1:length(J)) A <- eliminateCol(A,J,j)
+    for ( j in 1:length(J)){
+         red <- duplicated(A) | isObviouslyRedundant.array(A)
+         A <- eliminateCat(A[!red,],J,j)
+    }
     neweditarray(A,getInd(E), levels=getlevels(E))
 }
+
+# duplicated method for editarray
+duplicated.editarray <- function(x, ...) duplicated(getArr(E))
+
+# redundancy check - editarray method.
+isObviouslyRedundant.editarray <- function(E, ...){
+    isObviouslyRedundant.array(getArr(E))
+}
+
+# redundancy check (check if any edit rule is a subset of another one)
+isObviouslyRedundant.array <- function(E, ...){
+    # TODO: is this any faster with a while loop? Should we do this in C?
+    m <- nrow(E)
+    m1 <- m-1
+    sapply(1:m, function(i){
+        any(rowSums(E[-i,,drop=FALSE] - (E[rep(i,m1),,drop=FALSE] | E[-i,,drop=FALSE])) == 0)
+    })
+}
+
+
+# replace a value in an editmatrix: 
+#   remove rows of E for which have var[value] == FALSE
+#   set levels of var[!value] to FALSE
+replaceValue.editmatrix <- function(E, var, value){
+    J <- getInd(E)[[var]]
+    ival <- intersect(which(colnames(E) == value), J)
+    if ( length(ival) != 1 ) 
+        stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
+    ii <- setdiff(J,ival)
+    A <- getArr(E)
+    A[,ii] <- FALSE
+    I <- A[,ival] 
+    neweditarray(A[I,,drop=FALSE], getInd(E), levels=getlevels(E))
+}
+
+
+
 
 # example from method series
 D <- data.model(
@@ -181,12 +221,14 @@ D <- data.model(
 E <- editarray(
     forbid(D, age = "< 16", civilStatus = "married"),
     forbid(D, civilStatus = c("unmarried", "widowed","divorced"), 
+        positionInHousehold = "marriage partner"),
+    forbid(D, civilStatus = c("widowed","divorced"), 
         positionInHousehold = "marriage partner")
 )
 
 # derived edit, by eliminating civilStatus: you cannot be a marriage
 # partner in a household whe you're under 16:
-eliminateCat(E,"civilStatus")
+eliminateVar(E,"civilStatus")
 
 
 

@@ -1,7 +1,8 @@
 #' Facilitates reading of linear (in)equalities and
 #'    converting them to a matrix format (and vice versa)
 #' 
-#' The package \code{editrules} facilitates the reading/parsing of so called "edit rules" or constraints. These are linear (in)equalities used for checking
+#' The package \code{editrules} facilitates the reading/parsing of so called "edit rules" or constraints. 
+#' Edit rules are linear (in)equalities used for checking
 #' statistical data. 
 #' Often the specification of edit rules and their implementation in software is cumbersome. In many cases a restriction matrix 
 #' is created manually. With \code{editrules} these rules can be specified in R syntax and can be managed and documented.
