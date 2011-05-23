@@ -1,6 +1,12 @@
 #!/bin/bash
 
-R -e "Sweave('editrules-vignette.Snw')"
+# usage: buildVignette.bash linear
+#        buildVignette.bash categorical  
+
+arg=\'editrules-$1\'
+echo $arg
+
+R -e "Sweave($arg)"
 latex editrules-linear.tex
 bibtex editrules-linear
 latex editrules-linear.tex

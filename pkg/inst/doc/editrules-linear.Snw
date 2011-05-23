@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Editrules, define and check linear data restrictions}
+%\VignetteIndexEntry{Linear edit manipulation and error localization with the editrules package}
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}

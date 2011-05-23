@@ -1,0 +1,48 @@
+
+%\VignetteIndexEntry{Linear edit manipulation and error localization with the editrules package}
+\documentclass[10pt, fleqn, a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{threeparttable}
+\usepackage{natbib}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{threeparttable}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+
+\usepackage{float}
+ 
+\floatstyle{boxed}
+\newfloat{Rcode}{t}{rco}
+\floatname{Rcode}{Figure}
+ 
+
+
+% stimulate latex to put multiple floats on a page.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{3}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.75}
+\renewcommand{\floatpagefraction}{.9}
+\renewcommand{\dblfloatpagefraction}{.9}
+\renewcommand{\dbltopfraction}{.9}
+\hyphenation{time-stamp}
+
+
+\title{Linear edit manipulation and error localization with the {\tt editrules} package}
+\author{Mark van der Loo and Edwin de Jonge}
+\begin{document}
+\maketitle
+\begin{abstract}
+{\em This vignette is far from finished. Version 1.0 fo the package will have
+the full vignette.}
+\end{abstract}
+\begin{document}
+\maketitle
+
+\end{document}
