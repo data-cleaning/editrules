@@ -34,8 +34,9 @@ parseCond <- function(cond, pos=1, l=c(b=0), iscond=FALSE){
       l <- parseCond(cond[[2]], -pos, l, iscond=TRUE)
       l <- parseCond(cond[[3]], pos, l, iscond=TRUE)
    }
-   else if (op == "!"){
-      l <- parseCond(cond[[2]], -pos, l, iscond=iscond)
+   else if (op %in% c("!", "{","(")){
+      if (op == "!") pos <- -pos
+      l <- parseCond(cond[[2]], pos, l, iscond=iscond)
    }
    # TODO check if it is a categoral or a numerical constraint
    # i.e. '==' should be disambigued
@@ -104,10 +105,11 @@ getVarCat.cateditmatrix <- function(E, ...){
 }
 
 #' @method getVarCat character
-getVarCat.character <- function(x, ...){
+getVarCat.character <- function(x, full.names=FALSE, ...){
    vc <- sapply(strsplit(x, ":"), function(vc) c(var=vc[1], cat=vc[2]))
-   vc <- split(vc[2,], vc[1,])
    
+   vc <- if (full.names) split(x, vc[1,])
+         else split(vc[2,], vc[1,])
    # logical variable don't have categories...
    vc[is.na(vc)] <- list(NULL) #maybe change this to TRUE? Seems more natural
    vc
@@ -117,7 +119,7 @@ getVarCat.character <- function(x, ...){
 #' @method as.character cateditmatrix
 #' @param E \code{cateditmatrix} object
 #' @return \code{character} with the character representation of the edits
-as.character.cateditmatrix <- function(E){
+as.character.cateditmatrix <- function(E, ...){
     A <- getA(E)
     ops <- getOps(E)
     
@@ -151,7 +153,7 @@ as.character.cateditmatrix <- function(E){
             thenvars <- inclause(vars[thenc[i,]], collapse=" || ")
             if (any(ifc[i,])){
                 ifvars <- inclause(vars[ifc[i,]], collapse=" && ")
-                catedits[i] <- paste("if (",ifvars,")",thenvars, sep="")
+                catedits[i] <- paste("if (",ifvars,") ",thenvars, sep="")
             }
             else {
                 catedits[i] <- thenvars
