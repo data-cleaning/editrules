@@ -1,2 +1,2 @@
 
-Sweave("editrules-vignette.Snw")
+Sweave("editrules-linear.Snw")
