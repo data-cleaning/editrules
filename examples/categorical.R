@@ -206,8 +206,6 @@ replaceValue.editmatrix <- function(E, var, value){
 }
 
 
-
-
 # example from method series
 D <- data.model(
     civilStatus = c("married","unmarried","widowed","divorced"),
@@ -247,7 +245,7 @@ eliminateVar(E,"civilStatus")
 #combine(E,"age")
 
 # should yield the same as this:
-#forbid(D, pregnant="yes", age=c("child","old age"))
+# forbid(D, pregnant="yes", age=c("child","old age"))
 
 
 
