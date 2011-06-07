@@ -168,11 +168,11 @@ as.character.cateditmatrix <- function(E, ...){
 
 # ### examples....
 
-civilStatus <- c("married","unmarried","widowed","divorced")
+civilStatusLevels <- c("married","unmarried","widowed","divorced")
 
 x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
       , "if (age == '< 16') civilStatus=='unmarried'"
-      , "civilStatus %in% civilStatus" #that looks magical, but the second civilstatus is evaluated
+      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
       , "if (pregnant) gender == 'female'"
       , "if (nace %in% c('A','B')) valid==TRUE"
       )
