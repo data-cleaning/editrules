@@ -352,11 +352,16 @@ as.character.editmatrix <- function(x, ...){
    left <- gsub("1\\*","",left)
    right <- gsub("1\\*","",right)
 
+   
+   left <- ifelse( left==""
+                 , ifelse(right=="", "0", -b) 
+                 , ifelse(b < 0 & right != "", paste(left,-b,sep=" + "), left)
+                 )
+   
    right <- ifelse( right==""
                   , b
-                  , ifelse(b == 0, right, paste(right,b,sep=" + "))
+                  , ifelse(b > 0 & left != -b, paste(right,b,sep=" + "), right)
                   )
-   left <- ifelse(left=="", "0", left)
    txt <- paste(left,ops,right)    
    names(txt) <- rownames(x)
    txt
