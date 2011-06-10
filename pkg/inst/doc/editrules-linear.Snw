@@ -2,6 +2,7 @@
 \documentclass[10pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
+\usepackage{graphicx}
 \usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
@@ -659,6 +660,14 @@ The following subsection \eqref{schoicepoint} describes a flexible binairy
 search algorithm, which we implememted to support general binary search
 problems. Subsection \ref{scpeditmatrix} describes its application to the
 branch-and-bound algorithm mentioned above.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.495\textwidth]{diamond}
+\includegraphics[width=0.495\textwidth]{twodiamond}
+\caption{Editrules}
+\end{figure}
+
 
 \subsection{General binary search with the {\tt choicepoint} algorithm}
 \label{schoicepoint}
