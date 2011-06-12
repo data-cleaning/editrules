@@ -9,7 +9,12 @@
 #'
 #' \subsection{Methods}{
 #'   \describe{
-#'      \item{\code{$searchNext(..., VERBOSE=FALSE)}}{Search next solution, can be called repeatedly until there is no solution left. Named variables will be added to the search environment, this feature can be used to direct the search in subsequent calls to \code{searchNext}. VERBOSE=TRUE will print all intermediate search steps and results. It can be used to debug the expressions in the choicepoint}
+#'      \item{\code{$searchNext(..., VERBOSE=FALSE)}}{Search next solution, can
+#'           be called repeatedly until there is no solution left. Named variables will be
+#'           added to the search environment, this feature can be used to direct the search
+#'           in subsequent calls to \code{searchNext}. VERBOSE=TRUE will print all
+#'           intermediate search steps and results. It can be used to debug the expressions
+#'           in the choicepoint}
 #'      \item{\code{$searchAll(..., VERBOSE=FALSE)}}{Return all solutions as a list}
 #'      \item{\code{$reset()}}{Resets the \code{choicepoint} to its initial state.}
 #'   }

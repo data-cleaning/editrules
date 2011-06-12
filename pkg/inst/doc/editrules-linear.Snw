@@ -656,16 +656,49 @@ condition in \eqref{fhproblem} are generated. If a solution, with certain
 weight $w$ is found, branches developed later, receiving a higher weight are
 pruned as well.
 
-The following subsection \eqref{schoicepoint} describes a flexible binairy
-search algorithm, which we implememted to support general binary search
-problems. Subsection \ref{scpeditmatrix} describes its application to the
-branch-and-bound algorithm mentioned above.
+To clarify the above, in the next subsection we give two worked examples.
+Subsection \eqref{schoicepoint} describes a flexible binary search algorithm,
+which we implememted to support general binary search problems. Subsection
+\ref{scpeditmatrix} describes its application to the branch-and-bound algorithm
+mentioned above.
+
+\subsection{Two examples}
+To illustrate the binary search algorithm outlined above we will consider a
+simpe two-dimensional example. The reader is encouraged to follow the reasoning
+below by checking the calculations using the R-functions mentioned in the
+previous sections. Consider a 2-variable record $(x,y)$ subject to the set of
+constaints $E$:
+\begin{equation}
+\label{E1}
+E = \left\{
+\begin{array}{ll}
+e_1: & y > x - 1\\
+e_2: & y > -x + 3\\
+e_3: & y < x + 1\\
+e_4: & y < -x + 5. 
+\end{array}\right.
+\end{equation}
+Each separate inequality yields a half-plane of which the borders is determined by
+the line obtained by replacing $<$ or $>$ by $=$. The intersection of the four
+half-spaces is the region of allowed records.  In this example, the region is a
+diamond, depicted as the grey area in Figure \ref{example1}.  The borders are
+labed with the editrules in Eq.\ \eqref{E1}. Consider the record $(-2,1)$,
+depicted as the bottom black dot in Figure \ref{example1}. It is easy to confirm
+by substitution that $(-2,1)$ violated edits $e_2$ and $e_3$. 
+
+
+
+
+
+
+
 
 \begin{figure}
 \centering
 \includegraphics[width=0.495\textwidth]{diamond}
 \includegraphics[width=0.495\textwidth]{twodiamond}
 \caption{Editrules}
+\label{example1}
 \end{figure}
 
 

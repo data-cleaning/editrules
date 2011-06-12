@@ -100,12 +100,13 @@ eliminateFM <- function(E, var, fancynames=FALSE){
 
     m <- m[!redundant,,drop=FALSE]
     d <- d[!redundant,,drop=FALSE]
-    if ( fancynames ){
-        rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
-    } else {
-        rownames(m) <- paste("e",1:nrow(m),sep="")
+    if ( nrow(m) > 0 ){
+        if ( fancynames ){
+            rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
+        } else {
+            rownames(m) <- paste("e",1:nrow(m),sep="")
+        }
     }
-
     neweditmatrix(
           m
         , o[!redundant]

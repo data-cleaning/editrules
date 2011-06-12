@@ -1,6 +1,6 @@
 version 0.6-1
 - isObviouslyRedundant now finds duplicate rows within tolerance.
-- overloaded duplicated for editmatrix. 
+- overloaded built-in function "duplicated" for editmatrix. 
 - Added full feasibility check for editmatrix: isFeasible
 - removed bug from findBlocks and exported.
 

@@ -30,9 +30,13 @@ E <- editmatrix(c(
         "p + c == t",
         "c - 0.6*t >= 0"))
 cp <- cp.editmatrix(E,x=c(p=755,c=125,t=200))
-# Now, there's only one solution. 
+# Now, there's only one solution, but we need two runs to find it (the 1st one has higher weight)
+cp$searchNext()
 cp$searchNext()
 # Note that the editmatrix in the solution object suggests the actual unique value.
+
+# With the searchBest() function, the lowest weifght solution is found at once:
+cp.editmatrix(E,x=c(p=755,c=125,t=200))$searchBest()
 
 
 # An example with missing data.
