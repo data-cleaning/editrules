@@ -109,17 +109,17 @@ pdf(twodiamondFile)
     plotPoly(xright,yright)
     
     # record 1
-    points(0.5,1.5,pch=19,cex=textcex)
+    points(1.5,1.5,pch=19,cex=textcex)
     # record 2
     points(0,2.5,pch=19,cex=textcex)
     # record 2
     points(2,0,pch=19,cex=textcex)
     
     arrows(
-        x0 = c(0.3,-0.2,0.2,2),
-        y0 = c(1.5,2.5,2.5,0.2),
-        x1 = c(-1.3,-1.3,1.3,2),
-        y1 = c(1.5,2.5,2.5,1.8),
+        x0 = c( 1.3, 1.5,-0.2, 0.2, 2.0),
+        y0 = c( 1.5, 1.7, 2.5, 2.5, 0.2),
+        x1 = c(-1.3, 1.5,-1.3, 1.3, 2.0),
+        y1 = c( 1.5, 2.3, 2.5, 2.5, 1.8),
         lwd=linewidth
     )
     
@@ -127,6 +127,9 @@ pdf(twodiamondFile)
     lines(
         x=c(-1.5,-2.5),
         y=c(2.5,2.5))
+    lines(
+        x=c(1.5,1.5),
+        y=c(2.5,3.5))
     lines(
         x=c(1.5,2.5),
         y=c(2.5,2.5))
@@ -138,7 +141,7 @@ pdf(twodiamondFile)
         y=c(2,4))
     
     # labels
-    text(0.5,1.2,"(1/2,3/2)", cex=textcex)
+    text(0.9,1.2,"(3/2,3/2)", cex=textcex)
     text(0.0,2.2,"(0,5/2)", cex=textcex)
     text(1.4,0.0,"(2,0)", cex=textcex)
 dev.off()
