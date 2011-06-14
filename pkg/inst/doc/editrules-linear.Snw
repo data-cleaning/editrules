@@ -882,7 +882,31 @@ like any other {\sf R} object. {\sf R} environments are therefore employed to
 store state information in a choice point.
 
 
-
+\begin{algorithmic}
+\Require Expressions $\phi_0$, $\phi_l$, $\phi_r$, an expression $\psi$, with
+\begin{displaymath}
+\psi(\mathcal{E}) = \left\{\begin{array}{ll}
+\textrm{\sc true} &\textrm{ if environment } \mathcal{E}\textrm{ contains a solution}\\
+\textrm{\sc false}&\textrm{ if environment } \mathcal{E}\textrm{ cannot lead to a solution}\\
+\textrm{\sc null}&\textrm{ if environment } \mathcal{E}\textrm{ contains no solution}
+\end{array}\right.
+\end{displaymath}
+\State $\mathcal{E}\leftarrow\phi_0(\mathcal{E}_0)$ \Comment{$\phi_0$ can be used for variable initialisation}
+\State $\mathcal{E}::\textrm{treatedleft}\leftarrow \textrm{\sc false}$
+\State $\mathcal{E}::\textrm{treatedright}\leftarrow \textrm{\sc false}$
+\While{$\psi(\mathcal{E})\in\{\textrm{\sc false},\textrm{\sc null}\} \land \mathcal{E}\not=\textrm{\sc null}$ }
+\State $\textrm{\sc push }\mathcal{E}$
+\If{$\neg\mathcal{E}::\textrm{treatedleft}$}
+\State $\mathcal{E}::\textrm{treatedleft}\leftarrow \textrm{\sc true}$
+\State $\textrm{\sc push }\phi_l(\mathcal{E})$
+\ElsIf{$\neg\mathcal{E}::\textrm{treatedright}$}
+\State $\mathcal{E}::\textrm{treatedright}\leftarrow \textrm{\sc true}$
+\State $\textrm{\sc push }\phi_r(\mathcal{E})$
+\EndIf
+\State $\textrm{\sc pop}$
+\EndWhile
+\Return $\mathcal{E}$
+\end{algorithmic}
 
 
 
