@@ -599,7 +599,7 @@ iteration to ensure that the derivation history is updated at every step.}
 
 
 \section{Error localization for numerical data}
-\label{errorlocalization}
+\label{serrorlocalization}
 While checking whether a numerical record violates any imposed restrictions
 (within a certain limit) is easy, finding out which variable(s) of the record
 cause the violation(s) can be far from trivial. When possible, the cause of the
@@ -618,7 +618,9 @@ error localization based on the (generalized) principle of Fellegi and Holt can
 be applied.
 
 
-\subsection{The generalized Fellegi-Holt paradigm} In line with the good
+\subsection{The generalized Fellegi-Holt paradigm} 
+\label{sgeneralfellegiholt}
+In line with the good
 practice of altering source data as little as possible, the paradigm of
 \cite{fellegi:1976} advises to edit an as small amount of variables as
 possible, under the condition that after editing, every edit rule can be
@@ -850,8 +852,44 @@ equality yields two inequalities (as in Eq.\ \eqref{exampleExpansion}).
 We will have more to say on conditional edits in the accompanying paper where
 the error localization problem for categorical and mixed data are treated.
 
-\subsection{General binary search with the {\tt choicepoint} algorithm}
+\subsection{General binary search with the {\tt choicepoint} object}
 \label{schoicepoint}
+As stated in subsection \ref{sgeneralfellegiholt}, the error localization
+problem can be interpreted as a (pruned) binary programming problem. To
+facilitate implementation of error localization for numerical, categorical and
+mixed data, as well as to help further research in error localization
+algorithms it was deceided to implement general-purpose binary search
+functionality in the form of binary choice point programming.
+
+The term ``choice point'' stems from the field of nondeterministic programming.
+In nondeterministic programming, the control flow of a program is not
+determined explicitly by the programmer with standard branching statements. In
+stead, choice points may be created which store the full state of a program so
+that control flow can at any time return to a stored state and choose a new
+path from there. Choice point programming is supported by various niche
+programming environments, such as {\sf Alma-0} \citep{partington:1997} and {\sf
+ELAN} \citep{vittek:1996}. See \cite{moreau:1998} for a clear introduction or
+\cite{mart:2002} for a bibliographic overview. The choice point paradigm offers
+an excellent environment for programming backtracking algorithms, of which the
+Branch-and-Bound algorithm of subsection \ref{sgeneralfellegiholt} is just a
+specific example. Moreover, {\sf R} is ideally suited to develop choice
+point-like systems since {\sf R} has first-class environments. An {\sf R}
+environment can be thought of as a list of name-value pairs of {\sf R} objects,
+which are used when evaluating expressions. Expressions may create delete and
+remove {\sf R} objects within an environment, and having first-class
+environments means that environments can be created, deleted and manipulated
+like any other {\sf R} object. {\sf R} environments are therefore employed to
+store state information in a choice point.
+
+
+
+
+
+
+
+
+
+
 
 
 \subsection{Error localization with {\tt cp.editmatrix}}
