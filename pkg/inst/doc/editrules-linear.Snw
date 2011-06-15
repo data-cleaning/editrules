@@ -10,7 +10,11 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
+
 \DeclareMathOperator*{\argmin}{\arg\!\min}
+\newcommand{\pop}{\textrm{\sc pop}}
+\newcommand{\push}{\textrm{\sc push}}
+\newcommand{\env}{\ensuremath{\mathcal{E}}}
 
 \usepackage{float}
  
@@ -18,7 +22,8 @@
 \newfloat{Rcode}{t}{rco}
 \floatname{Rcode}{Figure}
  
-
+\algblock[structure]{Struct}{EndStruct}
+\algblock[method]{Method}{EndMethod}
 
 % stimulate latex to put multiple floats on a page.
 \setcounter{topnumber}{2}
@@ -490,7 +495,7 @@ of rows.
 A full Fourier-Motzkin operation on a system of inequalities involves
 eliminating variables (where possible) one by one from the augmented matrix
 $[{\bf A|b}]$. Eliminating a single variable is an important step in the error
-localization algorithms elaborted in Section \ref{errorlocalization}. 
+localization algorithms elaborated in Section \ref{serrorlocalization}. 
 
 Consider a system of inequalities ${\bf Ax}\leq {\bf b}$.  The $j^{\rm th}$
 variable  is eliminated by generating a positive combination of every row of
@@ -597,6 +602,7 @@ iteration to ensure that the derivation history is updated at every step.}
 \label{ReliminateFM}
 \end{Rcode}
 
+\clearpage
 
 \section{Error localization for numerical data}
 \label{serrorlocalization}
@@ -841,7 +847,7 @@ error localization routine.
 The number of partial error localization problems to be treated
 grows as $2n_{\rm eq}+n_{\rm ineq}$, where $n_{\rm eq}$ is the number
 of equalities and $n_{\rm ineq}$ the number of inequalities in $E_0$.
-This is easily derived from Eq.\ \eqref{editexpansion} since by De Morgan's law
+This is easily derived from Eq.\ \eqref{editexpansion} since by De Morgan's rule
 \begin{equation}
 \overline{E}_0=\overline{e_1\land e_2\land\ldots \land e_k} 
 = \overline{e}_1\lor\overline{e}_2\lor\ldots\lor\overline{e}_k.
@@ -875,39 +881,75 @@ Branch-and-Bound algorithm of subsection \ref{sgeneralfellegiholt} is just a
 specific example. Moreover, {\sf R} is ideally suited to develop choice
 point-like systems since {\sf R} has first-class environments. An {\sf R}
 environment can be thought of as a list of name-value pairs of {\sf R} objects,
-which are used when evaluating expressions. Expressions may create delete and
-remove {\sf R} objects within an environment, and having first-class
-environments means that environments can be created, deleted and manipulated
-like any other {\sf R} object. {\sf R} environments are therefore employed to
-store state information in a choice point.
+forming the scope for expressions evaluation. Expressions may create,
+manipulate and remove {\sf R} objects within an environment. Having first-class
+environments means that new environments can be created, deleted and
+manipulated like any other {\sf R} object. In {\sf R}, environments can be
+nested and there are mechanisms to control which environment is used to evaluate
+a certain expression. Nesting has another effect: the symbols (variable names) used
+in an expression are matched to symbols in the evaluation environment to substitute
+the values. If no match is found, the enveloping environment is searched.
+
+We will denote the result of evaluating an expression $\phi$ in an environment
+$\env$ as $\phi(\env)$.  One can think of $\phi$ as a subroutine which alters
+the internal state of \env.  It is also possible for $\phi$ to generate a
+return value (by issuing a {\tt return} statement) which is pushed to the encompassing
+environment. Finally, we note that expressions
+
+The binary choicepoint mechanism implemented here uses a sequence of nested
+environments to store a sequence of nodes in a search tree. The user must
+provide expressions to be evaluated at the left and right node, an expression
+to initialize the first environment and an expression which judges whether
+an environment contains a solution or not.
 
 
-\begin{algorithmic}
-\Require Expressions $\phi_0$, $\phi_l$, $\phi_r$, an expression $\psi$, with
+
+
+
+
+
 \begin{displaymath}
-\psi(\mathcal{E}) = \left\{\begin{array}{ll}
+\psi(\env) = \left\{\begin{array}{ll}
 \textrm{\sc true} &\textrm{ if environment } \mathcal{E}\textrm{ contains a solution}\\
 \textrm{\sc false}&\textrm{ if environment } \mathcal{E}\textrm{ cannot lead to a solution}\\
 \textrm{\sc null}&\textrm{ if environment } \mathcal{E}\textrm{ contains no solution}
 \end{array}\right.
 \end{displaymath}
-\State $\mathcal{E}\leftarrow\phi_0(\mathcal{E}_0)$ \Comment{$\phi_0$ can be used for variable initialisation}
-\State $\mathcal{E}::\textrm{treatedleft}\leftarrow \textrm{\sc false}$
-\State $\mathcal{E}::\textrm{treatedright}\leftarrow \textrm{\sc false}$
-\While{$\psi(\mathcal{E})\in\{\textrm{\sc false},\textrm{\sc null}\} \land \mathcal{E}\not=\textrm{\sc null}$ }
-\State $\textrm{\sc push }\mathcal{E}$
-\If{$\neg\mathcal{E}::\textrm{treatedleft}$}
-\State $\mathcal{E}::\textrm{treatedleft}\leftarrow \textrm{\sc true}$
-\State $\textrm{\sc push }\phi_l(\mathcal{E})$
-\ElsIf{$\neg\mathcal{E}::\textrm{treatedright}$}
-\State $\mathcal{E}::\textrm{treatedright}\leftarrow \textrm{\sc true}$
-\State $\textrm{\sc push }\phi_r(\mathcal{E})$
+
+\newpage
+
+\begin{algorithm}
+\caption{Choicepoint object}
+\label{choicepoint}
+\begin{algorithmic}
+\Struct\:  {\sc choicePoint} $(\phi_0,\phi_l,\phi_r,\psi)$
+\State $\mathcal{S}\leftarrow\textrm{\sc newStack}$
+\State $\env\leftarrow\textrm{\sc newEnvironment}$ 
+\State $\env::\textrm{treatedleft}\leftarrow \textrm{\sc false}$
+\State $\env::\textrm{treatedright}\leftarrow \textrm{\sc false}$
+\State $\phi_0(\env)$ \Comment{$\phi_0$ Initializes the top environment}
+\State $\push(\env,\mathcal{S})$
+\Method\: {\sc searchNext}
+\State $\env\leftarrow\pop(\mathcal{S})$ 
+\While{$\psi(\env)\in\{\textrm{\sc false},\textrm{\sc null}\} \land \mathcal{E}\not=\textrm{\sc null}$ }
+\State $\env'\leftarrow \env$
+\State $\textrm{\sc push }\env'$
+\If{$\neg\env::\textrm{treatedleft}$}
+\State $\phi_l(\env)$
+\State $\env::\textrm{treatedleft}\leftarrow \textrm{\sc true}$
+\State $\push(\env,\mathcal{S})$
+\ElsIf{$\neg\env::\textrm{treatedright}$}
+\State $\phi_r(\env)$
+\State $\env::\textrm{treatedright}\leftarrow \textrm{\sc true}$
+\State $\push(\env,\mathcal{S})$
 \EndIf
-\State $\textrm{\sc pop}$
+\State $\env\leftarrow\pop(\mathcal{S})$ 
 \EndWhile
 \Return $\mathcal{E}$
+\EndMethod
+\EndStruct
 \end{algorithmic}
-
+\end{algorithm}
 
 
 
