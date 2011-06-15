@@ -12,8 +12,8 @@
 \usepackage{threeparttable}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
-\newcommand{\pop}{\textrm{\sc pop}}
-\newcommand{\push}{\textrm{\sc push}}
+\newcommand{\pop}{\ensuremath{\textrm{\sc pop}}}
+\newcommand{\push}{\ensuremath{\textrm{\sc push}}}
 \newcommand{\env}{\ensuremath{\mathcal{E}}}
 
 \usepackage{float}
@@ -864,8 +864,8 @@ As stated in subsection \ref{sgeneralfellegiholt}, the error localization
 problem can be interpreted as a (pruned) binary programming problem. To
 facilitate implementation of error localization for numerical, categorical and
 mixed data, as well as to help further research in error localization
-algorithms it was deceided to implement general-purpose binary search
-functionality in the form of binary choice point programming.
+algorithms, general-purpose binary search functionality was implemented in the
+form of binary choice point programming.
 
 The term ``choice point'' stems from the field of nondeterministic programming.
 In nondeterministic programming, the control flow of a program is not
@@ -877,24 +877,31 @@ programming environments, such as {\sf Alma-0} \citep{partington:1997} and {\sf
 ELAN} \citep{vittek:1996}. See \cite{moreau:1998} for a clear introduction or
 \cite{mart:2002} for a bibliographic overview. The choice point paradigm offers
 an excellent environment for programming backtracking algorithms, of which the
-Branch-and-Bound algorithm of subsection \ref{sgeneralfellegiholt} is just a
-specific example. Moreover, {\sf R} is ideally suited to develop choice
-point-like systems since {\sf R} has first-class environments. An {\sf R}
-environment can be thought of as a list of name-value pairs of {\sf R} objects,
-forming the scope for expressions evaluation. Expressions may create,
-manipulate and remove {\sf R} objects within an environment. Having first-class
-environments means that new environments can be created, deleted and
-manipulated like any other {\sf R} object. In {\sf R}, environments can be
-nested and there are mechanisms to control which environment is used to evaluate
-a certain expression. Nesting has another effect: the symbols (variable names) used
-in an expression are matched to symbols in the evaluation environment to substitute
-the values. If no match is found, the enveloping environment is searched.
+branch-and-bound algorithm of subsection \ref{sgeneralfellegiholt} is just a
+specific example. 
+
+The {\sf R} language is ideally suited to develop choice point-like systems
+because of its first-class environments. An {\sf R} environment can be thought
+of as a list of {\sf R} objects, forming the scope for expression evaluation.
+Expressions are a series of R statements which may create, manipulate and
+remove {\sf R} objects within an environment. Having first-class environments
+means that expressions can also be used to create, manipulate and delete
+environments like any other {\sf R} object. Moreover, expressions can be
+evaluated in any environment created by the programmer. 
+
+In our implementation, a sequence of connected nodes in a binary search tree is
+represented by a sequence of nested environments. Such a series of nested
+environments is equivalent to a stack, where a \push-operation corresponds to
+nesting a new environment and a \pop-operation ensures that the next expression
+will be evaluated in the last-pushed environment. The user provides an
+expression to initialize the root node, expressions to be evalated at left and
+right child nodes and an expression to evaluate a node.
 
 We will denote the result of evaluating an expression $\phi$ in an environment
-$\env$ as $\phi(\env)$.  One can think of $\phi$ as a subroutine which alters
-the internal state of \env.  It is also possible for $\phi$ to generate a
-return value (by issuing a {\tt return} statement) which is pushed to the encompassing
-environment. Finally, we note that expressions
+$\env$ as $\phi(\env)$. One can think of $\phi$ as a subroutine which alters
+the internal state of \env. It is also possible for $\phi$ to generate a return
+value (by issuing a {\tt return} statement) which is pushed to the enveloping
+environment, similar to the action of a standard function. 
 
 The binary choicepoint mechanism implemented here uses a sequence of nested
 environments to store a sequence of nodes in a search tree. The user must
