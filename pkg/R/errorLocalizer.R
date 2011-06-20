@@ -34,7 +34,7 @@
 #' @return an object of class \code{\link{choicepoint}}. Each execution of \code{$searchNext()} yields a solution
 #'      in the form of a \code{list} (see details).
 #'
-#' @example examples/cpeditmatrix.R
+#' @example examples/errorLocalizer.R
 #'
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
