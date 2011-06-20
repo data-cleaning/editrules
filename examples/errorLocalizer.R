@@ -2,7 +2,7 @@
 # example with a single editrule
 # p = profit, c = cost, t = turnover
 E <- editmatrix(c("p + c == t"))
-cp <- cp.editmatrix(E, x=c(p=755, c=125, t=200))
+cp <- errorLocalizer(E, x=c(p=755, c=125, t=200))
 # x obviously violates E. With all weights equal, changing any variable will do.
 # first solution:
 cp$searchNext()
@@ -15,7 +15,7 @@ cp$searchNext()
 cp$searchNext()
 
 # Increasing the reliability weight of turnover, yields 2 solutions:
-cp <- cp.editmatrix(E, x=c(p=755, c=125, t=200), weight=c(1,1,2))
+cp <- errorLocalizer(E, x=c(p=755, c=125, t=200), weight=c(1,1,2))
 # first solution:
 cp$searchNext()
 # second solution:
@@ -29,14 +29,14 @@ cp$searchNext()
 E <- editmatrix(c(
         "p + c == t",
         "c - 0.6*t >= 0"))
-cp <- cp.editmatrix(E,x=c(p=755,c=125,t=200))
+cp <- errorLocalizer(E,x=c(p=755,c=125,t=200))
 # Now, there's only one solution, but we need two runs to find it (the 1st one has higher weight)
 cp$searchNext()
 cp$searchNext()
 # Note that the editmatrix in the solution object suggests the actual unique value.
 
 # With the searchBest() function, the lowest weifght solution is found at once:
-cp.editmatrix(E,x=c(p=755,c=125,t=200))$searchBest()
+errorLocalizer(E,x=c(p=755,c=125,t=200))$searchBest()
 
 
 # An example with missing data.
@@ -47,7 +47,7 @@ E <- editmatrix(c(
     "c1 > 0",
     "c2 > 0",
     "t > 0"))
-cp <- cp.editmatrix(E,x=c(p=755, c1=50, c2=NA,t=200))
+cp <- errorLocalizer(E,x=c(p=755, c1=50, c2=NA,t=200))
 # (Note that e2 is violated.)
 # There are two solutions. Both demand that c2 is adapted:
 cp$searchNext()

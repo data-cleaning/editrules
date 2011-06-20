@@ -16,5 +16,5 @@ URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
 Depends:
 Suggests: iterators
-Collate: 'check.R' 'choicepoint.R' 'cpeditmatrix.R' 'editmatrixAttr.R'
-    'editmatrix.R' 'eliminate.R' 'findBlocks.R' 'pkg.R' 'reduce.R'
+Collate: 'check.R' 'choicepoint.R' 'editmatrixAttr.R' 'editmatrix.R'
+    'eliminate.R' 'errorLocalizer.R' 'findBlocks.R' 'pkg.R' 'reduce.R'

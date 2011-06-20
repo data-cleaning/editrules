@@ -1,5 +1,4 @@
-#' Localize errors in numerical data
-#' 
+#' Localize errors in a record based on Fellegi and Holt's paradigm
 #' 
 #' Returns a \code{\link{choicepoint}} object for error localization in numerical data.
 #' The returned choicepoint containts methods to search depth-first to the least weighted
@@ -30,7 +29,7 @@
 #'
 #' @param E an \code{\link{editmatrix}}
 #' @param x a named numerical vecor. The record for which errors will be localized.
-#' @param weight a weight vector of length x
+#' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
 #' @return an object of class \code{\link{choicepoint}}. Each execution of \code{$searchNext()} yields a solution
 #'      in the form of a \code{list} (see details).
@@ -46,7 +45,21 @@
 #' http://www.cbs.nl/nl-NL/menu/methoden/onderzoek-methoden/onderzoeksrapporten/proefschriften/2008-proefschrift-de-waal.htm
 #' 
 #' @export
-cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
+errorLocalizer <- function(E, x, ...){
+    UseMethod("errorLocalizer")
+}
+
+
+#' Localize errors in numerical data
+#'
+#' @method errorLocalizer editmatrix
+#' 
+#' @param E Object of class \code{\link{editmatrix}}
+#' @param x Data record, in the form of a named numeric vector.
+#' @param weight Weight vector, of the same length of \code{x}
+#' @param ... arguments to be passed to other methods.
+#' @export
+errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
@@ -106,3 +119,20 @@ cp.editmatrix <- function(E, x, weight=rep(1,length(x))){
     })
     cp
 }
+
+#' Deprecated error localization function.
+#'
+#' This function is replaced by S3 generic \code{\link{errorLocalizer}}.
+#' 
+#'
+#' @param E editmatrix
+#' @param x record
+#' @param ... Arguments to be passed to \code{\link{errorLocalizer}}
+#'
+#' @export
+cp.editmatrix <- function(E,x,...){
+ warning("This function is deprecated. Use errorLocalizer in stead")
+ errorLocalizer(...)
+}
+
+

@@ -1,4 +1,5 @@
-version 0.6-1
+version 0.7
+- BREAKING CHANGE: cp.editmatrix replaced by S3 generic errorLocalizer
 - Vignette ready for review
 - solved bug in documentation of cp.editmatrix
 - solved bug in str.editmatrix
