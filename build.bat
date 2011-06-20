@@ -4,7 +4,7 @@ echo Removing building information...
 rm -rf output
 
 echo Generate documentation...
-R -q -f roxygen.R
+Rscript roxygen.R
 echo export(`[.editmatrix`) >> pkg/NAMESPACE
 
 md output

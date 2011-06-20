@@ -5,7 +5,9 @@ A , x == y         , "these variables should be equal"
 B , z + w == y + x ,
 C , z == y + 2*w   ,
 '
-E.df <- read.csv(textConnection(E.csv))			
+con <- textConnection(E.csv)
+E.df <- read.csv(con)			
+close(con)
 
 print(E.df)
 # Create the editmatrix from the editrules

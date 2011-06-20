@@ -52,13 +52,3 @@ cp <- errorLocalizer(E,x=c(p=755, c1=50, c2=NA,t=200))
 # There are two solutions. Both demand that c2 is adapted:
 cp$searchNext()
 cp$searchNext()
-
-
-
-
-
-
-
-
-
-
