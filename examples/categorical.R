@@ -65,10 +65,12 @@ neweditarray <- function(E, ind, names=rownames(E), levels=colnames(E)){
     if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
-        class  ="editarray",
+        class  = "editarray",
         ind    = ind
     )
 }
+
+getVars.editarray <- function(E) names(attr(E,"ind"))
 
 #' Generate a single edit restriction
 #'
@@ -143,7 +145,8 @@ contains <- function(E,var){
 }
 
 
-# eliminate one category from a logical array
+# eliminate one category from a logical array, not for export.
+# TODO redundancy removal by recording derivation history.
 eliminateCat <- function(A, J, j){
     j1 <- A[,J[j]]
     j2 <- !j1
@@ -161,12 +164,12 @@ eliminateCat <- function(A, J, j){
 # TODO  1. prove that this works --DONE 23.05.2011
 #       2. redundancy removal    --DONE. 23.05.2011
 #       3. robustness for empty arrays etc. --Needs testing
-eliminateVar <- function(E, var){
+eliminateFM.editarray <- function(E, var){
     J <- getInd(E)[[var]]
     A <- getArr(E)
     for ( j in 1:length(J)){
          red <- duplicated(A) | isObviouslyRedundant.array(A)
-         A <- eliminateCat(A[!red,],J,j)
+         A <- eliminateCat(A[!red,,drop=FALSE],J,j)
     }
     neweditarray(A,getInd(E), levels=getlevels(E))
 }
@@ -190,12 +193,12 @@ isObviouslyRedundant.array <- function(E, ...){
 }
 
 
-# replace a value in an editmatrix: 
+# replace a value in an editarray: 
 #   remove rows of E for which have var[value] == FALSE
 #   set levels of var[!value] to FALSE
-replaceValue.editmatrix <- function(E, var, value){
+replaceValue.editarray <- function(E, var, value){
     J <- getInd(E)[[var]]
-    ival <- intersect(which(colnames(E) == value), J)
+    ival <- intersect(which(colnames(E) == value), J) 
     if ( length(ival) != 1 ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
     ii <- setdiff(J,ival)
@@ -203,6 +206,80 @@ replaceValue.editmatrix <- function(E, var, value){
     A[,ii] <- FALSE
     I <- A[,ival] 
     neweditarray(A[I,,drop=FALSE], getInd(E), levels=getlevels(E))
+}
+
+# isObviouslyInfeasible should be lifted to S3 generic.
+# check if any of the variables has FALSE for every category.
+isObviouslyInfeasible.editarray <- function(E){
+    ind <- getInd(E)
+    for ( I in ind ) if ( any(apply(!E[,I,drop=FALSE],1,all)) ) return(TRUE)
+    return(FALSE)
+}
+
+
+violatedEdits.editarray <- function(E,x){
+    if ( is.data.frame(x)) x <- sapply(x,as.character)
+    apply(x,1, function(r) 
+        apply(E[,r],1,all)
+    )
+}
+
+
+# choicepoint object for error localization in categorical data.
+# E: editarray, x: character vector.
+# This function will become obsolete if the workhorse functions are overloaded.
+# TODO: deceide at which level the overloading / specialization limit lies.
+#
+errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
+    adapt <- is.na(x)
+
+    o <- order(weight, decreasing=TRUE)
+    totreat <- names(x)[o[!adapt]]
+
+    # x in direct sum representation
+    y <- rep(FALSE,ncol(E))
+    names(y) <- colnames(E)
+    y[x] <- TRUE # assumption: category names are unique over all cat. variables.
+
+    vars <- getVars.editarray(E)
+    for (v in vars[adapt & names(x) %in% vars]) E <- eliminateFM.editarray(E,v)
+    wsol <- sum(weight)
+    cp <- choicepoint(
+        isSolution = {
+            w <- sum(weight[adapt])
+            if ( w > wsol || isObviouslyInfeasible.editarray(E) ) return(FALSE)
+   
+#            if ( any( apply(E[,x[!adapt],drop=FALSE],1,all)) ) return(FALSE) 
+            if (length(totreat) == 0){
+                             
+
+                wsol <<- w
+                adapt <- adapt 
+                rm(totreat)
+                return(TRUE)
+            }
+        },
+        choiceLeft = {
+            .var <- totreat[1]
+            E <- replaceValue.editarray(E, .var , x[.var])
+            adapt[.var] <- FALSE
+            totreat <- totreat[-1]
+        },
+        choiceRight = {
+            .var <- totreat[1]
+            E <- eliminateFM.editarray(E, .var)
+            adapt[.var] <- TRUE
+            totreat <- totreat[-1]
+        },
+        E = E,
+        x = x,
+        totreat = totreat,
+        adapt = adapt,
+        weight = weight,
+        wsol = wsol,
+        ind = getInd(E)
+    )
+    cp
 }
 
 
@@ -224,9 +301,31 @@ E <- editarray(
         positionInHousehold = "marriage partner")
 )
 
+
+
+
 # derived edit, by eliminating civilStatus: you cannot be a marriage
 # partner in a household whe you're under 16:
-eliminateVar(E,"civilStatus")
+eliminateFM.editarray(E,"civilStatus")
+replaceValue.editarray(E,"civilStatus","married")
+
+x <- c(civilStatus="married",age="< 16",positionInHousehold = "marriage partner")
+
+cp <- errorLocalizer.editarray(E,x)
+print(cp$searchNext())
+print(cp$searchNext())
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
