@@ -1,1 +1,1 @@
-R -q -f autotest.R
+Rscript autotest.R
