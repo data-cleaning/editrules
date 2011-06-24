@@ -1,4 +1,5 @@
-
+rm(list=ls())
+require(editrules)
 # simple edit manipulation with categorical edits.
 # m, 04.05.2011
 
@@ -49,26 +50,37 @@ editindex <- function(dm){
     sapply(names(dm), function(n) which(n==S)) 
 }
 
-
-
 #' @nord
 print.editarray <- function(x, ...){
     cat("editarray:\n")
-    print(unclass(x)[,])
+    print(data.frame(getArr(x),n=getN(x)))
 }
 
 #' editarray: logical array where every column corresponds to one
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
 #' @nord
-neweditarray <- function(E, ind, names=rownames(E), levels=colnames(E)){
+neweditarray <- function(E, ind, n=NULL, names=NULL, levels=colnames(E)){
     if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
+    if ( is.null(n) ) n <- rep(length(ind), nrow(E))
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",
-        ind    = ind
+        ind    = ind,
+        n      = n
     )
 }
+
+# number of variables involved in the edits in E
+nInvolved <- function(E){
+    ind <- getInd(E)
+    apply(E,1,function(e){
+        sum(sapply(ind,
+            function(I) if (sum(e[I]) < length(I))  1 else 0
+        ))
+    })
+}
+
 
 getVars.editarray <- function(E) names(attr(E,"ind"))
 
@@ -112,9 +124,12 @@ editarray <- function(...){
 #' @nord
 getInd <- function(E) attr(E,"ind")
 
+
 #' @nord
 getArr <- function(E) E[,,drop=FALSE]
 
+#' @nord
+getN <- function(E) attr(E,"n")
 
 #' @nord
 getlevels <- function(E) colnames(E)
@@ -147,18 +162,20 @@ contains <- function(E,var){
 
 # eliminate one category from a logical array, not for export.
 # TODO redundancy removal by recording derivation history.
-eliminateCat <- function(A, J, j){
+eliminateCat <- function(A, n, J, j){
     j1 <- A[,J[j]]
     j2 <- !j1
     n1 <- sum(j1)
     n2 <- sum(j2)
-    if (n1==0 || n2==0) return(A)
+    if (n1==0 || n2==0) return(list(A=A,n=n))
     I1 <- rep(which(j1), times=n2)
     I2 <- rep(which(j2), each=n1)
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
     B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
     B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    B
+    print(B)
+    print(pmax(n[I1],n[I2]))
+    list(A=B, n=pmax(n[I1],n[I2]))
 }
 
 # TODO  1. prove that this works --DONE 23.05.2011
@@ -167,11 +184,14 @@ eliminateCat <- function(A, J, j){
 eliminateFM.editarray <- function(E, var){
     J <- getInd(E)[[var]]
     A <- getArr(E)
+    n <- getN(E)
     for ( j in 1:length(J)){
          red <- duplicated(A) | isObviouslyRedundant.array(A)
-         A <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         L <- eliminateCat(A[!red,,drop=FALSE],n[!red],J,j)
+         A <- L$A
+         n <- L$n
     }
-    neweditarray(A,getInd(E), levels=getlevels(E))
+    neweditarray(E=A, ind=getInd(E),n=n, levels=getlevels(E))
 }
 
 # duplicated method for editarray
@@ -196,16 +216,18 @@ isObviouslyRedundant.array <- function(E, ...){
 # replace a value in an editarray: 
 #   remove rows of E for which have var[value] == FALSE
 #   set levels of var[!value] to FALSE
-replaceValue.editarray <- function(E, var, value){
+substValue.editarray <- function(E, var, value){
     J <- getInd(E)[[var]]
     ival <- intersect(which(colnames(E) == value), J) 
     if ( length(ival) != 1 ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
     ii <- setdiff(J,ival)
     A <- getArr(E)
+    n <- getN(E) - A[,ival]     
     A[,ii] <- FALSE
-    I <- A[,ival] 
-    neweditarray(A[I,,drop=FALSE], getInd(E), levels=getlevels(E))
+#    A[,J] <- TRUE
+    I <- A[,ival]
+    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), n=n[I], levels=getlevels(E))
 }
 
 # isObviouslyInfeasible should be lifted to S3 generic.
@@ -214,6 +236,23 @@ isObviouslyInfeasible.editarray <- function(E){
     ind <- getInd(E)
     for ( I in ind ) if ( any(apply(!E[,I,drop=FALSE],1,all)) ) return(TRUE)
     return(FALSE)
+}
+
+isSolvable <- function(E, x, adapt){
+    A <- getArr(E)
+    vars <- getVars.editarray(E)
+    n <- length(vars)
+    for ( i in which(!adapt) ){ 
+        n <- n - A[,x[vars[i]]]
+    }
+    if ( any(n <=0 ) ) return(FALSE)
+    ind <- getInd(E)[adapt]
+    m <- apply(E,1,function(e){
+        sum(sapply(ind,function(I) if ( any(!e[I]) ) 1 else 0 ))
+    })
+    cat(paste("n:",paste(n,collapse=","),"\n"))
+    cat(paste("m:",paste(m,collapse=","),"\n"))
+    return(all(m <= (n-1)))
 }
 
 
@@ -249,10 +288,8 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
             w <- sum(weight[adapt])
             if ( w > wsol || isObviouslyInfeasible.editarray(E) ) return(FALSE)
    
-#            if ( any( apply(E[,x[!adapt],drop=FALSE],1,all)) ) return(FALSE) 
             if (length(totreat) == 0){
-                             
-
+                if (!isSolvable(E1,x,adapt)) return(FALSE) 
                 wsol <<- w
                 adapt <- adapt 
                 rm(totreat)
@@ -261,7 +298,7 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
         },
         choiceLeft = {
             .var <- totreat[1]
-            E <- replaceValue.editarray(E, .var , x[.var])
+            E <- substValue.editarray(E, .var , x[.var])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
@@ -272,6 +309,7 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
             totreat <- totreat[-1]
         },
         E = E,
+        E1=E,
         x = x,
         totreat = totreat,
         adapt = adapt,
@@ -286,7 +324,7 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
 # example from method series
 D <- data.model(
     civilStatus = c("married","unmarried","widowed","divorced"),
-    age = c("< 16",">= 16"),
+    age = c("under16","over15"),
     positionInHousehold = c("marriage partner","child","other")
 )
 
@@ -294,10 +332,8 @@ D <- data.model(
 #   1. you cannot be married under 16 yrs
 #   2. you cannot be a marriage partner in the household if you're not married
 E <- editarray(
-    forbid(D, age = "< 16", civilStatus = "married"),
+    forbid(D,  civilStatus = "married", age = "under16"),
     forbid(D, civilStatus = c("unmarried", "widowed","divorced"), 
-        positionInHousehold = "marriage partner"),
-    forbid(D, civilStatus = c("widowed","divorced"), 
         positionInHousehold = "marriage partner")
 )
 
@@ -306,16 +342,14 @@ E <- editarray(
 
 # derived edit, by eliminating civilStatus: you cannot be a marriage
 # partner in a household whe you're under 16:
-eliminateFM.editarray(E,"civilStatus")
-replaceValue.editarray(E,"civilStatus","married")
+print(eliminateFM.editarray(E,"civilStatus"))
+substValue.editarray(E,"civilStatus","married")
 
-x <- c(civilStatus="married",age="< 16",positionInHousehold = "marriage partner")
+x <- c(civilStatus="married",age="under16",positionInHousehold = "marriage partner")
 
-cp <- errorLocalizer.editarray(E,x)
-print(cp$searchNext())
-print(cp$searchNext())
-
-
+#cp <- errorLocalizer.editarray(E,x)
+#print(cp$searchNext())
+#print(cp$searchNext())
 
 
 
@@ -328,23 +362,6 @@ print(cp$searchNext())
 
 
 
-
-#D <- data.model(
-#    sex = c("male","female"),
-#    pregnant = c("yes","no"),
-#    age = c("child","adult","old age")
-#)
-
-# define some edits
-#E <- editarray(
-#    forbid(D, sex="male", pregnant="yes", name="e1"),
-#    forbid(D, age=c("child", "old age"), pregnant="yes", name="e2")
-#)
-# derive a new edit, using "age" as generating variable.
-#combine(E,"age")
-
-# should yield the same as this:
-# forbid(D, pregnant="yes", age=c("child","old age"))
 
 
 

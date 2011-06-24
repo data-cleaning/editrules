@@ -8,15 +8,15 @@ E[getOps(E) == "=="]
 
 
 #Using data.frame to define constraints
-E.csv <- 
-'name , edit       , description
-A , x == y         , "these variables should be equal"
-B , z + w == y + x ,
-C , z == y + 2*w   ,
-'
-con <- textConnection(E.csv)
-E.df <- read.csv(con)
-close(con)
+E.df <- data.frame(
+    name =c("A","B","C"),
+    edit = c("x == y",    
+            "z + w == y + x",
+            "z == y + 2*w"),
+    description = c(
+            "these variables should be equal","","")
+
+)
 print(E.df)
 
 E <- editmatrix(E.df)

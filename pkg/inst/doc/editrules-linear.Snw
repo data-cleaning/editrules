@@ -218,26 +218,14 @@ possible to name and comment edits by reading them from a {\tt data.frame}.
 
 \begin{Rcode}[t]
 <<keep.source=true>>=
-# generate a csv text string
-E.csv <- 
-'name , edit              , description
-"b1"  ,    t == ct + p    ,  "total balance"
-"b2"  ,    ct == ch + cp  ,  "cost balance"
-"s1"  ,    p <= 0.6*t     ,  "profit sanity"
-"s2"  ,    cp <= 0.3*t    ,  "personell cost sanity"
-"s3"  ,    ch <= 0.3*t    ,  "housing cost sanity"
-"p1"  ,    t >0           ,  "turnover positivity"
-"p2"  ,    ch > 0         ,  "housing cost positivity"
-"p3"  ,    cp > 0         ,  "personel cost positivity"
-"p4"  ,    ct > 0         ,  "total cost positivity"'
-# read into a data.frame
-E.df <- read.csv(textConnection(E.csv))
-# transform to an editmatrix
-editmatrix(E.df)
+data(edits)
+edits
+editmatrix(edits)
 @
-\caption{Declaring an editmatrix with a {\tt data.frame}. The input {\tt data.frame} is required to have three columns named
-{\tt name},(edit name, stored as rowname of augmented matrix) {\tt edit} (textual representation of the edit rule) 
-and {\tt description} (a comment stating the intent of the rule). All must be of type {\tt character}.}
+\caption{Declaring an editmatrix with a {\tt data.frame}. The input {\tt
+data.frame} is required to have three columns named {\tt name}, {\tt edit}
+(textual representation of the edit rule) and {\tt description} (a comment
+stating the intent of the rule). All must be of type {\tt character}.}
 \end{Rcode}
 %
 
@@ -421,15 +409,15 @@ Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
 replacing the $j^{\rm th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
 replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
-purposes, Algorithm \ref{replaceValue} spells out the substitution routine.
-The function was named {\tt replaceValue} since {\tt substitute} is already
-defined in the R-base. Figure \ref{RreplaceValue} shows how {\tt replaceValue}
+purposes, Algorithm \ref{substValue} spells out the substitution routine.
+The function was named {\tt substValue} since {\tt substitute} is already
+defined in the R-base. Figure \ref{RsubstValue} shows how {\tt substValue}
 can be called from the R environment.
 %
 %
 \begin{algorithm}[t]
-\caption{{\sc replaceValue}$(E,j,x)$}
-\label{replaceValue}
+\caption{{\sc substValue}$(E,j,x)$}
+\label{substValue}
 \begin{algorithmic}
 \Require $E=\langle [{\bf A}=[{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_j ,\ldots, {\bf a}_n]|{\bf b}],\boldsymbol{\odot}\rangle$, 
     $x\in\mathbb{R}$, $j\in \{1,2,\ldots n\}$
@@ -441,10 +429,10 @@ can be called from the R environment.
 
 \begin{Rcode}
 <<>>=
-replaceValue(E,"t",10)
+substValue(E,"t",10)
 @
-\caption{Substituting the value 10 for the turnover variable using the {\tt replaceValue} function.}
-\label{RreplaceValue}
+\caption{Substituting the value 10 for the turnover variable using the {\tt substValue} function.}
+\label{RsubstValue}
 \end{Rcode}
 
 
@@ -1132,7 +1120,7 @@ the enveloping environment, and removing the empty vector {\tt totreat}.
 
 In {\tt choiceLeft}, the first variable to be treated is chosen and its value
 replacen in the editmatrix. The value of {\tt E} in the call to {\tt
-replaceValue} is copied automagically from the enveloping environment which by
+substValue} is copied automagically from the enveloping environment which by
 construction holds the parent node of the node under treatment. For the same
 reason the assigning the indexed value of {\tt adapt} the value {\tt FALSE}
 works.  The value corresponding to the variable under treatement in {\tt adapt}
@@ -1165,7 +1153,7 @@ cp <- choicepoint(
     },
     choiceLeft = {  # things to do in the left node
         .var <- totreat[1]
-        E <- replaceValue(E, .var , r[.var])
+        E <- substValue(E, .var , r[.var])
         adapt[.var] <- FALSE
         totreat <- totreat[-1]
     },

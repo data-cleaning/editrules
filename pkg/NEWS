@@ -1,5 +1,8 @@
 version 0.7
-- BREAKING CHANGE: cp.editmatrix replaced by S3 generic errorLocalizer
+- added as.character coercions in editmatrix to solve crash in R2.13-patched
+- BREAKING CHANGE: replaceValues renamed to substValues. Currently warns, will emit error in next release.
+- BREAKING CHANGE: cp.editmatrix renamed to errorLocalizer and now S3 generic. Currently warns, will emit error in next release.
+- getC and getMatrix are deprecated and now emit errors.
 - Vignette ready for review
 - solved bug in documentation of cp.editmatrix
 - solved bug in str.editmatrix

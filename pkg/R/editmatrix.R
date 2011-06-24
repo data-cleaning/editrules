@@ -139,9 +139,9 @@ editmatrix <- function( editrules
       editrules <- NULL
     }
     else if (is.data.frame(editrules)){
-      name <- editrules$name
-      edit <- editrules$edit
-      description <- editrules$description
+      name <- as.character(editrules$name)
+      edit <- as.character(editrules$edit)
+      description <- as.character(editrules$description)
 
       if (is.null(edit)){
          stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")

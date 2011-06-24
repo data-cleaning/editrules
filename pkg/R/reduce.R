@@ -80,14 +80,14 @@ echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
 #'
 #' Note that the resulting \code{\link{editmatrix}} may be inconsistent because of inconsistencies in
 #' \eqn{\tilde{\bf x}}.
-#' 
+#' @aliases replaceValue
 #' @param E \code{editmatrix} object
 #' @param var \code{character} with name of variable
 #' @param value \code{numeric} with value of variable
 #' @return reduced edit matrix 
 #'
 #' @export
-replaceValue <- function(E, var, value){
+substValue <- function(E, var, value){
     v <- match(var, getVars(E), nomatch=0)
     if (v==0){
         stop("Parameter var (", var, ") is not a variable of editmatrix E")
@@ -98,3 +98,11 @@ replaceValue <- function(E, var, value){
     E[,v] <- 0
     E[!isObviouslyRedundant(E),]
 }
+
+#' @nord
+#' @export
+replaceValue <- function(...){
+    warning("replaceValue is deprecated. Use substValue in stead.")
+    substValue(...)
+}
+

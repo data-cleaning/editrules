@@ -32,7 +32,8 @@
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
 #' @return an object of class \code{\link{choicepoint}}. Each execution of \code{$searchNext()} yields a solution
-#'      in the form of a \code{list} (see details).
+#'      in the form of a \code{list} (see details). Executing \code{$searchBest()} returns the lowest-weight solution.
+#'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example examples/errorLocalizer.R
 #'
@@ -89,7 +90,7 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
         },
         choiceLeft = {
             .var <- totreat[1]
-            E <- replaceValue(E, .var , x[.var])
+            E <- substValue(E, .var , x[.var])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
@@ -109,13 +110,15 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     
     # add a searchBest function, currently returns last solution (which has the lowest weight)
     with(cp,{
-       # quick coding: only the last solution is returned, there may be other solutions with equal weight
-       # maybe we should do a random permutation of the variables (with equal weight) so all best solutions have the
-       # same probability of being returned. Other solution is to return a list of solutions
-       searchBest <- function(..., VERBOSE=FALSE){
-           l <- searchAll(...,VERBOSE=VERBOSE)
-           if (length(l)) return(l[[length(l)]])
-       }
+        searchBest <- function(..., VERBOSE=FALSE){
+            l <- searchAll(...,VERBOSE=VERBOSE)
+            if (length(l)>1){ # randomize minimal weight solutions
+                ws <- sapply(l,function(s) s$w)
+                return(l[[sample(which(ws==min(ws)),1)]])
+            } else if (length(l)){
+                return(l[[length(l)]])
+            }
+        }
     })
     cp
 }
@@ -128,7 +131,6 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
 #' @param E editmatrix
 #' @param x record
 #' @param ... Arguments to be passed to \code{\link{errorLocalizer}}
-#'
 #' @export
 cp.editmatrix <- function(E,x,...){
  warning("This function is deprecated. Use errorLocalizer in stead")

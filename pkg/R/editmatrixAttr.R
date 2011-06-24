@@ -22,8 +22,7 @@ editrules <- function(x){
 }
 
 getC <- function(E){
-  warning("This function is deprecated. Please use the function getb")
-  getb(E)
+  stop("This function is deprecated. Please use the function getb")
 }
 
 #' Returns the constant part \code{b} of a linear (in)equality
@@ -46,8 +45,7 @@ getb <- function(E){
 
 
 getMatrix <- function(E){
-  warning("This function is deprecated. Please use the function getA")
-  getA(E)
+  stop("This function is deprecated. Please use the function getA")
 }
 
 #' Returns the coefficient matrix \code{A} of linear (in)equalities
