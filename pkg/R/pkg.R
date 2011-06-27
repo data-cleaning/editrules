@@ -1,5 +1,9 @@
-#' Facilitates reading of linear (in)equalities and
-#'    converting them to a matrix format (and vice versa)
+#' Facilitates reading and manipulation of linear
+#'    (in)equalities, converting them into matrix format (and vice versa)
+#'    and checking if data are valid according to these rules. Sets of
+#'    linear edits can be manipulated using Fourier-Motzkin elimination
+#'    and variable substitution and solving error localization problems
+#'    based on the generalized principle of Felligi and Holt.
 #' 
 #' The package \code{editrules} facilitates the reading/parsing of so called "edit rules" or constraints. 
 #' Edit rules are linear (in)equalities used for checking
