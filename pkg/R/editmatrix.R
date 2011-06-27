@@ -139,13 +139,13 @@ editmatrix <- function( editrules
       editrules <- NULL
     }
     else if (is.data.frame(editrules)){
-      name <- as.character(editrules$name)
-      edit <- as.character(editrules$edit)
-      description <- as.character(editrules$description)
-
-      if (is.null(edit)){
+      if (is.null(editrules$edit)){
          stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")
       }            
+      name <- editrules$name
+      edit <- as.character(editrules$edit)
+      description <- editrules$description
+
     }
    else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")

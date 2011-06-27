@@ -1,3 +1,5 @@
+version 0.7-1
+- fixed bug in editmatrix causing crashes in cornercase when "description" column of input is empty.
 version 0.7
 - errorLocalizer gains searchBest() function, returns random solution in case of degeneracy
 - added as.character coercions in editmatrix to solve crash in R2.13-patched
