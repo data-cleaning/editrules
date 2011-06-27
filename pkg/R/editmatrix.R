@@ -258,7 +258,7 @@ is.editmatrix <- function(x){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @param A object to be transformed into an \code{\link{editmatrix}}. \code{A} will be coerced to a matrix.
+#' @param A matrix to be transformed into an \code{\link{editmatrix}}. 
 #' @param b Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
 #' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
 #' @param ... further parameters will be given to \code{editmatrix}
@@ -271,17 +271,23 @@ as.editmatrix <- function( A
                          ){
     if (is.editmatrix(A)){
         return(A)
-    }    
-    vars <- colnames(A)
-    if (is.null(vars)){
-       colnames(A) <- make.names(paste("x", 1:ncol(A), sep=""), unique=TRUE)
+    } 
+    if (!is.matrix(A)){
+        stop("Argument A must be an object of class matrix. ")
+    }   
+    cn <- colnames(A)
+    if (is.null(cn)){
+       cn <- make.names(paste("x", 1:ncol(A), sep=""), unique=TRUE)
     }
     rn <- rownames(A)
     if ( is.null(rn) || length(unique(rn)) != length(rn) ){
-       rownames(A) <- paste("e", 1:nrow(A), sep="")
+       rn <- paste("e", 1:nrow(A), sep="")
     }
-    A <- cbind(as.matrix(A), CONSTANT=b)
-    neweditmatrix(A=A, ops=ops)    
+    A <- cbind(as.matrix(A), b)
+    dimnames(A) <- list(rules=rn,var=c(cn,"CONSTANT"))
+    E <- neweditmatrix(A=A, ops=ops)
+    if (isNormalized(E)) attr(E,"normalized") <- TRUE
+    E
 }
 
 #' Coerce an editmatrix to a normal matrix

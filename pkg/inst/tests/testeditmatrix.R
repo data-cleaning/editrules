@@ -128,3 +128,12 @@ test_that("editmatrix normalize works",{
    ops <- getOps(E)
    expect_equivalent(ops, c("<", "<=", "<","==", "<="))
 })
+
+
+test_that("coercions work",{
+    E <- editmatrix("x+y==z")
+    expect_that(E, is_identical_to(editmatrix(editrules(E)))) 
+    expect_that(E, is_identical_to(as.editmatrix(A=getA(E), b=getb(E), ops=getOps(E))))    
+})
+
+
