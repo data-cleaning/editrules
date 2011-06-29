@@ -1,3 +1,6 @@
+version 0.7-2
+- `[.editmatrix` now retains derivation history (previously lost in substValue operations)
+
 version 0.7-1
 - made as.errormatrix a bit more robust and solved a cornercase 
 - fixed bug in editmatrix causing crashes in cornercase when "description" column of input is empty.
