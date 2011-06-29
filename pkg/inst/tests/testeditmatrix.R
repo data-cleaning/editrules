@@ -136,4 +136,3 @@ test_that("coercions work",{
     expect_that(E, is_identical_to(as.editmatrix(A=getA(E), b=getb(E), ops=getOps(E))))    
 })
 
-

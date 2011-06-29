@@ -146,7 +146,6 @@ editmatrix <- function( editrules
       edit <- as.character(editrules$edit)
       description <- editrules$description
      }            
-    }
    else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
    }

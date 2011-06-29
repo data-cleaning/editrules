@@ -100,12 +100,12 @@ The {\tt editrules} package for the R statistical computing environment
 \citep{R-core:2011} aims to provide an environment to conveniently define,
 read and check linear (in)equality restrictions, perform common edit
 manipulations and offer error localization functionality based on the
-(generalized) paradigm of \cite{fellegi:1976}. This paradigm is based on the
-assumption that errors are distributed randomly over the variables, and there
-is no detectable cause of error. The paradigm also decouples the detection from
-correction of corrupt variables. Certain causes of error, such as sign flips,
-typing errors or rounding errors can be detected and are closely related to
-their resolution. The reader is referred to the {\tt deducorrect}\index{deducorrect} 
+(generalized) paradigm of \cite{fellegi:1976}. This paradigm assumes
+that errors are distributed randomly over the variables and there
+is no detectable cause of error. It also decouples the detection of corrupt variables from their correction. 
+
+For some types of error, such as sign flips,
+typing errors or rounding errors, this assumption does not hold. These errors can be detected and are closely related to their resolution. The reader is referred to the {\tt deducorrect}\index{deducorrect} 
 package \citep{loo:2011, scholtus:2008, scholtus:2009} for treating such errors. 
 
 The following chapters demonstrates the functionality of the {\tt editrules}
@@ -114,7 +114,6 @@ algorithms. For a detailed per-function description the reader is referred to
 the reference manual accompanying the package. Unless mentioned otherwise,
 all code shown in this paper can be executed from the R commandline after loading
 the {\tt editrules} package.
-
 
 \section{Defining and checking numerical restrictions}
 
@@ -278,7 +277,7 @@ dat <- data.frame(
   t = c(1000, 1200),
  ct = c(400,  200),
  ch = c(100,  350),
- cp = c(500,  575),
+ cp = c(200,  575),
  p =  c(500,  652 ))
 # check for violated edits
 violatedEdits(E,dat)
@@ -290,19 +289,18 @@ The first record violates {\tt e1} and {\tt e2}, the second record violates {\tt
 %
 %
 Indexing of edits with the {\tt [} operator is restricted to selection only. 
-No assignment can be made to indexed {\tt editmatrix} objects. In stead, 
-{\tt as.editmatrix} should be used.
+For changing matrix entries {\tt as.editmatrix} should be used.
 
 \subsection{Obvious redundancy and infeasibility}
-When manipulating linear edit sets by value substitution and/or variable
-elimination, the edit set can become polluted with redundant edits or, when
-variable values are substituted, become infeasible. The {\tt editrules} 
+After manipulating a linear edit set by value substitution and/or variable
+elimination, it can contain redundant edits or become infeasible. 
+The {\tt editrules} 
 package has two methods available which check for easily detectable
 redundancies or infeasibility. The Fourier-Motzkin elimination method
 has auxilary built-in redundancy removal, which is described in Section
 \ref{sfouriermotzkin}.
 
-A system of inequalities $\bf Ax\leq b$ is called infeasible when there is no
+A system of inequalities $\bf Ax\leq b$ is called infeasible or overconstraint when there is no
 real vector $\bf x$ satisfying it. It is a consequence of Farkas' lemma
 (\cite{farkas:1902}, but see \cite{schrijver:1998} and/or \cite{kuhn:1956}) on
 feasibility of sytems of linear equalities, that  a system is infeasible if and
@@ -318,7 +316,9 @@ pseudocode for reference purposes.
 The function {\tt isFeasible} eliminates variables one by one using
 Fourier-Motzkin elimination (Section \ref{sfouriermotzkin}), and checks for obvious
 infeasibilities. If no obvious inconsistencies are found after the last
-variable has been eliminated, the system is consistent.
+variable has been eliminated, the system is consistent. This function is very 
+useful in checking the feasibility of large sets of edits, which may contain
+contradictionary edits after maintenance.
 %
 \begin{algorithm}[t]
 \caption{{\sc isObviouslyInfeasible($E$)}}
@@ -362,8 +362,8 @@ variable has been eliminated, the system is consistent.
 \end{algorithmic}
 \end{algorithm}
 
-When new edits are derived, either by value substitution or by variable
-elimination, redundant rules of the form $0 \leq 1$ or $0=0$ can be generated.
+Both value substitution and variable elimination derive new edits, that may be of 
+the form $0 \leq 1$ or $0=0$.
 The function {\tt isObviouslyRedundant} detects such rules and returns a {\tt
 logical} vector indicating which rows of an {\tt editmatrix} are redundant.
 By default, the function detects row duplicates (within an adjustable tolerance),
@@ -372,26 +372,16 @@ Pseudo-code is given in Algorithm \ref{isObviouslyRedundant}. The actual impleme
 avoids explicit loops and makes use of R's built-in {\tt duplicated} function,
 which is also overloaded for {\tt editmatrix} (see Table \ref{simplemanipulations}).
 
-
-
-
-
-
 \section{Manipulation of linear restrictions}
 There are two fundamental operations possible on edit sets, both of which
 (possibly) reduce the number of variables involved in the edit set. The first,
-most simple one is when a value is substituted into an edit. The second
+most simple one is to substitute a variable with a value. The second
 possibility is variable elimination. For a set of linear equalities, one can
-apply Gaussian elimination, while for sets of inequalities or mixed sets of
-equalities and inequalities Fourier-Motzkin elimination is applied. While
-variable substitution and Gaussian elimination guarantee that the eliminated
+apply Gaussian elimination, while for a set of inequalities or a mixed set of
+equalities and inequalities Fourier-Motzkin elimination can be applied. While
+variable substitution guarantees that the eliminated
 variable is not involved in the derived edit set anymore, this is not
-necessarily the case for Fourier-Motzkin elimination.
-
-
-
-
-
+necessarily the case for Gaussian and Fourier-Motzkin elimination.
 
 \subsection{Value substitution}
 Given a set of $m$ linear edits as defined in Eq.\ \eqref{editset}. For
@@ -404,9 +394,7 @@ Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
 replacing the $j^{\rm th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
 replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
-purposes, Algorithm \ref{substValue} spells out the substitution routine.
-The function was named {\tt substValue} since {\tt substitute} is already
-defined in the R-base. Figure \ref{RsubstValue} shows how {\tt substValue}
+purposes, Algorithm \ref{substValue} spells out the substitution routine. Figure \ref{RsubstValue} shows how {\tt substValue}
 can be called from the R environment.
 %
 %
@@ -469,6 +457,7 @@ Figure \ref{Rechelon} demonstrates a call to the R function.
 \begin{Rcode}
 \small
 <<>>=
+#TODO better example of echelon
 echelon(E)
 @
 \caption{Transforming linear equalities of an editmatrix to
@@ -481,7 +470,7 @@ reduced row echelon form. See Figure \ref{emfromtext} for the original definitio
 \subsection{Fourier-Motzkin elimination}
 \label{sfouriermotzkin}
 Fourier-Motzkin elimination [\cite{fourier:1826,motzkin:1936}, but see
-\cite{williams:1986} for an elaborate or \cite{schrijver:1998} for a consice
+\cite{williams:1986} for an elaborate or \cite{schrijver:1998} for a concise
 description] is an extension of Gaussian elimination to solving systems of
 linear inequalities. While Gaussian elimination is based on the reversible
 operations of row permutation and linear combination, Fourier-Motzkin
@@ -619,7 +608,6 @@ not necessarily uniformly) over one or more of the variables. In that case,
 error localization based on the (generalized) principle of Fellegi and Holt can
 be applied.
 
-
 \subsection{The generalized Fellegi-Holt paradigm} 
 \label{sgeneralfellegiholt}
 In line with the good
@@ -639,12 +627,12 @@ find $G$ such that
 \label{fhproblem}
 \end{eqnarray}
 %
-In other words, for every variable in $\bf x$, we have to deceide wheter to
-adapt it or not. Variables which are not adapted will be replaced with their
-value $x_j$ while variables that will be adapted will have to bereplaced by a
-value $\tilde{x}_j$, which has to to be determined. The solution to
-\eqref{fhproblem} need not be unique, but there is always at least one
-solution unless the edit rules in $E$ are contradictory. 
+In other words, for every variable in $\bf x$, we have to decide wether to
+use or adapt its value. Unadapted variables can be replaced with
+their known value $x_j$ while the values of the remaining variables 
+have to be changed into $\tilde{x}_j$, such that these values form no contradiction. 
+The solution to \eqref{fhproblem} need not be unique, but there is always at least 
+one solution unless the edit rules in $E$ are contradictory. 
 
 The minimization \eqref{fhproblem} amounts to a binary search problem, of which
 the search space increases as $2^n$ ($n$ the number of variables).
@@ -666,7 +654,7 @@ pruned as well.
 
 To clarify the above, in the next subsection we give two worked examples.
 Subsection \eqref{schoicepoint} describes a flexible binary search algorithm,
-which we implememted to support general binary search problems. Subsection
+which we implemented to support general binary search problems. Subsection
 \ref{scpeditmatrix} describes its application to the branch-and-bound algorithm
 mentioned above.
 
@@ -711,7 +699,7 @@ edits $e_1$ and $e_2$, and that the record can be made consistent by altering
 only $y$ and leaving $x$ constant (indicated by the black arrow).  It is also
 clear from the graph that the allowed values for  $y$ are between $1$ and $3$ 
 (indicated by the thin black vertical line in the diamond). The case $(x=0,y=0)$
-also violates $e_1$ and $e_2$ and can only be replaired by altering both $x$ and
+also violates $e_1$ and $e_2$ and can only be repaired by altering both $x$ and
 $y$, while the record $(x=-1,y=2)$ can be repaired by changing $x$ only.
 
 In the following we show that the binary search algorithm described in the
