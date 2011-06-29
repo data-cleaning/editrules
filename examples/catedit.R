@@ -1,6 +1,7 @@
-parseEdits <- function(x){
-   parse(text=x)
-}
+require(editrules)
+ parseEdits <- function(x){
+    parse(text=x)
+ }
 
 
 parseTree <- function(expr,prefix=NULL){
@@ -105,13 +106,13 @@ getVarCat.cateditmatrix <- function(E, ...){
 }
 
 #' @method getVarCat character
-getVarCat.character <- function(x, full.names=FALSE, ...){
-   vc <- sapply(strsplit(x, ":"), function(vc) c(var=vc[1], cat=vc[2]))
-   
-   vc <- if (full.names) split(x, vc[1,])
-         else split(vc[2,], vc[1,])
-   # logical variable don't have categories...
-   vc[is.na(vc)] <- list(NULL) #maybe change this to TRUE? Seems more natural
+getVarCat.character <- function(x, ...){
+   vc <- as.data.frame(t(sapply(strsplit(x, ":")
+                               , function(vc) c(var=vc[1], cat=vc[2])
+                               )
+                        )
+                      )
+   vc$fullname <- x
    vc
 }
 
@@ -129,14 +130,14 @@ as.character.cateditmatrix <- function(E, ...){
     #generate %in% statement
     inclause <- function(varcat, collapse=NULL){
        vc <- getVarCat(varcat)
+       vc <- split(vc$cat, vc$var)
        vc <- sapply( names(vc)
                    , function(var){
                         cats <- vc[[var]]
-                        if (length(cats) == 0){ #this is for a logical variable
-                           return(var)
-                        }
-                        else if (length(cats) == 1){ # cosmetic, for one category we generate an "==" statement
-                           paste(var," == '",cats,"'", sep="")
+                        if (length(cats) == 1){ #this is for a logical variable
+                           if (is.na(cats))
+                               return(var)
+                           paste(var," == '",cats,"'", sep="")  # cosmetic, for one category we generate an "==" statement
                         } else {
                             cats <- paste("'",cats,"'", sep="", collapse=",")
                             paste(var," %in% c(",cats,")", sep="")
@@ -159,11 +160,37 @@ as.character.cateditmatrix <- function(E, ...){
                 catedits[i] <- thenvars
             }
         } else{
-           catedits[i] <- paste("!", inclause(vars[ifc[i,]]), sep="",collapse=" || ")
+           catedits[i] <- paste("!(", inclause(vars[ifc[i,]]), ")",sep="",collapse=" || ")
         }
     }
     names(catedits) <- rownames(E)
     catedits
+}
+
+substValue.cateditmatrix <- function(x, var, value){
+   vc <- getVarCat(x)
+   vc <- vc[vc$var == var,]
+   if (!nrow(vc))
+      stop("Invalid variable: ", var)
+   
+   values <- as.numeric(vc$cat %in% value)
+   names(values) <- vc$cat
+   
+   #to be replaced by substValues
+   E <- substValue(x, vc$fullname, values, TRUE)
+   class(E) <- class(x) 
+   E
+}
+
+# isObviouslyRedundant.cateditmatrix <- function(x){
+   # print("redundant cateditmatrix")
+   # class(x) <- "editmatrix"
+   # return(isObviouslyRedundant(x))   
+# }
+
+redundant <- function(x){
+   vars <- getVarCat(x)
+   vars
 }
 
 # ### examples....
@@ -181,4 +208,42 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
 E <- cateditmatrix(x)
 E
 as.character(E)
-getVarCat(E)
+getVarCat(E, name="variable")
+
+E <- substValue.cateditmatrix(E, "civilStatus", "unmarried")
+E
+redundant(E)
+vars <- getVarCat(E)$var
+A <- getA(E)
+
+        
+upperbound <- function(E){
+  A <- getA(E)
+  vars <- getVarCat(E)$var
+  apply( A
+           , 1
+           , function(r){
+              m <- tapply(r, vars, max)
+              m[m<0] <- 0
+              sum(m)
+             }
+        )
+}
+        
+ub <- apply( A
+           , 1
+           , function(r){
+              m <- tapply(r, vars, max)
+              m[m<0] <- 0
+              sum(m)
+             }
+           )
+
+lb <- apply( A
+           , 1
+           , function(r){
+              m <- tapply(r, vars, min)
+              m[m>0] <- 0
+              sum(m)
+             }
+           )
