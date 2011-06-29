@@ -146,6 +146,7 @@ editmatrix <- function( editrules
       edit <- as.character(editrules$edit)
       description <- editrules$description
      }            
+    
    else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
    }
@@ -227,10 +228,13 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 #' @param ... arguments to be passed to other methods. Currently ignored.
 #' @rdname editmatrix-subscript
 `[.editmatrix` <- function(x, i, j, ...){
-    neweditmatrix(
+    E <- neweditmatrix(
         A = as.matrix(x)[i, j, drop=FALSE],
         ops = getOps(x)[i]
-        )
+    )
+    attr(E,"derivedFrom") <- attr(x,"derivedFrom")[i, , drop=FALSE]
+    attr(E,"nEliminated") <- attr(x,"nEliminated")
+    E
 }
 
 
