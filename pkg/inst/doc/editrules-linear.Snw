@@ -53,9 +53,8 @@ This paper is the first of two papers describing the editrules package. The
 current paper is concerned with the treatment of numerical data under linear
 constraints, while the accompanying paper is concerned with constrained
 categorical and mixed data. The {\tt editrules} package is designed to offer
-user-friendly interface for edit definition and manipulation. The package
-offers funtionality for edit checking, error localization based on the paradigm
-of Fellegi and Holt, and a flexible interface to binary programming based on
+user-friendly interface for edit definition, manipulation and checking. The package offers functionality for error localization based on the paradigm
+of Fellegi and Holt and a flexible interface to binary programming based on
 the choice point paradigm.  Lower-level functions include echelon
 transformation of linear systems, variable subtitution and a fast
 Fourier-Motzkin elimination routine. We describe theory, implementation and
@@ -73,11 +72,12 @@ library(editrules)
 \newpage
 
 \section{Introduction}
-The value domain of real numerical data records with $n$ variables is often restricted
-to a subdomain of $\mathbb{R}^n$ due to linear equality and inequality relations
-which the variables in the record have to obey. Examples include equality restrictions imposed
-by financial balance accounts, positivity demands on certain variables or limits on the
-ratio of variables.
+The value domain of real numerical data records with $n$ variables is often 
+restricted to a subdomain of $\mathbb{R}^n$ due to linear equality and inequality 
+relations which the variables in the record have to obey. Examples include 
+equality restrictions imposed
+by financial balance accounts, positivity demands on certain variables or limits 
+on the ratio of variables.
 
 Any such restriction is of the form
 \begin{equation}
@@ -86,24 +86,19 @@ Any such restriction is of the form
 \end{equation}
 where $\bf x$ is a numerical data record, ${\bf a}$, ${\bf x}\in \mathbb{R}^n$
 and $b\in \mathbb{R}$. In data editing literature, data restriction rules
-are refered to as {\em edits}, or {\em edit rules}. We will call edits, written
-in the form of Eq.\ \eqref{edit}, edits in {\em normal form}. 
+are referred to as {\em edits}, or {\em edit rules}. In this paper we will call edits, written
+in the form of eq.\ \eqref{edit}, edits in {\em normal form}. 
 
 Large complex surveys are often endowed with dozens or even hundreds of edit
 rules.  For example, the Dutch Structural Business Survey, which aims to report
-on the financial structure of companies in the Netherlands, contains on the
-order of 100 variables, endowed with a similar number of linear equality and
+on the financial structure of companies in the Netherlands, contains about 100 variables, and has a similar number of linear equality and
 inequality restrictions.
 
-Defining and manipulating large edit sets can be a daunting task when
-implemented directly as matrix representations. Also, edit violations give
-rise to the error localization problem, which can quite simply be stated as
-{\em which variables contain the errors that cause a record to violate certain
-edits rules?}.
+Defining and manipulating large edit sets in matrix representation is a daunting task, because it may involve hundreds of rows and columns. This is also true for finding which variables in a record are responsible for edit violations, the so called error localization problem.
 
 The {\tt editrules} package for the R statistical computing environment
 \citep{R-core:2011} aims to provide an environment to conveniently define,
-parse and check linear (in)equality restrictions, perform common edit
+read and check linear (in)equality restrictions, perform common edit
 manipulations and offer error localization functionality based on the
 (generalized) paradigm of \cite{fellegi:1976}. This paradigm is based on the
 assumption that errors are distributed randomly over the variables, and there
@@ -114,7 +109,7 @@ their resolution. The reader is referred to the {\tt deducorrect}\index{deducorr
 package \citep{loo:2011, scholtus:2008, scholtus:2009} for treating such errors. 
 
 The following chapters demonstrates the functionality of the {\tt editrules}
-package with coded examples as well a description of of the underlying theory and
+package with coded examples as well a description of the underlying theory and
 algorithms. For a detailed per-function description the reader is referred to
 the reference manual accompanying the package. Unless mentioned otherwise,
 all code shown in this paper can be executed from the R commandline after loading
@@ -133,7 +128,7 @@ is most conveniently represented as a matrix.  In the {\tt editrules} package,
 a set of linear edits is stored as an {\tt editmatrix}\index{editmatrix} object.  This 
 object stores the linear relations as an augmented matrix $[{\bf
 A},{\bf b}]$, where $\bf A$ is the matrix obtained by combining the  ${\bf a}$
-vecors of Eq.\ \eqref{nonnormaledit} in rows of $\bf A$ and constants  $b$ in $\bf b$. A
+vectors of Eq.\ \eqref{nonnormaledit} in rows of $\bf A$ and constants  $b$ in $\bf b$. A
 second attribute holds the comparison operators as a {\tt character} vector.
 Formally, we denote that every {\tt editmatrix} $E$ is defined by
 \begin{equation}
@@ -157,7 +152,7 @@ As an example, consider the set of variables
 \begin{center}
 \begin{tabular}{ll}
 turnover       & $t$ \\
-personell cost & $c_p$\\
+personnel cost & $c_p$\\
 housing cost   & $c_h$\\
 total cost     & $c_t$\\
 profit         & $p$, \\
@@ -231,7 +226,7 @@ stating the intent of the rule). All must be of type {\tt character}.}
 
 The ability to read edit sets from a {\tt data.frame} facilitates defining and
 maintaining the rules outside of the R environment by storing them in a
-user-filled database or textfile. Manipulating and combining edits, for example
+user-filled database or text file. Manipulating and combining edits, for example
 through variable elimination methods will cause {\tt editrules} to drop or
 change the names and drop the comments, as they become meaningless after
 certain manipulations.
@@ -308,13 +303,13 @@ has auxilary built-in redundancy removal, which is described in Section
 \ref{sfouriermotzkin}.
 
 A system of inequalities $\bf Ax\leq b$ is called infeasible when there is no
-real vecor $\bf x$ satisfying it. It is a consequence of Farkas' lemma
+real vector $\bf x$ satisfying it. It is a consequence of Farkas' lemma
 (\cite{farkas:1902}, but see \cite{schrijver:1998} and/or \cite{kuhn:1956}) on
 feasibility of sytems of linear equalities, that  a system is infeasible if and
 only if $0\leq -1$ can be derived by taking positive linear combinations of the
 rows of the augmented matrix $[{\bf A},{\bf b}]$. The function {\tt
 isObiouslyinfeasible} returns a {\tt logical} indicating whether such a
-contradiction is present. Subsitution of values may also lead to equalities of
+contradiction is present. Substitution of values may also lead to equalities of
 the form $0=1$, which also indicate that the system has become infeasible.
 Being obviously infeasible is sufficient for an {\tt editmatrix} to be
 infeasible, but not necessary. Algorithm \ref{isObviouslyInfeasible} gives the
@@ -358,7 +353,7 @@ variable has been eliminated, the system is consistent.
 \EndFor
 \If {duplicates}
 \For {$\{({\bf a}_i\cdot {\bf x}\odot_i b_i,\,{\bf a}_j\cdot {\bf x}\odot_j b_j)   \in E\times E\,:\, j>i\}$ }
-    \If {$|({\bf a}_i,b_i)-({\bf a}_j,b_j)|\leq \varepsilon$ elementwise $\land\: \odot_i=\odot_j$}
+    \If {$|({\bf a}_i,b_i)-({\bf a}_j,b_j)|\leq \varepsilon$ element wise $\land\: \odot_i=\odot_j$}
         \State $v_j\leftarrow${\sc true} 
     \EndIf  
 \EndFor
@@ -372,8 +367,8 @@ elimination, redundant rules of the form $0 \leq 1$ or $0=0$ can be generated.
 The function {\tt isObviouslyRedundant} detects such rules and returns a {\tt
 logical} vector indicating which rows of an {\tt editmatrix} are redundant.
 By default, the function detects row duplicates (within an adjustable tolerance),
-but this may be swithched of by providing the option {\tt duplicates=FALSE}.
-Pseudocode is given in Algorithm \ref{isObviouslyRedundant}. The actual implementation
+but this may be switched of by providing the option {\tt duplicates=FALSE}.
+Pseudo-code is given in Algorithm \ref{isObviouslyRedundant}. The actual implementation
 avoids explicit loops and makes use of R's built-in {\tt duplicated} function,
 which is also overloaded for {\tt editmatrix} (see Table \ref{simplemanipulations}).
 
@@ -438,13 +433,13 @@ substValue(E,"t",10)
 
 \subsection{Gaussian elimination}
 The well-known Gaussian elimination routine has been implemented here as a
-utility function, enabeling users to reduce the equality part of their edit
+utility function, enabling users to reduce the equality part of their edit
 matrices to reduced row echelon form.  The {\tt echelon} function has been
 overloaded to take either an R {\tt matrix} or an {\tt editmatrix} as argument.
 In the latter case, the equalities are transformed to reduced row echelon form,
 while inequalities are left untreated. Gaussian elimination is explained in
 many textbooks. Algorithm \ref{echelon} is written in a notation which is close
-to our R implementation in the sence that it involves just one explicit loop. 
+to our R implementation in the sense that it involves just one explicit loop. 
 Figure \ref{Rechelon} demonstrates a call to the R function.
 %
 %
@@ -681,7 +676,7 @@ mentioned above.
 \includegraphics[width=0.495\textwidth]{diamond}
 \includegraphics[width=0.495\textwidth]{twodiamond}
 \caption{Graphic representation of editrules and the allowed area. Left panel: a convex
-case, as defined by Eq.\ \eqref{E1}. Right panel: the nonconvex nonconnected case, as defined
+case, as defined by Eq.\ \eqref{E1}. Right panel: the non-convex unconnected case, as defined
 by Eq.\ \eqref{E2}. Grey areas indicate the valid record domain, black dots indicate erroneous records and 
 black arrows indicate the solution of the error localization problem, while the thin black lines
 show the range of solutions. The dotted arrows in the left panel indicate the range of directions in which
@@ -690,7 +685,7 @@ the record (0,0) can move to reach the valid area.}
 \end{figure}
 
 To illustrate the binary search algorithm outlined above we will consider a
-simpe two-dimensional example. The reader is encouraged to follow the reasoning
+simple two-dimensional example. The reader is encouraged to follow the reasoning
 below by checking the calculations using the R-functions mentioned in the
 previous sections. 
 
@@ -709,7 +704,7 @@ Each separate inequality yields a half-plane of which the borders is determined
 by the line obtained by replacing $<$ or $>$ by $=$. The intersection of the
 four half-planes is the region of allowed records.  In this example, the region
 is a diamond, depicted as the grey area in Figure \ref{example1}.  The borders
-are labed with the editrules in Eq.\ \eqref{E1}. Consider the record
+are labled with the editrules in Eq.\ \eqref{E1}. Consider the record
 $(y=2,x=-1)$, depicted as the bottom black dot in Figure \ref{example1}. It is
 easy to confirm either graphically or by substitution that $(2,-1)$ violates
 edits $e_1$ and $e_2$, and that the record can be made consistent by altering
@@ -738,10 +733,10 @@ y > 1\\
 y < 3
 \end{array}, (2,-1),0\right\rangle.
 \end{equation}
-In this notation, each time a left (right) node is added, the subscribt of $T$ is augmented
+In this notation, each time a left (right) node is added, the subscript of $T$ is augmented
 with an $l$ ($r$). Substituting one of the values further restricts the possible values
 for variables that have not been treated yet. In fact, after the error localization problem
-has been solved, subsitituting all unaltered values into $E$ yields a set of equations which 
+has been solved, substituting all unaltered values into $E$ yields a set of equations which 
 determine the range of the variable vector which have to be altered or imputed.
 
 Since no variables were eliminated, the weight in $T_{0l}$ is 0, and the record
@@ -760,7 +755,7 @@ corresponds to the projection of the diamond in the left pane of Figure
 \ref{example1} onto the $y$-axis. (The fact that $T_{0l}$ yields the same
 system is mere coincidence and depends on the fact that the $x$-coordinate in
 the record at hand equals 2). Calculating the left child of $T_{0l}$ means
-substiting $y$ by $-1$ in the edits of $T_{0l}$.  This yields 
+substituting $y$ by $-1$ in the edits of $T_{0l}$.  This yields 
 \begin{equation}
 T_{0ll} = \left\langle\begin{array}{l}
 -1 > 1\\
@@ -1027,8 +1022,8 @@ environment, similar to the action of a standard function.
 
 To construct a {\sc choicePoint} object, the user provides an expression
 $\phi_0$ to initialize the root node, expressions $\phi_l$ and $\phi_r$ to be
-evalated at left and right child nodes and an expression $\psi$ to evaluate a
-node. The initialisation expression usually consists of a number of variable
+evaluated at left and right child nodes and an expression $\psi$ to evaluate a
+node. The initialization expression usually consists of a number of variable
 declarations. Expressions $\phi_l$ and $\phi_r$ alter the state of left
 or right child node, any returned values are ignored. The expression $\psi$
 serves two purposes. First of all, it judges a node \env and must return
@@ -1112,14 +1107,14 @@ Next, it checks if the editmatrix is unfeasible, or if the current weight
 exceeds the weight of the last found solution. Since {\tt wsol} is initialized
 on the maximum weight, the latter can only happen when at least one solution
 has been found. If either condition is met, the branch must be pruned, so {\tt
-FALSE} is returned. Ortherwise, it is checked whether any variables are left to
+FALSE} is returned. Otherwise, it is checked whether any variables are left to
 treat, if so, the expression ends, otherwise. The solution weight in the top
 environment is set (using the \verb"<<-" operator) and {\tt TRUE} is returned.
 Before returning, output is prepared by copying the variable {\tt adapt} from
 the enveloping environment, and removing the empty vector {\tt totreat}.
 
 In {\tt choiceLeft}, the first variable to be treated is chosen and its value
-replacen in the editmatrix. The value of {\tt E} in the call to {\tt
+replaced in the editmatrix. The value of {\tt E} in the call to {\tt
 substValue} is copied automagically from the enveloping environment which by
 construction holds the parent node of the node under treatment. For the same
 reason the assigning the indexed value of {\tt adapt} the value {\tt FALSE}
