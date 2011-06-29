@@ -146,6 +146,13 @@ editmatrix <- function( editrules
       edit <- as.character(editrules$edit)
       description <- editrules$description
 
+      if (!length(edit)){
+         stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")
+#      if (!length(name))
+#         name <- paste("e",1:length(edit),sep="")
+#      if (!length(description))
+#         description <- character(length(edit))
+     }            
     }
    else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
