@@ -96,7 +96,7 @@ inequality restrictions.
 
 Defining and manipulating large edit sets in matrix representation is a daunting task, because it may involve hundreds of rows and columns. This is also true for finding which variables in a record are responsible for edit violations, the so called error localization problem.
 
-The {\tt editrules} package for the R statistical computing environment
+The {\tt editrules} package for the {\sf R} statistical computing environment
 \citep{R-core:2011} aims to provide an environment to conveniently define,
 read and check linear (in)equality restrictions, perform common edit
 manipulations and offer error localization functionality based on the
@@ -112,7 +112,7 @@ The following chapters demonstrates the functionality of the {\tt editrules}
 package with coded examples as well a description of the underlying theory and
 algorithms. For a detailed per-function description the reader is referred to
 the reference manual accompanying the package. Unless mentioned otherwise,
-all code shown in this paper can be executed from the R commandline after loading
+all code shown in this paper can be executed from the {\sf R} commandline after loading
 the {\tt editrules} package.
 
 \section{Defining and checking numerical restrictions}
@@ -200,11 +200,11 @@ The option {\tt normalize=TRUE} ensures that all comparison operators are either
 
 As Figure \ref{emfromtext} shows, the {\tt editmatrix} object is shown on the console
 as a matrix, as well as a set of textual edit rules. The {\tt editrules}
-package is capable of coercing a set of R expressions to an {\tt editmatrix}
+package is capable of coercing a set of {\sf R} expressions to an {\tt editmatrix}
 and {\em vice versa}. To coerce text to a matrix, the {\tt editmatrix} function
-processes the R language parsetree of the textual R expressions as provided by
-the R internal {\tt parse} function. To coerce the matrix representation to
-textual representation, an R character string is derived from the matrix which
+processes the {\sf R} language parsetree of the textual {\sf R} expressions as provided by
+the {\sf R} internal {\tt parse} function. To coerce the matrix representation to
+textual representation, an {\sf R} character string is derived from the matrix which
 can be parsed to a language object.
 
 In the example, the edits were automatically named {\tt e1}, {\tt e2}, $\ldots$, {\tt e9}. It is
@@ -224,7 +224,7 @@ stating the intent of the rule). All must be of type {\tt character}.}
 %
 
 The ability to read edit sets from a {\tt data.frame} facilitates defining and
-maintaining the rules outside of the R environment by storing them in a
+maintaining the rules outside of the {\sf R} environment by storing them in a
 user-filled database or text file. Manipulating and combining edits, for example
 through variable elimination methods will cause {\tt editrules} to drop or
 change the names and drop the comments, as they become meaningless after
@@ -394,8 +394,10 @@ Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
 replacing the $j^{\rm th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
 replaced by $x$ has to obey the adapted system \eqref{subst}. For reference
-purposes, Algorithm \ref{substValue} spells out the substitution routine. Figure \ref{RsubstValue} shows how {\tt substValue}
-can be called from the R environment.
+purposes, Algorithm \ref{substValue} spells out the substitution routine.
+Figure \ref{RsubstValue} shows how {\tt substValue} can be called from the R
+environment. The function is set up so multiple variables can be substituted
+in a single call as well.
 %
 %
 \begin{algorithm}[t]
@@ -414,7 +416,8 @@ can be called from the R environment.
 <<>>=
 substValue(E,"t",10)
 @
-\caption{Substituting the value 10 for the turnover variable using the {\tt substValue} function.}
+\caption{Substituting the value 10 for the turnover variable using the {\tt substValue} function. {\tt substValue} can
+substitute multiple values as well.}
 \label{RsubstValue}
 \end{Rcode}
 
@@ -423,12 +426,12 @@ substValue(E,"t",10)
 The well-known Gaussian elimination routine has been implemented here as a
 utility function, enabling users to reduce the equality part of their edit
 matrices to reduced row echelon form.  The {\tt echelon} function has been
-overloaded to take either an R {\tt matrix} or an {\tt editmatrix} as argument.
+overloaded to take either an {\sf R} {\tt matrix} or an {\tt editmatrix} as argument.
 In the latter case, the equalities are transformed to reduced row echelon form,
 while inequalities are left untreated. Gaussian elimination is explained in
 many textbooks. Algorithm \ref{echelon} is written in a notation which is close
-to our R implementation in the sense that it involves just one explicit loop. 
-Figure \ref{Rechelon} demonstrates a call to the R function.
+to our {\sf R} implementation in the sense that it involves just one explicit loop. 
+Figure \ref{Rechelon} demonstrates a call to the {\sf R} function.
 %
 %
 \begin{algorithm}[t]
@@ -494,34 +497,34 @@ Mixed systems with linear restrictions of the form ${\bf a}\cdot {\bf x}\odot
 b$ with $\odot\in\{<,\leq,=\}$ can in principle be transformed to a form where
 every $\odot \in\{\leq\}$. However, it is more efficient to take the comparison
 operators into account when combining rows. In that case, new rules are derived
-by first solving the the $j^{\rm th}$ from each equality and substituting them in
-each inequality. Next, inequalities are treated as stated before. When
-inequalities are combined where one comparison operator is $<$ and the other is
-$\leq$, it is not difficult to show that $<$ becomes the operator for the
-resulting inequality.
+by first solving the the $j^{\rm th}$ variable from each equality and
+substituting them in each inequality. Next, inequalities are treated as stated
+before. When inequalities are combined where one comparison operator is $<$ and
+the other is $\leq$, it is not difficult to show that $<$ becomes the operator
+for the resulting inequality.
 
 It is a basic result of the theory of linear inequalities that the system
 resulting from a single variable elimination is equivalent to the original
-system (that is, they have the same solution set $\{\bf x\}$). In fact, $k$
-elimination steps can generate up to $(\tfrac{1}{2}m)^{2k}$ new rows ($m$ being the
-original number of rows), of which many are redundant. Since the number of
-redundant rows increases fast during elimination, removing (most of) them is
-highly desirable. In our implementation, we use the property that if $k$
-variables have been eliminated, any row derived from more than $k+1$ rows of
-the original system is redundant. This result was originally stated by
-\cite{cernikov:1963} and rediscovered by \cite{kohler:1967}. A proof can also
-be found in \cite{williams:1986}. For the implementation in R, an {\tt
-editmatrix} is augmented with an integer $h$, recording the number of
-eliminations and a {\tt logical} array $\bf H$, which records for each edit
-from which original edit it was derived. Obviously, ${\bf H}$ is {\sc true}
-only on the diagonal when $h=0$. It is worth mentioning that by using R's
-vectorized indices and recycling properties, it is possible to avoid any
-explicit looping in the elimination process. Algorithm \ref{eliminateFM} gives
-an overview of the algorithm where explicit loops are included for readability.
-Figure \ref{ReliminateFM} shows how one or more variables can be eliminated
-from an editmatrix with the {\tt eliminateFM} function.  Note that when
-multiple variables are eliminated, the {\tt editmatrix} must be overwritten to
-at every iteration to ensure that the history $\bf H$ is updated accordingly.
+system. In Fourier-Motzkin elimination, $k$ elimination steps can generate up
+to $(\tfrac{1}{2}m)^{2k}$ new rows ($m$ being the original number of rows), of
+which many are redundant. Since the number of redundant rows increases fast
+during elimination, removing (most of) them is highly desirable. In our
+implementation, we use the property that if $k$ variables have been eliminated,
+any row derived from more than $k+1$ rows of the original system is redundant.
+This result was originally stated by \cite{cernikov:1963} and rediscovered by
+\cite{kohler:1967}. A proof can also be found in \cite{williams:1986}. For the
+implementation in R, an {\tt editmatrix} is augmented with an integer $h$,
+recording the number of eliminations and a {\tt logical} array $\bf H$, which
+records for each edit from which original edit it was derived. Obviously, ${\bf
+H}$ is {\sc true} only on the diagonal when $h=0$. It is worth mentioning that
+by using R's vectorized indices and recycling properties, it is possible to
+avoid any explicit looping in the elimination process. Algorithm
+\ref{eliminateFM} gives an overview of the algorithm where explicit loops are
+included for readability.  Figure \ref{ReliminateFM} shows how one or more
+variables can be eliminated from an editmatrix with the {\tt eliminateFM}
+function.  Note that when multiple variables are eliminated, the {\tt
+editmatrix} must be overwritten at every iteration to ensure that the
+history $\bf H$ is updated accordingly.
 %
 
 \begin{algorithm}[t]
@@ -594,12 +597,12 @@ iteration to ensure that the derivation history is updated at every step.}
 While checking whether a numerical record violates any imposed restrictions
 (within a certain limit) is easy, finding out which variable(s) of the record
 cause the violation(s) can be far from trivial. When possible, the cause of the
-violation, should be sought out, since it leads immediately to repair
+violation should be sought out, since it leads immediately to repair
 suggestions. The {\tt deducorrect} package \citep{loo:2011} mentioned above
 offers functionality to detect and repair common errors like typing errors,
 rounding errors and sign errors. Although not directly available in R, methods
 for detecting repairing unit measure errors or other systematic errors have
-been described in literature and may readily be implemented in R (see
+been described in literature and may readily be implemented in {\sf R} (see
 \cite{waal:2011} Chapter 2 for an overview). 
 
 After systematic errors with detectable causes in a data set have been
@@ -629,7 +632,7 @@ find $G$ such that
 %
 In other words, for every variable in $\bf x$, we have to decide wether to
 use or adapt its value. Unadapted variables can be replaced with
-their known value $x_j$ while the values of the remaining variables 
+their observed value $x_j$ while the values of the remaining variables 
 have to be changed into $\tilde{x}_j$, such that these values form no contradiction. 
 The solution to \eqref{fhproblem} need not be unique, but there is always at least 
 one solution unless the edit rules in $E$ are contradictory. 
@@ -645,10 +648,10 @@ substituted in $E$. In the right child node, $x_1$ is assumed to contain an
 error and it is eliminated from $E$ by Fourier-Motzkin elimination. The weight
 $w$ in the right node is increased by $w_1$. Each child node gets a left and
 right child node where $x_2$ is substituted or eliminated, and so on untill
-every variable has been treated.  Every path from root to leave represents one
+every variable has been treated.  Every path from root to leaf represents one
 element of the search space. A branch is pruned when $E$
 contains obvious inconsistencies, so no combinations not satisfying the
-condition in \eqref{fhproblem} are generated. If a solution, with certain
+condition in \eqref{fhproblem} are generated. If a solution with certain
 weight $w$ is found, branches developed later, receiving a higher weight are
 pruned as well.
 
@@ -673,9 +676,9 @@ the record (0,0) can move to reach the valid area.}
 \end{figure}
 
 To illustrate the binary search algorithm outlined above we will consider a
-simple two-dimensional example. The reader is encouraged to follow the reasoning
-below by checking the calculations using the R-functions mentioned in the
-previous sections. 
+simple two-dimensional example. The reader is encouraged to follow the
+reasoning below by checking the calculations using the R-functions mentioned in
+the previous sections. 
 
 Consider a 2-variable record $(x,y)$ subject to the set of constaints $E$:
 \begin{equation}
@@ -688,7 +691,7 @@ e_3: & y < x + 1\\
 e_4: & y < -x + 5. 
 \end{array}\right.
 \end{equation}
-Each separate inequality yields a half-plane of which the borders is determined
+Each separate inequality yields a half-plane of which the border is determined
 by the line obtained by replacing $<$ or $>$ by $=$. The intersection of the
 four half-planes is the region of allowed records.  In this example, the region
 is a diamond, depicted as the grey area in Figure \ref{example1}.  The borders
@@ -831,7 +834,8 @@ error localization routine.
 The number of partial error localization problems to be treated
 grows as $2n_{\rm eq}+n_{\rm ineq}$, where $n_{\rm eq}$ is the number
 of equalities and $n_{\rm ineq}$ the number of inequalities in $E_0$.
-This is easily derived from Eq.\ \eqref{editexpansion} since by De Morgan's rule
+This is easily derived from Eq.\ \eqref{editexpansion} since by De Morgan's rule,
+if $E_0=e_1\land e_2 \land \ldots\land e_k$, then
 \begin{equation}
 \overline{E}_0=\overline{e_1\land e_2\land\ldots \land e_k} 
 = \overline{e}_1\lor\overline{e}_2\lor\ldots\lor\overline{e}_k.
@@ -860,7 +864,7 @@ such objects to solve error localization problems. In Figure
 \ref{Rcpeditmatrix}, the edits of Eqn.\ \eqref{E1} and the record $(2,-1)$ are
 offered to {\tt errorLocalizer}.  By calling the built-in {\tt searchNext}
 function, the choicpoint object traverses the binary search tree depth-first,
-untill the first solution is found. When a solution is found, is is returned to
+untill the first solution is found. When a solution is found, it is returned to
 the user as a list, containing the solution weight {\tt w}, the edit matrix
 left after all substitutions and eliminations, and the logical vector {\tt
 adapt} which is {\tt TRUE} for variables which need to be changed, and {\tt
@@ -871,15 +875,16 @@ since in this example there is only one solution, {\tt searchNext} returns
 {\tt NULL}.
 
 The method {\tt searchNext} is not the only method of the {\tt choicepoint} object
-returned by {\tt cp.editmarix}. The avaliable methods are
+returned by {\tt errorLocalizer}. The avaliable methods are
 \begin{itemize}
 \item\verb"$searchNext" Searches for the next solution with a lower weight than the previously found solution.
 \item\verb"$searchAll"  Returns all solutions, regardless of the weight.
-\item\verb"$searchBest" Returns the last solution. Note that although this is a lowest-weight solution, it does not
-need to be unique.
+\item\verb"$searchBest" Returns the lowest-weight solution. If multiple solutions have the same, minimum weight,
+        it returns one of those solutions at random.
 \end{itemize}
 In fact, any {\tt choicepoint} object is equipped with the {\tt searchNext} and
-{\tt searchAll} methods. The {\tt searchBest} method is specific for {\tt errorLocalizer}.
+{\tt searchAll} methods. The {\tt searchBest} method is specific for the {\tt choicepoint} object returned by 
+{\tt errorLocalizer}.
 %
 %
 \begin{Rcode}
@@ -928,7 +933,7 @@ makes sure that during the search for solutions, variables with the highest reli
 ones to be assumed incorrect.
 
 If we add more restrictions, the number of solutions to the error localization problem decreases. 
-Here, we demand that the cost to turnover ration does not exceed 0.6.
+Here, we demand that the cost to turnover ratio does not exceed 0.6.
 <<keep.source=true>>=
 E <- editmatrix(c(
         "p + c == t",
@@ -943,7 +948,7 @@ which demands only that the profit variable should be changed.
 
 With {\tt errorLocalizer} records with missing data can be handled as well. Since variables with missing
 values have to be replaced, they are eliminated from the edit matrix prior to further error localization.
-In the next example we add some extra variables and positivity demands on all variables.
+In the next example we add some extra variables and demand positivity of all variables.
 <<keep.source=true>>=
 # An example with missing data.
 E <- editmatrix(c(
@@ -986,7 +991,7 @@ specific example.
 The {\sf R} language is ideally suited to develop choice point-like systems
 because of its first-class environments. An {\sf R} environment can be thought
 of as a list of {\sf R} objects, forming the scope for expression evaluation.
-Expressions are a series of R statements which may create, manipulate and
+Expressions are a series of {\sf R} statements which may create, manipulate and
 remove {\sf R} objects within an environment. Having first-class environments
 means that expressions can also be used to create, manipulate and delete
 environments like any other {\sf R} object. Moreover, expressions can be
@@ -1010,12 +1015,12 @@ environment, similar to the action of a standard function.
 
 To construct a {\sc choicePoint} object, the user provides an expression
 $\phi_0$ to initialize the root node, expressions $\phi_l$ and $\phi_r$ to be
-evaluated at left and right child nodes and an expression $\psi$ to evaluate a
-node. The initialization expression usually consists of a number of variable
-declarations. Expressions $\phi_l$ and $\phi_r$ alter the state of left
-or right child node, any returned values are ignored. The expression $\psi$
-serves two purposes. First of all, it judges a node \env and must return
-one of the following values:
+evaluated at left and right child nodes and an expression $\psi$ to evaluate
+the contents of a node. The initialization expression usually consists of a
+number of variable declarations. Expressions $\phi_l$ and $\phi_r$ alter the
+state of left or right child node, any returned values are ignored. The
+expression $\psi$ serves two purposes. First of all, it judges a node \env and
+must return one of the following values:
 \begin{equation}
 \psi(\env) = \left\{\begin{array}{ll}
 \textrm{\sc true} &\textrm{ if environment } \mathcal{E}\textrm{ contains a solution}\\
@@ -1024,12 +1029,13 @@ one of the following values:
 \end{array}\right.
 \label{psi}
 \end{equation}
-Secondly, $\psi$ may be used to update weights and to prepare the variables in a node for
-output. The method {\sc searchNext} generates nodes in the binary tree, depth-first and
-returns the (contents of) the first environment corresponding to a solution. If {\sc cp}
-is the instance of a {\sc choicePoint} object, then each call to {\sc cp::searchNext}
-will return a new, and better solution, untill all solutions are found, in which case
-{\sc null} is returned.
+Secondly, $\psi$ may be used to update weights or other administration and to
+prepare the variables in a node for output. The method {\sc searchNext}
+generates nodes in the binary tree, depth-first and returns the (contents of)
+the first environment corresponding to a solution. If {\sc cp} is the instance
+of a {\sc choicePoint} object, then each call to {\sc cp::searchNext} will
+return a new, and better solution, untill all solutions are found, in which
+case {\sc null} is returned.
 %
 %
 \begin{algorithm}[t]
