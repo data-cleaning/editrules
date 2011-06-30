@@ -425,7 +425,3 @@ str.editmatrix <- function(object,...){
     if (nchar(vars) > 20 ) vars <-  paste(strtrim(vars,16),"...") 
     cat(paste("editmatrix with", nrow(object), "edits containing variables",vars,"\n"))
 }
-
-
-
-

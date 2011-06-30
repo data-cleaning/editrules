@@ -306,7 +306,7 @@ real vector $\bf x$ satisfying it. It is a consequence of Farkas' lemma
 feasibility of sytems of linear equalities, that  a system is infeasible if and
 only if $0\leq -1$ can be derived by taking positive linear combinations of the
 rows of the augmented matrix $[{\bf A},{\bf b}]$. The function {\tt
-isObiouslyinfeasible} returns a {\tt logical} indicating whether such a
+isObviouslyinfeasible} returns a {\tt logical} indicating whether such a
 contradiction is present. Substitution of values may also lead to equalities of
 the form $0=1$, which also indicate that the system has become infeasible.
 Being obviously infeasible is sufficient for an {\tt editmatrix} to be
@@ -325,11 +325,9 @@ contradictionary edits after maintenance.
 \label{isObviouslyInfeasible}
 \begin{algorithmic}
 \Require a normalized {\tt editmatrix} $E$
-\For {${\bf a}\cdot {\bf x}\odot b\in E$}
- \If{$\bf a=0$}
-  \If {$(\odot\in\{=\}\land b\not=0)\lor(\odot\in\{\leq,<\}\land b<0)$} 
+\For {${\bf a}_i\cdot {\bf x}\odot_i b_i\in E$}
+ \If{${\bf a}_i=0  \land \lnot b_i\odot_i 0$}
     \State \Return {\sc true}
-  \EndIf
  \EndIf
 \EndFor
 \State\Return {\sc false}
@@ -344,11 +342,9 @@ contradictionary edits after maintenance.
 \begin{algorithmic}
 \Require a normalized {\tt editmatrix} $E$, with $m$ edits, a boolean ``duplicates'', and a tolerance $\varepsilon$.
 \State  ${\bf v} \leftarrow$ ({\sc false})$^{\times{m}}$
-\For {${\bf a}_i\cdot {\bf x}\odot b_i\in E$}
- \If{$\bf a=0$}
-  \If {$(\odot\in\{=\}\land b=0)\lor(\odot\in\{\leq,<\}\land b>0)$} 
+\For {${\bf a}_i\cdot {\bf x}\odot_i b_i\in E$}
+ \If{${\bf a}_i=0 \land b_i\odot_i 0$} 
     \State $v_i\leftarrow${\sc true}
-  \EndIf
  \EndIf
 \EndFor
 \If {duplicates}
@@ -668,7 +664,7 @@ mentioned above.
 \includegraphics[width=0.495\textwidth]{twodiamond}
 \caption{Graphic representation of editrules and the allowed area. Left panel: a convex
 case, as defined by Eq.\ \eqref{E1}. Right panel: the non-convex unconnected case, as defined
-by Eq.\ \eqref{E2}. Grey areas indicate the valid record domain, black dots indicate erroneous records and 
+by Eq.\ \eqref{E2}. Gray areas indicate the valid record domain, black dots indicate erroneous records and 
 black arrows indicate the solution of the error localization problem, while the thin black lines
 show the range of solutions. The dotted arrows in the left panel indicate the range of directions in which
 the record (0,0) can move to reach the valid area.}
@@ -694,7 +690,7 @@ e_4: & y < -x + 5.
 Each separate inequality yields a half-plane of which the border is determined
 by the line obtained by replacing $<$ or $>$ by $=$. The intersection of the
 four half-planes is the region of allowed records.  In this example, the region
-is a diamond, depicted as the grey area in Figure \ref{example1}.  The borders
+is a diamond, depicted as the gray area in Figure \ref{example1}.  The borders
 are labled with the editrules in Eq.\ \eqref{E1}. Consider the record
 $(y=2,x=-1)$, depicted as the bottom black dot in Figure \ref{example1}. It is
 easy to confirm either graphically or by substitution that $(2,-1)$ violates
@@ -780,7 +776,7 @@ a higher weight than the solution $T_{0lr}$ found earlier.
 The edit sets described so far involved a single set of (in)equalities,  yielding
 a convex record domain in $\mathbb{R}^n$. However, in practical cases the sets of
 allowed values for a record need not be convex, or even connected. As an example 
-consider the space of allowed records, indicated by the grey areas in the right panel
+consider the space of allowed records, indicated by the gray areas in the right panel
 of Figure \ref{example1}. Such a range can be defined by a conditional edit of the
 form
 \begin{equation}
