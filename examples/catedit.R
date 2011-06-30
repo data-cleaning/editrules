@@ -1,22 +1,23 @@
 require(editrules)
+
  parseEdits <- function(x){
     parse(text=x)
  }
 
 
-parseTree <- function(expr,prefix=NULL){
-   if (length(expr) == 1){
-      indent <- paste("[", prefix,"]", sep="", collapse="")
-      cat(indent, expr,"\n")
-   }
-   else {
-       for (i in 1:length(expr)){
-          parseTree(expr[[i]], c(prefix,i)) 
-       }
-   }
-}
+# parseTree <- function(expr,prefix=NULL){
+   # if (length(expr) == 1){
+      # indent <- paste("[", prefix,"]", sep="", collapse="")
+      # cat(indent, expr,"\n")
+   # }
+   # else {
+       # for (i in 1:length(expr)){
+          # parseTree(expr[[i]], c(prefix,i)) 
+       # }
+   # }
+# }
 
-parseCond <- function(cond, pos=1, l=c(b=0), iscond=FALSE){
+parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
    if (length(cond) == 1){
       value = pos
       names(value) <- as.character(cond)
@@ -60,6 +61,13 @@ parseCond <- function(cond, pos=1, l=c(b=0), iscond=FALSE){
       }
       l <- c(l, value)
    }
+   else if (op == "&&"){
+         l <- parseCond(cond[[2]], pos, l, iscond=iscond)
+         l <- parseCond(cond[[3]], pos, l, iscond=iscond)
+   }
+   else {
+      stop("Operator ", op, " not supported.")
+   }
    l
 }
 
@@ -88,7 +96,9 @@ cateditmatrix <- function(x){
 
     b <- A[,ncol(A)]
     A <- A[,-ncol(A), drop=FALSE]
-    ops <- ifelse(b==1, "==", ">")
+    
+    ops <- sapply(edts, function(e){deparse(e[[1]])})
+    ops <- ifelse(ops %in% c("if", "||"), ">=", "==")
 
     E <- normalize(as.editmatrix(A,b,ops))
     class(E) <- c("cateditmatrix", "editmatrix")
@@ -111,7 +121,10 @@ getVarCat.character <- function(x, ...){
                                , function(vc) c(var=vc[1], cat=vc[2])
                                )
                         )
+                      , stringsAsFactors=FALSE
                       )
+   # set value of logical variables to TRUE
+   vc$cat[is.na(vc$cat)] <- "TRUE"
    vc$fullname <- x
    vc
 }
@@ -120,52 +133,52 @@ getVarCat.character <- function(x, ...){
 #' @method as.character cateditmatrix
 #' @param E \code{cateditmatrix} object
 #' @return \code{character} with the character representation of the edits
-as.character.cateditmatrix <- function(E, ...){
-    A <- getA(E)
-    ops <- getOps(E)
+# as.character.cateditmatrix <- function(E, ...){
+    # A <- getA(E)
+    # ops <- getOps(E)
     
-    ifc <- A > 0 & ops == "<"
-    thenc <- A < 0 | ( A > 0 & ops == "==")
+    # ifc <- A > 0 & ops == "<="
+    # thenc <- A < 0 | ( A > 0 & ops == "==")
     
-    #generate %in% statement
-    inclause <- function(varcat, collapse=NULL){
-       vc <- getVarCat(varcat)
-       vc <- split(vc$cat, vc$var)
-       vc <- sapply( names(vc)
-                   , function(var){
-                        cats <- vc[[var]]
-                        if (length(cats) == 1){ #this is for a logical variable
-                           if (is.na(cats))
-                               return(var)
-                           paste(var," == '",cats,"'", sep="")  # cosmetic, for one category we generate an "==" statement
-                        } else {
-                            cats <- paste("'",cats,"'", sep="", collapse=",")
-                            paste(var," %in% c(",cats,")", sep="")
-                        }
-                     }
-                   )
-       paste(vc, collapse=collapse)
-    }
+    # #generate %in% statement
+    # inclause <- function(varcat, collapse=NULL){
+       # vc <- getVarCat(varcat)
+       # vc <- split(vc$cat, vc$var)
+       # vc <- sapply( names(vc)
+                   # , function(var){
+                        # cats <- vc[[var]]
+                        # if (length(cats) == 1){ #this is for a logical variable
+                           # if (cats %in% TRUE)
+                               # return(var)
+                           # paste(var," == '",cats,"'", sep="")  # cosmetic, for one category we generate an "==" statement
+                        # } else {
+                            # cats <- paste("'",cats,"'", sep="", collapse=",")
+                            # paste(var," %in% c(",cats,")", sep="")
+                        # }
+                     # }
+                   # )
+       # paste(vc, collapse=collapse)
+    # }
     
-    vars <- getVars(E)
-    catedits <- rownames(E)
-    for (i in 1:length(catedits)){
-        if (any(thenc[i,])){
-            thenvars <- inclause(vars[thenc[i,]], collapse=" || ")
-            if (any(ifc[i,])){
-                ifvars <- inclause(vars[ifc[i,]], collapse=" && ")
-                catedits[i] <- paste("if (",ifvars,") ",thenvars, sep="")
-            }
-            else {
-                catedits[i] <- thenvars
-            }
-        } else{
-           catedits[i] <- paste("!(", inclause(vars[ifc[i,]]), ")",sep="",collapse=" || ")
-        }
-    }
-    names(catedits) <- rownames(E)
-    catedits
-}
+    # vars <- getVars(E)
+    # catedits <- rownames(E)
+    # for (i in 1:length(catedits)){
+        # if (any(thenc[i,])){
+            # thenvars <- inclause(vars[thenc[i,]], collapse=" || ")
+            # if (any(ifc[i,])){
+                # ifvars <- inclause(vars[ifc[i,]], collapse=" && ")
+                # catedits[i] <- paste("if (",ifvars,") ",thenvars, sep="")
+            # }
+            # else {
+                # catedits[i] <- thenvars
+            # }
+        # } else{
+           # catedits[i] <- paste("!(", inclause(vars[ifc[i,]]), ")",sep="",collapse=" || ")
+        # }
+    # }
+    # names(catedits) <- rownames(E)
+    # catedits
+# }
 
 substValue.cateditmatrix <- function(x, var, value){
    vc <- getVarCat(x)
@@ -176,21 +189,37 @@ substValue.cateditmatrix <- function(x, var, value){
    values <- as.numeric(vc$cat %in% value)
    names(values) <- vc$cat
    
-   #to be replaced by substValues
-   E <- substValue(x, vc$fullname, values, TRUE)
+   E <- substValue(x, vc$fullname, values, remove=TRUE)
    class(E) <- class(x) 
    E
 }
 
-# isObviouslyRedundant.cateditmatrix <- function(x){
-   # print("redundant cateditmatrix")
-   # class(x) <- "editmatrix"
-   # return(isObviouslyRedundant(x))   
-# }
+#' finds the min and max value of an categorical edit
+#' 
+#' This can be used to check for infeasibility or redundancy
+#' @param E categorical editmatrix
+#' @return \code{numeric matrix} with columns min and max
+ranges <- function(E){
+  A <- getA(E)
+  vars <- getVarCat(E)$var
+  t(apply( A
+           , 1
+           , function(r){
+              ub <- tapply(r, vars, max)
+              lb <- tapply(r, vars, min)
+              c(min=sum(lb[lb<0]), max=sum(ub[ub>0]))
+             }
+        )
+    )
+}
 
-redundant <- function(x){
-   vars <- getVarCat(x)
-   vars
+isObviouslyRedundant.cateditmatrix <- function(E){
+   (getb(E) >= ranges(E)[,2]) | editrules:::isObviouslyRedundant.editmatrix(E) 
+}
+
+#'check which edits are not feasible
+isInfeasible.cateditmatrix <- function(E){
+   getb(E) < ranges(E)[,1]
 }
 
 # ### examples....
@@ -212,38 +241,15 @@ getVarCat(E, name="variable")
 
 E <- substValue.cateditmatrix(E, "civilStatus", "unmarried")
 E
-redundant(E)
-vars <- getVarCat(E)$var
-A <- getA(E)
 
-        
-upperbound <- function(E){
-  A <- getA(E)
-  vars <- getVarCat(E)$var
-  apply( A
-           , 1
-           , function(r){
-              m <- tapply(r, vars, max)
-              m[m<0] <- 0
-              sum(m)
-             }
-        )
-}
-        
-ub <- apply( A
-           , 1
-           , function(r){
-              m <- tapply(r, vars, max)
-              m[m<0] <- 0
-              sum(m)
-             }
-           )
+E <- substValue.cateditmatrix(E, "gender", "male")
+E
 
-lb <- apply( A
-           , 1
-           , function(r){
-              m <- tapply(r, vars, min)
-              m[m>0] <- 0
-              sum(m)
-             }
-           )
+
+E <- substValue.cateditmatrix(E, "pregnant", TRUE)
+E
+
+cateditmatrix(c("if (A=='a' && B=='b') C=='c'"))
+# ranges(E)
+# redundant(E)
+# infeasible(E)
