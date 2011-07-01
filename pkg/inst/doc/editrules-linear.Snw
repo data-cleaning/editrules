@@ -805,6 +805,16 @@ the record $(x=2,y=0)$ in the right panel of Figure \ref{example1}. The error lo
 problem corresponding to $x<0$ yields a solution where both $x$ and $y$ have to be altered,
 while the localization problem corresponding to $x\geq 0$ implies that only $y$ needs to be
 altered.
+%
+%
+\begin{figure}
+\input{tree.tex}
+\caption{Graphical representation of the binary tree used to solve the error
+localization problem for the record $(x=-2,y=-1)$, subject to the edits of
+Eqn.\eqref{E1}.  Each node contains an edit set, a (partially completed) record
+and the solution weight.  }
+\label{treefig}
+\end{figure}
 
 To generalize this example, note that a conditional edit sets of the form
 \begin{equation}
