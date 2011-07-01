@@ -326,7 +326,7 @@ contradictionary edits after maintenance.
 \begin{algorithmic}
 \Require a normalized {\tt editmatrix} $E$
 \For {${\bf a}_i\cdot {\bf x}\odot_i b_i\in E$}
- \If{${\bf a}_i=0  \land \lnot b_i\odot_i 0$}
+ \If{${\bf a}_i=0  \land \lnot 0\odot_i b_i$}
     \State \Return {\sc true}
  \EndIf
 \EndFor
@@ -343,7 +343,7 @@ contradictionary edits after maintenance.
 \Require a normalized {\tt editmatrix} $E$, with $m$ edits, a boolean ``duplicates'', and a tolerance $\varepsilon$.
 \State  ${\bf v} \leftarrow$ ({\sc false})$^{\times{m}}$
 \For {${\bf a}_i\cdot {\bf x}\odot_i b_i\in E$}
- \If{${\bf a}_i=0 \land b_i\odot_i 0$} 
+ \If{${\bf a}_i=0 \land 0\odot_i b_i$} 
     \State $v_i\leftarrow${\sc true}
  \EndIf
 \EndFor
@@ -456,8 +456,8 @@ Figure \ref{Rechelon} demonstrates a call to the {\sf R} function.
 \begin{Rcode}
 \small
 <<>>=
-#TODO better example of echelon
-echelon(E)
+E[1:2,]
+echelon(E[1:2,])
 @
 \caption{Transforming linear equalities of an editmatrix to
 reduced row echelon form. See Figure \ref{emfromtext} for the original definition of {\tt E}.}
@@ -886,7 +886,7 @@ In fact, any {\tt choicepoint} object is equipped with the {\tt searchNext} and
 \begin{Rcode}
 <<keep.source=true>>=
 E1 = editmatrix(c(
-    "y >  x + 1",
+    "y >  x - 1",
     "y > -x + 3",
     "y <  x + 1",
     "y < -x + 5"))
