@@ -122,17 +122,20 @@ eliminateFM <- function(E, var, fancynames=FALSE){
 #' If any edit in E is an obvious contradictions of a form similar to 0 < -1, the function.
 #' returns TRUE, otherwise FALSE. Obvious inconsistencies may arise during elimination processes.
 #' 
-#' @param E An \code{link{editmatrix}} 
+#' @param E An normalized \code{link{editmatrix}}. If E is not normalized on entry, it will be normalized internally prior to checking. 
 #' @param tol Tolerance for checking against zero.
 #' @seealso \code{\link{eliminateFM}} \code{\link{editmatrix}}
 #' @export
 isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
+    if ( !isNormalized(E) ) E <- normalize(E)
     A <- getAb(E)
     operators <- getOps(E)
-    b <- ncol(A)
-    zeroCoef <- rowSums(abs(A[,-b,drop=FALSE])) < tol        
-    if ( any(zeroCoef & operators %in% c("<", "<=") &  A[,b] < -tol) || 
-         any(zeroCoef & operators == c("==") &  abs(A[,b]) > tol)) return(TRUE)
+    ib <- ncol(A)
+    zeroCoef <- rowSums(abs(A[,-ib,drop=FALSE])) < tol  
+    b <- round(A[,ib],ceiling(-log10(tol)))    
+    if ( any(zeroCoef & operators == "<"    &  b <= 0) || 
+         any(zeroCoef & operators == "<="   &  b <  0) || 
+         any(zeroCoef & operators == c("==") &  abs(b) > tol)) return(TRUE)
     return(FALSE)
 }
 
@@ -185,11 +188,11 @@ isObviouslyRedundant.matrix <- function(
     duplicates=TRUE, 
     duplicates.tol=tol,
     ... ){
-    b <- ncol(E)
-    zeroCoef <- rowSums(abs(E[,-b,drop=FALSE])) < tol
+    ib <- ncol(E)
+    zeroCoef <- rowSums(abs(E[,-ib,drop=FALSE])) < tol
     v <- as.vector(
-        zeroCoef & operators %in% c("==","<=")  & abs(E[,b]) < tol |
-        zeroCoef & operators %in% c("<", "<=")  & E[,b] > tol
+        zeroCoef & operators %in% c("==","<=")  & abs(E[,ib]) < tol |
+        zeroCoef & operators %in% c("<", "<=")  & E[,ib] > tol
     )
     if (duplicates){
         if ( duplicates.tol > 0 )  E <- round(E, ceiling(-log10(duplicates.tol)))
@@ -211,6 +214,7 @@ isObviouslyRedundant.matrix <- function(
 #'
 #' @S3method isObviouslyRedundant editmatrix
 isObviouslyRedundant.editmatrix <- function(E, ...){
+    if ( !isNormalized(E) ) E <- normalize(E)
     isObviouslyRedundant.matrix(getAb(E),getOps(E), ...)
 }
 

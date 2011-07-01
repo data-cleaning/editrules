@@ -271,10 +271,8 @@ violatedEdits.editarray <- function(E,x){
 #
 errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
     adapt <- is.na(x)
-
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
-
     # x in direct sum representation
     y <- rep(FALSE,ncol(E))
     names(y) <- colnames(E)
