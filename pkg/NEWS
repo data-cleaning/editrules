@@ -1,4 +1,5 @@
 version 0.7-2
+- solved a bug causing isObviouslyInfeasible to miss certain cases
 - substValue can now replace multiple values at once.
 - `[.editmatrix` now retains derivation history (previously lost in substValue operations)
 - substValues now accepts more then one value 
