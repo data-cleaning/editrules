@@ -13,8 +13,7 @@
 #' Every call to \code{<choicepoint>$searchNext()} returns one solution \code{list}, consisting of
 #' \itemize{
 #' \item{w: The solution weight.} 
-#' \item{adapt: \code{logical} indicating whether a variable should be adapted (\code{TRUE}) or not}
-#' \item{E: The \code{\link{editmatrix}} with all variables to adapt eliminated}}
+#' \item{adapt: \code{logical} indicating whether a variable should be adapted (\code{TRUE}) or not}}
 #'
 #' Every subsequent call leads either to \code{NULL}, in which case all solutions have been found,
 #' or a new solution with a weight \code{w} not higher than the weight of the last found solution.
@@ -77,30 +76,27 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     cp <- choicepoint(
         isSolution = {
             w <- sum(weight[adapt])
-            if ( isObviouslyInfeasible(E) || w > wsol ) return(FALSE)
+            if ( isObviouslyInfeasible(.E) || w > wsol ) return(FALSE)
             if (length(totreat) == 0){
                 wsol <<- w
-                adapt <- adapt # neccessary because adapt won't be in the solution if it is not really changed.
-                # remove totreat, not necessary in solution
-                # other option would be to rename totreat into .totreat, because .names are not exported unless VERBOSE is set to TRUE
+                adapt <- adapt 
                 rm(totreat)
-                
                 return(TRUE)
             }
         },
         choiceLeft = {
             .var <- totreat[1]
-            E <- substValue(E, .var , x[.var])
+            .E <- substValue(.E, .var , x[.var])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
         choiceRight = {
             .var <- totreat[1]
-            E <- eliminateFM(E, .var)
+            .E <- eliminateFM(.E, .var)
             adapt[.var] <- TRUE
             totreat <- totreat[-1]
         },
-        E = E,
+        .E = E,
         x = x,
         totreat = totreat,
         adapt = adapt,

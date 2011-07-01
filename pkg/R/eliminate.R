@@ -191,7 +191,7 @@ isObviouslyRedundant.matrix <- function(
     ib <- ncol(E)
     zeroCoef <- rowSums(abs(E[,-ib,drop=FALSE])) < tol
     v <- as.vector(
-        zeroCoef & operators %in% c("==","<=")  & abs(E[,ib]) < tol |
+        zeroCoef & operators %in% c("==","<=")  & abs(E[,ib]) < tol ||
         zeroCoef & operators %in% c("<", "<=")  & E[,ib] > tol
     )
     if (duplicates){
