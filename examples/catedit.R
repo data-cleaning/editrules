@@ -62,8 +62,16 @@ parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
       l <- c(l, value)
    }
    else if (op == "&&"){
+       if (pos < 0){
          l <- parseCond(cond[[2]], pos, l, iscond=iscond)
          l <- parseCond(cond[[3]], pos, l, iscond=iscond)
+       }
+   }
+   else if (op == "||"){
+       if (pos > 0){
+         l <- parseCond(cond[[2]], pos, l, iscond=iscond)
+         l <- parseCond(cond[[3]], pos, l, iscond=iscond)
+       }
    }
    else {
       stop("Operator ", op, " not supported.")
@@ -190,7 +198,15 @@ substValue.cateditmatrix <- function(x, var, value){
    names(values) <- vc$cat
    
    E <- substValue(x, vc$fullname, values, remove=TRUE)
+   
    class(E) <- class(x) 
+   # rngs <- ranges(E)
+   # eq <- rngs[,1] == rngs[,2]
+   # if (any(eq)){ 
+      # ops <- getOps(E)
+      # ops[eq] <- "=="
+      # attr(E, "ops") <- ops
+   # }
    E
 }
 
@@ -209,7 +225,7 @@ ranges <- function(E){
               lb <- tapply(r, vars, min)
               c(min=sum(lb[lb<0]), max=sum(ub[ub>0]))
              }
-        )
+         )
     )
 }
 
@@ -250,6 +266,8 @@ E <- substValue.cateditmatrix(E, "pregnant", TRUE)
 E
 
 cateditmatrix(c("if (A=='a' && B=='b') C=='c'"))
-# ranges(E)
-# redundant(E)
-# infeasible(E)
+cateditmatrix(c("if (A=='a') {B == 'b' || C=='c'}"))
+#ranges(E)
+#redundant(E)
+isInfeasible.cateditmatrix(E)
+E
