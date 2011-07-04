@@ -109,8 +109,8 @@ makeEditRow <- function(edt){
 #'
 #' The second form is the prefered form, because it allows the documentation of constraints. This
 #' may be very useful when the incorrect observations are analyzed.
-#' If the first form is used, \code{editmatrix} internally creates the second form. This information
-#' can be retrieved by using \code{\link{editrules}}
+#' The function \code{\link{editrules}} creates/extracts the second form, which can be used to store edit rules
+#' externally or to recreate an editmatrix later on.
 #'
 #' The matrix is created by retrieving the coefficients of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=1, y=-1)}

@@ -1,9 +1,10 @@
 
-#' Choice point: a binary search program
+#' Backtracker: a flexible and generic binary search program
 #'
-#' \code{choicepoint} creates a binary search program that can be started by calling the \code{$searchNext} function
+#' \code{backtracker} creates a binary search program that can be started by calling the \code{$searchNext} function
 #' It walks a binary tree depth first. For all left nodes \code{choiceLeft} is evaluated, for all right nodes 
-#' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}.
+#' \code{choiceRight} is evaluated. A solution is found if \code{isSolution} evaluates to \code{TRUE}. 
+#' In that case \code{$searchNext} will return all variables in the search environment in a \code{list}
 #' If \code{isSolution} evaluates to NULL it will continue to search deaper.
 #' If \code{isSolution} evaluates to \code{FALSE} it stops at the current node and goes up the next search node
 #'
@@ -14,12 +15,12 @@
 #'           added to the search environment, this feature can be used to direct the search
 #'           in subsequent calls to \code{searchNext}. VERBOSE=TRUE will print all
 #'           intermediate search steps and results. It can be used to debug the expressions
-#'           in the choicepoint}
+#'           in the backtracker}
 #'      \item{\code{$searchAll(..., VERBOSE=FALSE)}}{Return all solutions as a list}
-#'      \item{\code{$reset()}}{Resets the \code{choicepoint} to its initial state.}
+#'      \item{\code{$reset()}}{Resets the \code{backtracker} to its initial state.}
 #'   }
 #' }
-#' @example examples/choicepoint.R
+#' @example examples/backtracker.R
 #'
 #' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.
 #' @param choiceLeft \code{expression} that will be evaluated for a left node
@@ -27,10 +28,11 @@
 #' @param list \code{list} with variables that will be added to the search environment
 #' @param ... named variables that will be added to the search environment
 #' 
-#' @return choicepoint object, see Methods for a description of the methods
-#' @export
+#' @return backtracker object, see Methods for a description of the methods
+#' @aliases backtracker choicepoint
+#' @export backtracker choicepoint
 #'
-choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
+backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    
    isSolution <- substitute(isSolution)
    choiceLeft <- substitute(choiceLeft)
@@ -140,34 +142,34 @@ choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       reset()
    })
    
-   structure(e, class="choicepoint")
+   structure(e, class="backtracker")
 }
 
 
-#' print a choicepoint
+#' print a backtracker
 #'
 #' @export
-#' @method print choicepoint
-#' @param x choicepoint object to be printed
+#' @method print backtracker
+#' @param x backtracker object to be printed
 #' @param ... other parameters passed to print method
 #' @param VERBOSE should all variables be printed?
-print.choicepoint <- function(x, ..., VERBOSE=FALSE){
+print.backtracker <- function(x, ..., VERBOSE=FALSE){
    print(ls.str(x$state, all.names=VERBOSE))
 }
 
-#' iterate over all solutions of a \code{\link{choicepoint}}
+#' iterate over all solutions of a \code{\link{backtracker}}
 #'
-#' iterate over all solutions of a \code{\link{choicepoint}}
-#' This method is identical to calling \code{$searchNext} on a \code{choicepoint}. Please note that iterating
-#' a choicepoint changes the state of a choicepoint.
+#' iterate over all solutions of a \code{\link{backtracker}}
+#' This method is identical to calling \code{$searchNext} on a \code{backtracker}. Please note that iterating
+#' a backtracker changes the state of a backtracker.
 #' 
 #' @export
-#' @method iter choicepoint
-#' @param x \code{\link{choicepoint}} object
+#' @method iter backtracker
+#' @param x \code{\link{backtracker}} object
 #' @param ... extra parameters that will given to the \code{searchNext()} function
-#' @return choicepoint iterator
+#' @return backtracker iterator
 #' @seealso \code{iter} from the package iterators
-iter.choicepoint <- function(x, ...){
+iter.backtracker <- function(x, ...){
    # TODO add stop iteration
    
    x$nextElem <- function(){ 
@@ -177,7 +179,11 @@ iter.choicepoint <- function(x, ...){
       }
       sol
    }
-   class(x) <- c("abstractiter","iter", "choicepoint")
+   class(x) <- c("abstractiter","iter", "backtracker")
    x
 }
 
+choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
+   warning("choicepoint method is deprecated, please use backtracker.")
+   #backtracker(isSolution=isSolution, choiceLeft=choiceLeft, choiceRight=choiceRight, list=list, ...)   
+}

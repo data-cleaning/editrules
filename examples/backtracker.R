@@ -1,26 +1,27 @@
 
-cp <- choicepoint( isSolution= { 
-                                 if (y==0) return(TRUE)
+bt <- backtracker( isSolution= { 
+                                 if (y == 0) return(TRUE)
                                  if (x == 0) return(FALSE)
                                }
                  , choiceLeft = { x <- x - 1; y <- y}
                  , choiceRight = { y <- y - 1; x <- x}
+                 # starting values for x and y
                  , x=2
                  , y=1
                  )
 
-cp$searchNext(VERBOSE=TRUE)
-cp$searchNext(VERBOSE=TRUE)
+bt$searchNext(VERBOSE=TRUE)
+bt$searchNext(VERBOSE=TRUE)
 
 # next search will return NULL because there is no more solution
-cp$searchNext()
+bt$searchNext()
 
 
-cp$reset()
+bt$reset()
 
-# choicepoint also works with iterators
+# backtracker also works with iterators
 if (require(iterators)){
-   it <- iter(cp)
+   it <- iter(bt)
    nextElem(it)
    #nextElem(it)
 }
