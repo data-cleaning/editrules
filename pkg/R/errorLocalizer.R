@@ -61,6 +61,7 @@ errorLocalizer <- function(E, x, ...){
 #' @export
 errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     if ( !isNormalized(E) ) E <- normalize(E)
+    
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
     names(adapt) <- names(x)
@@ -71,13 +72,14 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
 
     # Eliminate missing variables.
     vars <- getVars(E)
-    for (v in vars[adapt & names(x) %in% vars]) E <- eliminateFM(E,v)
+    for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
     wsol <- sum(weight)
     cp <- backtracker(
         isSolution = {
             w <- sum(weight[adapt])
             if ( isObviouslyInfeasible(.E) || w > wsol ) return(FALSE)
             if (length(totreat) == 0){
+                if ( !isFeasible(.E) ) return(FALSE)
                 wsol <<- w
                 adapt <- adapt 
                 rm(totreat)
