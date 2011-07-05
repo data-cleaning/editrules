@@ -11,8 +11,6 @@ eliminateCat <- function(A, n, J, j){
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
     B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
     B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    print(B)
-    print(pmax(n[I1],n[I2]))
     list(A=B, n=pmax(n[I1],n[I2]))
 }
 
