@@ -32,7 +32,7 @@ echelon.editmatrix <- function(E,...){
     o <- getOps(E)
     # nothing to eliminate?
     eq <- o == "=="
-    if ( sum(eq) <= 1 ) return(E,...)
+    if ( sum(eq) <= 1 ) return(E)
     Ab <- getAb(E)
     Ab <- rbind(
         echelon.matrix(Ab[eq,,drop=FALSE]),
