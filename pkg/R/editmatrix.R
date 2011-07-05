@@ -249,9 +249,9 @@ is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
 }
 
-#' Coerce to an edit matrix. This method will derive editrules from a matrix.
+#' Coerce a matrix to an edit matrix.
 #'
-#' \code{as.editmatrix} interpretes the matrix as an editmatrix and derives readable edit rules. 
+#' \code{as.editmatrix} interpretes the matrix as an editmatrix.
 #' The columns of the matrix
 #' are the variables and the rows are the edit rules (contraints).
 #' 
@@ -264,7 +264,7 @@ is.editmatrix <- function(x){
 #' @param A matrix to be transformed into an \code{\link{editmatrix}}. 
 #' @param b Constant, a \code{numeric} of \code{length(nrow(x))}, defaults to 0
 #' @param ops Operators, \code{character} of \code{length(nrow(x))} with the equality operators, defaults to "=="
-#' @param ... further parameters will be given to \code{editmatrix}
+#' @param ... further attributes that will be attached to the resulting editmatrix
 #'
 #' @return an object of class \code{editmatrix}.
 as.editmatrix <- function( A
@@ -288,7 +288,7 @@ as.editmatrix <- function( A
     }
     A <- cbind(as.matrix(A), b)
     dimnames(A) <- list(rules=rn,var=c(cn,"CONSTANT"))
-    E <- neweditmatrix(A=A, ops=ops)
+    E <- neweditmatrix(A=A, ops=ops, ...)
     if (isNormalized(E)) attr(E,"normalized") <- TRUE
     E
 }
@@ -332,8 +332,9 @@ as.data.frame.editmatrix <- function(x, ...){
 }
 
 
-#' Get character representation of editmatrix
+#' Coerce an editmatrix to a \code{character} vector
 #'
+#' Derives readable editrules from an editmatrix.
 #' @export
 #' @method as.character editmatrix
 #'
@@ -376,8 +377,9 @@ as.character.editmatrix <- function(x, ...){
    txt
 }
 
-#' Get expression representation of editmatrix
+#' Coerce an editmatrix to R expressions
 #'
+#' Generates an R \code{expression} vector that can be used to check data using \code{\link{eval}}.
 #' @export
 #' @method as.expression editmatrix
 #'

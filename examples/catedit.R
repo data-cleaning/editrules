@@ -238,7 +238,7 @@ isObviouslyRedundant.cateditmatrix <- function(E){
 }
 
 #'check which edits are infeasible
-isInfeasible.cateditmatrix <- function(E){
+isObviouslyInfeasible.cateditmatrix <- function(E){
    getb(E) < ranges(E)[,"min"]
 }
 
@@ -273,5 +273,5 @@ cateditmatrix(c("if (A=='a' && B=='b') C=='c'"))
 cateditmatrix(c("if (A=='a') {B == 'b' || C=='c'}"))
 #ranges(E)
 #redundant(E)
-isInfeasible.cateditmatrix(E)
+isObviouslyInfeasible.cateditmatrix(E)
 E

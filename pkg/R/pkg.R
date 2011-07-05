@@ -5,21 +5,17 @@
 #'    and variable substitution and solving error localization problems
 #'    based on the generalized principle of Felligi and Holt.
 #' 
-#' The package \code{editrules} facilitates the reading/parsing of so called "edit rules" or constraints. 
-#' Edit rules are linear (in)equalities used for checking
-#' statistical data. 
-#' Often the specification of edit rules and their implementation in software is cumbersome. In many cases a restriction matrix 
-#' is created manually. With \code{editrules} these rules can be specified in R syntax and can be managed and documented.
-#' The documented form can be easily translated into a constraint matrix form, useful for automatic detection and correction 
-#' methods.
-#' 
-#' If an observation passes the edit rules it is considered valid or plausible. 
-#' If an observation doesn't pass the rules then it should be further checked and eventually edited.
-#' Important for the (automatic) editing proces are the rules that are violated. \code{editrules} helps to detect which rules are 
-#' violated and which variables are involved in the violated edits.
+#' The \code{editrules} package aims to provide an environment to conveniently define,
+#' read and check linear (in)equality restrictions, perform common edit
+#' manipulations and offer error localization functionality based on the
+#' (generalized) paradigm of Fellige Holt. This paradigm assumes
+#' that errors are distributed randomly over the variables and there
+#' is no detectable cause of error. It also decouples the detection of corrupt variables from their correction. 
+#' For some types of error, such as sign flips,
+#' typing errors or rounding errors, this assumption does not hold. These errors can be detected and are closely 
+#' related to their resolution. The reader is referred to the package \code{deducorrect}
+#' package for treating such errors. 
 #'
-#' 
-#' The function \code{\link{editmatrix}} reads linear (in)equalities.
 #' Typical usage is:
 #' @example examples/editrules.R
 #' @name editrules-package 
