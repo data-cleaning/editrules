@@ -986,11 +986,11 @@ bt$searchNext()$adapt
 bt$searchNext()$adapt
 bt$searchNext()$adapt
 @
-There are two solutions, both of which include the field {\tt c2} with the
+There are three equivalent solutions, all of which include the field {\tt c2} with the
 missing value. To obtain the restrictions for the variables which have altered,
-simply substitute all values which are retained in the solution.
+simply substitute all values which are retained in the solution, for example
 <<<keep.source=true>>=
-isFeasible(substValue(E,c("p","t"),c(755,200)))
+substValue(E,"p",755)
 @
 
 \subsection{General binary search with the {\tt backtracker} object}
