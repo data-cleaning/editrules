@@ -62,16 +62,20 @@ parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
       l <- c(l, value)
    }
    else if (op == "&&"){
-       if (pos < 0){
+
+         if (pos > 0){
+            stop("Invalid use of ", op, " in then clause.")
+         }         
          l <- parseCond(cond[[2]], pos, l, iscond=iscond)
          l <- parseCond(cond[[3]], pos, l, iscond=iscond)
        }
    }
    else if (op == "||"){
-       if (pos > 0){
+         if (pos < 0){
+            stop("Invalid use of ", op, " in if clause.")
+         }         
          l <- parseCond(cond[[2]], pos, l, iscond=iscond)
          l <- parseCond(cond[[3]], pos, l, iscond=iscond)
-       }
    }
    else {
       stop("Operator ", op, " not supported.")
@@ -230,12 +234,12 @@ ranges <- function(E){
 }
 
 isObviouslyRedundant.cateditmatrix <- function(E){
-   (getb(E) >= ranges(E)[,2]) | editrules:::isObviouslyRedundant.editmatrix(E) 
+   (getb(E) >= ranges(E)[,"max"]) | editrules:::isObviouslyRedundant.editmatrix(E) 
 }
 
-#'check which edits are not feasible
+#'check which edits are infeasible
 isInfeasible.cateditmatrix <- function(E){
-   getb(E) < ranges(E)[,1]
+   getb(E) < ranges(E)[,"min"]
 }
 
 # ### examples....

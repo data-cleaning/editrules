@@ -87,7 +87,7 @@ Any such restriction is of the form
 where $\bf x$ is a numerical data record, ${\bf a}$, ${\bf x}\in \mathbb{R}^n$
 and $b\in \mathbb{R}$. In data editing literature, data restriction rules
 are referred to as {\em edits}, or {\em edit rules}. In this paper we will call edits, written
-in the form of eq.\ \eqref{edit}, edits in {\em normal form}. 
+in the form of Eq.\ \eqref{edit}, edits in {\em normal form}. 
 
 Large complex surveys are often endowed with dozens or even hundreds of edit
 rules.  For example, the Dutch Structural Business Survey, which aims to report
@@ -454,13 +454,15 @@ Figure \ref{Rechelon} demonstrates a call to the {\sf R} function.
 
 
 \begin{Rcode}
-\small
-<<>>=
-E[1:2,]
-echelon(E[1:2,])
+<<keep.source=true>>=
+(E2 <- editmatrix(c("2*x1 + x2 -x3 == 8",
+                  "2*x3 + 11 == 3*x1 + x2", 
+                  "x2 + 2*x3 + 3 == 2*x1")
+                ))
+echelon(E2)
 @
 \caption{Transforming linear equalities of an editmatrix to
-reduced row echelon form. See Figure \ref{emfromtext} for the original definition of {\tt E}.}
+reduced row echelon form.}
 \label{Rechelon}
 \end{Rcode}
 
@@ -592,10 +594,10 @@ iteration to ensure that the derivation history is updated at every step.}
 \label{serrorlocalization}
 While checking whether a numerical record violates any imposed restrictions
 (within a certain limit) is easy, finding out which variable(s) of the record
-cause the violation(s) can be far from trivial. When possible, the cause of the
+cause the violation(s) can be far from trivial. If possible, the cause of the
 violation should be sought out, since it leads immediately to repair
 suggestions. The {\tt deducorrect} package \citep{loo:2011} mentioned above
-offers functionality to detect and repair common errors like typing errors,
+offers functionality to detect and repair typing errors,
 rounding errors and sign errors. Although not directly available in R, methods
 for detecting repairing unit measure errors or other systematic errors have
 been described in literature and may readily be implemented in {\sf R} (see
@@ -611,8 +613,8 @@ be applied.
 \label{sgeneralfellegiholt}
 In line with the good
 practice of altering source data as little as possible, the paradigm of
-\cite{fellegi:1976} advises to edit an as small amount of variables as
-possible, under the condition that after editing, every edit rule can be
+\cite{fellegi:1976} advises to edit a minimal number of variables as
+possible, under the condition that after editing, every edit rule will be
 obeyed. A generalization of this principle says that a weighted number
 of variables should be minimized. More formally, the principle yields the
 following problem. Given a record ${\bf x}$, violating a number of edits
@@ -643,7 +645,7 @@ parents. In the left child node, $x_1$ is assumed correct and its value is
 substituted in $E$. In the right child node, $x_1$ is assumed to contain an
 error and it is eliminated from $E$ by Fourier-Motzkin elimination. The weight
 $w$ in the right node is increased by $w_1$. Each child node gets a left and
-right child node where $x_2$ is substituted or eliminated, and so on untill
+right child node where $x_2$ is substituted or eliminated, and so on until
 every variable has been treated.  Every path from root to leaf represents one
 element of the search space. A branch is pruned when $E$
 contains obvious inconsistencies, so no combinations not satisfying the
@@ -883,7 +885,7 @@ The method {\tt searchNext} is not the only method of the {\tt backtracker} obje
 returned by {\tt errorLocalizer}. The avaliable methods are
 \begin{itemize}
 \item\verb"$searchNext" Searches for the next solution with a lower weight than the previously found solution.
-\item\verb"$searchAll"  Returns all solutions, regardless of the weight.
+\item\verb"$searchAll"  Returns all encountered solutions that have non-increasing weights.
 \item\verb"$searchBest" Returns the lowest-weight solution. If multiple solutions have the same, minimum weight,
         it returns one of those solutions at random.
 \end{itemize}
@@ -1057,7 +1059,7 @@ prepare the variables in a node for output. The method {\sc searchNext}
 generates nodes in the binary tree, depth-first and returns the (contents of)
 the first environment corresponding to a solution. If {\sc bt} is the instance
 of a {\sc backtracker} object, then each call to {\sc bt::searchNext} will
-return a new, and better solution, untill all solutions are found, in which
+return a new, and better solution, until all solutions are found, in which
 case {\sc null} is returned.
 %
 %
@@ -1191,6 +1193,29 @@ bt$searchNext()
 \end{Rcode}
 
 \clearpage
+
+\section{Related R-packages}
+The {\tt editrules} packages provides methods to specify, modify and solve sets of linear constraints.
+Solving systems of linear constraints is the domain of linear programming (reference).
+CRAN provides several R packages  that use external libraries to 
+solve linear programming problems for example {\sc R} packages {\tt linprog} \citep{linprog:2010} and {\tt lpSolve} \citep{lpSolve:2011}. 
+{\tt editrules} takes a different approach for a number of reasons, it provides an "all R solution".
+
+First of all the specification of constraints in {\tt editrules} is in R syntax, while other packages typically
+use the specification format of the external library. This facilitates the maintanance of edits and reuse 
+of these statements within R. It is very useful to check data within R before, during and after data analysis.
+
+Secondly \cite{waal:2011}, Chapter ? observed that branch and bound algorithms for 
+error localization problems are as fast as linear programming techniques, but have
+the added advantage of returning multiple equal solutions to the specified problem.
+{\tt errorLocalizer} is an improved implementation their original branch and 
+bound algorithm.
+
+Thirdly {\tt editrules} provides a powerful toolbox allowing to write advanced 
+editing and backtracking operations on sets of edits using R statements. 
+Some linear programming libraries also offer branch and bound/cut methods, but 
+these typically have to be specified in the original programming language of the
+library. In {\tt editrules} all coding is in {\sc R}.
 
 \section{Conclusions}
 The {\tt editrules} package offers a convenient interface to define and

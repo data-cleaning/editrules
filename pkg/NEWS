@@ -4,7 +4,7 @@ version 0.8
 - solved a bug causing isObviouslyInfeasible to miss certain cases
 - substValue can now replace multiple values at once.
 - `[.editmatrix` now retains derivation history (previously lost in substValue operations)
-- substValues now accepts more then one value 
+- removed a bug from echelon.editmatrix, it failed when no operation was possible.
 
 version 0.7-1
 - made as.errormatrix a bit more robust and solved a cornercase 
