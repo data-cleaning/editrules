@@ -62,13 +62,11 @@ parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
       l <- c(l, value)
    }
    else if (op == "&&"){
-
-         if (pos > 0){
+        if (pos > 0){
             stop("Invalid use of ", op, " in then clause.")
-         }         
-         l <- parseCond(cond[[2]], pos, l, iscond=iscond)
-         l <- parseCond(cond[[3]], pos, l, iscond=iscond)
-       }
+        }         
+        l <- parseCond(cond[[2]], pos, l, iscond=iscond)
+        l <- parseCond(cond[[3]], pos, l, iscond=iscond)
    }
    else if (op == "||"){
          if (pos < 0){
@@ -192,8 +190,22 @@ getVarCat.character <- function(x, ...){
     # catedits
 # }
 
+negateValue <- function(x, variable, value){
+   if (is.logical(value)){
+     vc <- subset(getVarCat(x), var==variable)
+     return(substValue(x, vc$fullname, !value))
+   } else {
+      vc <- subset(getVarCat(x), var==variable & cat==value)
+      if (nrow(vc) > 0){
+         return(substValue(x, vc$fullname, 0))
+      }
+   }
+   x
+}
+
 substValue.cateditmatrix <- function(x, var, value){
    vc <- getVarCat(x)
+   #TODO implement multiple substition
    vc <- vc[vc$var == var,]
    if (!nrow(vc))
       stop("Invalid variable: ", var)
@@ -211,6 +223,14 @@ substValue.cateditmatrix <- function(x, var, value){
       # ops[eq] <- "=="
       # attr(E, "ops") <- ops
    # }
+   E
+}
+
+eliminateFM.cateditmatrix <- function(E, variable){
+   cemclass <- class(E)
+   vars <- subset(getVarCat(E), var==variable)$fullname
+   for (v in vars) E <- eliminateFM(E,v)
+   class(E) <- cemclass
    E
 }
 
@@ -239,9 +259,61 @@ isObviouslyRedundant.cateditmatrix <- function(E){
 
 #'check which edits are infeasible
 isObviouslyInfeasible.cateditmatrix <- function(E){
-   getb(E) < ranges(E)[,"min"]
+   any(getb(E) < ranges(E)[,"min"])
 }
 
+errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
+    # store class for backcasting
+    cemclass <- class(E)
+    
+    if ( !isNormalized(E) ) E <- normalize(E)
+    
+    # missings must be adapted, others still have to be treated.
+    adapt <- is.na(x)   
+    names(adapt) <- names(x)
+
+    #order decreasing by weight
+    o <- order(weight, decreasing=TRUE)
+    totreat <- names(x)[o[!adapt]]
+
+    # Eliminate missing variables.
+    vars <- getVars(E)
+    for (v in names(which(adapt))) E <- eliminateFM.cateditmatrix(E,v)
+    
+    wsol <- sum(weight)
+    cp <- backtracker(
+        isSolution = {
+            w <- sum(weight[adapt])
+            if ( isObviouslyInfeasible.cateditmatrix(.E) || w > wsol ) return(FALSE)
+            if (length(.totreat) == 0){
+                wsol <<- w
+                adapt <- adapt 
+                return(TRUE)
+            }
+        },
+        choiceLeft = {
+            .var <- .totreat[1]
+            .E <- substValue.cateditmatrix(.E, .var , x[.var])
+            .totreat <- .totreat[-1]
+
+            adapt[.var] <- FALSE
+        },
+        choiceRight = {
+            .var <- .totreat[1]
+            negateValue(.E, .var, x[.var])
+            .E <- eliminateFM.cateditmatrix(.E, .var)
+            .totreat <- .totreat[-1]
+
+            adapt[.var] <- TRUE
+        },
+        .E = E,
+        .totreat = totreat,
+        x = x,
+        adapt = adapt,
+        weight = weight,
+        wsol = wsol 
+    )
+}
 # ### examples....
 
 civilStatusLevels <- c("married","unmarried","widowed","divorced")
@@ -254,24 +326,20 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
       )
 
 
-E <- cateditmatrix(x)
-E
-as.character(E)
-getVarCat(E, name="variable")
+(E <- cateditmatrix(x))
+# negateValue(E, "age", "< 16")
+# negateValue(E, "gender", "female")
 
-E <- substValue.cateditmatrix(E, "civilStatus", "unmarried")
-E
-
-E <- substValue.cateditmatrix(E, "gender", "male")
-E
-
-
-E <- substValue.cateditmatrix(E, "pregnant", TRUE)
-E
-
-cateditmatrix(c("if (A=='a' && B=='b') C=='c'"))
-cateditmatrix(c("if (A=='a') {B == 'b' || C=='c'}"))
-#ranges(E)
-#redundant(E)
-isObviouslyInfeasible.cateditmatrix(E)
-E
+bt <- errorLocalizer.cateditmatrix( E
+                                  , x =c( civilStatus='married'
+                                        , age='< 16'
+                                        , positionInHousehold='marriage partner'
+                                        , gender='male'
+                                        , pregnant=TRUE
+                                        , nace='A'
+                                        , valid=TRUE
+                                        )
+                                  )
+bt$searchNext()$adapt
+bt$searchNext()$adapt
+bt$searchNext()
