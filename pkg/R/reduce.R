@@ -110,7 +110,6 @@ substValue <- function(E, var, value, remove=FALSE){
 #' @nord
 #' @export
 replaceValue <- function(...){
-    warning("replaceValue is deprecated. Use substValue in stead.")
-    substValue(...)
+    stop("replaceValue is deprecated. Use substValue in stead.")
 }
 

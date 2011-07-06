@@ -79,7 +79,6 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
             w <- sum(weight[adapt])
             if ( isObviouslyInfeasible(.E) || w > wsol ) return(FALSE)
             if (length(totreat) == 0){
-                if ( !isFeasible(.E) ) return(FALSE)
                 wsol <<- w
                 adapt <- adapt 
                 rm(totreat)
@@ -131,8 +130,7 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
 #' @param ... Arguments to be passed to \code{\link{errorLocalizer}}
 #' @export
 cp.editmatrix <- function(E,x,...){
- warning("This function is deprecated. Use errorLocalizer in stead")
- errorLocalizer(...)
+ stop("This function is deprecated. Use errorLocalizer in stead")
 }
 
 

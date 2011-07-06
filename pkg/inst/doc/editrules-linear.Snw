@@ -84,9 +84,10 @@ Any such restriction is of the form
 {\bf a}\cdot{\bf x} \odot b\textrm{ with }\odot\in\{<,\leq,=\},
 \end{equation}
 where $\bf x$ is a numerical data record, ${\bf a}$, ${\bf x}\in \mathbb{R}^n$
-and $b\in \mathbb{R}$. In data editing literature, data restriction rules
-are referred to as {\em edits}, or {\em edit rules}. In this paper we will call edits, written
-in the form of Eq.\ \eqref{edit}, edits in {\em normal form}. 
+and $b\in \mathbb{R}$. In data editing literature, data restriction rules are
+referred to as {\em edits}, or {\em edit rules}\index{edit rules}\index{edit}.
+In this paper we will call edits, written in the form of Eq.\ \eqref{edit},
+edits in {\em normal form}\index{edit rules!normal form}. 
 
 Large complex surveys are often endowed with dozens or even hundreds of edit
 rules.  For example, the Dutch Structural Business Survey, which aims to report
@@ -110,7 +111,7 @@ decouples the detection of corrupt variables from their correction.
 For some types of error, such as sign flips, typing errors or rounding errors,
 this assumption does not hold. These errors can be detected and are closely
 related to their resolution. The reader is referred to the {\tt
-deducorrect}\index{deducorrect} package \citep{loo:2011, scholtus:2008,
+deducorrect}\index{deducorrect@{\tt deducorrect}} package \citep{loo:2011, scholtus:2008,
 scholtus:2009} for treating such errors. 
 
 The following chapters demonstrates the functionality of the {\tt editrules}
@@ -129,7 +130,7 @@ For computational processing, a set of edits of the form
 \label{nonnormaledit}
 \end{equation}
 is most conveniently represented as a matrix.  In the {\tt editrules} package,
-a set of linear edits is stored as an {\tt editmatrix}\index{editmatrix}
+a set of linear edits is stored as an {\tt editmatrix}
 object.  This object stores the linear relations as an augmented matrix $[{\bf
 A},{\bf b}]$, where $\bf A$ is the matrix obtained by combining the  ${\bf a}$
 vectors of Eq.\ \eqref{nonnormaledit} in rows of $\bf A$ and constants  $b$ in
@@ -140,7 +141,7 @@ E = \left\langle [\mathbf{A}|\mathbf{b}],\boldsymbol{\odot}\right\rangle
 \textrm{ with } [{\bf A}|{\bf b}]\in \mathbb{R}^{m\times{n+1}},\:
 \boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^{m},
 \label{editset}
-\end{equation}
+\end{equation}\index{editmatrix@{\tt editmatrix}}
 where $n$ is the number of variables, $m$ the number of edit rules and the
 notation $\langle \:,\:\rangle$ denotes a combination of objects.  Retrieval
 functions for various parts of an {\tt editmatrix} are available, see Table
@@ -201,7 +202,7 @@ E
 verbose edit statements.  The option {\tt normalize=TRUE} ensures that all
 comparison operators are either ${\tt <}$, ${\tt \leq}$ or ${\tt ==}$.}
 \label{emfromtext}
-\end{Rcode}
+\end{Rcode}\index{edit rules!defining}
 %
 
 As Figure \ref{emfromtext} shows, the {\tt editmatrix} object is shown on the
@@ -272,12 +273,12 @@ function                      & description\\
 {\tt violatedEdits(E, x)}     & Check which edits are violated by ${\bf x}$\\
 {\tt duplicated(E)}           & Check for duplicates in rows of {\tt E}\\
 {\tt isObviouslyRedundant(E)} & Check for tautologies and duplicates in  {\tt E}\\
-{\tt isObviouslyUnfeasible(E)}& Check for contradictions in rows of {\tt E}\\
+{\tt isObviouslyInfeasible(E)}& Check for contradictions in rows of {\tt E}\\
 {\tt isFeasible}              & Complete feasibility check for {\tt E}\\ 
 \hline
 \end{tabular}
 \end{threeparttable}
-\end{table}
+\end{table}\index{editmatrix@{\tt editmatrix}!basic functions}\index{edit rules!checking}
 %
 %
 \begin{Rcode}
@@ -343,7 +344,7 @@ contradictionary edits after maintenance.
 \State\Return {\sc false}
 \Ensure \Comment{{\tt logical} indicating if $E$ is obviously infeasible.}
 \end{algorithmic}
-\end{algorithm}
+\end{algorithm}\index{editmatrix@{\tt editmatrix}!feasibility}
 %
 %
 \begin{algorithm}[t]
@@ -366,7 +367,7 @@ contradictionary edits after maintenance.
 \EndIf
 \Ensure ${\bf v}$ \Comment{{\tt logical} vector indicating which rows of $E$ are obviously redundant.}
 \end{algorithmic}
-\end{algorithm}
+\end{algorithm}\index{editmatrix@{\tt editmatrix}!redundancy}
 
 Both value substitution and variable elimination derive new edits, that may be
 of the form $0 \leq 1$ or $0=0$.  The function {\tt isObviouslyRedundant}
@@ -397,7 +398,7 @@ any record $\bf x$ it must hold that
 \begin{equation}
 {\bf Ax}\boldsymbol{\odot}  {\bf b},\quad \boldsymbol{\odot}\in\{<,\leq,=,\geq,>\}^m.
 \label{subst}
-\end{equation}
+\end{equation}\index{editmatrix@{\tt editmatrix}!value substitution}
 Substituting one of the unknowns $x_j$ by a certain value $x$ amounts to
 replacing the $j^{\rm th}$ column of $\bf A$ with ${\bf 0}$ and ${\bf b}$ with
 ${\bf b}-{\bf a}_j'x$. After this, the reduced record of unknowns, with $x_j$
@@ -463,7 +464,7 @@ implementation in the sense that it involves just one explicit loop.  Figure
 \State Move rows of $[{\bf A|b}]$ with all zeros to bottom.
 \Ensure $E$, transformed to reduced row echelon form.
 \end{algorithmic}
-\end{algorithm}
+\end{algorithm}\index{Gaussian elimination}
 
 
 \begin{Rcode}
@@ -587,7 +588,7 @@ with negative $j^{th}$ coefficient:}
 \State Remove edit rules of $\tilde{E}$ for which {\sc isObviouslyRedundant}$(\tilde{E})$ is {\sc true}
 \Ensure {\tt editmatrix} $\tilde{E}$ with variable $j$ eliminated and updated history
 \end{algorithmic}
-\end{algorithm}
+\end{algorithm}\index{Fourier-Motzkin elimination}
 %
 \begin{Rcode}
 <<>>=
@@ -630,7 +631,7 @@ practice of altering source data as little as possible, the paradigm of
 \cite{fellegi:1976} advises to edit a minimal number of variables as
 possible, under the condition that after editing, every edit rule will be
 obeyed. A generalization of this principle says that a weighted number
-of variables should be minimized. More formally, the principle yields the
+of variables should be minimized.\index{Fellegi and Holt principle} More formally, the principle yields the
 following problem. Given a record ${\bf x}$, violating a number of edits
 in an edit matrix $E$ (see Eqn. \eqref{editset}) with $m$ rules and $n$ variables, 
 find $G$ such that
@@ -652,20 +653,20 @@ one solution unless the edit rules in $E$ are contradictory.
 The minimization \eqref{fhproblem} amounts to a binary search problem, of which
 the search space increases as $2^n$ ($n$ the number of variables).
 \cite{waal:2003} and \cite{waal:2011} describe a branch-and-bound binary search
-algorithm which generates all minimal weight solutions. It works by generating
-the following binary tree: the root node contains $E$ and $\bf x$ and weight
-$w=0$.  Both left and right nodes receive a copy of the objects in their
-parents. In the left child node, $x_1$ is assumed correct and its value is
-substituted in $E$. In the right child node, $x_1$ is assumed to contain an
-error and it is eliminated from $E$ by Fourier-Motzkin elimination. The weight
-$w$ in the right node is increased by $w_1$. Each child node gets a left and
-right child node where $x_2$ is substituted or eliminated, and so on until
-every variable has been treated.  Every path from root to leaf represents one
-element of the search space. A branch is pruned when $E$
-contains obvious inconsistencies, so no combinations not satisfying the
-condition in \eqref{fhproblem} are generated. If a solution with certain
-weight $w$ is found, branches developed later, receiving a higher weight are
-pruned as well.
+algorithm which generates all minimal weight solutions.\index{branch-and-bound,
+for error localization} It works by generating the following binary tree: the
+root node contains $E$ and $\bf x$ and weight $w=0$.  Both left and right nodes
+receive a copy of the objects in their parents. In the left child node, $x_1$
+is assumed correct and its value is substituted in $E$. In the right child
+node, $x_1$ is assumed to contain an error and it is eliminated from $E$ by
+Fourier-Motzkin elimination. The weight $w$ in the right node is increased by
+$w_1$. Each child node gets a left and right child node where $x_2$ is
+substituted or eliminated, and so on until every variable has been treated.
+Every path from root to leaf represents one element of the search space. A
+branch is pruned when $E$ contains obvious inconsistencies, so no combinations
+not satisfying the condition in \eqref{fhproblem} are generated. If a solution
+with certain weight $w$ is found, branches developed later, receiving a higher
+weight are pruned as well.
 
 To clarify the above, in the next subsection we give two worked examples.
 Subsection \eqref{sbacktracker} describes a flexible binary search algorithm,
@@ -865,14 +866,15 @@ if $E_0=e_1\land e_2 \land \ldots\land e_k$, then
 Here, each negated inequality translates to a single inequality, while each negated
 equality yields two inequalities (as in Eq.\ \eqref{exampleExpansion}).
 
-We will have more to say on conditional edits in the accompanying paper where
-the error localization problem for categorical and mixed data are treated.
+We will have more to say on conditional edits\index{edit rules!conditional} in
+the accompanying paper where the error localization problem for categorical and
+mixed data are treated.
 
 \subsection{Error localization with {\tt errorLocalizer}}
 \label{scpeditmatrix}
 
 The error localization problem detailed in the previous subsections can be
-automated with {\tt errorLocalizer}. This function expects an {\tt editmatrix},
+automated with {\tt errorLocalizer}.\index{errorLocalizer@{\tt errorLocalizer}} This function expects an {\tt editmatrix},
 a named {\tt numerical} record and optionally a vector of reliability weights
 with the same length as the record. The return value is not the solution to the
 error localization problem but an object of class {\tt backtracker}. With a
@@ -981,17 +983,20 @@ E <- editmatrix(c(
     "c1 > 0",
     "c2 > 0",
     "t > 0"))
-bt <- errorLocalizer(E,x=c(p=755, c1=50, c2=NA,t=200))
+x <- c(p=755, c1=50, c2=NA,t=200)
+bt <- errorLocalizer(E,x)
 bt$searchNext()$adapt
 bt$searchNext()$adapt
-bt$searchNext()$adapt
+(s <- bt$searchNext()$adapt)
 @
-There are three equivalent solutions, all of which include the field {\tt c2} with the
-missing value. To obtain the restrictions for the variables which have altered,
-simply substitute all values which are retained in the solution, for example
+There are three equivalent solutions, all of which include the field with the
+missing value ({\tt c2}). To obtain the restrictions for the variables which have altered,
+simply substitute all values which are retained in the solution, for example:
 <<<keep.source=true>>=
-substValue(E,"p",755)
+substValue(E,names(x)[!s],x[!s])
 @
+This system of equations must be obeyed if {\tt p}, {\tt c1} and {\tt c2} are going
+to be adapted or imputed.
 
 \subsection{General binary search with the {\tt backtracker} object}
 \label{sbacktracker}
@@ -1000,25 +1005,23 @@ problem can be interpreted as a (pruned) binary programming problem. To
 facilitate implementation of error localization for numerical, categorical and
 mixed data, as well as to help further research in error localization
 algorithms, we implemented general-purpose binary search functionality in the
-form of backtracking programming.
-A backtracking algorithm \citep{knuth:1968} finds solutions to a computational
-problem by building incrementally candidate solutions. It starts with an partial
-solution and extends the partial solution in subsequent steps until it is a 
-valid solution. When a partial solution is extended the full state of the 
-current (sub) problem is stored in a ``choice point''. If a partial solution is 
-not valid, the algorithm  will ``back track'' to the last previously stored 
-choice point and 
-continue its search. In other words, it prunes invalid search subtrees and 
-does not waste computation time on invalid solutions. Furthermore the algorithm
-allows users to specify how to extend a partial solution and when a partial
-solution is invalid.
+form of backtracking programming.  A backtracking algorithm \citep{knuth:1968}
+finds solutions to a computational problem by building incrementally candidate
+solutions. It starts with a partial solution and extends the partial solution
+in subsequent steps until it is a valid solution. When a partial solution is
+extended the full state of the current (sub) problem is stored in a ``choice
+point''. If a partial solution is not valid, the algorithm  will ``back track''
+to the last previously stored choice point and continue its search. In other
+words, it prunes invalid search subtrees and does not waste computation time on
+invalid solutions. Furthermore the algorithm allows users to specify how to
+extend a partial solution and when a partial solution is invalid.
 
-Backtracking is specific form of the more general ``choice point'' programming 
-which stems from the field of nondeterministic programming.
-In nondeterministic programming, the control flow of a program is not
-determined explicitly by the programmer with standard branching statements. In
-stead, choice points may be created which store the full state of a program so
-that control flow can at any time return to a stored state and choose a new
+Backtracking\index{backtracking} is specific form of the more general ``choice point''
+\index{choice point} programming which stems from the field of nondeterministic
+programming.  In nondeterministic programming, the control flow of a program is
+not determined explicitly by the programmer with standard branching statements.
+In stead, choice points may be created which store the full state of a program
+so that control flow can at any time return to a stored state and choose a new
 path from there. Choice point programming is supported by various niche
 programming environments, such as {\sf Alma-0} \citep{partington:1997} and {\sf
 ELAN} \citep{vittek:1996}. See \cite{moreau:1998} for a clear introduction or
@@ -1036,27 +1039,26 @@ means that expressions can also be used to create, manipulate and delete
 environments like any other {\sf R} object. Moreover, expressions can be
 evaluated in any environment created by the programmer.  
 
-In our implementation, we model the search tree as a binary search tree, in 
-which each node is a binary choice (left or right) for extending the 
-current partial solution. In the {\sc backtracker} object the sequence of
-connected nodes is represented by a sequence of nested environments. 
-Each environment stores the state of a binary ``choice point'' . Such a 
-series of nested
+In our implementation, we model the search tree as a binary search tree, in
+which each node is a binary choice (left or right) for extending the current
+partial solution. In the {\sc backtracker} object the sequence of connected
+nodes is represented by a sequence of nested environments.  Each environment
+stores the state of a binary ``choice point'' . Such a series of nested
 environments is equivalent to a stack, where a \push-operation corresponds to
 nesting a new environment and a \pop-operation ensures that the next expression
 will be evaluated in the last-pushed environment. Since environments are
 nested, expressions evaluated in a child node have read access to information
-stored in the parent node. 
-Pseudocode for the {\sc backtracker} object is given
-in Algorithm \ref{backtracker}. Expressions are denoted with greek letters
-$\psi$ or $\phi$, environments are denoted as $\env$ and $::$ is the scope
-resolution operator. The symbol $\mathcal{S}$ denotes a formal stack. We denote
-the result of evaluating an expression $\phi$ in an environment $\env$ as
-$\phi(\env)$. One can think of $\phi$ as a subroutine which alters the internal
-state of \env. It is also possible for $\phi$ to generate a return value (by
-issuing a {\tt return} statement) which is pushed to the enveloping
+stored in the parent node.  Pseudocode for the {\sc backtracker} object is
+given in Algorithm \ref{backtracker}. Expressions are denoted with greek
+letters $\psi$ or $\phi$, environments are denoted as $\env$ and $::$ is the
+scope resolution operator. The symbol $\mathcal{S}$ denotes a formal stack. We
+denote the result of evaluating an expression $\phi$ in an environment $\env$
+as $\phi(\env)$. One can think of $\phi$ as a subroutine which alters the
+internal state of \env. It is also possible for $\phi$ to generate a return
+value (by issuing a {\tt return} statement) which is pushed to the enveloping
 environment, similar to the action of a standard function. 
 
+\index{backtracker@{\tt backtracker}|(}
 To construct a {\sc backtracker} object, the user provides an expression
 $\phi_0$ to initialize the root node, expressions $\phi_l$ and $\phi_r$ to be
 evaluated at left and right child nodes and an expression $\psi$ to evaluate
@@ -1069,7 +1071,7 @@ must return one of the following values:
 \psi(\env) = \left\{\begin{array}{ll}
 \textrm{\sc true} &\textrm{ if environment } \mathcal{E}\textrm{ contains a solution}\\
 \textrm{\sc false}&\textrm{ if environment } \mathcal{E}\textrm{ cannot lead to a solution}\\
-\textrm{\sc null}&\textrm{ if environment } \mathcal{E}\textrm{ contains a partial solution}
+\textrm{\sc null}&\textrm{ if environment } \mathcal{E}\textrm{ contains a partial solution}.
 \end{array}\right.
 \label{psi}
 \end{equation}
@@ -1168,6 +1170,7 @@ eliminated from the editmatrix, and therefore assumed incorrect.
 The editmatrix used here corresponds to edit $e_1$ and $e_2$ of Eqn.\ \eqref{E1},
 which are the edits violated by the record $(x=2, y=-1)$. As expected, a single
 call to {\tt bt\$searchNext()} yields the correct solution. 
+\index{backtracker@{\tt backtracker}|)}
 
 %
 %
@@ -1213,27 +1216,35 @@ bt$searchNext()
 
 
 \section{Related R-packages}
-The {\tt editrules} packages provides methods to specify, modify and solve sets of linear constraints.
-Solving systems of linear constraints is the domain of linear programming (reference).
-CRAN provides several R packages  that use external libraries to 
-solve linear programming problems for example {\sc R} packages {\tt linprog} \citep{linprog:2010} and {\tt lpSolve} \citep{lpSolve:2011}. 
-{\tt editrules} takes a different approach for a number of reasons, it provides an "all R solution".
+The {\tt editrules} packages provides methods to specify, modify and solve sets
+of linear constraints.  Solving systems of linear constraints is the domain of
+linear programming \citep{schrijver:1998}. The comprehensive R Archive Network
+\citep{CRAN:2011} provides several R packages  that use external libraries to
+solve linear programming problems. For example {\sc R} packages {\tt linprog}
+\citep{linprog:2010} and {\tt lpSolve} \citep{lpSolve:2011}.  {\tt editrules}
+takes a different approach for a number of reasons and it provides an ``all R
+solution''.
 
-First of all the specification of constraints in {\tt editrules} is in R syntax, while other packages typically
-use the specification format of the external library. This facilitates the maintanance of edits and reuse 
-of these statements within R. It is very useful to check data within R before, during and after data analysis.
+First of all, the specification of constraints in {\tt editrules} is in R
+syntax, while other packages typically use the specification format of the
+external library. This facilitates the maintanance of edits and reuse of these
+statements within R. It is very useful to check data within R before, during
+and after data analysis.
 
-Secondly \cite{waal:2011}, Chapter ? observed that branch and bound algorithms for 
-error localization problems are as fast as linear programming techniques, but have
-the added advantage of returning multiple equal solutions to the specified problem.
-{\tt errorLocalizer} is an improved implementation their original branch and 
+Secondly, \cite{waal:2011}, Chapter \mbox{3.4.9} compares various
+implementations of error localilzers, based on specificly written
+branch-and-bound software and based on general linear solvers. They observed
+that branch and bound algorithms for error localization problems in realistic
+data are as fast as linear programming techniques, but have the added advantage
+of returning multiple equivalent solutions to the specified problem.  {\tt
+errorLocalizer} is an improved implementation of their original branch and
 bound algorithm.
 
-Thirdly {\tt editrules} provides a powerful toolbox allowing to write advanced 
-editing and backtracking operations on sets of edits using R statements. 
-Some linear programming libraries also offer branch and bound/cut methods, but 
-these typically have to be specified in the original programming language of the
-library. In {\tt editrules} all coding is in {\sc R}.
+Thirdly {\tt editrules} provides a powerful toolbox to write advanced
+editing and backtracking operations on sets of edits using R statements.  Some
+linear programming libraries also offer branch and bound or branch and cut
+methods, but these typically have to be specified in the original programming
+language of the library. In {\tt editrules} all coding is in {\sc R}.
 
 \section{Conclusions}
 The {\tt editrules} package offers a convenient interface to define and
@@ -1245,11 +1256,11 @@ elimination. The latter routine also allows the user to check sets of linear
 (in)equalities for internal consistency. 
 
 The package offers the ability to efficiently identify the edit rules violated
-by a set of records. Moreover, based on the Fellegi-Holt assumption, one can
-localize the erroneous fields in edit-violating records. The error localization
-routines are based on a backtracker-programming paradigm which is exported to
-user space, providing users with a flexible and easy to use interface for 
-solving binary programming problems.
+by a set of records. Moreover, based on the generalized Fellegi-Holt
+assumption, one can localize the erroneous fields in edit-violating records.
+The error localization routines are based on a backtracker-programming paradigm
+which is exported to user space, providing users with a flexible and easy to
+use interface for solving binary programming problems.
 
 
 \clearpage

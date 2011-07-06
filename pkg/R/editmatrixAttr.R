@@ -21,15 +21,12 @@ editrules <- function(x){
    er
 }
 
-getC <- function(E){
-  stop("This function is deprecated. Please use the function getb")
-}
 
 #' Returns the constant part \code{b} of a linear (in)equality
 #'
 #' @example examples/editmatrixAttr.R
-#' @aliases getb getC
-#' @export getb getC
+#' @aliases getb 
+#' @export getb 
 #' @seealso \code{\link{editmatrix}}
 #'
 #' @param E editmatrix
@@ -44,16 +41,13 @@ getb <- function(E){
 }
 
 
-getMatrix <- function(E){
-  stop("This function is deprecated. Please use the function getA")
-}
 
 #' Returns the coefficient matrix \code{A} of linear (in)equalities
 #'
 #' @example examples/editmatrixAttr.R
-#' @export getA getMatrix
+#' @export getA 
 #' @seealso \code{\link{editmatrix}}
-#' @aliases getA getMatrix
+#' @aliases getA 
 #'
 #' @param E editmatrix
 #' @return \code{numeric} matrix \code{A}
