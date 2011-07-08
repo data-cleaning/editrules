@@ -1,28 +1,90 @@
-#
-# column indices in editarray, for every variable
-editindex <- function(dm){
-    S <- as.character(stack(dm)[,2])
-    sapply(names(dm), function(n) which(n==S)) 
+parseEdits <- function(x){
+    parse(text=x)
 }
+
+parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
+    if (length(x) == 1 ) x <- x[[1]]    
+    op <- as.character(x[[1]])
+    if ( op == "if" ){
+        edit <- parseCond(x[[2]],TRUE,  edit, sep)
+        edit <- parseCond(x[[3]],FALSE, edit, sep)
+    }
+    if ( op %in% c("%in%","==") ){
+        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        edit[var] <- val
+    } 
+    edit
+}
+
+
+editarray <- function(x, sep=":"){
+    e <- parseEdits(x)
+    v <- lapply(e,parseCond,sep=sep)
+    # derive datamodel
+    cols <- sort(unique(do.call(c,lapply(v,names))))
+    # get variable names
+    vr <- sub(paste(sep,".+","",sep=""),"",cols)
+    vars <- unique(vr)
+    # get categories
+    cat <- sub(paste(".+",sep,sep=""),"",cols)
+    # build indexing list
+    ind <- lapply(vars, function(v) which(v==vr))
+    ind <- lapply(ind,function(I) {names(I) <- cat[I];I})
+    names(ind) <- vars
+    # edits with NA only extend the data model.
+    v <- v[!sapply(v,function(u) is.na(u[1]))]
+        
+    # set edtiarray values
+    n <- length(cols)
+    m <- length(v)
+    E <- array(NA, dim=c(m,n), 
+            dimnames = list(
+                edits = paste("e",1:m,sep=""),
+                variables = cols
+            )
+        )
+    lapply(1:m,function(i) E[i,names(v[[i]])] <<- v[[i]])    
+    for ( J in ind ){
+        # vars not in any edit.
+        I <- apply(E[,J],1,function(e) all(is.na(e)) ) 
+        E[I,J] <- TRUE
+        # vars in edits
+        E[,J] <-  t(apply(E[,J],1,function(e){
+            val <- e[!is.na(e)][1]
+            e[is.na(e)] <- !val
+            e
+        }))
+    }
+
+    neweditarray(E,ind)
+}
+
+
+
+
+
+
+
+
+
+
 
 #' @nord
 print.editarray <- function(x, ...){
     cat("editarray:\n")
-    print(data.frame(getArr(x),n=getN(x)))
+    print(getArr(x))
 }
 
 #' editarray: logical array where every column corresponds to one
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
 #' @nord
-neweditarray <- function(E, ind, n=NULL, names=NULL, levels=colnames(E)){
+neweditarray <- function(E, ind, names=NULL, levels=colnames(E)){
     if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
-    if ( is.null(n) ) n <- rep(length(ind), nrow(E))
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",
-        ind    = ind,
-        n      = n
+        ind    = ind
     )
 }
 
@@ -39,43 +101,6 @@ nInvolved <- function(E){
 
 getVars.editarray <- function(E) names(attr(E,"ind"))
 
-#' Generate a single edit restriction
-#'
-#'
-#' @param ... edit restrictions in the form <var>=c("val1", "val2")
-#' @param dm \code{\link{data.model}}
-#' @param name name of edit.
-#'
-#' @return one-row \code{\link{editarray}} 
-#' @nord
-forbid <- function(dm, ..., name=NULL){
-
-    L <- list(...)
-    if ( !all(names(L) %in% names(dm)) )
-        stop("edit contains variables not in data.model")
-    
-    d <- sum(dim(dm))
-    e <- !array(logical(d),dim=c(1,d))
-    colnames(e) <- c(dm,recursive=TRUE)
-    rownames(e) <- name
-    I <- editindex(dm) 
-    for ( x in names(L) ){
-        e[ 1, I[[x]][ !(dm[[x]] %in% L[[x]]) ] ] <- FALSE
-    }
-
-    neweditarray(e, ind = I, names=name, levels=c(dm,recursive=TRUE))
-}
-
-
-#' combine edit restrictions to an array
-#'
-#' @param ... objects of class \code{\link{editarray}}
-#'
-#' @nord
-#editarray <- function(...){
-#    neweditarray(rbind(...), ind = attr(..1,"ind") )
-#}
-
 #' @nord
 getInd <- function(E) attr(E,"ind")
 
@@ -84,28 +109,10 @@ getInd <- function(E) attr(E,"ind")
 getArr <- function(E) E[,,drop=FALSE]
 
 #' @nord
-getN <- function(E) attr(E,"n")
-
-#' @nord
 getlevels <- function(E) colnames(E)
 #' @nord
 getnames <- function(E) rownames(E)
 
-
-# combine editarray by generating variable "var"
-# intersection <-> and, union <-> or
-combine <- function(E,var){ 
-    ind <- getInd(E)
-    lev <- getlevels(E)
-    Arr <- getArr(E)
-    I <- ind[[var]]
-    n <- ncol(Arr)
-    J <- 1:n
-    J <- c(J[I],J[-I])
-    e <- array(logical(n),dim=c(1,n))
-    e[,J] <-  c(apply(Arr[, I],2,any), apply(Arr[, -I],2,all))
-    neweditarray(e,ind, levels=lev)
-}
 
 # determine which edits in an editmatrix contain a certain variable.
 contains <- function(E,var){

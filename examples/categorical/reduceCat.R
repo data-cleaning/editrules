@@ -1,6 +1,6 @@
 # eliminate one category from a logical array, not for export.
 # TODO redundancy removal by recording derivation history.
-eliminateCat <- function(A, n, J, j){
+eliminateCat <- function(A, J, j){
     j1 <- A[,J[j]]
     j2 <- !j1
     n1 <- sum(j1)
@@ -11,7 +11,7 @@ eliminateCat <- function(A, n, J, j){
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
     B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
     B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    list(A=B, n=pmax(n[I1],n[I2]))
+    B
 }
 
 # TODO  1. prove that this works --DONE 23.05.2011
@@ -21,14 +21,11 @@ eliminateCat <- function(A, n, J, j){
 eliminateFM.editarray <- function(E, var){
     J <- getInd(E)[[var]]
     A <- getArr(E)
-    n <- getN(E)
     for ( j in 1:length(J)){
          red <- duplicated(A) | isObviouslyRedundant.array(A)
-         L <- eliminateCat(A[!red,,drop=FALSE],n[!red],J,j)
-         A <- L$A
-         n <- L$n
+         A <- eliminateCat(A[!red,,drop=FALSE],J,j)
     }
-    neweditarray(E=A, ind=getInd(E),n=n, levels=getlevels(E))
+    neweditarray(E=A, ind=getInd(E), levels=getlevels(E))
 }
 
 # duplicated method for editarray
@@ -60,11 +57,9 @@ substValue.editarray <- function(E, var, value){
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
     ii <- setdiff(J,ival)
     A <- getArr(E)
-    n <- getN(E) - A[,ival]     
     A[,ii] <- FALSE
-#    A[,J] <- TRUE
     I <- A[,ival]
-    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), n=n[I], levels=getlevels(E))
+    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), levels=getlevels(E))
 }
 
 # isObviouslyInfeasible should be lifted to S3 generic.

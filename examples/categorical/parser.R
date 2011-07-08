@@ -37,8 +37,6 @@ editarray <- function(x, sep=":"){
     # edits with NA only extend the data model.
     v <- v[!sapply(v,function(u) is.na(u[1]))]
         
-    
-
     # set edtiarray values
     n <- length(cols)
     m <- length(v)
