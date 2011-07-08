@@ -89,6 +89,11 @@ editarray <- function(x, sep=":"){
 edts <- c(
     "geslacht %in% c('man','vrouw')",
     "zwanger %in% c('JA','NEE')",
+    "leeftijd %in% c('<16','16-60','>=60')",
+    "A %in% c('a','a1')",
+    "B %in% c('b','b1')",
+    "C %in% c('c','c1')",
+    "zwanger %in% c('JA','NEE')",
     "if (geslacht %in% c('man')) zwanger == 'NEE' ",
     "if (leeftijd %in% c('<16','>=60')) zwanger == 'NEE'",
     "if (A == 'a' && B == 'b') C == 'c'",
