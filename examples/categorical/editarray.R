@@ -3,16 +3,36 @@ parseEdits <- function(x){
 }
 
 parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-    if (length(x) == 1 ) x <- x[[1]]    
+    if (length(x) == 1 ) x <- x[[1]] 
     op <- as.character(x[[1]])
     if ( op == "if" ){
         edit <- parseCond(x[[2]],TRUE,  edit, sep)
         edit <- parseCond(x[[3]],FALSE, edit, sep)
-    }
-    if ( op %in% c("%in%","==") ){
+    } else if ( op %in% c("(","{") ){
+        edit <- parseCond(x[[2]], val,  edit, sep)
+    } else if ( op %in% c("%in%","==") ){
         var <- paste(x[[2]],eval(x[[3]]),sep=sep)
         edit[var] <- val
-    } 
+    } else if (op == "!=") {
+        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        edit[var] <- !val
+    } else if (op == "!") {
+        edit <- parseCond(x[[2]],!val,  edit, sep)
+    } else if (op == "&&"){
+        if (val == FALSE){
+            stop("Operator '&&' not allowed in 'if' clause")
+        }
+        edit <- parseCond(x[[2]],val, edit, sep)
+        edit <- parseCond(x[[3]],val, edit, sep)
+    } else if (op == "||"){
+        if (val == TRUE){
+            stop("Operator '||' not allowed in 'then' clause")
+        }
+        edit <- parseCond(x[[2]],val, edit, sep)
+        edit <- parseCond(x[[3]],val, edit, sep)
+    } else {
+     #   stop("Operator '",op,"' not implemented")
+    }
     edit
 }
 
@@ -20,17 +40,23 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 editarray <- function(x, sep=":"){
     e <- parseEdits(x)
     v <- lapply(e,parseCond,sep=sep)
+    #return(v)
+    
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
+    
     # get variable names
     vr <- sub(paste(sep,".+","",sep=""),"",cols)
     vars <- unique(vr)
+    
     # get categories
     cat <- sub(paste(".+",sep,sep=""),"",cols)
+    
     # build indexing list
     ind <- lapply(vars, function(v) which(v==vr))
     ind <- lapply(ind,function(I) {names(I) <- cat[I];I})
     names(ind) <- vars
+    
     # edits with NA only extend the data model.
     v <- v[!sapply(v,function(u) is.na(u[1]))]
         
@@ -46,27 +72,18 @@ editarray <- function(x, sep=":"){
     lapply(1:m,function(i) E[i,names(v[[i]])] <<- v[[i]])    
     for ( J in ind ){
         # vars not in any edit.
-        I <- apply(E[,J],1,function(e) all(is.na(e)) ) 
+        I <- apply(E[,J,drop=FALSE],1,function(e) all(is.na(e)) ) 
         E[I,J] <- TRUE
         # vars in edits
-        E[,J] <-  t(apply(E[,J],1,function(e){
+        E[,J] <-  t(apply(E[,J,drop=FALSE],1,function(e){
             val <- e[!is.na(e)][1]
             e[is.na(e)] <- !val
             e
         }))
     }
 
-    neweditarray(E,ind)
+    neweditarray(E,ind,sep=sep)
 }
-
-
-
-
-
-
-
-
-
 
 
 #' @nord
@@ -79,12 +96,13 @@ print.editarray <- function(x, ...){
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
 #' @nord
-neweditarray <- function(E, ind, names=NULL, levels=colnames(E)){
+neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E)){
     if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",
-        ind    = ind
+        ind    = ind,
+        sep    = sep
     )
 }
 
@@ -104,6 +122,9 @@ getVars.editarray <- function(E) names(attr(E,"ind"))
 #' @nord
 getInd <- function(E) attr(E,"ind")
 
+
+#' @nord
+getSep <- function(E) attr(E,"sep")
 
 #' @nord
 getArr <- function(E) E[,,drop=FALSE]

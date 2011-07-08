@@ -3,9 +3,11 @@ require(editrules)
 # m, 04.05.2011
 
 violatedEdits.editarray <- function(E,x){
-    if ( is.data.frame(x)) x <- sapply(x,as.character)
-    apply(x,1, function(r) 
-        apply(E[,r],1,all)
+    s <- getSep(E)
+    for ( v in colnames(x) ) x[,v] <- paste(v,x[,v],sep=s)
+    apply(x,1, function(r) {
+        apply(E[,r,drop=FALSE],1,all)
+        }
     )
 }
 

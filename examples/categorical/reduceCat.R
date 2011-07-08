@@ -5,7 +5,7 @@ eliminateCat <- function(A, J, j){
     j2 <- !j1
     n1 <- sum(j1)
     n2 <- sum(j2)
-    if (n1==0 || n2==0) return(list(A=A,n=n))
+    if (n1==0 || n2==0) return(A)
     I1 <- rep(which(j1), times=n2)
     I2 <- rep(which(j2), each=n1)
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
@@ -20,12 +20,15 @@ eliminateCat <- function(A, J, j){
 #       4. history recording for redundancy removal
 eliminateFM.editarray <- function(E, var){
     J <- getInd(E)[[var]]
+    sep <- getSep(E) 
     A <- getArr(E)
     for ( j in 1:length(J)){
          red <- duplicated(A) | isObviouslyRedundant.array(A)
+   print(red)
          A <- eliminateCat(A[!red,,drop=FALSE],J,j)
+   print(A)
     }
-    neweditarray(E=A, ind=getInd(E), levels=getlevels(E))
+    neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E))
 }
 
 # duplicated method for editarray
@@ -40,6 +43,7 @@ isObviouslyRedundant.editarray <- function(E, ...){
 isObviouslyRedundant.array <- function(E, ...){
     # TODO: is this any faster with a while loop? Should we do this in C?
     m <- nrow(E)
+    if ( m == 0 ) return(logical(0))
     m1 <- m-1
     sapply(1:m, function(i){
         any(rowSums(E[-i,,drop=FALSE] - (E[rep(i,m1),,drop=FALSE] | E[-i,,drop=FALSE])) == 0)
@@ -52,6 +56,8 @@ isObviouslyRedundant.array <- function(E, ...){
 #   set levels of var[!value] to FALSE
 substValue.editarray <- function(E, var, value){
     J <- getInd(E)[[var]]
+    sep=getSep(E)
+    value <- paste(var,value,sep=getSep(E))
     ival <- intersect(which(colnames(E) == value), J) 
     if ( length(ival) != 1 ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
@@ -59,7 +65,7 @@ substValue.editarray <- function(E, var, value){
     A <- getArr(E)
     A[,ii] <- FALSE
     I <- A[,ival]
-    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), levels=getlevels(E))
+    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), sep=sep, levels=getlevels(E))
 }
 
 # isObviouslyInfeasible should be lifted to S3 generic.
