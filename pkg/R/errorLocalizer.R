@@ -77,7 +77,7 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     cp <- backtracker(
         isSolution = {
             w <- sum(weight[adapt])
-            if ( isObviouslyInfeasible(.E) || w > wsol ) return(FALSE)
+            if ( w > wsol || isObviouslyInfeasible(.E)) return(FALSE)
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -112,8 +112,8 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
             if (length(l)>1){ # randomize minimal weight solutions
                 ws <- sapply(l,function(s) s$w)
                 return(l[[sample(which(ws==min(ws)),1)]])
-            } else if (length(l)){
                 return(l[[length(l)]])
+            } else if (length(l)){
             }
         }
     })
