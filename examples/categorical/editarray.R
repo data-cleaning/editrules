@@ -72,9 +72,9 @@ forbid <- function(dm, ..., name=NULL){
 #' @param ... objects of class \code{\link{editarray}}
 #'
 #' @nord
-editarray <- function(...){
-    neweditarray(rbind(...), ind = attr(..1,"ind") )
-}
+#editarray <- function(...){
+#    neweditarray(rbind(...), ind = attr(..1,"ind") )
+#}
 
 #' @nord
 getInd <- function(E) attr(E,"ind")
