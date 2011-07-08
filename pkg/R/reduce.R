@@ -97,14 +97,12 @@ substValue <- function(E, var, value, remove=FALSE){
     ib <- ncol(E)
     E[,ib] <- E[ ,ib] - E[ ,v]%*%value
     
-    E[,v] <- 0     
-    if (remove){
-        E[!isObviouslyRedundant(E),-v]
-    }
-    
-    else {
-        E[!isObviouslyRedundant(E),]
-    }
+    if (remove)
+        E <- E[,-v, drop=FALSE]
+    else 
+        E[,v] <- 0
+        
+    E[!isObviouslyRedundant(E),]    
 }
 
 #' @nord

@@ -125,6 +125,11 @@ getVarCat.cateditmatrix <- function(E, ...){
    getVarCat(getVars(E), ...)
 }
 
+#' @method getVarCat editmatrix
+getVarCat.editmatrix <- function(E, ...){
+   getVarCat(getVars(E), ...)
+}
+
 #' @method getVarCat character
 getVarCat.character <- function(x, ...){
    vc <- as.data.frame(t(sapply(strsplit(x, ":")
@@ -191,31 +196,42 @@ getVarCat.character <- function(x, ...){
 # }
 
 negateValue <- function(x, variable, value){
+   neg <- numeric(ncol(x))
+   names(neg) <- colnames(x)
+   
    if (is.logical(value)){
-     vc <- subset(getVarCat(x), var==variable)
-     return(substValue(x, vc$fullname, !value))
+     neg[variable] <- 1
+     neg[ncol(x)]<- !value
    } else {
       vc <- subset(getVarCat(x), var==variable & cat==value)
-      if (nrow(vc) > 0){
-         return(substValue(x, vc$fullname, 0))
-      }
+      #TODO multiple negations
+      neg[vc$fullname] <- 1
+      neg[ncol(x)] <- 0
+      
    }
-   x
+   Ab <- rbind(getAb(x), neg)
+   rownames(Ab)[nrow(Ab)] <- paste("not",variable,value, sep="_")
+   
+   E <- editrules:::neweditmatrix( Ab
+                                 , c(getOps(x),"==")
+                                 )
+   class(E) <- c("cateditmatrix", class(E))
+   E
 }
 
-substValue.cateditmatrix <- function(x, var, value){
-   vc <- getVarCat(x)
-   #TODO implement multiple substition
-   vc <- vc[vc$var == var,]
+substValue.cateditmatrix <- function(E, variable, value){
+   vc <- getVarCat(E)
+   vc <- vc[vc$var %in% variable,]
    if (!nrow(vc))
       stop("Invalid variable: ", var)
    
-   values <- as.numeric(vc$cat %in% value)
-   names(values) <- vc$cat
-   
-   E <- substValue(x, vc$fullname, values, remove=TRUE)
-   
-   class(E) <- class(x) 
+   for (v in variable){
+       vcv <- vc[vc$var==v,]
+       values <- as.numeric(vcv$cat %in% value)
+       names(values) <- vcv$cat
+       E <- substValue(E, vcv$fullname, values, remove=TRUE)
+   }
+   class(E) <- c("cateditmatrix", class(E))
    # rngs <- ranges(E)
    # eq <- rngs[,1] == rngs[,2]
    # if (any(eq)){ 
@@ -227,10 +243,9 @@ substValue.cateditmatrix <- function(x, var, value){
 }
 
 eliminateFM.cateditmatrix <- function(E, variable){
-   cemclass <- class(E)
    vars <- subset(getVarCat(E), var==variable)$fullname
    for (v in vars) E <- eliminateFM(E,v)
-   class(E) <- cemclass
+   class(E) <- c("cateditmatrix", class(E))
    E
 }
 
@@ -254,12 +269,13 @@ ranges <- function(E){
 }
 
 isObviouslyRedundant.cateditmatrix <- function(E){
-   (getb(E) >= ranges(E)[,"max"]) | editrules:::isObviouslyRedundant.editmatrix(E) 
+     (getOps(E) %in% c("<=","<") & (getb(E) >= ranges(E)[,"max"]))
+   |  editrules:::isObviouslyRedundant.editmatrix(E)
 }
 
 #'check which edits are infeasible
 isObviouslyInfeasible.cateditmatrix <- function(E){
-   any(getb(E) < ranges(E)[,"min"])
+   nrow(E) && any(getb(E) < ranges(E)[,"min"])
 }
 
 errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
@@ -284,7 +300,7 @@ errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
     cp <- backtracker(
         isSolution = {
             w <- sum(weight[adapt])
-            if ( isObviouslyInfeasible.cateditmatrix(.E) || w > wsol ) return(FALSE)
+            if ( w > wsol || isObviouslyInfeasible.cateditmatrix(.E)  ) return(FALSE)
             if (length(.totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -300,10 +316,9 @@ errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
         },
         choiceRight = {
             .var <- .totreat[1]
-            negateValue(.E, .var, x[.var])
+            #.E <- negateValue(.E, .var, x[.var])
             .E <- eliminateFM.cateditmatrix(.E, .var)
             .totreat <- .totreat[-1]
-
             adapt[.var] <- TRUE
         },
         .E = E,
@@ -323,12 +338,14 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
       , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
       , "if (pregnant) gender == 'female'"
       , "if (nace %in% c('A','B')) valid==TRUE"
+      , "gender %in% c('male','female')"
       )
 
 
 (E <- cateditmatrix(x))
-# negateValue(E, "age", "< 16")
-# negateValue(E, "gender", "female")
+#negateValue(E, "age", "< 16")
+#negateValue(E, "gender", "female")
+#negateValue(E, "pregnant", FALSE)
 
 bt <- errorLocalizer.cateditmatrix( E
                                   , x =c( civilStatus='married'
@@ -340,6 +357,10 @@ bt <- errorLocalizer.cateditmatrix( E
                                         , valid=TRUE
                                         )
                                   )
-bt$searchNext()$adapt
-bt$searchNext()$adapt
-bt$searchNext()
+
+#bt$searchNext()$adapt
+#bt$searchNext()$adapt
+bt$searchNext(VERBOSE=TRUE)
+
+
+# substValue.cateditmatrix(E, c("gender", "pregnant"), c("male", TRUE))
