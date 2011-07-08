@@ -41,7 +41,7 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 editarray <- function(x, sep=":"){
     e <- parseEdits(x)
     v <- lapply(e,parseCond,sep=sep)
-    return(v)
+    #return(v)
     
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
