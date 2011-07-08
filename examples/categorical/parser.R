@@ -4,7 +4,10 @@ parseEdits <- function(x){
 }
 
 parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-    if (length(x) == 1 ) x <- x[[1]] 
+    if ( length(x) == 1 ) {
+       edit[as.character(x)] <- val
+       return(edit)
+    }
     op <- as.character(x[[1]])
     if ( op == "if" ){
         edit <- parseCond(x[[2]],TRUE,  edit, sep)
@@ -12,7 +15,13 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
     } else if ( op %in% c("(","{") ){
         edit <- parseCond(x[[2]], val,  edit, sep)
     } else if ( op %in% c("%in%","==") ){
-        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        cat <- eval(x[[3]])
+        if (is.logical(cat)){ 
+          var <- as.character(x[[2]])
+          if (!cat) val <- !val
+        } else {
+            var <- paste(x[[2]],cat,sep=sep)
+        }
         edit[var] <- val
     } else if (op == "!=") {
         var <- paste(x[[2]],eval(x[[3]]),sep=sep)
@@ -73,10 +82,10 @@ editarray <- function(x, sep=":"){
     lapply(1:m,function(i) E[i,names(v[[i]])] <<- v[[i]])    
     for ( J in ind ){
         # vars not in any edit.
-        I <- apply(E[,J],1,function(e) all(is.na(e)) ) 
+        I <- apply(E[,J, drop=FALSE],1,function(e) all(is.na(e)) ) 
         E[I,J] <- TRUE
         # vars in edits
-        E[,J] <-  t(apply(E[,J],1,function(e){
+        E[,J] <-  t(apply(E[,J, drop=FALSE],1,function(e){
             val <- e[!is.na(e)][1]
             e[is.na(e)] <- !val
             e
@@ -101,8 +110,13 @@ edts <- c(
     "if (A != 'a') B == 'b'",
     "if (A == 'a') B != 'b'",
     "if (!(A == 'a')) B == 'b'",
-    "if (A == 'a') {B == 'b'}"
+    "if (A == 'a') {B == 'b'}",
+    "if (pregnant) zwanger=='JA'",
+    "if (pregnant==TRUE) zwanger=='JA'",
+    "if (geslacht %in% c('man')) !pregnant",
+    "if (geslacht %in% c('man')) pregnant==FALSE"
      )
 
 L <- editarray(edts)
 L
+rm(L)
