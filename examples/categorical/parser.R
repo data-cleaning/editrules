@@ -4,36 +4,60 @@ parseEdits <- function(x){
 }
 
 parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-    if (length(x) == 1 ) x <- x[[1]]    
+    if (length(x) == 1 ) x <- x[[1]] 
     op <- as.character(x[[1]])
     if ( op == "if" ){
         edit <- parseCond(x[[2]],TRUE,  edit, sep)
         edit <- parseCond(x[[3]],FALSE, edit, sep)
-    }
-    if ( op %in% c("%in%","==") ){
+    } else if ( op %in% c("(","{") ){
+        edit <- parseCond(x[[2]], val,  edit, sep)
+    } else if ( op %in% c("%in%","==") ){
         var <- paste(x[[2]],eval(x[[3]]),sep=sep)
         edit[var] <- val
+    } else if (op == "!=") {
+        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        edit[var] <- !val
+    } else if (op == "!") {
+        edit <- parseCond(x[[2]],!val,  edit, sep)
+    } else if (op == "&&"){
+        if (val == FALSE){
+            stop("Operator '&&' not allowed in 'if' clause")
+        }
+        edit <- parseCond(x[[2]],val, edit, sep)
+        edit <- parseCond(x[[3]],val, edit, sep)
+    } else if (op == "||"){
+        if (val == TRUE){
+            stop("Operator '||' not allowed in 'then' clause")
+        }
+        edit <- parseCond(x[[2]],val, edit, sep)
+        edit <- parseCond(x[[3]],val, edit, sep)
     } else {
-        stop("Operator not implemented")
+        stop("Operator '",op,"' not implemented")
+    }
     edit
-
 }
 
 
 editarray <- function(x, sep=":"){
     e <- parseEdits(x)
     v <- lapply(e,parseCond,sep=sep)
+    return(v)
+    
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
+    
     # get variable names
     vr <- sub(paste(sep,".+","",sep=""),"",cols)
     vars <- unique(vr)
+    
     # get categories
     cat <- sub(paste(".+",sep,sep=""),"",cols)
+    
     # build indexing list
     ind <- lapply(vars, function(v) which(v==vr))
     ind <- lapply(ind,function(I) {names(I) <- cat[I];I})
     names(ind) <- vars
+    
     # edits with NA only extend the data model.
     v <- v[!sapply(v,function(u) is.na(u[1]))]
         
@@ -66,14 +90,14 @@ edts <- c(
     "geslacht %in% c('man','vrouw')",
     "zwanger %in% c('JA','NEE')",
     "if (geslacht %in% c('man')) zwanger == 'NEE' ",
-    "if (leeftijd %in% c('<16','>=60')) zwanger == 'NEE'")
+    "if (leeftijd %in% c('<16','>=60')) zwanger == 'NEE'",
+    "if (A == 'a' && B == 'b') C == 'c'",
+    "if (A == 'a')  B == 'b' || C == 'c'",
+    "if (A != 'a') B == 'b'",
+    "if (A == 'a') B != 'b'",
+    "if (!(A == 'a')) B == 'b'",
+    "if (A == 'a') {B == 'b'}"
+     )
 
-L<-editarray(edts)
-L[[1]]
-
-
-
-
-
-
-
+L <- editarray(edts)
+L
