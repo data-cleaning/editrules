@@ -97,7 +97,7 @@ print.editarray <- function(x, ...){
 #' a *forbidden* combination.
 #' @nord
 neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E)){
-    if ( is.null(names) ) names <- paste("e",1:nrow(E),sep="")
+    if ( is.null(names) & nrow(E)>0 ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",

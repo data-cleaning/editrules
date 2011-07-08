@@ -57,7 +57,7 @@ isObviouslyRedundant.array <- function(E, ...){
 substValue.editarray <- function(E, var, value){
     J <- getInd(E)[[var]]
     sep=getSep(E)
-    value <- paste(var,value,sep=getSep(E))
+    value <- paste(var,value,sep=sep)
     ival <- intersect(which(colnames(E) == value), J) 
     if ( length(ival) != 1 ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
