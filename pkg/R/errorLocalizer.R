@@ -58,9 +58,12 @@ errorLocalizer <- function(E, x, ...){
 #' @param x Data record, in the form of a named numeric vector.
 #' @param weight Weight vector, of the same length of \code{x}
 #' @param maxdepth maximum depth of search tree
+#' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
+#' maximum number of variables to adapt. Defaults to 6.
+#' @param maxduration maximum number of seconds, the errorlocalizer may spend on finding a solution. By default this is #' unconstraint. Change this for large problems, because the solution space is $2^n$, with n the number of variables.
 #' @param ... arguments to be passed to other methods.
 #' @export
-errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=ncol(E), ...){
+errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=ncol(E), maxweight=6, maxduration=Inf, ...){
     if ( !isNormalized(E) ) E <- normalize(E)
     
     # missings must be adapted, others still have to be treated.
@@ -74,12 +77,15 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=nc
     # Eliminate missing variables.
     vars <- getVars(E)
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
-    wsol <- sum(weight)
+    wsol <- min(sum(weight), maxweight)
     cp <- backtracker(
         maxdepth = maxdepth,
         isSolution = {
             w <- sum(weight[adapt])
-            if ( w > wsol || isObviouslyInfeasible(.E)) return(FALSE)
+            if ( w > wsol 
+              || (proc.time() - .start)[3] > .maxduration 
+              || isObviouslyInfeasible(.E)
+               ) return(FALSE)
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -100,6 +106,8 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=nc
             totreat <- totreat[-1]
         },
         .E = E,
+        .start = proc.time(),
+        .maxduration = maxduration,
         x = x,
         totreat = totreat,
         adapt = adapt,
