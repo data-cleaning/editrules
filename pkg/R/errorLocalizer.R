@@ -60,10 +60,11 @@ errorLocalizer <- function(E, x, ...){
 #' @param maxdepth maximum depth of search tree
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
 #' maximum number of variables to adapt. Defaults to 6.
-#' @param maxduration maximum number of seconds, the errorlocalizer may spend on finding a solution. By default this is #' unconstraint. Change this for large problems, because the solution space is $2^n$, with n the number of variables.
+#' @param maxduration maximum number of seconds, the errorlocalizer may spend on finding a solution. By default this is 
+#' unconstraint. Change this for large problems, because the solution space is $2^n$, with n the number of variables.
 #' @param ... arguments to be passed to other methods.
 #' @export
-errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=ncol(E), maxweight=6, maxduration=Inf, ...){
+errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=length(x), maxweight=6, maxduration=Inf, ...){
     if ( !isNormalized(E) ) E <- normalize(E)
     
     # missings must be adapted, others still have to be treated.
@@ -86,6 +87,10 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=nc
               || (proc.time() - .start)[3] > .maxduration 
               || isObviouslyInfeasible(.E)
                ) return(FALSE)
+
+            if ( w == wsol && isObviouslyInfeasible(substValue(.E,totreat,x[totreat])) ) 
+                return (FALSE)
+            
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
