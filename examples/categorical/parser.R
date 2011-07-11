@@ -5,7 +5,8 @@ parseEdits <- function(x){
 
 parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
     if ( length(x) == 1 ) {
-       edit[as.character(x)] <- val
+       var <- paste(x,"TRUE",sep=sep)
+       edit[var] <- val
        return(edit)
     }
     op <- as.character(x[[1]])
@@ -16,12 +17,7 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
         edit <- parseCond(x[[2]], val,  edit, sep)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]])
-        if (is.logical(cat)){ 
-          var <- as.character(x[[2]])
-          if (!cat) val <- !val
-        } else {
-            var <- paste(x[[2]],cat,sep=sep)
-        }
+        var <- paste(x[[2]],cat,sep=sep)
         edit[var] <- val
     } else if (op == "!=") {
         var <- paste(x[[2]],eval(x[[3]]),sep=sep)
@@ -29,12 +25,16 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
     } else if (op == "!") {
         edit <- parseCond(x[[2]],!val,  edit, sep)
     } else if (op == "&&"){
+        if (is.na(val))
+           val <- TRUE
         if (val == FALSE){
             stop("Operator '&&' not allowed in 'if' clause")
         }
         edit <- parseCond(x[[2]],val, edit, sep)
         edit <- parseCond(x[[3]],val, edit, sep)
     } else if (op == "||"){
+        if (is.na(val))
+           val <- FALSE
         if (val == TRUE){
             stop("Operator '||' not allowed in 'then' clause")
         }
@@ -114,7 +114,9 @@ edts <- c(
     "if (pregnant) zwanger=='JA'",
     "if (pregnant==TRUE) zwanger=='JA'",
     "if (geslacht %in% c('man')) !pregnant",
-    "if (geslacht %in% c('man')) pregnant==FALSE"
+    "if (geslacht %in% c('man')) pregnant==FALSE",
+    "!pregnant || geslacht=='vrouw'",
+    "if (pregnant) geslacht == 'vrouw'"
      )
 
 L <- editarray(edts)
