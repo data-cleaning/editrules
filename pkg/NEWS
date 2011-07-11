@@ -1,5 +1,7 @@
 version 0.8-1
-- backtracker and errorLocalizer gain maxdepth parameter
+- BREAKING CHANGE: function searchBlocks replaced by blocks
+- Solved bug causing eliminateFM to return spurious but harmless edits in edge case, thanks to Sander Scholtus
+- Backtracker and errorLocalizer gain maxdepth parameter
 - errorLocalizer has maxweight and maxduration parameter
  
 version 0.8

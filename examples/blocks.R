@@ -5,7 +5,7 @@ E <- editmatrix( c( "x1 + x2 == x3"
                   , "y1 + y2 == y3"
                   , "z1 + z2 == z3")
                )
-findBlocks(E)
+blocks(E)
 
 # four seperate blocks, will they be found?
 E <- editmatrix( c( "x1 + x2 == x3"
@@ -14,4 +14,4 @@ E <- editmatrix( c( "x1 + x2 == x3"
                   , "y1 + y2 == y3"
                   , "z1 + z2 == z3")
                )
-findBlocks(E)
+blocks(E)

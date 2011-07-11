@@ -1,11 +1,17 @@
+#' @nord
+findBlocks <- function(M){
+    warning("findBlocks is deprecated, use 'blocks' in stead")
+    blocks(M)
+}
+
 #' Break a matrix into blocks
 #'
 #' @example examples/findBlocks.R
-#'
+#' @aliases findBlocks
 #' @param M \code{matrix} or \code{editmatrix} that will be broken in blocks
 #' @return list with seperate matrix blocks
 #' @export
-findBlocks <- function(M){
+blocks <- function(M){
    
    block <- function(B){
      x1 <- FALSE

@@ -62,7 +62,7 @@ eliminateFM <- function(E, var, fancynames=FALSE){
          (length(eq) >= 2) ){
        n <- n+1
     } else {
-        return(E)
+        return(E[ E[ ,var]==0,])
     } 
 
 
