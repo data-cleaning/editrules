@@ -57,9 +57,10 @@ errorLocalizer <- function(E, x, ...){
 #' @param E Object of class \code{\link{editmatrix}}
 #' @param x Data record, in the form of a named numeric vector.
 #' @param weight Weight vector, of the same length of \code{x}
+#' @param maxdepth maximum depth of search tree
 #' @param ... arguments to be passed to other methods.
 #' @export
-errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
+errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=ncol(E), ...){
     if ( !isNormalized(E) ) E <- normalize(E)
     
     # missings must be adapted, others still have to be treated.
@@ -75,6 +76,7 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
     wsol <- sum(weight)
     cp <- backtracker(
+        maxdepth = maxdepth,
         isSolution = {
             w <- sum(weight[adapt])
             if ( w > wsol || isObviouslyInfeasible(.E)) return(FALSE)
@@ -102,7 +104,7 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)),...){
         totreat = totreat,
         adapt = adapt,
         weight = weight,
-        wsol = wsol 
+        wsol = wsol
     )
     
     # add a searchBest function, currently returns last solution (which has the lowest weight)

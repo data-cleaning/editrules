@@ -1,3 +1,6 @@
+version 0.8-1
+- backtracker and errorLocalizer gain maxdepth parameter
+
 version 0.8
 - removed deprecated functions getC. getMatrix from source
 - deprecated functions cp.editmatrix, replaceValue now emit error

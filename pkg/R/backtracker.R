@@ -26,13 +26,14 @@
 #' @param choiceLeft \code{expression} that will be evaluated for a left node
 #' @param choiceRight \code{expression} that will be evaluated for a right node
 #' @param list \code{list} with variables that will be added to the search environment
+#' @param maxdepth \code{integer} maximum depth of the search tree.
 #' @param ... named variables that will be added to the search environment
 #' 
 #' @return backtracker object, see Methods for a description of the methods
 #' @aliases backtracker choicepoint
 #' @export backtracker choicepoint
 #'
-backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
+backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth=100, ...){
    
    isSolution <- substitute(isSolution)
    choiceLeft <- substitute(choiceLeft)
@@ -125,7 +126,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       
       down <- function(state){
          depth  <<- depth + 1
-         if (depth > maxdepth) stop("maxdepth")
+#         if (depth > maxdepth) stop("maxdepth")
          #cat("down, depth=", depth,"width=", state$.width, "\n")
          #state$.width <- state$.width + 1
          state <- new.env(parent=state)
@@ -134,8 +135,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
       }
       depth <- 0
       maxwidth <- 2
-      #TODO add maxdepth as parameter to this function
-      maxdepth <- 100
+      maxdepth <- maxdepth
       currentSolution <- NULL
       root <- new.env(parent=e)
       init <- c(list, list(...))
