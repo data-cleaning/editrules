@@ -91,9 +91,9 @@ echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
 substValue <- function(E, var, value, remove=FALSE){
     v <- match(var, getVars(E), nomatch=0)
     if (any(v==0)){
-        stop("Parameter var (", var[v==0], ") is not a variable of editmatrix E")
+        warning("Parameter var (", var[v==0], ") is not a variable of editmatrix E")
     }
-    
+    v <- v[v != 0]
     ib <- ncol(E)
     E[,ib] <- E[ ,ib] - E[ ,v]%*%value
     

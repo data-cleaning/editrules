@@ -84,14 +84,16 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
          sol <- eval(isSolution, state)
          while (is.null(sol) || !sol){
             e$duration <- proc.time() - start
+            
             if (e$duration[3] > maxduration){
-                    e$maxdurationExceeded <- TRUE
-                    return(NULL)
+               state <- up(state)
+               e$maxdurationExceeded <- TRUE
+               return(NULL)
             }
 
-            if (!is.null(sol)){
-               
+            if (!is.null(sol)){               
                state <- up(state)
+               
                if (is.null(state)){
                   return(NULL)
                }
@@ -101,18 +103,18 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
             path <- state$.path
             state <- down(state)
             if (width == 1){
-               state$.path <- c(path, "left")
+               state$.path <- c(path, "l")
                eval(choiceLeft, state)
             }
             else {
-               state$.path <- c(path, "right")
+               state$.path <- c(path, "r")
                eval(choiceRight, state)
             }
             sol <- eval(isSolution, state)
             
             if (VERBOSE){
                cat("***********************************************************************\n")
-               cat("path:",paste(state$.path, collapse="->", sep=""),", solution : ", sol,"\n")
+               cat("path:",paste(state$.path, collapse="", sep=""),", solution : ", sol,"\n")
                print(ls.str(envir=state))
             }
          }
@@ -134,6 +136,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
          if (state$.width > maxwidth){
             return(up(state))
          }
+         state$.path <- head(state$.path, depth)
          #cat("up, depth=", depth,"width=", state$.width, "\n")
          state
       }

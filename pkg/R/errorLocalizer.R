@@ -82,7 +82,6 @@ errorLocalizer.editmatrix <- function(
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
 
-
     # Eliminate missing variables.
     vars <- getVars(E)
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
@@ -136,6 +135,7 @@ errorLocalizer.editmatrix <- function(
                 return(l[[sample(which(ws==min(ws)),1)]])
                 return(l[[length(l)]])
             } else if (length(l)){
+               return(l[[1]])
             }
         }
     })

@@ -1,4 +1,5 @@
 version 0.8-1
+- removed bug from $searchBest(), a sole solution wasn't returned.
 - backtracker$searchNext() and $searchAll() gain maxduration argument
 - BREAKING CHANGE: function searchBlocks replaced by blocks
 - Solved bug causing eliminateFM to return spurious but harmless edits in edge case, thanks to Sander Scholtus
