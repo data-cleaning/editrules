@@ -891,28 +891,38 @@ mixed data are treated.
 \label{scpeditmatrix}
 
 The error localization problem detailed in the previous subsections can be
-automated with {\tt errorLocalizer}.\index{errorLocalizer@{\tt errorLocalizer}} This function expects an {\tt editmatrix},
-a named {\tt numerical} record and optionally a vector of reliability weights
-with the same length as the record. The return value is not the solution to the
-error localization problem but an object of class {\tt backtracker}. With a
+automated with {\tt errorLocalizer}.\index{errorLocalizer@{\tt errorLocalizer}}
+This function expects an {\tt editmatrix}, a named {\tt numerical} record and
+optionally a vector of reliability weights with the same length as the record.
+There are extra options to control the maximum number of variables to adapt
+({\tt maxadapt}), the maximum weight ({\tt maxweight}) and the maximum search
+time ({\tt maxduration}) in seconds.  The return value is not the solution to
+the error localization problem but an object of class {\tt backtracker}. With a
 backtracker object the branch-and-bound tree can be searched to find solutions
 one by one. As an example, consider the edits of Eqn.\ \eqref{E1}, and the
-record $(x=2,y=-1)$. Figure \ref{Rcpeditmatrix} shows how the error
-localization problem can be solved with the {\tt backtracker} object
-returned by {\tt errorLocalizer}. The internal machinery of {\tt backtracker}
-objects is detailed in the next subsection, in this section we show how to use
-such objects to solve error localization problems. In Figure
-\ref{Rcpeditmatrix}, the edits of Eqn.\ \eqref{E1} and the record $(2,-1)$ are
-offered to {\tt errorLocalizer}.  By calling the built-in {\tt searchNext}
-function, the backtracker object traverses the binary search tree depth-first,
-until the first solution is found. When a solution is found, it is returned to
-the user as a list, containing the solution weight {\tt w} and the logical vector 
-{\tt adapt} which is {\tt TRUE} for variables which need to be changed, and {\tt
-FALSE} for variables which can retain their original values. As expected,
-$y$ is pointed out as the variable to change. Another call to {\tt searchNext}
-will search for the next solution in the tree, with lower weight. However,
-since in this example there is only one solution, {\tt searchNext} returns
-{\tt NULL}.
+record $(x=2,y=-1)$.  Figure \ref{Rcpeditmatrix} shows how the error
+localization problem can be solved with the {\tt backtracker} object returned
+by {\tt errorLocalizer}. The internal machinery of {\tt backtracker} objects is
+detailed in the next subsection, in this section we show how to use such
+objects to solve error localization problems. In Figure \ref{Rcpeditmatrix},
+the edits of Eqn.\ \eqref{E1} and the record $(2,-1)$ are offered to {\tt
+errorLocalizer}.  By calling the built-in {\tt searchNext} function, the
+backtracker object traverses the binary search tree depth-first, until the
+first solution is found. When a solution is found or {\tt maxduration} is
+exceeded, the current node is returned to the user as a list containing the
+solution weight {\tt w} and the logical vector {\tt adapt} which is {\tt TRUE}
+for variables which need to be changed, and {\tt FALSE} for variables which can
+retain their original values. As expected, $y$ is pointed out as the variable
+to change. At this point, the {\tt backtracker} object contains all the
+information needed to continue the search for new solutions from the node.  It
+also stores some information on the elapsed time needed for the previous search
+in the form of a standard {\tt proc\_time} object and whether the maximum
+duration was exceeded, in which case the currently returned node is not a
+solution.
+
+Another call to {\tt searchNext} will
+search for the next solution in the tree, with lower weight. However, since in
+this example there is only one solution, {\tt searchNext} returns {\tt NULL}.
 
 The method {\tt searchNext} is not the only method of the {\tt backtracker} object
 returned by {\tt errorLocalizer}. The avaliable methods are
@@ -922,9 +932,16 @@ returned by {\tt errorLocalizer}. The avaliable methods are
 \item\verb"$searchBest" Returns the lowest-weight solution. If multiple solutions have the same, minimum weight,
         it returns one of those solutions at random.
 \end{itemize}
-In fact, any {\tt backtracker} object is equipped with the {\tt searchNext} and
-{\tt searchAll} methods. The {\tt searchBest} method is specific for the {\tt backtracker} object returned by 
-{\tt errorLocalizer}.
+All these methods accept the following optional arguments:
+\begin{itemize}
+\item \verb"maxduration" The number of seconds after which to stop the search. The default value is the
+        value passed to {\tt errorLocalizer}, which created the object.
+\item \verb"VERBOSE" Print the path in the search tree and contents of each node during search. 
+\end{itemize}
+%
+Any {\tt backtracker} object is equipped with the {\tt searchNext} and
+{\tt searchAll} methods. The {\tt searchBest} method is specific for the {\tt
+backtracker} object returned by {\tt errorLocalizer}. 
 %
 %
 \begin{Rcode}
@@ -936,9 +953,13 @@ E1 = editmatrix(c(
     "y < -x + 5"))
 bt <- errorLocalizer(E1, c(x=2,y=-1))
 bt$searchNext()
+bt$duration
+bt$maxdurationExceeded
 bt$searchNext()
 @
-\caption{Localizing errors with the {\tt backtracker} object generated by {\tt errorLocalizer}}
+\caption{Localizing errors with the {\tt backtracker} object generated by {\tt errorLocalizer}. After
+a search is performed, the backtracker object holds information on the duration of the search, and if
+the time-limit for a search was exceeded.}
 \label{Rcpeditmatrix}
 \end{Rcode}
 %
@@ -968,10 +989,12 @@ bt$searchNext()$adapt
 bt$searchNext()$adapt
 bt$searchNext()$adapt
 @
-As can be seen the solution where turnover must be adapted is not found anymore. The 
-reason is that {\tt errorLocalizer} makes sure that during the search for solutions, 
-variables with the highest reliability weight are the last
-ones to be assumed incorrect. Since it has found solutions for the less reliable variables ($p$ and $c$), it won't search for solutions with higher weight.
+As can be seen the solution where turnover must be adapted is not found
+anymore. The reason is that {\tt errorLocalizer} makes sure that during the
+search for solutions, variables with the highest reliability weight are the
+last ones to be assumed incorrect. Since it has found solutions for the less
+reliable variables ($p$ and $c$), it won't search for solutions with higher
+weight.
 
 If we add more restrictions, the number of solutions to the error localization problem decreases. 
 Here, we demand that the cost to turnover ratio does not exceed 0.6.
@@ -1099,7 +1122,12 @@ generates nodes in the binary tree, depth-first and returns the (contents of)
 the first environment corresponding to a solution. If {\sc bt} is the instance
 of a {\sc backtracker} object, then each call to {\sc bt::searchNext} will
 return a new, and better solution, until all solutions are found, in which
-case {\sc null} is returned.
+case {\sc null} is returned. A call to {\sc bt::searchAll} (not shown in
+pseudocode) will return all solutions.
+Since search spaces grow exponentially with tree depth, the backtracker object
+can be equipped with a time limit for tree search or a maximum tree depth.
+The latter is mainly usefull for debugging purposes.
+
 %
 %
 \begin{algorithm}[t]
@@ -1148,8 +1176,12 @@ error localization. The {\tt backtracker} function accepts the following argumen
 \item {\tt isSolution}  : An {\sf R} expression corresponding to $\psi$ of Eqn.\ \eqref{psi}.
 \item {\tt choiceLeft}  : An {\sf R} expression for execution in left child nodes ($\phi_l$) .
 \item {\tt choiceRight} : An {\sf R} expression for execution in right child nodes ($\phi_r$).
+\item {\tt maxduration} : Optional: the default maximum time in seconds for a tree search with {\tt \$searchNext()} or {\tt \$searchAll()}.
+        This time may be overwritten by passing a new {\tt maxduration} when calling a search funtion.
+\item {\tt maxdepth}    : Optional: The maximum tree search depth.
 \item {\tt ...}         : Named arguments, to initialize the root node ($\phi_0$).
 \end{itemize}
+
 %
 %
 In Figure \ref{Rbacktracker} the top environment (root node) receives an edit
