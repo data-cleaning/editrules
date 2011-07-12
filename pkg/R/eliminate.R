@@ -30,9 +30,8 @@ eliminateFM <- function(E, var, fancynames=FALSE){
         warning("Trying to eliminate variable not occuring in E")
         return(E)
     }
-    
-    d <- attr(E,"derivedFrom")  
-    n <- attr(E,"nEliminated")
+    d <- getH(E)   
+    n <- geth(E)  
     if ( is.null(d) ){
         n <- 0
         d <- matrix(FALSE,nrow=nrow(E),ncol=nrow(E))
@@ -111,8 +110,8 @@ eliminateFM <- function(E, var, fancynames=FALSE){
           m
         , o[!redundant]
         , normalized = TRUE 
-        , derivedFrom = d 
-        , nEliminated = n
+        , H = d 
+        , h = n
     )
 }
 

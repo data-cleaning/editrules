@@ -1,4 +1,5 @@
-version 0.8-1
+version 0.9-0
+- editmatrix gains getH and geth method.
 - removed bug from $searchBest(), a sole solution wasn't returned.
 - backtracker$searchNext() and $searchAll() gain maxduration argument
 - BREAKING CHANGE: function searchBlocks replaced by blocks
@@ -6,7 +7,7 @@ version 0.8-1
 - Backtracker and errorLocalizer gain maxdepth parameter
 - errorLocalizer gains maxduration, maxadapt parameter
  
-version 0.8
+version 0.8-0
 - removed deprecated functions getC. getMatrix from source
 - deprecated functions cp.editmatrix, replaceValue now emit error
 - added index to vignette

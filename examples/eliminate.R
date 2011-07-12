@@ -15,6 +15,13 @@ P <- editmatrix(c(
 # finally, the answer:
 (P3 <- eliminateFM(P2, "x3", fancynames=TRUE))
 
+# check which original edits were used in deriving the new ones
+getH(P3)
+
+# check how many variables were eliminated
+geth(P3)
+
+
 # An  example with an equality and two inequalities
 # The only thing to do is solving for x in e1 and substitute in e3.
 (E <- editmatrix(c(

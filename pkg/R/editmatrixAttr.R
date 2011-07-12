@@ -25,7 +25,6 @@ editrules <- function(x){
 #' Returns the constant part \code{b} of a linear (in)equality
 #'
 #' @example examples/editmatrixAttr.R
-#' @aliases getb 
 #' @export getb 
 #' @seealso \code{\link{editmatrix}}
 #'
@@ -37,10 +36,42 @@ getb <- function(E){
   }
   E <- unclass(E)
   E[,ncol(E)]
-  #attr(E, "b")
 }
 
+#' Returns the derivation history of an edit matrix
+#'
+#' eliminateFM tracks the history of edits in a logical array H.
+#' H has nrow(E) rows and the number of columns is the number of
+#' edits in the editmatrix as it was first defined. If suppose
+#' H[i,j1], H[i,j2],...,H[i,jn] are TRUE, then E[i,] is some 
+#' positive linear combination of original edits E[j1,], E[j2,],...,E[jn,]
+#'
+#' Attributes H and h are used to detect redundant derived edits.
+#'
+#' @param E editmatrix
+#' @rdname geth
+#' @seealso \code{\link{editmatrix}},\code{\link{eliminateFM}}
+#'
+#' @example examples/eliminate.R
+#'
+#' @export
+getH <- function(E){
+    if ( !is.editmatrix(E) ) stop("E has to be an editmatrix")
+    attr(E,"H")  
+}
 
+#' Returns the number of elimination steps performed on an edit matrix
+#'
+#' h records the number of variables eliminated from E by \code{\link{eliminateFM}}
+#' @param E editmatrix
+#'
+#' @rdname geth
+#' @seealso \code{\link{editmatrix}}, \code{\link{eliminateFM}}
+#' @export
+geth <- function(E){
+    if ( !is.editmatrix(E) ) stop("E has to be an editmatrix")
+    attr(E,"h")  
+}
 
 #' Returns the coefficient matrix \code{A} of linear (in)equalities
 #'

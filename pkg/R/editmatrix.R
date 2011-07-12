@@ -232,8 +232,8 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
         A = as.matrix(x)[i, j, drop=FALSE],
         ops = getOps(x)[i]
     )
-    attr(E,"derivedFrom") <- attr(x,"derivedFrom")[i, , drop=FALSE]
-    attr(E,"nEliminated") <- attr(x,"nEliminated")
+    attr(E,"H") <- attr(x,"H")[i, , drop=FALSE]
+    attr(E,"h") <- attr(x,"h")
     E
 }
 
