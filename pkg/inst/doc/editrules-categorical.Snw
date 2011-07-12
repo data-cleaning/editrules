@@ -33,7 +33,7 @@
 \hyphenation{time-stamp}
 
 
-\title{Categorical edit manipulation and error localization with the {\tt editrules} package}
+\title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package}
 \author{Mark van der Loo and Edwin de Jonge}
 \begin{document}
 \maketitle

@@ -1,11 +1,3 @@
-#' parse textual edits to R-expressions
-#'
-#' @param x character
-#' @value R expression
-parseEdits <- function(x){
-    parse(text=x)
-}
-
 #' Parse a categorical edit expression 
 #'
 #' @param x a valid R expression
@@ -13,8 +5,11 @@ parseEdits <- function(x){
 #' @param edit logical (vector)
 #' @param sep edit separator
 #' @nord
-parseCond <- function(x, val=NA, edit=logical(0), sep){
-    if (length(x) == 1 ) x <- x[[1]] 
+parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
+    if ( length(x) == 1 ) {
+       edit[as.character(x)] <- val
+       return(edit)
+    }
     op <- as.character(x[[1]])
     if ( op == "if" ){
         edit <- parseCond(x[[2]],TRUE,  edit, sep)
@@ -22,7 +17,13 @@ parseCond <- function(x, val=NA, edit=logical(0), sep){
     } else if ( op %in% c("(","{") ){
         edit <- parseCond(x[[2]], val,  edit, sep)
     } else if ( op %in% c("%in%","==") ){
-        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        cat <- eval(x[[3]])
+        if (is.logical(cat)){ 
+          var <- as.character(x[[2]])
+          if (!cat) val <- !val
+        } else {
+            var <- paste(x[[2]],cat,sep=sep)
+        }
         edit[var] <- val
     } else if (op == "!=") {
         var <- paste(x[[2]],eval(x[[3]]),sep=sep)
@@ -42,20 +43,54 @@ parseCond <- function(x, val=NA, edit=logical(0), sep){
         edit <- parseCond(x[[2]],val, edit, sep)
         edit <- parseCond(x[[3]],val, edit, sep)
     } else {
-     #   stop("Operator '",op,"' not implemented")
+        stop("Operator '",op,"' not implemented")
     }
     edit
 }
 
-#' Parse textual edits to editarray
+#' Parse textual, categorical edit rules to an editarray
 #'
-#' @param x character vector 
+#' Transforms a list of categorical edit rules to a boolean array representation.
+#' An editarry is used to store demands on purely categorical data.
+#'
+#' The purpose of this function is to turn human-readable demands on categorical data
+#' to a boolean array. Categorical edit rules state demands on a dataset in the form of a
+#' quoted R expression. Allowed statements include \code{if}, operators 
+#' \code{%in%}, \code{==}, \code{!=}, \code{||}, \code{&&} and brackets \code{()} and \code{\{\}}.
+#'
+#' The datamodel is derived from the edit set. A data model can be defined by simply adding 
+#' univariate edits of the form
+#'
+#' \itemize{
+#' \item{\code{"<variable> %in% c('<cat1>','<cat2>',...,'<catN>')"}}
+#' }
+#'
+#' Note the double quotes around the whole statement, and the single quotes around the category levels.
+#' The right hand side is evaluated when the editarray is generated, so it may also be the name of a
+#' previously defined variable. Also see the examples section.
+#'
+#' Relations between variables can be written in the form
+#'
+#' \itemize{
+#' \item{\code{"if( <logical expression involving categorical variables> ) <logical expression involving categorical variables>"}}
+#' }
+#' See the example section for some coded examples.
+#'
+#' The result is an object of class \code<editarray>, which contains a \eqn{m\times n} boolean array, representing
+#' the multivariate edits. The columns are labeled with \code{<variable><sep><category>}, for example \code{gender:Male}.
+#' The column names represent the data model for the data  to be treated, the entries represent the edit rules. For example.
+#' if the datamodel is \code{"gender %in% c('male','female')"} and \code{"pregnant %in% c('yes','no')"}, the edit
+#' \code{"if(gender == 'male') pregnant == 'no'"} is represented by the boolean array 
+#' \code{c(gender:male=TRUE, gender:female=FALSE, pregnant:yes=TRUE, pregnant:no=FALSE)}.
+#'
+#'
+#'
+#' @param editrules \code{character} vector 
 #' @value editarray
 #' @export
-editarray <- function(x, sep=":"){
-    e <- parseEdits(x)
+editarray <- function(editrules, sep=":"){
+    e <- parseEdits(editrules)
     v <- lapply(e,parseCond,sep=sep)
-    #return(v)
     
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
@@ -85,6 +120,9 @@ editarray <- function(x, sep=":"){
             )
         )
     lapply(1:m,function(i) E[i,names(v[[i]])] <<- v[[i]])    
+    # per variable, the boolean values not filled in during parsing must be derived.
+    # they are the opposite from allready filled in values, or in case they are not involved,
+    # all TRUE.
     for ( J in ind ){
         # vars not in any edit.
         I <- apply(E[,J,drop=FALSE],1,function(e) all(is.na(e)) ) 
@@ -121,24 +159,6 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E)){
     )
 }
 
-#' number of variables involved in the edits in E
-#'
-#' Determines the number of variables involved in each edit in E.
-#' A variable is involved in an edit if the boolean representation is not
-#' TRUE for every category of that variable.
-#'
-#' @param E \code{\link{editmatrix}}
-#' @value integer
-#'
-#' @nord
-nInvolved <- function(E){
-    ind <- getInd(E)
-    apply(E,1,function(e){
-        sum(sapply(ind,
-            function(I) if (sum(e[I]) < length(I))  1 else 0
-        ))
-    })
-}
 
 #' get variable names in editarray
 #' 

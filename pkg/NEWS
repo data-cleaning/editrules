@@ -2,6 +2,7 @@ version 0.9-0
 - editmatrix gains getH and geth method.
 - removed bug from $searchBest(), a sole solution wasn't returned.
 - backtracker$searchNext() and $searchAll() gain maxduration argument
+- internally, editmatrix now calls parseEdits()
 - BREAKING CHANGE: function searchBlocks replaced by blocks
 - Solved bug causing eliminateFM to return spurious but harmless edits in edge case, thanks to Sander Scholtus
 - Backtracker and errorLocalizer gain maxdepth parameter
