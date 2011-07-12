@@ -344,7 +344,7 @@ maintenance.
 
 A complete feasibility check is as computationally expensive as solving a
 system of inequalities. Therefore, the function {\tt isObviouslyinfeasible} was
-written to perform a quick check on obvious inconsistend rules in an
+written to perform a quick check on obvious inconsistent rules in an
 editmatrix. It returns a {\tt logical} indicating whether an obvious
 contradiction of the form $0<-1$ or $0=1$ is present in an editmatrix. The
 latter inconsistency can be caused by substitution of values in the edit
@@ -830,7 +830,7 @@ e_4':&y < -x+6.
 \end{array}\right.
 \label{E2}
 \end{equation}
-The error localization problem for this can be handled by solving the partial
+This error localization problem can be handled by solving the partial
 localization problems for $\{e_0,e_1,\ldots,e_4\}$ and $\{
 \overline{e}_0,e_1',\ldots,e_4'\}$ separately, where $\overline{e}_0$ stands
 for the complement $\overline{e}_0:\, x \geq 0$. The partial solution with the
