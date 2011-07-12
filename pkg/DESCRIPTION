@@ -12,11 +12,11 @@ Description: Facilitates reading and manipulation of linear
     linear edits can be manipulated using Fourier-Motzkin elimination
     and variable substitution and solving error localization problems
     based on the generalized principle of Felligi and Holt.
-Version: 0.8-1
+Version: 0.9-0
 URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
 Depends:
 Suggests: iterators
-Collate: 'backtracker.R' 'blocks.R' 'check.R' 'editmatrix.R'
-    'editmatrixAttr.R' 'editrules-data.R' 'eliminate.R'
-    'errorLocalizer.R' 'pkg.R' 'reduce.R'
+Collate: 'backtracker.R' 'blocks.R' 'check.R' 'editmatrixAttr.R'
+    'editmatrix.R' 'editrules-data.R' 'eliminate.R' 'errorLocalizer.R'
+    'pkg.R' 'reduce.R'
