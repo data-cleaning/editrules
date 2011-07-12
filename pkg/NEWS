@@ -1,8 +1,9 @@
 version 0.8-1
+- backtracker$searchNext() and $searchAll() gain maxduration argument
 - BREAKING CHANGE: function searchBlocks replaced by blocks
 - Solved bug causing eliminateFM to return spurious but harmless edits in edge case, thanks to Sander Scholtus
 - Backtracker and errorLocalizer gain maxdepth parameter
-- errorLocalizer has maxweight and maxduration parameter
+- errorLocalizer gains maxduration, maxadapt parameter
  
 version 0.8
 - removed deprecated functions getC. getMatrix from source

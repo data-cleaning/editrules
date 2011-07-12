@@ -109,10 +109,10 @@ randomly over the variables and there is no detectable cause of error. It also
 decouples the detection of corrupt variables from their correction. 
 
 For some types of error, such as sign flips, typing errors or rounding errors,
-this assumption does not hold. These errors can be detected and are closely
-related to their resolution. The reader is referred to the {\tt
-deducorrect}\index{deducorrect@{\tt deducorrect}} package \citep{loo:2011, scholtus:2008,
-scholtus:2009} for treating such errors. 
+this assumption does not hold. The cause of these errors can be detected and
+are closely related to their resolution. The reader is referred to the {\tt
+deducorrect}\index{deducorrect@{\tt deducorrect}} package \citep{loo:2011,
+scholtus:2008, scholtus:2009} for treating such errors. 
 
 The following chapters demonstrates the functionality of the {\tt editrules}
 package with coded examples as well a description of the underlying theory and
@@ -150,7 +150,7 @@ Defining augmented matrices by hand is tedious and prone to error, which is why
 the {\tt editmatrix} function  derives edit matrices from a textual
 representation of edit rules. Since most functions of the {\tt editrules}
 package expect an {\tt editmatrix} in normal form (that is
-$\boldsymbol{\odot}\in\{<,\leq,=\}$), the {\tt editmatrix} function by default
+$\boldsymbol{\odot}\in\{<,\leq,=\}^m$), the {\tt editmatrix} function by default
 transforms all linear edits to normal form.
 
 As an example, consider the set of variables
@@ -182,7 +182,11 @@ equality restrictions correspond to balance accounts, the 3rd, 4th and 5th
 restrictions are sanity checks and the last four edits demand positivity.
 Figure \ref{emfromtext} shows how these edit rules can be transformed from a
 textual representation to a matrix representation with the {\tt editmatrix}
-function.
+function. To define an {\tt editmatrix}, edit restrictions can be defined in usual
+R syntax, using ${\sf ==}$ as comparison operator for equalities and ${\tt <}$
+${\tt <=}$, ${\tt >=}$ or ${\tt >}$ for inequalities. Coefficients may be 
+negative or positive, and both the binary ${\tt +}$ and ${\tt -}$ operator are
+recognized.
 %
 \begin{Rcode}
 <<keep.source=true>>=
@@ -308,7 +312,7 @@ violatedEdits(E,dat)
 @
 \caption{Checking which edits are violated for every record in a {\tt
 data.frame}.  The first record violates {\tt e1} and {\tt e2}, the second
-record violates {\tt e1},{\tt e2}, and {\tt e4}.}
+record violates {\tt e1},{\tt e2}, and {\tt e5}.}
 \label{violatedEdits}
 \end{Rcode}
 %
@@ -330,19 +334,22 @@ Farkas' lemma (\cite{farkas:1902}, but see \cite{schrijver:1998} and/or
 \cite{kuhn:1956}) on feasibility of sytems of linear equalities, that  a system
 is infeasible if and only if $0\leq -1$ can be derived by taking positive
 linear combinations of the rows of the augmented matrix $[{\bf A},{\bf b}]$.
-The function {\tt isObviouslyinfeasible} returns a {\tt logical} indicating
-whether such a contradiction is present. Substitution of values may also lead
-to equalities of the form $0=1$, which also indicate that the system has become
-infeasible.  Being obviously infeasible is sufficient for an {\tt editmatrix}
-to be infeasible, but not necessary. Algorithm \ref{isObviouslyInfeasible}
-gives the pseudocode for reference purposes.
 
 The function {\tt isFeasible} eliminates variables one by one using
-Fourier-Motzkin elimination (Section \ref{sfouriermotzkin}), and checks for
-obvious infeasibilities. If no obvious inconsistencies are found after the last
-variable has been eliminated, the system is consistent. This function is very
-useful in checking the feasibility of large sets of edits, which may contain
-contradictory edits after maintenance.
+Fourier-Motzkin elimination (Section \ref{sfouriermotzkin}), and checks if such
+infeasible rules arise. If none are found after the last variable has been
+eliminated, the system is feasible. This function is useful in checking the
+feasibility of large sets of edits, which may contain contradictory edits after
+maintenance.
+
+A complete feasibility check is as computationally expensive as solving a
+system of inequalities. Therefore, the function {\tt isObviouslyinfeasible} was
+written to perform a quick check on obvious inconsistend rules in an
+editmatrix. It returns a {\tt logical} indicating whether an obvious
+contradiction of the form $0<-1$ or $0=1$ is present in an editmatrix. The
+latter inconsistency can be caused by substitution of values in the edit
+matrix. Algorithm \ref{isObviouslyInfeasible} gives the pseudocode for
+reference purposes.
 %
 \begin{algorithm}[t]
 \caption{{\sc isObviouslyInfeasible($E$)}}
@@ -386,7 +393,7 @@ Both value substitution and variable elimination derive new edits, that may be
 of the form $0 \leq 1$ or $0=0$.  The function {\tt isObviouslyRedundant}
 detects such rules and returns a {\tt logical} vector indicating which rows of
 an {\tt editmatrix} are redundant.  By default, the function detects row
-duplicates (within an adjustable tolerance), but this may be switched of by
+duplicates within an adjustable tolerance, but this may be switched of by
 providing the option {\tt duplicates=FALSE}.  Pseudo-code is given in Algorithm
 \ref{isObviouslyRedundant}. The actual implementation avoids explicit loops and
 makes use of R's built-in {\tt duplicated} function, which is also overloaded
@@ -487,7 +494,7 @@ echelon(E2)
 @
 \caption{Transforming linear equalities of an editmatrix to reduced row echelon
 form. If the {\tt editmatrix} argument contains inequalities, these are copied
-to the resuling system.}
+to the resulting system.}
 \label{Rechelon}
 \end{Rcode}
 
@@ -823,7 +830,7 @@ e_4':&y < -x+6.
 \end{array}\right.
 \label{E2}
 \end{equation}
-The error localization problem fo this can be handled by solving the partial
+The error localization problem for this can be handled by solving the partial
 localization problems for $\{e_0,e_1,\ldots,e_4\}$ and $\{
 \overline{e}_0,e_1',\ldots,e_4'\}$ separately, where $\overline{e}_0$ stands
 for the complement $\overline{e}_0:\, x \geq 0$. The partial solution with the

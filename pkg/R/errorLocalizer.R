@@ -57,16 +57,23 @@ errorLocalizer <- function(E, x, ...){
 #' @param E Object of class \code{\link{editmatrix}}
 #' @param x Data record, in the form of a named numeric vector.
 #' @param weight Weight vector, of the same length of \code{x}
-#' @param maxdepth maximum depth of search tree
+#' @param maxadapt maximum number of variables to adapt
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
-#' maximum number of variables to adapt. Defaults to 6.
-#' @param maxduration maximum number of seconds, the errorlocalizer may spend on finding a solution. By default this is 
-#' unconstraint. Change this for large problems, because the solution space is $2^n$, with n the number of variables.
+#' maximum number of variables to adapt. 
+#' @param maxduration maximum time (in seconds), for \code{$searchNext()}, \code{$searchAll()} and \code{$searchBest()} 
 #' @param ... arguments to be passed to other methods.
 #' @export
-errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=length(x), maxweight=6, maxduration=Inf, ...){
+errorLocalizer.editmatrix <- function(
+            E, 
+            x, 
+            weight=rep(1,length(x)), 
+            maxadapt=length(x), 
+            maxweight=sum(weight),
+            maxduration=600,
+            ...){
+    # search space larger then 1M:
+
     if ( !isNormalized(E) ) E <- normalize(E)
-    
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
     names(adapt) <- names(x)
@@ -75,22 +82,23 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=le
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
 
+
     # Eliminate missing variables.
     vars <- getVars(E)
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
     wsol <- min(sum(weight), maxweight)
     cp <- backtracker(
-        maxdepth = maxdepth,
+        maxduration=maxduration,
         isSolution = {
             w <- sum(weight[adapt])
             if ( w > wsol 
-              || (proc.time() - .start)[3] > .maxduration 
+              || sum(adapt) > maxadapt
               || isObviouslyInfeasible(.E)
                ) return(FALSE)
 
             if ( w == wsol && isObviouslyInfeasible(substValue(.E,totreat,x[totreat])) ) 
                 return (FALSE)
-            
+            # TODO report status
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -111,9 +119,8 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=le
             totreat <- totreat[-1]
         },
         .E = E,
-        .start = proc.time(),
-        .maxduration = maxduration,
         x = x,
+        maxadapt=maxadapt,
         totreat = totreat,
         adapt = adapt,
         weight = weight,
@@ -122,8 +129,8 @@ errorLocalizer.editmatrix <- function(E, x, weight=rep(1,length(x)), maxdepth=le
     
     # add a searchBest function, currently returns last solution (which has the lowest weight)
     with(cp,{
-        searchBest <- function(..., VERBOSE=FALSE){
-            l <- searchAll(...,VERBOSE=VERBOSE)
+        searchBest <- function(maxduration=600, VERBOSE=FALSE){
+            l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
             if (length(l)>1){ # randomize minimal weight solutions
                 ws <- sapply(l,function(s) s$w)
                 return(l[[sample(which(ws==min(ws)),1)]])
