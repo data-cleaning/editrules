@@ -86,7 +86,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
             e$duration <- proc.time() - start
             
             if (e$duration[3] > maxduration){
-               state <- up(state)
+               e$state <- state
                e$maxdurationExceeded <- TRUE
                return(NULL)
             }
@@ -97,7 +97,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
                if (is.null(state)){
                   return(NULL)
                }
-               state$.path <- state$.path[1:depth]
+               #state$.path <- state$.path[1:depth]
             }
             width <- state$.width
             path <- state$.path

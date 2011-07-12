@@ -96,7 +96,7 @@ errorLocalizer.editmatrix <- function(
                ) return(FALSE)
 
             if ( w == wsol && isObviouslyInfeasible(substValue(.E,totreat,x[totreat])) ) 
-                return (FALSE)
+                    return(FALSE)
             # TODO report status
             if (length(totreat) == 0){
                 wsol <<- w
