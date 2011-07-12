@@ -41,7 +41,7 @@
 \hyphenation{time-stamp}
 
 
-\title{Linear edit manipulation and error localization with the {\tt editrules} package\\
+\title{Manipulation of linear edits and error localization with the {\tt editrules} package\\
 {\small Package version \Sexpr{packageVersion("editrules")}}}
 \author{Edwin de Jonge and Mark van der Loo}
 \begin{document}
@@ -217,9 +217,7 @@ editmatrix} function processes the {\sf R} language parsetree of the textual
 {\sf R} expressions as provided by the {\sf R} internal {\tt parse} function.
 To coerce the matrix representation to textual representation, an {\sf R}
 character string is derived from the matrix which can be parsed to a language
-object.
-
-In the example, the edits were automatically named {\tt e1}, {\tt e2},
+object. In the example, the edits were automatically named {\tt e1}, {\tt e2},
 $\ldots$, {\tt e9}. It is possible to name and comment edits by reading them
 from a {\tt data.frame}. 
 
@@ -407,7 +405,9 @@ There are two fundamental operations possible on edit sets, both of which
 most simple one is to substitute a variable with a value. The second
 possibility is variable elimination. For a set of linear equalities, one can
 apply Gaussian elimination, while for a set of inequalities or a mixed set of
-equalities and inequalities Fourier-Motzkin elimination can be applied. 
+equalities and inequalities Fourier-Motzkin elimination can be applied. Table
+\ref{editmanipulationfunctions} (page \pageref{editmanipulationfunctions}) 
+gives an overview.
 
 \subsection{Value substitution}
 Given a set of $m$ linear edits as defined in Eq.\ \eqref{editset}. For
@@ -502,6 +502,7 @@ to the resulting system.}
 
 \subsection{Fourier-Motzkin elimination}
 \label{sfouriermotzkin}
+\index{Fourier-Motzkin elimination}
 Fourier-Motzkin elimination [\cite{fourier:1826,motzkin:1936}, but see
 \cite{williams:1986} for an elaborate or \cite{schrijver:1998} for a concise
 description] is an extension of Gaussian elimination to solving systems of
@@ -554,8 +555,29 @@ included for readability.  Figure \ref{ReliminateFM} shows how one or more
 variables can be eliminated from an editmatrix with the {\tt eliminateFM}
 function.  Note that when multiple variables are eliminated, the {\tt
 editmatrix} must be overwritten at every iteration to ensure that the
-history $\bf H$ is updated accordingly.
+history $\bf H$ is updated accordingly. 
 %
+
+\begin{table}
+\begin{threeparttable}
+\caption{Edit manipulation functions. Only mandatory functions are shown. Refer
+to the built-in documentation for optional arguments}
+\label{editmanipulationfunctions}
+\begin{tabular}{ll}
+\hline
+function & description \\
+\hline
+{\tt substValue(E,var,value)}  & (multiple) value substitution\\ 
+{\tt echelon(E)}         & bring equalities in echelon form\\ 
+{\tt eliminateFM(E,var)} & Fourier-Motzkin elimination\\
+{\tt getH(E)}            & derivarion history of {\tt E}\\
+{\tt geth(E)}            & nr. of eliminated variables\\
+\hline
+\end{tabular}
+\index{editmatrix@{\tt editmatrix}!manipulation}
+\end{threeparttable}
+\end{table}
+
 
 \begin{algorithm}[t]
 \caption[{\sc eliminateFM}$(E,j)$]{{\sc eliminateFM}$(E,j)$. In the actual implementation all explicit loops are avoided by
