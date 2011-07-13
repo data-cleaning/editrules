@@ -215,7 +215,7 @@ As Figure \ref{emfromtext} shows, the {\tt editmatrix} object is shown on the
 console as a matrix, as well as a set of textual edit rules. The {\tt
 editrules} package is capable of coercing a set of {\sf R} expressions to an
 {\tt editmatrix} and {\em vice versa}. To coerce text to a matrix, the {\tt
-editmatrix} function processes the {\sf R} language parsetree of the textual
+editmatrix} function processes the {\sf R} language parse tree of the textual
 {\sf R} expressions as provided by the {\sf R} internal {\tt parse} function.
 To coerce the matrix representation to textual representation, an {\sf R}
 character string is derived from the matrix which can be parsed to a language
@@ -249,7 +249,7 @@ for an {\tt editmatrix}. Basic manipulations include retrieval functions for
 the augmented matrix, coefficient matrix, constant vector and operators of an
 {\tt editmatrix}. There are also functions to test for and transform to normality.
 
-When groups of editrules are unrelateted, that is, if they do not share any
+When groups of editrules are unrelated, that is, if they do not share any
 variables, the edit matrix can be decomposed as\index{editmatrix@{\tt editmatrix}!blocks}
 \begin{equation}
 E = E_1 \oplus E_2\oplus\ldots \oplus E_k,
@@ -325,13 +325,13 @@ After manipulating a linear edit set by value substitution and/or variable
 elimination, it can contain redundant edits or become infeasible.  The {\tt
 editrules} package has two methods available which check for easily detectable
 redundancies or infeasibility. The Fourier-Motzkin elimination method has
-auxilary built-in redundancy removal, which is described in Section
+auxiliary built-in redundancy removal, which is described in Section
 \ref{sfouriermotzkin}.
 
 A system of inequalities $\bf Ax\leq b$ is called infeasible or overconstraint
 when there is no real vector $\bf x$ satisfying it. It is a consequence of
 Farkas' lemma (\cite{farkas:1902}, but see \cite{schrijver:1998} and/or
-\cite{kuhn:1956}) on feasibility of sytems of linear equalities, that  a system
+\cite{kuhn:1956}) on feasibility of systems of linear equalities, that  a system
 is infeasible if and only if $0\leq -1$ can be derived by taking positive
 linear combinations of the rows of the augmented matrix $[{\bf A},{\bf b}]$.
 
@@ -348,7 +348,7 @@ written to perform a quick check on obvious inconsistent rules in an
 editmatrix. It returns a {\tt logical} indicating whether an obvious
 contradiction of the form $0<-1$ or $0=1$ is present in an editmatrix. The
 latter inconsistency can be caused by substitution of values in the edit
-matrix. Algorithm \ref{isObviouslyInfeasible} gives the pseudocode for
+matrix. Algorithm \ref{isObviouslyInfeasible} gives the pseudo-code for
 reference purposes.
 %
 \begin{algorithm}[t]
@@ -572,7 +572,7 @@ function & description \\
 {\tt substValue(E,var,value)}  & (multiple) value substitution\\ 
 {\tt echelon(E)}         & bring equalities in echelon form\\ 
 {\tt eliminateFM(E,var)} & Fourier-Motzkin elimination\\
-{\tt getH(E)}            & derivarion history of {\tt E}\\
+{\tt getH(E)}            & derivation history of {\tt E}\\
 {\tt geth(E)}            & nr. of eliminated variables\\
 \hline
 \end{tabular}
@@ -734,7 +734,7 @@ simple two-dimensional example. The reader is encouraged to follow the
 reasoning below by checking the calculations using the {\sf R}-functions mentioned in
 the previous sections. 
 
-Consider a 2-variable record $(x,y)$ subject to the set of constaints $E$:
+Consider a 2-variable record $(x,y)$ subject to the set of constraints $E$:
 \begin{equation}
 \label{E1}
 E = \left\{
@@ -813,7 +813,7 @@ The right child of $T_{0l}$ is obtained by eliminating $y$:
 \begin{equation}
 T_{0lr} = \left\langle \varnothing, (2,y),1\right\rangle,
 \end{equation}
-where the tautology $0<2$ was removed. This endnode does represent a solution, since no
+where the tautology $0<2$ was removed. This end node does represent a solution, since no
 conflicting rules have been generated. To see if any other solutions exist, continue to
 calculate the left child node of $T_{0r}$
 \begin{equation}
@@ -934,7 +934,7 @@ calling the built-in {\tt searchNext} function, the backtracker object
 traverses the binary search tree depth-first, until the first solution is found
 or {\tt maxduration} is exceeded. The contents of the current node is returned
 to the user as a list, and if {\tt maxduration} has not been exceeded, the {\tt
-list} contains a solution to the error localisation problem. It contains the
+list} contains a solution to the error localization problem. It contains the
 current solution weight {\tt w} and a named {\tt logical} vector called {\tt
 adapt}, indicating which variables have to be adapted. The backtracker object
 property {\tt maxdurationExceeded} indicates if the time limit has been exceeded
@@ -1114,7 +1114,7 @@ environments is equivalent to a stack, where a \push-operation corresponds to
 nesting a new environment and a \pop-operation ensures that the next expression
 will be evaluated in the last-pushed environment. Since environments are
 nested, expressions evaluated in a child node have read access to information
-stored in the parent node.  Pseudocode for the {\sc backtracker} object is
+stored in the parent node.  Pseudo-code for the {\sc backtracker} object is
 given in Algorithm \ref{backtracker}. Expressions are denoted with greek
 letters $\psi$ or $\phi$, environments are denoted as $\env$ and $::$ is the
 scope resolution operator. The symbol $\mathcal{S}$ denotes a formal stack. We
@@ -1148,10 +1148,10 @@ the first environment corresponding to a solution. If {\sc bt} is the instance
 of a {\sc backtracker} object, then each call to {\sc bt::searchNext} will
 return a new, and better solution, until all solutions are found, in which
 case {\sc null} is returned. A call to {\sc bt::searchAll} (not shown in
-pseudocode) will return all solutions.
+pseudo-code) will return all solutions.
 Since search spaces grow exponentially with tree depth, the backtracker object
 can be equipped with a time limit for tree search or a maximum tree depth.
-The latter is mainly usefull for debugging purposes.
+The latter is mainly useful for debugging purposes.
 
 %
 %
@@ -1210,7 +1210,7 @@ accepts the following arguments:
 %
 As an example, Figure \ref{Rbacktracker} shows a simple implementation of the
 branch-and-bound algorithm for error localization (the implementation in {\tt
-errorLocalizer} is somwhat more advanced and faster than this example).  The
+errorLocalizer} is somewhat more advanced and faster than this example).  The
 top environment (root node) receives an edit matrix {\tt E}, a record {\tt r},
 a vector of variable names that have yet to be treated ({\tt totreat}), a
 logical vector indicating whether a variable should be altered or not ({\tt
@@ -1303,7 +1303,7 @@ takes a different approach for a number of reasons.
 
 First of all, the specification of constraints in {\tt editrules} is in {\sf R}
 syntax, while other packages typically use the specification format of the
-external library. This facilitates the maintanance of edits and reuse of these
+external library. This facilitates the maintenance of edits and reuse of these
 statements within {\sf R}. It is very useful to check data within {\sf R} before, during
 and after data analysis.
 
