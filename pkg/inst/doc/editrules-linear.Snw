@@ -312,7 +312,7 @@ violatedEdits(E,dat)
 @
 \caption{Checking which edits are violated for every record in a {\tt
 data.frame}.  The {\tt editmatrix} is the same as used in Fig.\ \ref{ReditmatrixDataframe}.
-The first record violates {\tt e1} and {\tt e2}, the second
+The first record violates {\tt e1},{\tt e2} and {\tt e4}, the second
 record violates {\tt e1},{\tt e2}, and {\tt e5}.}
 \label{violatedEdits}
 \end{Rcode}
@@ -1326,7 +1326,7 @@ language of the library. In {\tt editrules} all coding is in {\sf R}.
 \section{Conclusions}
 The {\tt editrules} package offers an interface to define and
 manipulate sets of linear (in)equality restrictions. Linear restrictions can be
-entered textually for for automated translation to matrix form or {\em vice
+entered textually for automated translation to matrix form or {\em vice
 versa}. Edit sets can be manipulated by value substitution or variable
 elimination, through a newly developed fast routine for Fourier-Motzkin
 elimination. The latter routine also allows the user to check sets of linear
