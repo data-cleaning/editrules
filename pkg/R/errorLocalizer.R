@@ -15,11 +15,13 @@
 #' \item{w: The solution weight.} 
 #' \item{adapt: \code{logical} indicating whether a variable should be adapted (\code{TRUE}) or not}}
 #'
-#' Every subsequent call leads either to \code{NULL}, in which case all solutions have been found,
-#' or a new solution with a weight \code{w} not higher than the weight of the last found solution.
+#' Every subsequent call leads either to \code{NULL}, in which case either all solutions have been found,
+#' or \code{maxduration} was exceeded. The property \code{<backtracker>$maxdurationExceeded} indicates if this is
+#' the case. Otherwise, a new solution with a weight \code{w} not higher than the weight of the last found solution
+#' is returned.
 #' 
-#' Alternatively \code{<backtracker>$searchBest()} will return the last solution found directly: 
-#' the solution has the lowest weight (but there may be more solutions with equal weight).
+#' Alternatively \code{<backtracker>$searchBest()} will return the best solution found within \code{maxduration} seconds.
+#' If multiple equivalent solutions are found, a random one is returned.
 #'
 #' The backtracker is prepared such that missing data in the input record \code{x} is already
 #' set to adapt, and missing variables have been eliminated already.
@@ -62,6 +64,8 @@ errorLocalizer <- function(E, x, ...){
 #' maximum number of variables to adapt. 
 #' @param maxduration maximum time (in seconds), for \code{$searchNext()}, \code{$searchAll()} and \code{$searchBest()} 
 #' @param ... arguments to be passed to other methods.
+#'
+#' @rdname errorLocalizer
 #' @export
 errorLocalizer.editmatrix <- function(
             E, 
@@ -140,19 +144,6 @@ errorLocalizer.editmatrix <- function(
         }
     })
     cp
-}
-
-#' Deprecated error localization function.
-#'
-#' This function is replaced by S3 generic \code{\link{errorLocalizer}}.
-#' 
-#'
-#' @param E editmatrix
-#' @param x record
-#' @param ... Arguments to be passed to \code{\link{errorLocalizer}}
-#' @export
-cp.editmatrix <- function(E,x,...){
- stop("This function is deprecated. Use errorLocalizer in stead")
 }
 
 

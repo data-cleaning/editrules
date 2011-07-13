@@ -80,7 +80,6 @@ echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
 #'
 #' Note that the resulting \code{\link{editmatrix}} may be inconsistent because of inconsistencies in
 #' \eqn{\tilde{\bf x}}.
-#' @aliases replaceValue
 #' @param E \code{editmatrix} object
 #' @param var \code{character} with name(s) of variable(s)
 #' @param value \code{numeric} with value(s) of variable(s)
@@ -105,9 +104,4 @@ substValue <- function(E, var, value, remove=FALSE){
     E[!isObviouslyRedundant(E),]    
 }
 
-#' @nord
-#' @export
-replaceValue <- function(...){
-    stop("replaceValue is deprecated. Use substValue in stead.")
-}
 

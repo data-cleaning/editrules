@@ -120,7 +120,7 @@ The following chapters demonstrate the functionality of the {\tt editrules}
 package with coded examples as well a description of the underlying theory and
 algorithms. For a detailed per-function description the reader is referred to
 the reference manual accompanying the package. Unless mentioned otherwise, all
-code shown in this paper can be executed from the {\sf R} commandline after
+code shown in this paper can be executed from the {\sf R} command line after
 loading the {\tt editrules} package.
 
 \section{Defining and checking numerical restrictions}
@@ -524,13 +524,13 @@ $[{\bf A|b}]$ where $A_{ij}>0$ with every row of $[{\bf A|b}]$ where $A_{ij}<0$
 such that for the resulting row the $j^{\rm th}$ coefficient equals zero. Rows
 of $[{\bf A|b}]$ for which $A_{ij}=0$ are copied to the resulting system. 
 If the system does not contain rows for which $A_{ij}>0$ and rows for which
-$A_{ij}<0$, the result is the removal of al rows with nonzero $A_{ij}$
+$A_{ij}<0$, the result is the removal of all rows with nonzero $A_{ij}$
 
 Mixed systems with linear restrictions of the form ${\bf a}\cdot {\bf x}\odot
 b$ with $\odot\in\{<,\leq,=\}$ can in principle be transformed to a form where
 every $\odot \in\{\leq\}$. However, it is more efficient to take the comparison
 operators into account when combining rows. In that case, new rules are derived
-by first solving the the $j^{\rm th}$ variable from each equality and
+by first solving the $j^{\rm th}$ variable from each equality and
 substituting them in each inequality. Next, inequalities are treated as stated
 before. When inequalities are combined where one comparison operator is $<$ and
 the other is $\leq$, it is not difficult to show that $<$ becomes the operator
@@ -674,7 +674,7 @@ possible, under the condition that after editing, every edit rule can be
 obeyed. A generalization of this principle says that a weighted number of
 variables should be minimized.\index{Fellegi and Holt principle} More formally
 the principle yields the following problem. Given a record ${\bf x}$, violating
-a number of edits in an edit matrix $E$ (see Eqn. \eqref{editset}) with $m$
+a number of edits in an edit matrix $E$ (see Eq. \eqref{editset}) with $m$
 rules and $n$ variables, find $G$ such that
 %
 \begin{eqnarray}
@@ -932,13 +932,13 @@ Figure \ref{Rcpeditmatrix} shows how the error localization problem can be
 solved with the {\tt backtracker} object returned by {\tt errorLocalizer}.  By
 calling the built-in {\tt searchNext} function, the backtracker object
 traverses the binary search tree depth-first, until the first solution is found
-or {\tt maxduration} is exceeded. The contents of the current node is returned
-to the user as a list, and if {\tt maxduration} has not been exceeded, the {\tt
-list} contains a solution to the error localization problem. It contains the
-current solution weight {\tt w} and a named {\tt logical} vector called {\tt
-adapt}, indicating which variables have to be adapted. The backtracker object
-property {\tt maxdurationExceeded} indicates if the time limit has been exceeded
-or not.
+or {\tt maxduration} is exceeded. If a solution is found, the contents of the
+current node is returned to the user as a list. It contains the current
+solution weight {\tt w} and a named {\tt logical} vector called {\tt adapt},
+indicating which variables have to be adapted.  If {\tt maxduration} is
+exceeded or no solution is found, {\tt NULL} is returned.  The backtracker
+object property {\tt maxdurationExceeded} indicates if the time limit has been
+exceeded or not.
 
 As expected, in the example $y$ is pointed out as the variable to change. At
 this point, the {\tt backtracker} object contains all the information needed to
@@ -972,11 +972,12 @@ search for the next solution in the tree, with lower weight. However, since in
 this example there is only one solution, {\tt searchNext} returns {\tt NULL}.
 
 The method {\tt searchNext} is not the only method of the {\tt backtracker} object
-returned by {\tt errorLocalizer}. The avaliable methods are
+returned by {\tt errorLocalizer}. The available methods are
 \begin{itemize}
 \item\verb"$searchNext" Searches for the next solution with a lower weight than the previously found solution.
-\item\verb"$searchAll"  Returns all encountered solutions that have non-increasing weights.
-\item\verb"$searchBest" Returns the lowest-weight solution. If multiple solutions have the same, minimum weight,
+\item\verb"$searchAll"  Returns all solutions encountered in the branch-and-bound search before {\tt maxduration} is exceeded.
+\item\verb"$searchBest" Returns the lowest-weight solution of all solutions found before {\tt maxduration} is exceeded. 
+        If multiple solutions have the same, minimum weight,
         it returns one of those solutions at random.
 \end{itemize}
 All these methods accept the following optional arguments:
@@ -1115,7 +1116,7 @@ nesting a new environment and a \pop-operation ensures that the next expression
 will be evaluated in the last-pushed environment. Since environments are
 nested, expressions evaluated in a child node have read access to information
 stored in the parent node.  Pseudo-code for the {\sc backtracker} object is
-given in Algorithm \ref{backtracker}. Expressions are denoted with greek
+given in Algorithm \ref{backtracker}. Expressions are denoted with Greek
 letters $\psi$ or $\phi$, environments are denoted as $\env$ and $::$ is the
 scope resolution operator. The symbol $\mathcal{S}$ denotes a formal stack. We
 denote the result of evaluating an expression $\phi$ in an environment $\env$
@@ -1202,7 +1203,7 @@ accepts the following arguments:
 \item {\tt choiceLeft}  : An {\sf R} expression for execution in left child nodes ($\phi_l$) .
 \item {\tt choiceRight} : An {\sf R} expression for execution in right child nodes ($\phi_r$).
 \item {\tt maxduration} : Optional: the default maximum time in seconds for a tree search with {\tt \$searchNext()} or {\tt \$searchAll()}.
-        This time may be overwritten by passing a new {\tt maxduration} when calling a search funtion.
+        This time may be overwritten by passing a new {\tt maxduration} when calling a search function.
 \item {\tt maxdepth}    : Optional: The maximum tree search depth.
 \item {\tt ...}         : Named arguments, to initialize the root node ($\phi_0$).
 \end{itemize}
@@ -1215,7 +1216,7 @@ top environment (root node) receives an edit matrix {\tt E}, a record {\tt r},
 a vector of variable names that have yet to be treated ({\tt totreat}), a
 logical vector indicating whether a variable should be altered or not ({\tt
 adapt}), a weight vector {\tt weight} with reliability weights for each
-variable, and the weight {\tt wsol} of the current solution is initialized to
+variable. Also, the weight {\tt wsol} of the current solution is initialized to
 the maximum possible weight. 
 
 The expression {\tt isSolution} first computes the weight of the current
