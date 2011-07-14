@@ -1,12 +1,15 @@
 require(editrules)
+
 #' extends an editmatrix with extra constraint useful for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
-buildELMatrix <- function(E,x){
+buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   vars <- getVars(E)
   x <- x[vars]
+  weight <- weight[match(vars, names(x))]
+  
   nvars <- length(vars)
   
   #TODO cope with NA's in x
@@ -41,7 +44,7 @@ buildELMatrix <- function(E,x){
                       )
   
   objfn <- numeric(2*nvars)
-  objfn[binidx] <- 1
+  objfn[binidx] <- weight
   
   names(lb) <- names(ub) <- vars
   names(objfn) <- getVars(Eel)
@@ -54,8 +57,9 @@ buildELMatrix <- function(E,x){
 }
 
 
-errorLocalize_glpk <- function(E, x){
-   elm <- buildELMatrix(E,x)
+errorLocalize_glpk <- function(E, x, weight=rep(1, length(x))){
+   vars <- getVars(E)
+   elm <- buildELMatrix(E,x, weight)
    types <- ifelse(elm$objfn, "B", "C")
    E <- elm$E
    binidx <- which(elm$objfn > 0)
@@ -74,16 +78,16 @@ errorLocalize_glpk <- function(E, x){
 #                              , upper=list(ind=seq_along(vars), val=ub)
 #                              )
                 )
-   names(sol$solution) <- getVars(E) 
+   names(sol$solution) <- c(vars,vars) 
    list( w=sol$optimum
        , adapt = (sol$solution > 0)[binidx]
        , x_c = sol$solution[-binidx]
        )
 }
 
-errorLocalize_lp <- function(E, x, verbose="neutral"){
+errorLocalize_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    vars <- getVars(E)
-   elm <- buildELMatrix(E, x)
+   elm <- buildELMatrix(E, x, weight)
    E <- elm$E
    objfn <- elm$objfn
    binidx <- which(objfn > 0)
@@ -115,7 +119,7 @@ errorLocalize_lp <- function(E, x, verbose="neutral"){
  
    delete.lp(lps)
    
-   names(sol) <- getVars(E)
+   names(sol) <- c(vars,vars)
    list( w=w
        , adapt=(sol > 0)[binidx]
        , x_c = sol[-binidx]
