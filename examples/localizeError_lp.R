@@ -57,7 +57,7 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
 }
 
 
-errorLocalize_glpk <- function(E, x, weight=rep(1, length(x))){
+localizeError_glpk <- function(E, x, weight=rep(1, length(x))){
    vars <- getVars(E)
    elm <- buildELMatrix(E,x, weight)
    types <- ifelse(elm$objfn, "B", "C")
@@ -85,7 +85,7 @@ errorLocalize_glpk <- function(E, x, weight=rep(1, length(x))){
        )
 }
 
-errorLocalize_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
+localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    vars <- getVars(E)
    elm <- buildELMatrix(E, x, weight)
    E <- elm$E
@@ -138,5 +138,5 @@ Et <- editmatrix(c(
 
 x <- c(p=755,c=125,t=200)
 
-errorLocalize_lp(Et, x)
-errorLocalize_glpk(Et, x)
+localizeError_lp(Et, x)
+localizeError_glpk(Et, x)
