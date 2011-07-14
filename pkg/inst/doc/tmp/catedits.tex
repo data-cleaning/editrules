@@ -1,7 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage{array}
-\usepackage{color}
-\begin{document}
+\usepackage{color, colortbl}
+
 \setlength{\unitlength}{0.012mm}
 \definecolor{grey}{rgb}{0.8,0.8,0.8}
 
@@ -28,16 +28,22 @@
 \newcommand{\Tl}{\put(300,700){\blackcircle}}
 \newcommand{\Tr}{\put(1100,700){\blackcircle}}
 \newcommand{\Tll}{\put(100,300){\blackcircle}}
+\newcommand{\XTll}{\put(-20,215){{$-$}}}
 \newcommand{\Tlr}{\put(500,300){\blackcircle}}
 \newcommand{\Trl}{\put(900,300){\blackcircle}}
 \newcommand{\Trr}{\put(1300,300){\blackcircle}}
+\newcommand{\XTrr}{\put(1171,215){$-$}}
+
 
 \newcommand{\Tlll}{\put(000,000){\blackcircle}}
 \newcommand{\Tllr}{\put(200,000){\blackcircle}}
 \newcommand{\Tlrl}{\put(400,000){\blackcircle}}
 \newcommand{\Tlrr}{\put(600,000){\blackcircle}}
+\newcommand{\XTlrr}{\put(471,-85){$-$}}
 \newcommand{\Trll}{\put(800,000){\blackcircle}}
+\newcommand{\XTrll}{\put(671,-85){$-$}}
 \newcommand{\Trlr}{\put(1000,000){\blackcircle}}
+\newcommand{\XTrlr}{\put(871,-85){$-$}}
 \newcommand{\Trrl}{\put(1200,000){\blackcircle}}
 \newcommand{\Trrr}{\put(1400,000){\blackcircle}}
 
@@ -57,7 +63,12 @@
 \newcommand{\Errl}{\put(1300,300){\line(-1,-3){100}}}
 \newcommand{\Errr}{\put(1300,300){\line( 1,-3){100}}}
 
+\begin{document}
+Intro
 
+%%%%%%%%%%%%%
+% T0: ROOT NODE
+%%%%%%%%%%%%%
 \begin{tabular}{m{20mm}m{5.5cm}}
 \begin{picture}(1400,1000)
     \treeframe
@@ -68,11 +79,14 @@
         x  &1&0&0&0&1&0&1&0&0\\
         \hline
         e_1&1&0&0&0&1&0&1&1&1\\
-        e_2&0&1&1&1&1&1&0&0&1
+        e_2&0&1&1&1&1&1&1&0&0
     \end{array}
 $
-\end{tabular} Root node
+\end{tabular} Root node, $w=0$.
 
+%%%%%%%%%%%
+% T0L
+%%%%%%%%%%
 \begin{tabular}{m{20mm}m{5.5cm}}
 \begin{picture}(1400,1000)
     \treeframe
@@ -82,10 +96,148 @@ $
     \begin{array}{l|cccc|cc|ccc}
         x  &1&0&0&0&1&0&1&0&0\\
         \hline
-        e_1&1&0&0&0&1&0&1&1&1\\
+        e_1& & & & &1&0&1&1&1\\
     \end{array}
 $
-\end{tabular} Substitute $x_1$.
+\end{tabular} Substitute $x_1$, $w=0$.
+
+%%%%%%%%%%%
+% T0LL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x  &1&0&0&0&1&0&1&0&0\\
+        \hline
+        e_1& & & & & & &1&1&1\\
+    \end{array}
+$
+\end{tabular} Substitute $x_2$, $w=0$.
+
+Bound condition. Up and Continue.
+
+%%%%%%%%%%%
+% T0LR
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x &1&0&0&0&\phantom{1}&\phantom{0}&1&0&0\\
+\hline
+\phantom{e_1}&&&&&&&&
+    \end{array}
+$
+\end{tabular} Eliminate $x_2$, $w=1$.
+
+
+%%%%%%%%%%%
+% T0LRL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x &1&0&0&0&\phantom{1}&\phantom{0}&1&0&0\\
+\hline
+\phantom{e_1}&&&&&&&&
+    \end{array}
+$
+\end{tabular} Substitute $x_3$, $w=1$.
+
+Solution found. Up and continue. Bound condition, up and continue.
+
+
+%%%%%%%%%%%
+% T0R
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Elr\Tlr\Elrl\Tlrl\Elrr\Tlrr\XTlrr
+    \Er\Tr
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x  &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&0&1&0&0\\
+        \hline
+        e_3 &1&1&1&1&1&0&1&0&0\\
+    \end{array}
+$
+\end{tabular} Eliminate $x_1$, $w=1$.
+
+%%%%%%%%%%%
+% T0RL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Elr\Tlr\Elrl\Tlrl\Elrr\Tlrr\XTlrr
+    \Er\Tr\Erl\Trl
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x  &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&0&1&0&0\\
+        \hline
+        e_3 &1&1&1&1&\phantom{1}&\phantom{0}&1&0&0\\
+    \end{array}
+$
+\end{tabular} Substitute $x_2$, $w=1$.
+
+
+%%%%%%%%%%%
+% T0RLL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Elr\Tlr\Elrl\Tlrl\Elrr\Tlrr\XTlrr
+    \Er\Tr\Erl\Trl\Erll\Trll
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        x  &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&0&1&0&0\\
+        \hline
+        e_3 &1&1&1&1&\phantom{1}&\phantom{0}&\phantom{1}&\phantom{0}&\phantom{0}\\
+    \end{array}
+$
+\end{tabular} Substitute $x_3$, $w=1$.
+
+Bound condition. Up and continue. Weight would increase, so up and continue.
+Weight would increase, so end. Final tree:
+
+\begin{center}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Elr\Tlr\Elrl\Tlrl\Elrr\Tlrr\XTlrr
+    \Er\Tr\Erl\Trl\Erll\Trll\XTrll
+    \Erlr\Trlr\XTrlr
+    \Err\Trr\XTrr
+\end{picture}
+\end{center}
+
+
+
 \end{document}
 
 
