@@ -1,10 +1,11 @@
 require(editrules)
 
-#' extends an editmatrix with extra constraint useful for error
+#' Extends an editmatrix with extra constraint useful for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
+#' @nord
 buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   vars <- getVars(E)
   x <- x[vars]
@@ -56,7 +57,13 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
       )
 }
 
-
+#' Localize an error using RGlpk
+#' localization
+#' @param E editmatrix 
+#' @param x named numeric with data
+#' @param weight  numeric with weights
+#' @return list with w, adapt and x_c
+#' @nord
 localizeError_glpk <- function(E, x, weight=rep(1, length(x))){
    vars <- getVars(E)
    elm <- buildELMatrix(E,x, weight)
@@ -85,6 +92,13 @@ localizeError_glpk <- function(E, x, weight=rep(1, length(x))){
        )
 }
 
+#' Localize an error using lpSolveApi
+#' localization
+#' @param E editmatrix 
+#' @param x named numeric with data
+#' @param weight  numeric with weights
+#' @return list with w, adapt and x_c
+#' @nord
 localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    vars <- getVars(E)
    elm <- buildELMatrix(E, x, weight)
@@ -125,10 +139,6 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
        , x_c = sol[-binidx]
        )
 }
-
-   
-   
-   
 
 #testing...
 Et <- editmatrix(c(
