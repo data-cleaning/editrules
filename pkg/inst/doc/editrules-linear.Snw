@@ -722,19 +722,6 @@ which we implemented to support general binary search problems. Subsection
 mentioned above.
 
 \subsection{Two examples}
-\begin{figure}
-\centering
-\includegraphics[width=0.495\textwidth]{diamond}
-\includegraphics[width=0.495\textwidth]{twodiamond}
-\caption{Graphic representation of edit rules and the allowed area. Left panel: a convex
-case, as defined by Eq.\ \eqref{E1}. Right panel: the non-convex unconnected case, as defined
-by Eq.\ \eqref{E2}. Gray areas indicate the valid record domain, black dots indicate erroneous records and 
-black arrows indicate the solution of the error localization problem, while the thin black lines
-show the range of solutions. The dotted arrows in the left panel indicate the range of directions in which
-the record (0,0) can move to reach the valid area.}
-\label{example1}
-\end{figure}
-
 To illustrate the binary search algorithm outlined above we will consider a
 simple two-dimensional example. The reader is encouraged to follow the
 reasoning below by checking the calculations using the {\sf R}-functions mentioned in
@@ -764,6 +751,20 @@ clear from the graph that the allowed values for  $y$ are between $1$ and $3$
 (indicated by the thin black vertical line in the diamond). The case $(x=0,y=0)$
 also violates $e_1$ and $e_2$ and can only be repaired by altering both $x$ and
 $y$, while the record $(x=-1,y=2)$ can be repaired by changing $x$ only.
+%
+\begin{figure}
+\centering
+\includegraphics[width=0.495\textwidth]{diamond}
+\includegraphics[width=0.495\textwidth]{twodiamond}
+\caption{Graphic representation of edit rules and the allowed area. Left panel: a convex
+case, as defined by Eq.\ \eqref{E1}. Right panel: the non-convex unconnected case, as defined
+by Eq.\ \eqref{E2}. Gray areas indicate the valid record domain, black dots indicate erroneous records and 
+black arrows indicate the solution of the error localization problem, while the thin black lines
+show the range of solutions. The dotted arrows in the left panel indicate the range of directions in which
+the record (0,0) can move to reach the valid area.}
+\label{example1}
+\end{figure}
+
 
 In the following we show that the binary search algorithm described in the
 previous subsection indeed solves the error localization problem for
