@@ -17,9 +17,10 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   binvars <- paste("adapt", vars, sep=".")
   binidx <- seq_along(vars) + nvars
   
-  lb=rep(0, nvars)
-  ub = 1000 * x #heuristic
-  
+  #TODO get upperbounds and lowerbounds present in E and remove them from E
+  ub = 1000 * abs(x) #heuristic
+  ub[ub < 1000] <- 1000
+  lb <- -ub
   A <- getA(E)
   
   Ael <- cbind(A,A,getb(E))
@@ -64,7 +65,7 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
 #' @param weight  numeric with weights
 #' @return list with w, adapt and x_c
 #' @nord
-localizeError_glpk <- function(E, x, weight=rep(1, length(x))){
+localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
    vars <- getVars(E)
    elm <- buildELMatrix(E,x, weight)
    types <- ifelse(elm$objfn, "B", "C")
@@ -80,13 +81,13 @@ localizeError_glpk <- function(E, x, weight=rep(1, length(x))){
                  , rhs=getb(E)
                  , types=types
                  , max=FALSE
-                 , verbose=FALSE
-#                 , bounds=list( lower=list(ind=seq_along(vars), val=lb)
-#                              , upper=list(ind=seq_along(vars), val=ub)
-#                              )
+                 , verbose=verbose
+                , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
+                             , upper=list(ind=seq_along(vars), val=elm$ub)
+                             )
                 )
    names(sol$solution) <- c(vars,vars) 
-   list( w=sol$optimum
+   list( w = sol$optimum
        , adapt = (sol$solution > 0)[binidx]
        , x_c = sol$solution[-binidx]
        )
@@ -124,9 +125,14 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
-
-   solve(lps)
    
+   # move univariate constraints into bounds
+   lp.control(lps,presolve="rows")
+ 
+   solve(lps)
+   print(get.constraints(lprec=lps))
+   print(lps)
+ 
    sol <- get.variables(lps)#[binidx]
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
@@ -143,10 +149,13 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
 #testing...
 Et <- editmatrix(c(
         "p + c == t",
-        "c - 0.6*t >= 0")
+        "c - 0.6*t >= 0",
+        "c>=0",
+        "p >=0"
+        )
                )
 
 x <- c(p=755,c=125,t=200)
 
 localizeError_lp(Et, x)
-localizeError_glpk(Et, x)
+#localizeError_glpk(Et, x)
