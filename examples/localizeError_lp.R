@@ -17,10 +17,12 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   binvars <- paste("adapt", vars, sep=".")
   binidx <- seq_along(vars) + nvars
   
-  #TODO get upperbounds and lowerbounds present in E and remove them from E
+  #TODO get upperbounds and lowerbounds present in E and put them in the bounds
+  # assume that boundary for each variable is at most 1000 higher that given value 
   ub = 1000 * abs(x) #heuristic
   ub[ub < 1000] <- 1000
   lb <- -ub
+  
   A <- getA(E)
   
   Ael <- cbind(A,A,getb(E))
@@ -125,14 +127,13 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
+   add.SOS
    
    # move univariate constraints into bounds
    lp.control(lps,presolve="rows")
  
    solve(lps)
-   print(get.constraints(lprec=lps))
-   print(lps)
- 
+   
    sol <- get.variables(lps)#[binidx]
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
@@ -158,4 +159,4 @@ Et <- editmatrix(c(
 x <- c(p=755,c=125,t=200)
 
 localizeError_lp(Et, x)
-#localizeError_glpk(Et, x)
+localizeError_glpk(Et, x)
