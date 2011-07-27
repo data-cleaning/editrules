@@ -1,10 +1,10 @@
 require(editrules)
 
-map <- "/home/mark/R/editrules/examples/categorical"
+map <- "/media/Data/Projecten/editrules/develop/categorical"
 fil <- c("categorical.R", "editarray.R", "reduceCat.R")
 dmp <- sapply(file.path(map,fil),source)
 
-source("../../pkg/R/parse.R")
+source("../../pkg/R/check.R")
 
 civilStatusLevels <- c("married","unmarried","widowed","divorced")
 hhLevels <- c("marriage partner", "child","other")

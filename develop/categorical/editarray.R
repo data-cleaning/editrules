@@ -138,11 +138,71 @@ editarray <- function(editrules, sep=":"){
     neweditarray(E,ind,sep=sep)
 }
 
+#' derive textual representation from (partial) indices
+#' not for export
+#' @nord
+ind2char <- function(ind, invert=logical(length(ind))){
+    v <- names(ind)
+    cats <- lapply(ind, function(k) paste("'", names(k), "'", sep=""))
+    op <- rep("%in%",length(ind))
+    l <- sapply(cats,length)
+    op[l == 1 & !invert] <- "=="
+    op[l == 1 &  invert] <- "!="
+    cats[l>1] <- lapply(cats[l>1], function(cc) paste("c(",paste(cc,collapse=","),")"))
+    u <- paste(v,op,cats)
+    u[l>1 & invert] <- paste("!(",u[l>1&invert],")")
+    u
+}
+
+
+#'
+#'
+#' @export
+as.character.editarray <- function(x,...){
+    A <- getArr(x)
+    ind <- getInd(x)
+    # data model
+    dm <- ind2char(ind)
+    names(dm) <- paste("d",1:length(dm),sep="")
+    # edits
+    edts <- character(nrow(E))
+    for ( i in 1:nrow(E) ){
+        a <- E[i,]
+        involved <- sapply(ind, function(J) sum(a[J]) < length(J))
+        ivr <- ind[involved]
+        ivr <- lapply(ivr, function(J) J[a[J]])
+        if ( length(ivr) == 1 ){ 
+            edts[i] <- ind2char(ivr)
+        } else {
+            n <- length(ivr)
+            inv <- logical(n)
+            inv[n] <- TRUE
+            ch <- ind2char(ivr, invert=inv)
+            edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" && "), ")",ch[n])
+    
+        }
+    }
+    names(edts) <- rownames(x)
+    # add datamodel and return
+    c(dm, edts) 
+}
+
+as.data.frame.editarray <- function(x, row.names=NULL, optional = FALSE, ...){
+    edts <- as.character(x)
+    data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
+}
 
 #' @nord
 print.editarray <- function(x, ...){
-    cat("editarray:\n")
-    print(getArr(x))
+    d <- datamodel(E)
+    cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
+    A <- getArr(E)
+    colnames(A) <- cn
+    cat("Edit array:\n")
+    print(A)
+    cat("\nEdit rules:\n")
+    d <- as.data.frame(x)
+    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
 }
 
 #' editarray: logical array where every column corresponds to one
