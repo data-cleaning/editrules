@@ -91,7 +91,7 @@ localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
    names(sol$solution) <- c(vars,vars) 
    list( w = sol$optimum
        , adapt = (sol$solution > 0)[binidx]
-       , x_c = sol$solution[-binidx]
+       , x_feasible = sol$solution[-binidx]
        )
 }
 
@@ -127,7 +127,6 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
-   add.SOS
    
    # move univariate constraints into bounds
    lp.control(lps,presolve="rows")
@@ -143,7 +142,7 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    names(sol) <- c(vars,vars)
    list( w=w
        , adapt=(sol > 0)[binidx]
-       , x_c = sol[-binidx]
+       , x_feasible = sol[-binidx]
        )
 }
 
