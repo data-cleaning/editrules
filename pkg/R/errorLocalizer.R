@@ -80,14 +80,17 @@ errorLocalizer.editmatrix <- function(
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
-    names(adapt) <- names(x)
+    vars <- getVars(E)
 
     #order decreasing by weight
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
+    # only treat variables in occuring in editmatrix.
+    totreat[totreat %in% vars]
+    # if variables do not occur in editmatrix, do not adapt.
+    adapt[!(names(adapt) %in% vars)] <- FALSE
 
     # Eliminate missing variables.
-    vars <- getVars(E)
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
     wsol <- min(sum(weight), maxweight)
     cp <- backtracker(

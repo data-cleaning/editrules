@@ -1,3 +1,6 @@
+version 0.9-1
+- errorLocalizer now robust when variables occur in record and not in editmatrix.
+
 version 0.9-0
 - Performance gain by improved bounding condition in backtracking object returned by errorLocalizer 
 - functions getH and geth for objects of class editmatrix added.
