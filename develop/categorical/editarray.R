@@ -138,7 +138,19 @@ editarray <- function(editrules, sep=":"){
     neweditarray(E,ind,sep=sep)
 }
 
-#' derive textual representation from (partial) indices
+#' Derive textual representation from (partial) indices
+#'
+#' 
+#'
+#' @param ind a \code{list}, usually a (part of) the 'ind' attribute of an editarray
+#' @param invert \code{logical} vector of  lenght length(ind)
+#'
+#' @return For every entry in \code{ind}, a character vector is returned where each entry
+#'      is a statement of the form "<var> %in% c('<cat1>',...,'<catN>')" or "<var> == '<catt>'"
+#'      if invert==TRUE. If invert==FALSE, the negation of the above statements is returned.
+#'
+#' @seealso as.character.editarray
+#'
 #' not for export
 #' @nord
 ind2char <- function(ind, invert=logical(length(ind))){
@@ -155,7 +167,16 @@ ind2char <- function(ind, invert=logical(length(ind))){
 }
 
 
+#' Coerce an editarray to \code{character}
 #'
+#' Coerces an editarray to a \code{data.frame}. The resulting character vector can be reparsed 
+#' to an editarray with \code{\link{editarray}}. The datamodel (the set of categories for every variable)
+#' is represented in the 'ind' attribute of an editarray. The character representation will contain
+#' a number of entries, named \code{d}\eqn{i}, of the form "<variable> %in% c('<cat1>',...,'<catN>')". 
+#'
+#' @method as.character editarray
+#' @param x editarray object
+#' @param ... further arguments passed to or from other methods
 #'
 #' @export
 as.character.editarray <- function(x,...){
@@ -165,9 +186,9 @@ as.character.editarray <- function(x,...){
     dm <- ind2char(ind)
     names(dm) <- paste("d",1:length(dm),sep="")
     # edits
-    edts <- character(nrow(E))
-    for ( i in 1:nrow(E) ){
-        a <- E[i,]
+    edts <- character(nrow(x))
+    for ( i in 1:nrow(x) ){
+        a <- x[i,]
         involved <- sapply(ind, function(J) sum(a[J]) < length(J))
         ivr <- ind[involved]
         ivr <- lapply(ivr, function(J) J[a[J]])
@@ -187,16 +208,29 @@ as.character.editarray <- function(x,...){
     c(dm, edts) 
 }
 
-as.data.frame.editarray <- function(x, row.names=NULL, optional = FALSE, ...){
+
+#' Coerce an editarray to a \code{data.frame}
+#'
+#' Coerces an editarray to a \code{data.frame}. 
+#'
+#' @method as.data.frame editmatrix
+#' @param x editmatrix object
+#' @param ... further arguments passed to or from other methods.
+#' @seealso \code{\link{as.character.editarray}}
+#' @return data.frame with columns 'name', 'edit' and 'description'.
+#'
+#'
+#' @export 
+as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x)
     data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
 }
 
 #' @nord
 print.editarray <- function(x, ...){
-    d <- datamodel(E)
+    d <- datamodel(x)
     cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
-    A <- getArr(E)
+    A <- getArr(x)
     colnames(A) <- cn
     cat("Edit array:\n")
     print(A)
@@ -277,15 +311,15 @@ contains <- function(E,var){
 }
 
 #' Summarize data model of an editarray in a data.frame
-#' @export
+#'
 #' @param E editarray
 #' @value data.frame describing the categorical variables and their levels.
 #' 
+#' @export
 datamodel <- function(E){
     st <- stack(getInd(E))
     data.frame(variable=as.character(st[,2]),value=rownames(st))
 }
-
 
 
 

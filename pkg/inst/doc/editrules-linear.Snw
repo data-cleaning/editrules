@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Linear edit manipulation and error localization with the editrules package}
+%\VignetteIndexEntry{Manipulation of linear edits and error localization with the editrules package}
 \documentclass[11pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
@@ -47,19 +47,21 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is not completely finished. Version 1.0 of the package will have
-the full vignette.}
 This paper is the first of two papers describing the editrules package. The
 current paper is concerned with the treatment of numerical data under linear
 constraints, while the accompanying paper \citep{loo:2011b} is concerned with
 constrained categorical and mixed data. The {\tt editrules} package is designed
-to offer user-friendly interface for edit definition, manipulation and
+to offer a user-friendly interface for edit definition, manipulation and
 checking. The package offers functionality for error localization based on the
 paradigm of Fellegi and Holt and a flexible interface to binary programming
 based on the choice point paradigm.  Lower-level functions include echelon
 transformation of linear systems, variable substitution and a fast
 Fourier-Motzkin elimination routine. We describe theory, implementation and
 give examples of package usage.
+
+This vignette is a near-literal transcript of \cite{jonge:2011}. The vignette
+is a living document which will be updated with the package while the reference
+corresponds to version {\sf 1.0}. 
 
 
 

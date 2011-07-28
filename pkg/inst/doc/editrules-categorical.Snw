@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{Categorical edit manipulation and error localization with the editrules package}
-\documentclass[10pt, fleqn, a4paper]{article}
+\documentclass[11pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb}
 \usepackage{threeparttable}
@@ -10,6 +10,9 @@
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
 \DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\Lor}{\lor}
+\DeclareMathOperator*{\Land}{\land}
+
 
 \usepackage{float}
  
@@ -33,7 +36,8 @@
 \hyphenation{time-stamp}
 
 
-\title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package}
+\title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package\\
+{\small package version \Sexpr{packageVersion("editrules")}}}
 \author{Mark van der Loo and Edwin de Jonge}
 \begin{document}
 \maketitle
@@ -41,5 +45,98 @@
 {\em This vignette is far from finished. Version 2.0 fo the package will have
 the full vignette.}
 \end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+
+\section{Defining and checking categorical constraints}
+\subsection{The {\tt editarray} object}
+A categorical record ${\bf v}$ is a combination of values from the
+cartesian product space
+\begin{equation}
+    D = D_1\times D_2\times\ldots\times D_n,
+\end{equation}
+where each $D_k$ is a finite set of $d_k$ categories. The total number of
+categories is $d = \sum_{k=1}^n d_k$.
+Categorical records can be represented as  a boolean vector. A boolean
+vector of dimension $d$ is an element of the boolean algebra 
+\begin{equation}
+\mathbb{B}^{d}=\left(\{0,1\}^{d},\land,\lor,\lnot\right),
+\end{equation}
+where 0 and 1 have the usual interpretations {\sc false} and {\sc true} and the
+logical operators work elementwise on their operands. To represent a record
+${\bf v}$, assign to every category $i$ in $D_k$ a unique standard 
+basisvector $\vec{\delta}_k(i)$ of $\mathbb{B}^{d_k}$. 
+The boolean representation $\rho({\bf v})$ of the full record can then be 
+represented as the direct sum
+%
+\begin{equation}
+    {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
+\end{equation}
+
+An edit $e$ is a subset of $D$, which can be written as the cartesian product
+\begin{equation}
+    e = {\bf e}_1\times{\bf e}_2\ldots\times{\bf e}_n,
+\end{equation}
+where each ${\bf e}_k\subseteq D_k$.  The interpretation of an edit is that if
+a record ${\bf v}\in {\bf e}$, then ${\bf v}$ is considered invalid. Since every
+category $i$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(i)$,  the
+subset ${\bf a}$ has a boolean representation given by
+\begin{equation}
+    e \xrightarrow{\rho}
+    \Lor_{i\in{\bf e}_1}\vec{\delta}_1(i)\oplus
+    \Lor_{i\in{\bf e}_2}\vec{\delta}_2(i)\oplus\ldots
+    \oplus\Lor_{i\in{\bf e}_k}\vec{\delta}_n(i).
+\end{equation}
+This gives yields a fast computational way for determining record validity, since
+\begin{equation}
+    {\bf v}\in{e}\Leftrightarrow \sum_{j=1}^d(\rho({\bf v})\land\rho({ e}))_j = n,
+    \label{eqCheckEdit}
+\end{equation}
+where the sum is over the coefficients of $\rho({\bf v})\land\rho({ e})$, interpreted
+as numbers. We say that a record {\em fails} an edit when it satisfies Eq.\ \eqref{eqCheckEdit}.
+
+In the {\tt editrules} package, a set of categorical edits is represented as an {\tt editarray}
+object. Formally, we denote an edit array $E$ as
+\begin{equation}
+    E = \langle {\bf A}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}.
+\end{equation}
+Here, each row of ${\bf A}$ contains the boolean representation of an edit. The brackets
+are used to indicate a combination of objects. 
+<<echo=false>>=
+library(editrules)
+path <- "/home/mark/R/editrules/develop/categorical"
+source(file.path(path,"editarray.R"))
+source(file.path(path,"categorical.R"))
+source(file.path(path,"reduceCat.R"))
+parseEdits <- editrules:::parseEdits
+@
+
+\begin{Rcode}
+<<keep.source=true>>=
+editarray(c(
+    "gender %in% c('male','female')",
+    "pregnant %in% c('yes','no')",
+    "if (gender == 'male') pregnant == 'no'"
+    )
+)
+@
+\end{Rcode}
+
+
+
+\section{Elimination of variables and redundant edits}
+
+\begin{equation}
+    e_1\,\mathfrak{R}_1\,e_2
+\end{equation}
+
+
+
+
 
 \end{document}

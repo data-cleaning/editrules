@@ -86,10 +86,9 @@ errorLocalizer.editmatrix <- function(
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
     # only treat variables in occuring in editmatrix.
-    totreat[totreat %in% vars]
+    totreat <- totreat[totreat %in% vars]
     # if variables do not occur in editmatrix, do not adapt.
     adapt[!(names(adapt) %in% vars)] <- FALSE
-
     # Eliminate missing variables.
     for (v in names(x)[is.na(x)]) E <- eliminateFM(E,v)
     wsol <- min(sum(weight), maxweight)
