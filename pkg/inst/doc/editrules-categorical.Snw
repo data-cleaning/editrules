@@ -12,7 +12,8 @@
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
-
+\DeclareMathOperator{\res}{\mathfrak{R}}
+\newcommand{\rhomap}{\xrightarrow{\rho}}
 
 \usepackage{float}
  
@@ -35,6 +36,14 @@
 \renewcommand{\dbltopfraction}{.9}
 \hyphenation{time-stamp}
 
+<<echo=false>>=
+library(editrules)
+path <- "../../../develop/categorical"
+source(file.path(path,"editarray.R"))
+source(file.path(path,"categorical.R"))
+source(file.path(path,"reduceCat.R"))
+parseEdits <- editrules:::parseEdits
+@
 
 \title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package\\
 {\small package version \Sexpr{packageVersion("editrules")}}}
@@ -77,7 +86,6 @@ represented as the direct sum
 \begin{equation}
     {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
 \end{equation}
-
 An edit $e$ is a subset of $D$, which can be written as the cartesian product
 \begin{equation}
     e = {\bf e}_1\times{\bf e}_2\ldots\times{\bf e}_n,
@@ -86,12 +94,12 @@ where each ${\bf e}_k\subseteq D_k$.  The interpretation of an edit is that if
 a record ${\bf v}\in {\bf e}$, then ${\bf v}$ is considered invalid. Since every
 category $i$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(i)$,  the
 subset ${\bf a}$ has a boolean representation given by
-\begin{equation}
-    e \xrightarrow{\rho}
+\begin{eqnarray}
+    e &\xrightarrow{\rho}&
     \Lor_{i\in{\bf e}_1}\vec{\delta}_1(i)\oplus
     \Lor_{i\in{\bf e}_2}\vec{\delta}_2(i)\oplus\ldots
     \oplus\Lor_{i\in{\bf e}_k}\vec{\delta}_n(i).
-\end{equation}
+\end{eqnarray}
 This gives yields a fast computational way for determining record validity, since
 \begin{equation}
     {\bf v}\in{e}\Leftrightarrow \sum_{j=1}^d(\rho({\bf v})\land\rho({ e}))_j = n,
@@ -104,17 +112,10 @@ In the {\tt editrules} package, a set of categorical edits is represented as an 
 object. Formally, we denote an edit array $E$ as
 \begin{equation}
     E = \langle {\bf A}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}.
+    \label{eqEditarray}
 \end{equation}
 Here, each row of ${\bf A}$ contains the boolean representation of an edit. The brackets
 are used to indicate a combination of objects. 
-<<echo=false>>=
-library(editrules)
-path <- "/home/mark/R/editrules/develop/categorical"
-source(file.path(path,"editarray.R"))
-source(file.path(path,"categorical.R"))
-source(file.path(path,"reduceCat.R"))
-parseEdits <- editrules:::parseEdits
-@
 
 \begin{Rcode}
 <<keep.source=true>>=
@@ -125,18 +126,39 @@ editarray(c(
     )
 )
 @
+\caption{Defining a simple {\tt editarray} with the {\tt editarray} function.}
+\label{Reditarray}
 \end{Rcode}
 
+\subsection{Basic manipulations and edit checking}
 
+\subsection{Obvious redundancy and infeasibility}
 
-\section{Elimination of variables and redundant edits}
-
+\section{Manipulation of categorical restrictions}
+Write
 \begin{equation}
-    e_1\,\mathfrak{R}_1\,e_2
+    \rho(e) ={\bf a} = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n,
 \end{equation}
+with $e\subseteq D$ and ${\bf a}\in \oplus_{k=1}^n\mathbb{B}^{d_k}$.
+Suppose $e_1$ and $e_2$ are edits, with boolean representations ${\bf a}$ and ${\bf b}$ respectively.
+We define the {\em resolution operator} $\res_j$ as follows:
+\begin{eqnarray}
+    {\bf a} \res_j {\bf b} = (a_1\land b_1,\ldots,a_{j-1}\land b_{j-1},a_{j}\lor b_{j},a_{j+1}\land b_{j+1},\ldots,a_d\land b_d). 
+\end{eqnarray}
+Observe that if a record ${\bf v}\in {\bf a}\res_j{\bf b}$, it must hold that
+${\bf v}\in e_1$ and/or ${\bf v}\in e_2$.  The converse is also true: If ${\bf
+v}\in e_1$ or $e_2$, then it must be in $e_1\res_j e_2$.  The operator is
+called resolution operator since its action strongly resembles a resolution
+operation from formal logic.  If $a_j= \lnot b_j$, the operator ``resolves'' or
+eliminates one of the categories $j\in D$. If $a_j=b_j$, the resulting edit is
+the intersection of the original edits.
 
 
 
 
+
+
+\bibliographystyle{chicago}
+\bibliography{editrules}
 
 \end{document}
