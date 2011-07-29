@@ -35,12 +35,12 @@ eliminateFM.editarray <- function(E, var){
 duplicated.editarray <- function(x, ...) duplicated(getArr(E))
 
 # redundancy check - editarray method.
-isObviouslyRedundant.editarray <- function(E, ...){
+isSubset.editarray <- function(E, ...){
     isObviouslyRedundant.array(getArr(E))
 }
 
 # redundancy check (check if any edit rule is a subset of another one)
-isObviouslyRedundant.array <- function(E, ...){
+isSubset.array <- function(E, ...){
     # TODO: is this any faster with a while loop? Should we do this in C?
     m <- nrow(E)
     if ( m == 0 ) return(logical(0))
@@ -48,6 +48,11 @@ isObviouslyRedundant.array <- function(E, ...){
     sapply(1:m, function(i){
         any(rowSums(E[-i,,drop=FALSE] - (E[rep(i,m1),,drop=FALSE] | E[-i,,drop=FALSE])) == 0)
     })
+}
+
+# any edit TRUE for every variable and every category?
+isObviouslyInfeasible.editarray <- function(E,...){
+    any(rowSums(E)==ncol(E))
 }
 
 
@@ -68,9 +73,8 @@ substValue.editarray <- function(E, var, value){
     neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), sep=sep, levels=getlevels(E))
 }
 
-# isObviouslyInfeasible should be lifted to S3 generic.
-# check if any of the variables has FALSE for every category.
-isObviouslyInfeasible.editarray <- function(E){
+# check if any of the variables has FALSE for every category (a record can never be contained in such a set)
+isObviouslyRedundant.editarray <- function(E){
     ind <- getInd(E)
     for ( I in ind ) if ( any(apply(!E[,I,drop=FALSE],1,all)) ) return(TRUE)
     return(FALSE)
