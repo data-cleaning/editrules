@@ -63,6 +63,8 @@ the full vignette.}
 
 
 \section{Defining and checking categorical constraints}
+We spend some time to define the boolean representation, since it eventually allow for an elegant
+elimination method.
 \subsection{The {\tt editarray} object}
 A categorical record ${\bf v}$ is a combination of values from the
 cartesian product space
@@ -80,8 +82,7 @@ where 0 and 1 have the usual interpretations {\sc false} and {\sc true} and the
 logical operators work elementwise on their operands. To represent a record
 ${\bf v}$, assign to every category $i$ in $D_k$ a unique standard 
 basisvector $\vec{\delta}_k(i)$ of $\mathbb{B}^{d_k}$. 
-The boolean representation $\rho({\bf v})$ of the full record can then be 
-represented as the direct sum
+The boolean representation $\rho({\bf v})$ of the full record reads
 %
 \begin{equation}
     {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
@@ -114,9 +115,12 @@ object. Formally, we denote an edit array $E$ as
     E = \langle {\bf A}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}.
     \label{eqEditarray}
 \end{equation}
-Here, each row of ${\bf A}$ contains the boolean representation of an edit. The brackets
-are used to indicate a combination of objects. 
-
+Here, each row of ${\bf A}$ contains the boolean representation of one edit. The brackets
+are used to indicate a combination of objects. The {\tt editarray} is the central object for
+computing with catgegorical edits, just like the {\tt editmatrix} is the central object for
+computations with linear edits.
+ 
+%
 \begin{Rcode}
 <<keep.source=true>>=
 editarray(c(
@@ -126,11 +130,117 @@ editarray(c(
     )
 )
 @
-\caption{Defining a simple {\tt editarray} with the {\tt editarray} function.}
+\caption{Defining a simple {\tt editarray} with the {\tt editarray} function. 
+Column heads of the array are abbreviated versions of variable names and categories
+seperated by a colon (by default). When printed to screen, a {\tt character} version
+of the edits is shown as well, for readability.
+}
 \label{Reditarray}
 \end{Rcode}
+%
+
+It is both tedious and error prone to define and maintain an editarray by hand. In practice,
+categorical edits are usually stated verbosely, such as: ``if the gender is male, then pregnant must be false'',
+or ``if you are under-aged, you cannot be married''. To facilitate the definition of edit arrays, {\tt editrules}
+is equipped with a parser, which takes R-statements in {\tt character} format, and translates them to
+an {\tt editarray}.
+
+Figure \ref{Reditarray} shows a simple example of defining an editmatrix with
+the editrules package.  The first two edits in Figure \ref{Reditarray} define
+the data model. The {\tt editarray} function derives the datamodel based on the
+variable names and categories it finds in the edits, whether they are
+univariate (defining domains) of multivariate. This means that if all possible
+variables and categories are mentioned in the multivariate edits, the correct
+datamodel will be derived as well. It is important to note that most functions
+working with categorical edits, assume that the full datamodel is represented
+in the columns of an {\tt editarray}. The function {\tt datamodel} accepts an
+edit array as input and returns an overview of variables and their categories,
+allowing for inspection.
+
+When printed to the screen, the boolean array is shown with column heads of the form
+\begin{quote}
+{\tt <variable><separator><category>}, 
+\end{quote}
+where both variable names and categories are abbreviated for readability, and
+the standard separator is a colon ({\tt :}). The separator may not occur as a
+symbol in either variable or category name, and its value can be determined by
+passing a custom {\tt sep} argument to {\tt editarray}.
+
+Internally, {\tt editarray} uses the {\sf R} internal {\tt parse} function to
+transform the {\tt character} expressions to a parse tree, which is
+subsequently traversed recursively to derive the entries of the editmatrix. The
+opposite is also possible. The {\sf R} internal function {\tt as.character} has
+been overloaded to derive a {\tt character} representation from a boolean
+representation. When printed to the screen, both the boolean and textual
+representation are shown.
+
+The character expressions that can be read by {\tt editarray}, such as
+\begin{quote}
+\verb+"if ( gender == 'male' ) pregnant = 'no'"+ 
+\end{quote}
+follows standard {\sf R} syntax, which should be already familliar to the
+reader. Note that double quotes are used to enclose the whole string, while
+single quotes are used for category names. Table \ref{tabOperators} shows
+which operators and functions can be used to specify categorical edit rules.
+%
+\begin{table}
+\begin{threeparttable}
+\caption{Functions and operators that may be used to define edits with {\tt editarray} }
+\label{tabOperators}
+\begin{tabular}{ll}
+\hline
+Operator & Description\\
+\hline
+{\tt \%in\%} & Set membership$^*$  \\
+{\tt ==}     & Equality$^*$ \\
+{\tt if( <condition> ) <expression> } & conditional statement\\
+{\tt c(\verb"'"<cat1>\verb"'",\verb"'"<cat2>\verb"'",...)} & categories, {\tt character} or {\tt logical}\\
+{\tt \&\&}    & logical {\sc and}\\
+{\tt ||}      & logical {\sc or}\\
+{\tt !}       & logical {\sc not}\\
+\hline
+\end{tabular}
+$^*${\small Right-hand side is evaluated.}
+\end{threeparttable}
+\end{table}
+%
+%
+Categories may be litaral characters, or booleans.  It is worth noting that
+expressions on the right hand side of the {\tt \%in\%}  and {\tt ==} operators
+are evaluated. One useful application of this is that the categories, or data
+model can be defined outside of the edits:
+%
+<<keep.source=true>>=
+xval <- letters[1:4]
+yval <- c(TRUE,FALSE)
+editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
+@
+%
+The above example also illustrates the use of boolean categories.
+
+
 
 \subsection{Basic manipulations and edit checking}
+
+\begin{table}
+\begin{threeparttable}
+\caption{Basic functions for objects of class {\tt editarray}. Only mandatory
+arguments are shown, refer to the built-in documentation for optional
+arguments.}
+\begin{tabular}{ll}
+\hline
+Function        & description \\
+\hline
+{\tt datamodel(E)}      & get datamodel \\
+{\tt getArr}            & get array ${\bf A}$\\
+{\tt as.data.frame(E)}  & coerce to {\tt data.frame}\\
+{\tt as.character(E)}   & coerce to {\tt character} vector\\
+{\tt violatedEdits(E,x)}& check which edits are violated by {\tt x}\\
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
 
 \subsection{Obvious redundancy and infeasibility}
 
@@ -154,6 +264,21 @@ eliminates one of the categories $j\in D$. If $a_j=b_j$, the resulting edit is
 the intersection of the original edits.
 
 
+Given the boolean vectors {\bf a}, {\bf b} and {\bf c} in $\mathbb{B}^d$. It is not difficult to show that the resolution
+operator has the following properties 
+\begin{equation}
+\begin{array}{ll}
+\textrm{symmetry:}  &{\bf a}\res_j{\bf b} = {\bf b} \res_j {\bf a} \\
+\textrm{associativity:}& ({\bf a}\res_j{\bf b})\res_j {\bf c} = {\bf a}\res_j({\bf b}\res_j {\bf c})\\
+\textrm{idempotency:} &{\bf a}\res_j {\bf a} = {\bf a}.
+\end{array}
+\end{equation}
+The following distributive property also holds
+\begin{equation}
+\begin{array}{ll}
+\textrm{distributivity:}& ({\bf a}\res_i{\bf b})\res_j{\bf c} = ({\bf a}\res_j{\bf c})\res_i({\bf b}\res_j{\bf c}).
+\end{array}
+\end{equation}
 
 
 
