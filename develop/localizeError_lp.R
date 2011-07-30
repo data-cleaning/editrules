@@ -1,6 +1,14 @@
+# Error localization using an linear programming library
+# Advantage: can be very fast for localization problems with hundreds of variables
+# Disadvantage:
+#           * gives only one solution out of possibly many
+#           * numeric instability may give no, or false solutions, how ever these can
+# be checked with editrules isFeasible functionality. Furthermore, numeric instability can be decreased by using appropiate upper
+# and lower bounds
+
 require(editrules)
 
-#' Extends an editmatrix with extra constraint useful for error
+#' Extends an editmatrix with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
@@ -20,6 +28,7 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   #TODO get upperbounds and lowerbounds present in E and put them in the bounds
   # assume that boundary for each variable is at most 1000 higher that given value 
   ub = 1000 * abs(x) #heuristic
+  ub[is.na(ub)] <- 1000
   ub[ub < 1000] <- 1000
   lb <- -ub
   
@@ -113,7 +122,7 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    ops[ops=="=="] <- "="
  
    if (!require(lpSolveAPI)){
-      stop("Install 'lpSolveApi' to use this function")
+      stop("Install 'lpSolveAPI' to use this function")
    }
    
    A <- getA(E)
@@ -137,7 +146,7 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
  
-   delete.lp(lps)
+   #delete.lp(lps)
    
    names(sol) <- c(vars,vars)
    list( w=w
