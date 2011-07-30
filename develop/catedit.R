@@ -89,7 +89,7 @@ cateditmatrix <- function(x){
     edts <- parseEdits(x)
     
     catedits <- lapply(edts, parseCond)
-    categories <- unique(names(unlist(catedits)))
+    categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
 
     A <- matrix( 0
@@ -269,8 +269,9 @@ ranges <- function(E){
 }
 
 isObviouslyRedundant.cateditmatrix <- function(E){
-     (getOps(E) %in% c("<=","<") & (getb(E) >= ranges(E)[,"max"]))
+   (  (getOps(E) %in% c("<=","<") & (getb(E) >= ranges(E)[,"max"]))
    |  editrules:::isObviouslyRedundant.editmatrix(E)
+   )
 }
 
 #'check which edits are infeasible
