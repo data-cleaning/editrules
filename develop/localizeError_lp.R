@@ -1,7 +1,7 @@
 # Error localization using an linear programming library
 # Advantage: can be very fast for localization problems with hundreds of variables
 # Disadvantage:
-#           * gives only one solution out of possibly many
+#           * gives only one solution out of possibly multiple
 #           * numeric instability may give no, or false solutions, how ever these can
 # be checked with editrules isFeasible functionality. Furthermore, numeric instability can be decreased by using appropiate upper
 # and lower bounds
@@ -21,12 +21,12 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   
   nvars <- length(vars)
   
-  #TODO cope with NA's in x
+  #TODO cope with NA's in x (choose upper en lower bound and  don't generate error localization contraints for na's')
   binvars <- paste("adapt", vars, sep=".")
   binidx <- seq_along(vars) + nvars
   
   #TODO get upperbounds and lowerbounds present in E and put them in the bounds
-  # assume that boundary for each variable is at most 1000 higher that given value 
+  # assume that boundary for each variable is at most 1000 times higher than given value 
   ub = 1000 * abs(x) #heuristic
   ub[is.na(ub)] <- 1000
   ub[ub < 1000] <- 1000
@@ -93,7 +93,7 @@ localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
                  , types=types
                  , max=FALSE
                  , verbose=verbose
-                , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
+                 , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
                              , upper=list(ind=seq_along(vars), val=elm$ub)
                              )
                 )
