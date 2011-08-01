@@ -38,11 +38,6 @@
 
 <<echo=false>>=
 library(editrules)
-path <- "../../../develop/categorical"
-source(file.path(path,"editarray.R"))
-source(file.path(path,"categorical.R"))
-source(file.path(path,"reduceCat.R"))
-parseEdits <- editrules:::parseEdits
 @
 
 \title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package\\
@@ -52,7 +47,7 @@ parseEdits <- editrules:::parseEdits
 \maketitle
 \begin{abstract}
 {\em This vignette is far from finished. Version 2.0 fo the package will have
-the full vignette.}
+the full vignette. At the moment, functionality for treating categorical data has alpha status and is not public yet.}
 \end{abstract}
 
 \newpage
@@ -130,12 +125,12 @@ editmatrix} is the central object for computations with linear edits.
 %
 \begin{Rcode}
 <<keep.source=true>>=
-editarray(c(
-    "gender %in% c('male','female')",
-    "pregnant %in% c('yes','no')",
-    "if (gender == 'male') pregnant == 'no'"
-    )
-)
+#editarray(c(
+#    "gender %in% c('male','female')",
+#    "pregnant %in% c('yes','no')",
+#    "if (gender == 'male') pregnant == 'no'"
+#    )
+#)
 @
 \caption{Defining a simple {\tt editarray} with the {\tt editarray} function. 
 Column heads of the array are abbreviated versions of variable names and categories
@@ -218,9 +213,9 @@ are evaluated. One useful application of this is that the categories, or data
 model can be defined outside of the edits:
 %
 <<keep.source=true>>=
-xval <- letters[1:4]
-yval <- c(TRUE,FALSE)
-editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
+#xval <- letters[1:4]
+#yval <- c(TRUE,FALSE)
+#editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
 @
 %
 The above example also illustrates the use of boolean categories.

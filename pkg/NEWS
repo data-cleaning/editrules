@@ -1,3 +1,6 @@
+version 1.0-0
+- Formal upgrade only.
+
 version 0.9-1
 - errorLocalizer now robust when variables occur in record and not in editmatrix.
 
