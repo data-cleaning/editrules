@@ -234,7 +234,7 @@ isObviouslyRedundant.editmatrix <- function(E, ...){
 isFeasible <- function(E, warn=TRUE){
     vars <- getVars(E)
     vars2 <- vars
-    feasible <- TRUE
+    feasible <- !isObviouslyInfeasible(E)
     while( feasible && length(vars) > 0 ){
         E <- eliminateFM(E,vars[1])
         vars <- vars[-1]
