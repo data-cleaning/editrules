@@ -137,6 +137,7 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
    
+   #TODO add time.out (maxduration)
    # move univariate constraints into bounds
    lp.control(lps,presolve="rows")
  
