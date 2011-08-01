@@ -24,12 +24,24 @@ genEditMatrix <- function(nedits, nvars, nvr=min(4, nvars)){
   E
 }
 
-E <- genEditMatrix(20,100)
+nvars <- 50
+E <- genEditMatrix(10,nvars)
 vars <- getVars(E)
 
-x <- sample(10, size=100, replace=TRUE)
+x <- numeric(nvars) # since b==0, this is a valid solution
 names(x) <- vars
 
+x[sample(nvars,1)] <- 1
+
 el <- errorLocalizer(E, x)
-#el$searchBest()
-localizeError_lp(E,x)
+system.time({
+  sol1 <- el$searchBest()
+})
+which(sol1$adapt)
+
+system.time({
+  sol2 <- localizeError_lp(E,x)
+})
+which(sol2$adapt)
+
+#results should be analyzed!
