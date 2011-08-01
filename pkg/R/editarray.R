@@ -88,6 +88,10 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' @param editrules \code{character} vector 
 #' @param sep textual separator, to be used internally for separating variable from category names. 
 #' @return editarray
+#'
+#' @example examples/editarray.R
+#'
+#'
 #' @export
 editarray <- function(editrules, sep=":"){
     e <- parseEdits(editrules)
@@ -229,7 +233,13 @@ as.data.frame.editarray <- function(x, ...){
     data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
 }
 
-#' @nord
+#' print  editarray
+#'
+#' @method print editarray
+#' @param x an \code{\link{editarray}}
+#' @param ... arguments to be passed to or from other methods.
+#'
+#' @export
 print.editarray <- function(x, ...){
     d <- datamodel(x)
     cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
