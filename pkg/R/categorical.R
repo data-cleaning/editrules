@@ -1,11 +1,13 @@
-require(editrules)
-# simple edit manipulation with categorical edits.
-# m, 04.05.2011
-
-violatedEdits.editarray <- function(E,x){
+#' Check which edits are violated by which record.
+#' @method violatedEdits editarray
+#' @param E an \code{\link{editarray}}
+#' @param dat \code{data.frame}
+#' @param ... arguments to be passed to or from other methods
+#' @export
+violatedEdits.editarray <- function(E, dat,...){
     s <- getSep(E)
-    for ( v in colnames(x) ) x[,v] <- paste(v,x[,v],sep=s)
-    apply(x,1, function(r) {
+    for ( v in colnames(dat) ) dat[,v] <- paste(v,dat[,v],sep=s)
+    apply(dat,1, function(r) {
         apply(E[,r,drop=FALSE],1,all)
         }
     )
@@ -13,11 +15,15 @@ violatedEdits.editarray <- function(E,x){
 
 
 
-# choicepoint object for error localization in categorical data.
-# E: editarray, x: character vector.
-# This function will become obsolete if the workhorse functions are overloaded.
-# TODO: deceide at which level the overloading / specialization limit lies.
-#
+#' Localize errors in categorical data
+#'
+#' @method errorLocalizer editarray
+#' @param E a \code{\link{editarray}}
+#' @param x a named \code{character} vector
+#' @param weight positive reliability weights
+#' @param ... arguments to be passed to or from other methods
+#' 
+#' @export
 errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
     adapt <- is.na(x)
     o <- order(weight, decreasing=TRUE)
@@ -25,8 +31,9 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
     weight <- weight[o[!adapt]]
 
     vars <- getVars.editarray(E)
-    for (v in vars[adapt & names(x) %in% vars]) E <- eliminateFM.editarray(E,v)
+    for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
     wsol <- sum(weight)
+    ind <- getInd(E)
     bt <- backtracker(
         isSolution = {
             w <- sum(weight[adapt])
@@ -57,7 +64,7 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
         },
         choiceRight = {
             .var <- totreat[1]
-            E <- eliminateFM.editarray(E, .var)
+            E <- eliminate.editarray(E, .var)
             adapt[.var] <- TRUE
             totreat <- totreat[-1]
         },
@@ -67,22 +74,10 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
         adapt   = adapt,
         weight  = weight,
         wsol    = wsol,
-        ind     = getInd(E)
+        ind     = ind
     )
     bt
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -9,11 +9,11 @@ P <- editmatrix(c(
      "-x2 <= 0",
      "-x3 <= 0"))
 # eliminate 1st variable
-(P1 <- eliminateFM(P, "x1", fancynames=TRUE))
+(P1 <- eliminate(P, "x1", fancynames=TRUE))
 # eliminate 2nd variable. Note that redundant rows have been eliminated
-(P2 <- eliminateFM(P1, "x2", fancynames=TRUE))
+(P2 <- eliminate(P1, "x2", fancynames=TRUE))
 # finally, the answer:
-(P3 <- eliminateFM(P2, "x3", fancynames=TRUE))
+(P3 <- eliminate(P2, "x3", fancynames=TRUE))
 
 # check which original edits were used in deriving the new ones
 getH(P3)
@@ -28,7 +28,7 @@ geth(P3)
     "2*x + y == 1",
     "y > 0",
     "x > 0"),normalize=TRUE))
-eliminateFM(E,"x", fancynames=TRUE)
+eliminate(E,"x", fancynames=TRUE)
 
 
 # This example has two equalities, and it's solution 
@@ -38,7 +38,7 @@ eliminateFM(E,"x", fancynames=TRUE)
     "y >= -1 + x",
     "x == y",
     "y ==-2*x" ),normalize=TRUE))
-eliminateFM(E,"x", fancynames=TRUE)
+eliminate(E,"x", fancynames=TRUE)
 
 # this example has no solution, the equalities demand (x,y) = (0,2)
 # while the inequalities demand y <= 1
@@ -48,7 +48,7 @@ eliminateFM(E,"x", fancynames=TRUE)
     "y == 2 - x",
     "y == -2 + x" ),normalize=TRUE))
 # this happens to result in an obviously unfeasable system:
-isObviouslyInfeasible(eliminateFM(E,"x"))
+isObviouslyInfeasible(eliminate(E,"x"))
 
 
 

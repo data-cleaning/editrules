@@ -1,7 +1,7 @@
 require(testthat)
 
-# test: the first example of eliminateFM
-test_that("eliminateFM works fine",{
+# test: the first example of eliminate
+test_that("eliminate works fine",{
 
     P <- editmatrix(c(
          "4*x1 - 5*x2 - 3*x3 + z <= 0",
@@ -10,7 +10,7 @@ test_that("eliminateFM works fine",{
          "-x1 <= 0",
          "-x2 <= 0",
          "-x3 <= 0"))
-    P1 <- eliminateFM(P, "x1", fancynames=TRUE)
+    P1 <- eliminate(P, "x1", fancynames=TRUE)
     Ab <- matrix(c( 
         0, -0.25, -1.75, 0.25,  2,
         0, -1.25, -0.75, 0.25,  0,

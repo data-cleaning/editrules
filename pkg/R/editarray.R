@@ -48,51 +48,6 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
     edit
 }
 
-
-# earlier version
-#parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-#    if ( length(x) == 1 ) {
-#       edit[as.character(x)] <- val
-#       return(edit)
-#    }
-#    op <- as.character(x[[1]])
-#    if ( op == "if" ){
-#        edit <- parseCond(x[[2]],TRUE,  edit, sep)
-#        edit <- parseCond(x[[3]],FALSE, edit, sep)
-#    } else if ( op %in% c("(","{") ){
-#        edit <- parseCond(x[[2]], val,  edit, sep)
-#    } else if ( op %in% c("%in%","==") ){
-#        cat <- eval(x[[3]])
-#        if (is.logical(cat)){ 
-#          var <- as.character(x[[2]])
-#          if (!cat) val <- !val
-#        } else {
-#            var <- paste(x[[2]],cat,sep=sep)
-#        }
-#        edit[var] <- val
-#    } else if (op == "!=") {
-#        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
-#        edit[var] <- !val
-#    } else if (op == "!") {
-#        edit <- parseCond(x[[2]],!val,  edit, sep)
-#    } else if (op == "&&"){
-#        if (val == FALSE){
-#            stop("Operator '&&' not allowed in 'if' clause")
-#        }
-#        edit <- parseCond(x[[2]],val, edit, sep)
-#        edit <- parseCond(x[[3]],val, edit, sep)
-#    } else if (op == "||"){
-#        if (val == TRUE){
-#            stop("Operator '||' not allowed in 'then' clause")
-#        }
-#        edit <- parseCond(x[[2]],val, edit, sep)
-#        edit <- parseCond(x[[3]],val, edit, sep)
-#    } else {
-#        stop("Operator '",op,"' not implemented")
-#    }
-#    edit
-#}
-
 #' Parse textual, categorical edit rules to an editarray
 #'
 #' Transforms a list of categorical edit rules to a boolean array representation.
@@ -101,13 +56,13 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' The purpose of this function is to turn human-readable demands on categorical data
 #' to a boolean array. Categorical edit rules state demands on a dataset in the form of a
 #' quoted R expression. Allowed statements include \code{if}, operators 
-#' \code{%in%}, \code{==}, \code{!=}, \code{||}, \code{&&} and brackets \code{()} and \code{\{\}}.
+#' \code{\%in\%}, \code{==}, \code{!=}, \code{||}, \code{&&} and brackets \code{()} and \code{\{\}}.
 #'
 #' The datamodel is derived from the edit set. A data model can be defined by simply adding 
 #' univariate edits of the form
 #'
 #' \itemize{
-#' \item{\code{"<variable> %in% c('<cat1>','<cat2>',...,'<catN>')"}}
+#' \item{\code{"<variable> \%in\% c('<cat1>','<cat2>',...,'<catN>')"}}
 #' }
 #'
 #' Note the double quotes around the whole statement, and the single quotes around the category levels.
@@ -121,17 +76,18 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' }
 #' See the example section for some coded examples.
 #'
-#' The result is an object of class \code<editarray>, which contains a \eqn{m\times n} boolean array, representing
+#' The result is an object of class \code{editarray}, which contains a \eqn{m\times n} boolean array, representing
 #' the multivariate edits. The columns are labeled with \code{<variable><sep><category>}, for example \code{gender:Male}.
 #' The column names represent the data model for the data  to be treated, the entries represent the edit rules. For example.
-#' if the datamodel is \code{"gender %in% c('male','female')"} and \code{"pregnant %in% c('yes','no')"}, the edit
+#' if the datamodel is \code{"gender \%in\% c('male','female')"} and \code{"pregnant \%in\% c('yes','no')"}, the edit
 #' \code{"if(gender == 'male') pregnant == 'no'"} is represented by the boolean array 
 #' \code{c(gender:male=TRUE, gender:female=FALSE, pregnant:yes=TRUE, pregnant:no=FALSE)}.
 #'
 #'
 #'
 #' @param editrules \code{character} vector 
-#' @value editarray
+#' @param sep textual separator, to be used internally for separating variable from category names. 
+#' @return editarray
 #' @export
 editarray <- function(editrules, sep=":"){
     e <- parseEdits(editrules)
@@ -191,7 +147,7 @@ editarray <- function(editrules, sep=":"){
 #' @param invert \code{logical} vector of  lenght length(ind)
 #'
 #' @return For every entry in \code{ind}, a character vector is returned where each entry
-#'      is a statement of the form "<var> %in% c('<cat1>',...,'<catN>')" or "<var> == '<catt>'"
+#'      is a statement of the form \code{"<var> \%in\% c('<cat1>',...,'<catN>')" or "<var> == '<catt>'"}
 #'      if invert==TRUE. If invert==FALSE, the negation of the above statements is returned.
 #'
 #' @seealso as.character.editarray
@@ -219,7 +175,7 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
 #' Coerces an editarray to a \code{data.frame}. The resulting character vector can be reparsed 
 #' to an editarray with \code{\link{editarray}}. The datamodel (the set of categories for every variable)
 #' is represented in the 'ind' attribute of an editarray. The character representation will contain
-#' a number of entries, named \code{d}\eqn{i}, of the form "<variable> %in% c('<cat1>',...,'<catN>')". 
+#' a number of entries, named \code{d}\eqn{i}, of the form \code{"<variable> \%in\% c('<cat1>',...,'<catN>')"}. 
 #'
 #' @method as.character editarray
 #' @param x editarray object
@@ -260,7 +216,7 @@ as.character.editarray <- function(x,...){
 #'
 #' Coerces an editarray to a \code{data.frame}. 
 #'
-#' @method as.data.frame editmatrix
+#' @method as.data.frame editarray
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #' @seealso \code{\link{as.character.editarray}}
@@ -304,7 +260,7 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E)){
 #' get variable names in editarray
 #' 
 #' @param E \code{\link{editmatrix}
-#' @value character vector
+#' @return character vector
 #' @nord
 getVars.editarray <- function(E) names(attr(E,"ind"))
 
@@ -315,32 +271,32 @@ getVars.editarray <- function(E) names(attr(E,"ind"))
 #' variables. The names of the vectors are the names of the columns of the editarray.
 #' 
 #' @param E \code{\link{editarray}}
-#' @value named list, indexing category levels in the editarray (columns)
+#' @return named list, indexing category levels in the editarray (columns)
 #' @nord
 getInd <- function(E) attr(E,"ind")
 
 
 #' get seprator used to seperate variables from levels in editarray
 #' @param E \code{\link{editarray}}
-#' @value character
+#' @return character
 #' @nord
 getSep <- function(E) attr(E,"sep")
 
 #' Get named logical array from editarray
 #' @param E \code{\link{editarray}}
-#' @value logical array
+#' @return logical array
 #' @nord
 getArr <- function(E) E[,,drop=FALSE]
 
 #' retrieve level names from editarray
 #' @param editarray \code{\link{editarray}}
-#' @value character vector
+#' @return character vector
 #' @nord
 getlevels <- function(E) colnames(E)
 
 #' retrieve edit names from editarray
 #' @param E \code{\link{editarray}}
-#' @value character vector
+#' @return character vector
 #' @nord
 getnames <- function(E) rownames(E)
 
@@ -349,7 +305,7 @@ getnames <- function(E) rownames(E)
 #'
 #' @param E \code{\link{editarray}}
 #' @param var character, name of a categorical variable of \code{E}
-#' @value \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
+#' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
 #' @export
 contains <- function(E,var){
     I <- getInd(E)[[var]]
@@ -360,7 +316,7 @@ contains <- function(E,var){
 #' Summarize data model of an editarray in a data.frame
 #'
 #' @param E editarray
-#' @value data.frame describing the categorical variables and their levels.
+#' @return \code{data.frame} describing the categorical variables and their levels.
 #' 
 #' @export
 datamodel <- function(E){

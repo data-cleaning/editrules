@@ -125,12 +125,12 @@ editmatrix} is the central object for computations with linear edits.
 %
 \begin{Rcode}
 <<keep.source=true>>=
-#editarray(c(
-#    "gender %in% c('male','female')",
-#    "pregnant %in% c('yes','no')",
-#    "if (gender == 'male') pregnant == 'no'"
-#    )
-#)
+editarray(c(
+    "gender %in% c('male','female')",
+    "pregnant %in% c('yes','no')",
+    "if (gender == 'male') pregnant == 'no'"
+    )
+)
 @
 \caption{Defining a simple {\tt editarray} with the {\tt editarray} function. 
 Column heads of the array are abbreviated versions of variable names and categories
@@ -213,9 +213,9 @@ are evaluated. One useful application of this is that the categories, or data
 model can be defined outside of the edits:
 %
 <<keep.source=true>>=
-#xval <- letters[1:4]
-#yval <- c(TRUE,FALSE)
-#editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
+xval <- letters[1:4]
+yval <- c(TRUE,FALSE)
+editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
 @
 %
 The above example also illustrates the use of boolean categories.

@@ -560,9 +560,9 @@ records for each edit from which original edit it was derived. Obviously, ${\bf
 H}$ is {\sc true} only on the diagonal when $h=0$. It is worth mentioning that
 by using {\sf R}'s vectorized indices and recycling properties, it is possible to
 avoid any explicit looping in the elimination process. Algorithm
-\ref{eliminateFM} gives an overview of the algorithm where explicit loops are
-included for readability.  Figure \ref{ReliminateFM} shows how one or more
-variables can be eliminated from an editmatrix with the {\tt eliminateFM}
+\ref{eliminate} gives an overview of the algorithm where explicit loops are
+included for readability.  Figure \ref{Reliminate} shows how one or more
+variables can be eliminated from an editmatrix with the {\tt eliminate}
 function.  Note that when multiple variables are eliminated, the {\tt
 editmatrix} must be overwritten at every iteration to ensure that the
 history $\bf H$ is updated accordingly. 
@@ -579,7 +579,7 @@ function & description \\
 \hline
 {\tt substValue(E,var,value)}  & (multiple) value substitution\\ 
 {\tt echelon(E)}         & bring equalities in echelon form\\ 
-{\tt eliminateFM(E,var)} & Fourier-Motzkin elimination\\
+{\tt eliminate(E,var)} & Fourier-Motzkin elimination\\
 {\tt getH(E)}            & derivation history of {\tt E}\\
 {\tt geth(E)}            & nr. of eliminated variables\\
 \hline
@@ -590,9 +590,9 @@ function & description \\
 
 
 \begin{algorithm}[t]
-\caption[{\sc eliminateFM}$(E,j)$]{{\sc eliminateFM}$(E,j)$. In the actual implementation all explicit loops are avoided by
+\caption[{\sc eliminate}$(E,j)$]{{\sc eliminate}$(E,j)$. In the actual implementation all explicit loops are avoided by
 making use of {\sf R}'s recycling properties and vectorized indices.}
-\label{eliminateFM}
+\label{eliminate}
 \begin{algorithmic}
 \Require A normalized {\tt editmatrix} $E=\langle [{\bf A|b}],\boldsymbol{\odot},{\bf H},h\rangle$, and a variable index $j$.
 \If {${\bf H}=\varnothing$}
@@ -641,15 +641,15 @@ with negative $j^{th}$ coefficient:}
 %
 \begin{Rcode}
 <<>>=
-eliminateFM(E,"t")
+eliminate(E,"t")
 F <- E
-for ( var in c("t","cp","p") ) F <- eliminateFM(F,var)
+for ( var in c("t","cp","p") ) F <- eliminate(F,var)
 F
 @
-\caption{Above: eliminating {\tt t} from the editmatrix with the {\tt eliminateFM} function.
+\caption{Above: eliminating {\tt t} from the editmatrix with the {\tt eliminate} function.
 Below: to eliminate multiple variables, the original editmatrix must be overwritten at each
 iteration to ensure that the derivation history is updated at every step.}
-\label{ReliminateFM}
+\label{Reliminate}
 \end{Rcode}
 
 \clearpage
@@ -1282,7 +1282,7 @@ bt <- backtracker(
     },
     choiceRight = { # things to do in the right node
         .var <- .totreat[1]
-        .E <- eliminateFM(.E, .var)
+        .E <- eliminate(.E, .var)
         .totreat <- .totreat[-1]
                               
         adapt[.var] <- TRUE

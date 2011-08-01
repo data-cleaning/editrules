@@ -1,3 +1,10 @@
+#' @nord
+eliminateFM <- function(E, var,...){
+    warning("eliminateFM is deprecated. Use 'eliminate' in stead")
+    eliminate(E,var,...)
+}
+
+
 #' Eliminate a variable from an editmatrix
 #'
 #' Uses Fourier-Motzkin elimination to eliminate a variable from a set
@@ -5,10 +12,11 @@
 #' An observation of Kohler (1967) is used to reduce the number of implied 
 #' restrictions. Obvious redundancies of the type 0 < 1 are removed as well. 
 #'
-#'
+#' @method eliminate editmatrix
 #' @param E an object of class \code{\link{editmatrix}}
 #' @param var \code{character} name of the variable to eliminate
 #' @param fancynames \code{logical} If true, the derived restrictions have rownames derived from the original restrictions (slower).
+#' @param ... other arguments to be passed to or from other methods
 #' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
 #'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
 #' 
@@ -22,7 +30,7 @@
 #' H.P. Williams (1986) Fourier's method of linear programming and its dual,
 #' The American Mathematical Monthly 93, 681-695
 #' @export
-eliminateFM <- function(E, var, fancynames=FALSE){
+eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
     if (!isNormalized(E)) E <- normalize(E)
     vars <- getVars(E)
 
@@ -123,7 +131,7 @@ eliminateFM <- function(E, var, fancynames=FALSE){
 #' 
 #' @param E An normalized \code{link{editmatrix}}. If E is not normalized on entry, it will be normalized internally prior to checking. 
 #' @param tol Tolerance for checking against zero.
-#' @seealso \code{\link{eliminateFM}} \code{\link{editmatrix}}
+#' @seealso \code{\link{eliminate}} \code{\link{editmatrix}}
 #' @export
 isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
     if ( !isNormalized(E) ) E <- normalize(E)
@@ -139,32 +147,6 @@ isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
 }
 
 
-
-#' Find obvious redundancies in set of (in)equalities
-#'
-#' The function returns a logical vector which is TRUE at any row of the system 
-#' Ax <operators> b which is obviously redundant. Obvious redundancies, amounting
-#' to statements as 0==0 or 0 < 1 may arise durining elimination processes. The 
-#' function also checks for duplicate rows in the augmented matrix [A|b]
-#' 
-#' Extra paramters:
-#' \itemize{
-#' \item{tol: tolerance to check for zeros, default square root of machine accuracy}
-#' \item{duplicates: logical, check for duplicate rows?, default \code{TRUE}}
-#' \item{duplicates.tol: tolerance for duplicate search, standard: \code{tol}}
-#' }
-#' @param E Augmented matrix A|b or editmatrix
-#' @param ... parameters to be passed to other methods. 
-#' 
-#'
-#'
-#'
-#'
-#' @seealso \code{\link{isObviouslyRedundant.matrix}}, \code{\link{isObviouslyRedundant.editmatrix}}
-#' @export 
-isObviouslyRedundant <- function(E, ...){
-    UseMethod("isObviouslyRedundant")
-}
 
 #' Redundancy check, \code{matrix} method
 #'
@@ -236,7 +218,7 @@ isFeasible <- function(E, warn=TRUE){
     vars2 <- vars
     feasible <- !isObviouslyInfeasible(E)
     while( feasible && length(vars) > 0 ){
-        E <- eliminateFM(E,vars[1])
+        E <- eliminate(E,vars[1])
         vars <- vars[-1]
         feasible <- !isObviouslyInfeasible(E)
         if ( !feasible && warn )

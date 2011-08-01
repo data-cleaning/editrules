@@ -1,3 +1,4 @@
+
 #' Reduce an (edit)matrix by removing empty rows and columns
 #'
 #' @nord
@@ -10,21 +11,6 @@ removeEmpty  <- function(E){
   E[edits, vars, drop=FALSE]
 }
 
-
-#' Bring an (edit) matrix to reduced row echelon form.
-#'
-#' If E is a matrix, a matrix in reduced row echelon form is returned.
-#' If E is an \code{\link{editmatrix}} the equality part of E is transformed
-#' to reduced row echelon form.
-#'
-#' @aliases echelon.editmatrix echelon.matrix
-#'
-#' @param E a matrix or editmatrix
-#' @param ... options to pass on to further methods.
-#' @export
-echelon <- function(E,...){
-    UseMethod("echelon")
-}
 
 #' @export
 #' @nord
