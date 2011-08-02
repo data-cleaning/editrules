@@ -222,6 +222,14 @@ as.character.editarray <- function(x,...){
     c(dm, edts) 
 }
 
+#' check if an object is an editarray
+#'
+#' @param x object to be checked
+#' @export
+#' @return \code{TRUE} if \code{x} is an \code{\link{editarray}}
+#' @seealso \code{\link{editarray}}, \code{\link{is.editmatrix}}
+#'
+is.editarray <- function(x) inherits(x,"editarray")
 
 #' Coerce an editarray to a \code{data.frame}
 #'
@@ -263,13 +271,14 @@ print.editarray <- function(x, ...){
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
 #' @nord
-neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E)){
+neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
     if ( is.null(names) & nrow(E)>0 ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",
         ind    = ind,
-        sep    = sep
+        sep    = sep,
+        ...
     )
 }
 

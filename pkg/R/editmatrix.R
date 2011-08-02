@@ -238,7 +238,7 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 
 #' Check if object is an editmatrix
 #' 
-#' @seealso \code{\link{editmatrix}}
+#' @seealso \code{\link{editmatrix}},\code{\link{is.editarray}}
 #' @export
 #' @param x object to be checked
 #' @return TRUE if \code{x} is an \code{editmatrix}

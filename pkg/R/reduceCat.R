@@ -1,7 +1,7 @@
 #' eliminate one category from a logical array, not for export.
 #' TODO redundancy removal by recording derivation history.
 #' @nord
-eliminateCat <- function(A, J, j){
+eliminateCat <- function(A, J, j, H, h){
     j1 <- A[,J[j]]
     j2 <- !j1
     n1 <- sum(j1)
@@ -12,7 +12,11 @@ eliminateCat <- function(A, J, j){
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
     B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
     B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    rbind(A[j1,,drop=FALSE],B)
+    A <- rbind(A[j1,,drop=FALSE],B)
+    # detect redundancies and get rid of them
+    H <- rbind(H[j1,,drop=FALSE],H[I1,,drop=FALSE] | H[I2,,drop=FALSE])
+    I3 <- rowSums(H) > h+1
+    list(A=A[!I3,,drop=FALSE], H=H[I3,,drop=FALSE], h=h+1)
 }
 
 #' Eliminate variable from editarray.
@@ -27,11 +31,22 @@ eliminate.editarray <- function(E, var, ...){
     J <- getInd(E)[[var]]
     sep <- getSep(E) 
     A <- getArr(E)
+    h <- geth(E)
+    if ( is.null(h) ){
+        h <- 0
+        H <- matrix(FALSE,ncol=nrow(E),ncol=nrow(E))
+        diag(H) <- TRUE
+    } else {
+        H <- getH(E)
+    }
     for ( j in 1:length(J)){
          red <- duplicated(A) | isObviouslyRedundant(A)
-         A <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         L <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         A <- L$A
+         H <- L$H
+         h <- L$h
     }
-    neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E))
+    neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E), H=H, h=h)
 }
 
 #' duplicated method for editarray
