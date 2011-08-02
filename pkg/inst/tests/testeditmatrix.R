@@ -1,5 +1,4 @@
 library(testthat)
-library(testthat)
 
 test_that("editmatrix works correcly with character",{
    cond <- c( "x == y"

@@ -115,9 +115,15 @@ editarray <- function(editrules, sep=":"){
     # edits with NA only extend the data model.
     v <- v[!sapply(v,function(u) is.na(u[1]))]
         
-    # set edtiarray values
+    # set editarray values
     n <- length(cols)
     m <- length(v)
+    if ( m == 0 ){
+        return(neweditarray(
+            array(logical(0),dim=c(m,n),dimnames=list(edits=NULL,variables=cols)),ind,sep)
+        )
+
+    }
     E <- array(NA, dim=c(m,n), 
             dimnames = list(
                 edits = paste("e",1:m,sep=""),
@@ -193,6 +199,7 @@ as.character.editarray <- function(x,...){
     dm <- ind2char(ind)
     names(dm) <- paste("d",1:length(dm),sep="")
     # edits
+    if ( nrow(x) == 0 ) return(dm)
     edts <- character(nrow(x))
     for ( i in 1:nrow(x) ){
         a <- x[i,]

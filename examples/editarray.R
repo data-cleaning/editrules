@@ -23,5 +23,18 @@ editarray(c(
     )
 )
 
+# the \%in\% statement may be used at will
+editarray(c(
+    "gender \%in\% c('male','female')",
+    "pregnant \%in\% c(TRUE, FALSE)",
+    "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
+    "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
+    "if( gender == 'male' ) !pregnant",
+    "if( maritalStatus \%in\% c('married','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
+    )
+)
+
+
+
 
 
