@@ -12,7 +12,7 @@ eliminateCat <- function(A, J, j){
     B <- array(FALSE,dim=c(n1*n2,ncol(A)))
     B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
     B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    B
+    rbind(A[j1,,drop=FALSE],B)
 }
 
 #' Eliminate variable from editarray.
