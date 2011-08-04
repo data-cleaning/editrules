@@ -86,7 +86,6 @@ errorLocalizer.editmatrix <- function(
             if (length(l)>1){ # randomize minimal weight solutions
                 ws <- sapply(l,function(s) s$w)
                 return(l[[sample(which(ws==min(ws)),1)]])
-                return(l[[length(l)]])
             } else if (length(l)){
                return(l[[1]])
             }
