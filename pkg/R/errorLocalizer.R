@@ -83,11 +83,11 @@ errorLocalizer.editmatrix <- function(
     with(cp,{
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
             l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
-            if (length(l)>1){ # randomize minimal weight solutions
+            if (length(l)>0){ 
                 ws <- sapply(l,function(s) s$w)
-                return(l[[sample(which(ws==min(ws)),1)]])
-            } else if (length(l)){
-               return(l[[1]])
+                iwmin <- which(ws==min(ws))
+                if (length(iwmin) == 1) return(l[[iwmin]])
+                return(l[[sample(iwmin,1)]])
             }
         }
     })
