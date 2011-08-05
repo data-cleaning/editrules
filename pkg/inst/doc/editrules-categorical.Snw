@@ -326,10 +326,7 @@ ${\bf b}$ respectively.  We define the {\em resolution operator} $\res_j$ as
 follows:
 \begin{eqnarray}
     {\bf a} \res_j {\bf b} = 
-    \left\{\begin{array}{l}
-        \varnothing \textrm{ when } a_j=b_j= \textrm{\sc false}\textrm{, otherwise}\\
     (a_1\land b_1,\ldots,a_{j-1}\land b_{j-1},a_{j}\lor b_{j},a_{j+1}\land b_{j+1},\ldots,a_d\land b_d).
-\end{array}\right.
 \end{eqnarray}
 Observe that this operator has the following properties, relevant for record checking.
 \begin{eqnarray}
@@ -350,13 +347,13 @@ $a_j=b_j=\textrm{\sc true}$, the resulting edit is the intersection of the
 original edits, in which case the resulting edit is redundant. 
 
 By substitution in the definition, it can be shown that the resolution operator is
-symmetrical and associative. As a reminder, these properties are defined
+symmetrical, associative and idempotent. As a reminder, these properties are defined
 as follows.
 \begin{equation}
 \begin{array}{ll}
 \textrm{symmetry:}  &{\bf a}\res_j{\bf b} = {\bf b} \res_j {\bf a} \\
 \textrm{associativity:}& ({\bf a}\res_j{\bf b})\res_j {\bf c} = {\bf a}\res_j({\bf b}\res_j {\bf c}).\\
-%\textrm{idempotent:} &{\bf a}\res_j {\bf a} = {\bf a}.
+\textrm{idempotency:} &{\bf a}\res_j {\bf a} = {\bf a}.
 \end{array}
 \end{equation}
 The following distributive property also holds
@@ -376,42 +373,42 @@ $a_j=\textrm{\sc true}$ for all $j\in D_k$. In set-theoretical terms this means
 that for every resulting edit ${\bf e}_k=D_k$. Or in words: it does not depend
 on the value of $v_k$ if a record ${\bf v}$ fails one of the resulting edits.
 
-When eliminating variables in this way, a large number of new edits may be generated.
-If $h$ categories are eliminated, the number of edits maximally grows with
-$\tfrac{1}{2}m+(\tfrac{1}{2}m)^2$ at every step.
-The following rule is an analog of a rule of \cite{cernikov:1960}, used in
-removing redundancies in Fourier-Motzkin elimination.
-\begin{theorem} Given a set of edits $E$ in boolean representation. If $h$
-    categories are eliminated from $E$, every resulting edit, derived from more
-    than $h+1$ original edits is redundant.  
-\end{theorem}
-
-\begin{proof}
-Eliminate categories $j=1$ and $j=2$ from $E$, so $h=2$. 
-All edits resulting from $h+1=3$ original edits can be written as
-$({\bf a} \res_1 {\bf b})\res_2{\bf c}$ while edits resulting from
-$h+2=4$ original edits read
-$({\bf a}\res_1{\bf b})\res_2({\bf c}\res_1{\bf d})$.
-Using the distribution rule, the first form may be expanded to
-\begin{equation}
-    ({\bf a}\res_2{\bf c})\res_1({\bf b} \res_2{\bf c}),
-    \label{pr1}
-\end{equation}
-and the second form to
-\begin{equation}
-    \left[({\bf a}\res_2{\bf c})\res_1
-    ({\bf b}\res_2{\bf c})\right]\res_1
-    \left[({\bf a}\res_2{\bf d})\res_1
-    ({\bf b}\res_2{\bf d})\right]
-    \label{pr2}
-\end{equation}
-The left and right term between square brackets have category $j=1$ eliminated,
-so according to Eq.\ \eqref{eqRedundant} the resulting edit is equal to the
-intersection of the two terms, and is therefore redundant. Both terms are of
-the form \eqref{pr1}, containing $h+1=3$ original edits.  Since we made no
-assumption about previous derivation history of {\bf a}, {\bf b}, {\bf c} or
-{\bf d}, we are done.
-\end{proof}
+%When eliminating variables in this way, a large number of new edits may be generated.
+%If $h$ categories are eliminated, the number of edits maximally grows with
+%$\tfrac{1}{2}m+(\tfrac{1}{2}m)^2$ at every step.
+%The following rule is an analog of a rule of \cite{cernikov:1960}, used in
+%removing redundancies in Fourier-Motzkin elimination.
+%\begin{theorem} Given a set of edits $E$ in boolean representation. If $h$
+%    categories are eliminated from $E$, every resulting edit, derived from more
+%    than $h+1$ original edits is redundant.  
+%\end{theorem}
+%
+%\begin{proof}
+%Eliminate categories $j=1$ and $j=2$ from $E$, so $h=2$. 
+%All edits resulting from $h+1=3$ original edits can be written as
+%$({\bf a} \res_1 {\bf b})\res_2{\bf c}$ while edits resulting from
+%$h+2=4$ original edits read
+%$({\bf a}\res_1{\bf b})\res_2({\bf c}\res_1{\bf d})$.
+%Using the distribution rule, the first form may be expanded to
+%\begin{equation}
+%    ({\bf a}\res_2{\bf c})\res_1({\bf b} \res_2{\bf c}),
+%    \label{pr1}
+%\end{equation}
+%and the second form to
+%\begin{equation}
+%    \left[({\bf a}\res_2{\bf c})\res_1
+%    ({\bf b}\res_2{\bf c})\right]\res_1
+%    \left[({\bf a}\res_2{\bf d})\res_1
+%    ({\bf b}\res_2{\bf d})\right]
+%    \label{pr2}
+%\end{equation}
+%The left and right term between square brackets have category $j=1$ eliminated,
+%so according to Eq.\ \eqref{eqRedundant} the resulting edit is equal to the
+%intersection of the two terms, and is therefore redundant. Both terms are of
+%the form \eqref{pr1}, containing $h+1=3$ original edits.  Since we made no
+%assumption about previous derivation history of {\bf a}, {\bf b}, {\bf c} or
+%{\bf d}, we are done.
+%\end{proof}
 
 
 %
