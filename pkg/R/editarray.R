@@ -176,6 +176,8 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
     u[l>1 &  invert] <- paste("!(",u[l>1 & invert],")")
     u <- sub("'FALSE'","FALSE",u)
     u <- sub("'TRUE'","TRUE",u)
+    u <- sub("!= FALSE","== TRUE",u)
+    u <- sub("!= TRUE","== FALSE",u)
     u
 }
 
