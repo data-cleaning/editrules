@@ -20,7 +20,7 @@
 #'      \item{\code{$reset()}}{Resets the \code{backtracker} to its initial state.}
 #'   }
 #' }
-#' @example examples/backtracker.R
+#' @example ../examples/backtracker.R
 #'
 #' @param isSolution \code{expression} that should evaluate to \code{TRUE} when a solution is found.
 #' @param choiceLeft \code{expression} that will be evaluated for a left node

@@ -75,7 +75,7 @@ violatedEdits.data.frame <- function(E, dat, ...){
 #' Lists which rows of \code{data.frame dat} violate which constraints
 #'
 #' This function can be used as an input for automatic corrections methods.
-#' @example examples/listViolatedEdits.R
+#' @example ../examples/listViolatedEdits.R
 #' @export
 #' @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
 #' @param dat \code{data.frame} with data that should be checked

@@ -6,7 +6,7 @@ findBlocks <- function(M){
 
 #' Break a matrix into blocks
 #'
-#' @example examples/blocks.R
+#' @example ../examples/blocks.R
 #' @aliases findBlocks
 #' @param M \code{matrix} or \code{editmatrix} that will be broken in blocks
 #' @return list with seperate matrix blocks

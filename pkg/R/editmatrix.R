@@ -122,7 +122,7 @@ makeEditRow <- function(edt){
 #' @title Create an editmatrix
 #' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
 #' @export
-#' @example examples/editmatrix.R
+#' @example ../examples/editmatrix.R
 #'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
 #'        a \code{character} with (in)equalities written in R syntax

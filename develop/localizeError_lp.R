@@ -156,6 +156,19 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
        )
 }
 
+em2lp <- function(E){
+   A <- getA(E)
+   ops <- getOps(E)
+   lps <- make.lp(nrow(A), ncol(A))
+   dimnames(lps) <- dimnames(A)
+   for (v in 1:ncol(A)){
+     set.column(lps, v, A[,v])
+   }
+   set.constr.type(lps,types=ops)
+   set.constr.value(lps, getb(E))
+   lps
+}
+
 #testing...
 Et <- editmatrix(c(
         "p + c == t",
@@ -168,4 +181,4 @@ Et <- editmatrix(c(
 x <- c(p=755,c=125,t=200)
 
 localizeError_lp(Et, x)
-localizeError_glpk(Et, x)
+#localizeError_glpk(Et, x)

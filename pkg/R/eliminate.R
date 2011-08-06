@@ -20,7 +20,7 @@ eliminateFM <- function(E, var,...){
 #' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
 #'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
 #' 
-#' @example examples/eliminate.R
+#' @example ../examples/eliminate.R
 #'
 #' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyInfeasible}}
 #' @references

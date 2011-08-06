@@ -15,9 +15,8 @@ Description: Facilitates reading and manipulation of linear
 Version: 1.1-0
 URL: http://code.google.com/p/editrules/
 Date: 2011-02-06
-Depends:
 Suggests: iterators
 Collate: 'backtracker.R' 'blocks.R' 'categorical.R' 'check.R'
-    'editarray.R' 'editmatrixAttr.R' 'editmatrix.R' 'editrules-data.R'
-    'eliminate.R' 'errorLocalizer.R' 'pkg.R' 'reduceCat.R' 'reduce.R'
+    'editarray.R' 'editmatrix.R' 'editmatrixAttr.R' 'editrules-data.R'
+    'eliminate.R' 'errorLocalizer.R' 'pkg.R' 'reduce.R' 'reduceCat.R'
     'S3Generics.R'

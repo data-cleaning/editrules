@@ -79,9 +79,9 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' The result is an object of class \code{editarray}, which contains a \eqn{m\times n} boolean array, representing
 #' the multivariate edits. The columns are labeled with \code{<variable><sep><category>}, for example \code{gender:Male}.
 #' The column names represent the data model for the data  to be treated, the entries represent the edit rules. For example.
-#' if the datamodel is \code{"gender \%in\% c('male','female')"} and \code{"pregnant \%in\% c('yes','no')"}, the edit
-#' \code{"if(gender == 'male') pregnant == 'no'"} is represented by the boolean array 
-#' \code{c(gender:male=TRUE, gender:female=FALSE, pregnant:yes=TRUE, pregnant:no=FALSE)}.
+#' if the datamodel is \code{"gender \%in\% c('male','female')"} and \code{"pregnant \%in\% c(TRUE,FALSE)"}, the edit
+#' \code{"if(gender == 'male') pregnant == FALSE"} is represented by the boolean array 
+#' \code{c(gender:male=TRUE, gender:female=FALSE, pregnant:TRUE=TRUE, pregnant:FALSE=FALSE)}.
 #'
 #'
 #'
@@ -89,7 +89,7 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' @param sep textual separator, to be used internally for separating variable from category names. 
 #' @return editarray
 #'
-#' @example examples/editarray.R
+#' @example ../examples/editarray.R
 #'
 #'
 #' @export

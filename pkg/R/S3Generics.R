@@ -23,7 +23,7 @@
 #'      no edit restrictions, \code{TRUE} otherwise \code{FALSE}
 #'
 #' @seealso violatedEdits
-#' @example examples/checkRows.R
+#' @example ../examples/checkRows.R
 #' @export
 checkRows <- function(E, dat){
     UseMethod("checkRows")
@@ -42,7 +42,7 @@ checkRows <- function(E, dat){
 #' This method will fail if \code{E} contains variables that are not available in \code{dat}
 #' 
 #' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
-#' @example examples/violatedEdits.R
+#' @example ../examples/violatedEdits.R
 #' @export
 #' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
 #' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
@@ -92,7 +92,7 @@ violatedEdits <- function(E, dat, ...){
 #'      in the form of a \code{list} (see details). Executing \code{$searchBest()} returns the lowest-weight solution.
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
-#' @example examples/errorLocalizer.R
+#' @example ../examples/errorLocalizer.R
 #'
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 

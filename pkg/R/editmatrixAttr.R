@@ -7,7 +7,7 @@
 #'
 #' If \code{x} is a normal matrix, the matrix will be coerced to an \code{editmatrix}. The columns of the matrix
 #' are the variables and the rows are the edit rules (constraints).
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' @aliases editrules
 #' @seealso \code{\link{editmatrix}}
 #' @export editrules
@@ -24,7 +24,7 @@ editrules <- function(x){
 
 #' Returns the constant part \code{b} of a linear (in)equality
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' @export getb 
 #' @seealso \code{\link{editmatrix}}
 #'
@@ -52,7 +52,7 @@ getb <- function(E){
 #' @rdname geth
 #' @seealso \code{\link{editmatrix}},\code{\link{editarray}}, \code{\link{eliminate}}
 #'
-#' @example examples/eliminate.R
+#' @example ../examples/eliminate.R
 #'
 #' @export
 getH <- function(E){
@@ -75,7 +75,7 @@ geth <- function(E){
 
 #' Returns the coefficient matrix \code{A} of linear (in)equalities
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' @export getA 
 #' @seealso \code{\link{editmatrix}}
 #' @aliases getA 
@@ -95,7 +95,7 @@ getA <- function(E){
 
 #' Returns augmented matrix representation of edit set.
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' @seealso \code{\link{editmatrix}} \code{\link{as.matrix.editmatrix}}
 #'
 #' @param E editmatrix
@@ -111,7 +111,7 @@ getAb <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' 
 #' @param E editmatrix
 #'
@@ -128,7 +128,7 @@ getOps <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' 
 #' @param E editmatrix
 #'
@@ -145,7 +145,7 @@ getVars <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' 
 #' @param E editmatrix
 #'
@@ -167,7 +167,7 @@ isNormalized <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example examples/editmatrixAttr.R
+#' @example ../examples/editmatrixAttr.R
 #' 
 #' @param E editmatrix
 #'

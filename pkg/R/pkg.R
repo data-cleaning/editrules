@@ -17,7 +17,7 @@
 #' package for treating such errors. 
 #'
 #' Typical usage is:
-#' @example examples/editrules.R
+#' @example ../examples/editrules.R
 #' @name editrules-package 
 #' @docType package 
 {}
