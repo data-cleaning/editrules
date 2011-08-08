@@ -50,13 +50,13 @@ getb <- function(E){
 #'
 #' @param E editmatrix
 #' @rdname geth
-#' @seealso \code{\link{editmatrix}},\code{\link{editarray}}, \code{\link{eliminate}}
+#' @seealso \code{\link{editmatrix}}, \code{\link{eliminate}}
 #'
 #' @example ../examples/eliminate.R
 #'
 #' @export
 getH <- function(E){
-    if ( !is.editmatrix(E) && !is.editarray(E) ) stop("E has to be an editmatrix or editarray")
+    if ( !is.editmatrix(E)  ) stop("E has to be an editmatrix")
     attr(E,"H")  
 }
 
@@ -69,7 +69,7 @@ getH <- function(E){
 #' @seealso \code{\link{editmatrix}}, \code{\link{eliminate}}
 #' @export
 geth <- function(E){
-    if ( !is.editmatrix(E) && !is.editarray(E) ) stop("E has to be an editmatrix or editarray")
+    if ( !is.editmatrix(E) ) stop("E has to be an editmatrix")
     attr(E,"h")  
 }
 
@@ -85,10 +85,8 @@ geth <- function(E){
 getA <- function(E){
   if ( is.editmatrix(E) ){
     unclass(E)[,-ncol(E),drop=FALSE]
-  } else if ( is.editarray(E) ){
-    unclass(E)[,,drop=FALSE]
   } else {
-     stop("E has to be an editmatrix or editarray")
+     stop("E has to be an editmatrix")
   }
 }
 

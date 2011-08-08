@@ -1,8 +1,5 @@
-version 1.1-0
-- solved cornercase in $searchBest() method of errorLocalizer
-- Defining, manipulating and error localization for categorical edits now public -- still in beta
-- violatedEdits now S3 generic for editmatrix and editarray
-- BREAKING CHANGE: eliminateFM renamed to eliminate and made S3 generic to treat editarray as well. eliminateFM emits warning, will be error in next release.
+version 1.0-1
+- solved edge case in $searchBest() method of errorLocalizer (thanks to Sander Scholtus)
 
 version 1.0-0
 - Formal upgrade only.

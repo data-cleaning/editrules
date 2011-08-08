@@ -122,7 +122,7 @@ errorLocalizer <- function(E, x, ...){
 #' \item{duplicates: logical, check for duplicate rows?, default \code{TRUE}}
 #' \item{duplicates.tol: tolerance for duplicate search, standard: \code{tol}}
 #' }
-#' @param E Augmented matrix A|b, editmatrix or editarray
+#' @param E Augmented matrix A|b, editmatrix 
 #' @param ... parameters to be passed to or from other methods. 
 #' 
 #'
@@ -153,7 +153,7 @@ echelon <- function(E,...){
 #' 
 #'
 #'
-#' @param E editmatrix or editarray
+#' @param E editmatrix 
 #' @param var name of variable to be eliminated
 #' @param ... argumemts to be passed to or from other methods
 #' @export

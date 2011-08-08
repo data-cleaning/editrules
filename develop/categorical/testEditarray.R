@@ -1,20 +1,37 @@
-require(testthat)
 
-test_that("editarray works accoring to plan",{
-    expect_identical(editarray(
-        c("gender %in% c('m','f')",
-          "pregnant %in% c('y','n')",
-          "if(gender == 'm') pregnant == 'n'"
-          )),
-        neweditarray(
-            E = array(c(TRUE,FALSE,TRUE,FALSE),
-            ind = list(gender=c(gender:f=1,genger:m=2),pregnant=c(pregnant:n=3,pregnant:y=4)),
-            sep=":",
-            names="e1",
-            levels=c("gender:f=1","gender:m=2","pregnant:n=3","pregnant:y=4")
-            )
-        )
-    )
+
+library(testthat)
+
+
+
+
+test_that("2x2 categorical datamodel",{
+    dm <- c(
+        "g %in% c('m','f')",
+        "p %in% c('y','n')")
+     is_equivalent_to(getArr(editarray(c(dm,"if( p == 'y' )  g != 'm'"))),array(c(F,T,F,T),dim=c(1,4)))
+     is_equivalent_to(getArr(editarray(c(dm,"if( p %in% c('y') )  g != 'm'"))),array(c(F,T,F,T),dim=c(1,4)))
+     is_equivalent_to(getArr(editarray(c(dm,"if( p %in% c('y') )  g == 'f'"))),array(c(F,T,F,T),dim=c(1,4)))
 })
+
+
+test_that("2x{TRUE,FALSE} datamodel",{
+    dm <- c(
+        "g %in% c('m','f')",
+        "p %in% c(FALSE,TRUE)")
+     is_equivalent_to(getArr(editarray(c(dm,"if( p )  g != 'm'"))),array(c(F,T,F,T),dim=c(1,4)))
+     is_equivalent_to(getArr(editarray(c(dm,"if( g == 'm' ) !p"))),array(c(F,T,F,T),dim=c(1,4)))
+     is_equivalent_to(getArr(editarray(c(dm,"!p || g=='f'"))),array(c(F,T,F,T),dim=c(1,4)))
+})
+
+test_that("parse editarray to character and back",{
+    edts <- c(
+        "g %in% c('m','f')",
+        "p %in% c(FALSE,TRUE)",
+        "if (p) !g=='m'")
+    is_equivalent_to(editarray(edts), editarray(as.character(editarray(edts))))
+})
+
+
 
 
