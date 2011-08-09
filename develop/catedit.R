@@ -17,10 +17,14 @@ require(editrules)
    # }
 # }
 
-parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
-   if (length(cond) == 1){
+parseCond <- function( e
+                     , pos=1
+                     , l=c(b=1)
+                     , iscond=FALSE
+                     ){
+   if (length(e) == 1){
       value = pos
-      names(value) <- as.character(cond)
+      names(value) <- as.character(e)
       if (!iscond){
          l["b"] <- 1
       }
@@ -30,22 +34,22 @@ parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
       l <- c(l, value) 
       return(l)
    }
-   op <- as.character(cond[[1]])
+   op <- as.character(e[[1]])
    #TODO add checks for && and ||
    if (op == "if"){
-      l <- parseCond(cond[[2]], -pos, l, iscond=TRUE)
-      l <- parseCond(cond[[3]], pos, l, iscond=TRUE)
+      l <- parseCond(e[[2]], -pos, l, iscond=TRUE)
+      l <- parseCond(e[[3]], pos, l, iscond=TRUE)
    }
    else if (op %in% c("!", "{","(")){
       if (op == "!") pos <- -pos
-      l <- parseCond(cond[[2]], pos, l, iscond=iscond)
+      l <- parseCond(e[[2]], pos, l, iscond=iscond)
    }
    # TODO check if it is a categoral or a numerical constraint
    # i.e. '==' should be disambigued
    else if (op %in% c("==", "%in%","!=")){
       if (op == "!=") pos <- -pos
-      var <- as.character(cond[[2]])
-      cat <- eval(cond[[3]])
+      var <- as.character(e[[2]])
+      cat <- eval(e[[3]])
       if (is.logical(cat)){
          value <- ifelse(cat, pos, -pos)
          names(value) <- var
@@ -65,15 +69,15 @@ parseCond <- function(cond, pos=1, l=c(b=1), iscond=FALSE){
         if (pos > 0){
             stop("Invalid use of ", op, " in then clause.")
         }         
-        l <- parseCond(cond[[2]], pos, l, iscond=iscond)
-        l <- parseCond(cond[[3]], pos, l, iscond=iscond)
+        l <- parseCond(e[[2]], pos, l, iscond=iscond)
+        l <- parseCond(e[[3]], pos, l, iscond=iscond)
    }
    else if (op == "||"){
          if (pos < 0){
             stop("Invalid use of ", op, " in if clause.")
          }         
-         l <- parseCond(cond[[2]], pos, l, iscond=iscond)
-         l <- parseCond(cond[[3]], pos, l, iscond=iscond)
+         l <- parseCond(e[[2]], pos, l, iscond=iscond)
+         l <- parseCond(e[[3]], pos, l, iscond=iscond)
    }
    else {
       stop("Operator ", op, " not supported.")
@@ -132,16 +136,11 @@ getVarCat.editmatrix <- function(E, ...){
 
 #' @method getVarCat character
 getVarCat.character <- function(x, ...){
-   vc <- as.data.frame(t(sapply(strsplit(x, ":")
-                               , function(vc) c(var=vc[1], cat=vc[2])
-                               )
-                        )
-                      , stringsAsFactors=FALSE
-                      )
-   # set value of logical variables to TRUE
-   vc$cat[is.na(vc$cat)] <- "TRUE"
-   vc$fullname <- x
-   vc
+   
+   var <- gsub(":.+", "", x)
+   cat <- gsub(".+:", "", x)
+   cat[var==cat] <- "TRUE"
+   return(data.frame(var=var, cat=cat, fullname=x, stringsAsFactors=FALSE))
 }
 
 #' get all variables with its categories
@@ -344,24 +343,25 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
 
 
 (E <- cateditmatrix(x))
+getVarCat(E)
 #negateValue(E, "age", "< 16")
 #negateValue(E, "gender", "female")
 #negateValue(E, "pregnant", FALSE)
 
-bt <- errorLocalizer.cateditmatrix( E
-                                  , x =c( civilStatus='married'
-                                        , age='< 16'
-                                        , positionInHousehold='marriage partner'
-                                        , gender='male'
-                                        , pregnant=TRUE
-                                        , nace='A'
-                                        , valid=TRUE
-                                        )
-                                  )
-
-#bt$searchNext()$adapt
-#bt$searchNext()$adapt
-bt$searchNext(VERBOSE=TRUE)
-
-
+# bt <- errorLocalizer.cateditmatrix( E
+#                                   , x =c( civilStatus='married'
+#                                         , age='< 16'
+#                                         , positionInHousehold='marriage partner'
+#                                         , gender='male'
+#                                         , pregnant=TRUE
+#                                         , nace='A'
+#                                         , valid=TRUE
+#                                         )
+#                                   )
+# 
+# #bt$searchNext()$adapt
+# #bt$searchNext()$adapt
+# bt$searchNext(VERBOSE=TRUE)
+# 
+# 
 # substValue.cateditmatrix(E, c("gender", "pregnant"), c("male", TRUE))

@@ -11,15 +11,14 @@ retrieveCoef <- function(e, co=1){
         l <- co
         names(l) <- as.character(e)
      }
-      return(l)
+     return(l)
    }
    if (length(e) == 2){
      op <- deparse(e[[1]])
       rhs <- e[[2]]
      if (op == "("){
 	    return(retrieveCoef(rhs, co))
-	  } 
-     else if (op == "-"){
+	  } else if (op == "-"){
         return(retrieveCoef(rhs, -1*co))
      }
 	  else { 
@@ -27,16 +26,16 @@ retrieveCoef <- function(e, co=1){
 	  }
    }
    if (length(e) == 3){
-     op <- deparse(e[[1]])
+      op <- deparse(e[[1]])
       lhs <- e[[2]]
       rhs <- e[[3]]
       lsign <- rsign <- co
-     if ( op %in% c(COPS, "-")){
-	    rsign <- -1 * co
-	  } 
-	  else if (op == "+"){
-	  }
-	  else if (op == "*"){
+      if ( op %in% c(COPS, "-")){
+	      rsign <- -1 * co
+	    } 
+	    else if (op == "+"){
+	    }
+	    else if (op == "*"){
        co <- retrieveCoef(lhs, co)
        if (!is.numeric(co)){
                 stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
@@ -44,7 +43,7 @@ retrieveCoef <- function(e, co=1){
        return(retrieveCoef(rhs, co))
 	  }
 	  else { 
-		stop("Operator ", op, " not implemented", "Invalid expression:", e)
+		   stop("Operator ", op, " not implemented", "Invalid expression:", e)
 	  }
 	  return(c( retrieveCoef(lhs, lsign)
 		      , retrieveCoef(rhs, rsign)
@@ -54,31 +53,9 @@ retrieveCoef <- function(e, co=1){
    stop("Invalid expression:", e)
 }
 
-parseGuard <- function(g){
-  op <- deparse(g[[1]])
-  if (op %in% c( COPS
-               , "||"
-               , "&&"
-               ,"%in%"
-               )
-     ){
-  }
-  else {
-     stop("Invalid condition syntax: ", g)
-  }
-}
-
 makeEditRow <- function(edt){
   op <- as.character(edt[[1]])
-  if (op == "if"){
-     stop("Conditional edit rules are not (yet) supported.", edt)
-     guard <- edt[[2]]
-     print(eval(guard[[3]]))
-     parseGuard(guard)
-     edt <- edt[[3]]
-     op <- as.character(edt[[1]])
-  }
-  else if (!(op %in% COPS)){
+  if (!(op %in% COPS)){
      stop(paste("Invalid edit rule:", edt))
   }
   wgt <- retrieveCoef(edt)
@@ -151,14 +128,10 @@ editmatrix <- function( editrules
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
    }
 
-   edts <- parseEdits(edit)
-
-   edit <- sapply(edts, deparse, width.cutoff=500)
-   edit <- gsub(" * ","*", fixed=TRUE, edit)
-   
-	if (is.null(name)){
-	   name <- paste("e", seq_along(edit),sep="")
-	}
+   edts <- parseEdits(edit)   
+  	if (is.null(name)){
+  	   name <- paste("e", seq_along(edts),sep="")
+  	}
    
     rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
     ops <- sapply(edts, function(e){deparse(e[[1]])})
