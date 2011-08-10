@@ -133,5 +133,8 @@ test_that("coercions work",{
     E <- editmatrix("x+y==z")
     expect_that(E, is_identical_to(editmatrix(editrules(E)))) 
     expect_that(E, is_identical_to(as.editmatrix(A=getA(E), b=getb(E), ops=getOps(E))))    
+    # edge case, testing as.character feature
+    E <- editmatrix("x + 0.1*y==z")
+    expect_that(E, is_identical_to(editmatrix(as.character(E)))) 
 })
 

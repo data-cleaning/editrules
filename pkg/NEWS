@@ -1,3 +1,6 @@
+version 1.0-2
+- solved bug in as.character.editmatrix (thanks to Sander Scholtus)
+
 version 1.0-1
 - solved edge case in $searchBest() method of errorLocalizer (thanks to Sander Scholtus)
 

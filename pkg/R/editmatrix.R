@@ -329,8 +329,10 @@ as.character.editmatrix <- function(x, ...){
      left[i] <- if(any(lhs)) { paste(r[lhs], "*", vars[lhs],sep="",collapse=" + ") } else ""
      right[i] <-if(any(rhs))  { paste(-r[rhs], "*",vars[rhs],sep="",collapse=" + ") } else ""
    }
-   left <- gsub("1\\*","",left)
-   right <- gsub("1\\*","",right)
+   left <- gsub(" 1\\*"," ",left)
+   right <- gsub(" 1\\*"," ",right)
+   left <- gsub("^1\\*","",left)
+   right <- gsub("^1\\*","",right)
 
    
    left <- ifelse( left==""

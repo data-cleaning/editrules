@@ -49,7 +49,9 @@ library(editrules)
 \maketitle
 \begin{abstract}
 {\em This vignette is far from finished. Version 2.0 fo the package will have
-the full vignette. At the moment, functionality for treating categorical data has alpha status and is not public yet.}
+the full vignette. At the moment, functionality for treating categorical data has alpha status and is not public yet.
+Refer to the accompanying paper \cite{jonge:2011} for manipulation of linear edits.
+}
 \end{abstract}
 
 \newpage
