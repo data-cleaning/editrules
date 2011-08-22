@@ -200,7 +200,7 @@ eliminateFM.cateditmatrix <- function(E, variable){
 ranges <- function(E){
   A <- getA(E)
   vars <- getVarCat(E)$var
-  t(apply( A
+  t(apply(   A
            , 1
            , function(r){
               ub <- tapply(r, vars, max)
@@ -275,7 +275,7 @@ errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
 }
 
 parseCatEdit <- function(e){
-  el <- parseCat(e)
+  el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
     val <- rep(1, length(el)+1)
     names(val) <- c(names(el), "b")
@@ -292,7 +292,7 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
       , "if (age == '< 16') civilStatus=='unmarried'"
 #      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
       , "if (pregnant) gender == 'female'"
-      , "if (nace %in% c('A','B')) valid==FALSE"
+      , "if (nace %in% c('A','B')) valid==TRUE"
       , "gender %in% c('male','female')"
       )
 
