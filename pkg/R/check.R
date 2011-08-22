@@ -86,23 +86,3 @@ listViolatedEdits <- function(E, dat){
     errorlist <- apply(errors, 1, which)
     return(apply(errors, 1, which))
 }
-
-
-#' Parse a character vector of edits
-#'
-#' This function wraps the native \code{\link{parse}} function in a \code{\link{tryCatch}}.
-#' The function is \code{editrules} internal. It tries to give a meaningfull error message when
-#' parsing fails for some reason.
-#'
-#' @param E \code{character}
-#' @return The edits in \code{E} parsed to R expressions.
-#'
-parseEdits <- function(E){
-     return(
-        tryCatch(parse(text=E), 
-            error=function(e){
-                stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
-            }
-        )
-    )
-}

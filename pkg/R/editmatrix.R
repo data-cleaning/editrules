@@ -1,69 +1,3 @@
-COPS <- c("==","<","<=",">",">=")
-
-retrieveCoef <- function(e, co=1){
-   #stopifnot(is.language(e))
-   if (length(e) == 1){
-     if (is.numeric(e)){
-        l <- co*e   #the resulting matrix is augmented so b has a -
-        names(l) <- getOption("editrules.CONSTANT", "CONSTANT")
-     }
-     else {
-        l <- co
-        names(l) <- as.character(e)
-     }
-     return(l)
-   }
-   if (length(e) == 2){
-     op <- deparse(e[[1]])
-      rhs <- e[[2]]
-     if (op == "("){
-	    return(retrieveCoef(rhs, co))
-	  } else if (op == "-"){
-        return(retrieveCoef(rhs, -1*co))
-     }
-	  else { 
-		stop("Operator ", op, " not implemented", "Invalid expression:", e)
-	  }
-   }
-   if (length(e) == 3){
-      op <- deparse(e[[1]])
-      lhs <- e[[2]]
-      rhs <- e[[3]]
-      lsign <- rsign <- co
-      if ( op %in% c(COPS, "-")){
-	      rsign <- -1 * co
-	    } 
-	    else if (op == "+"){
-	    }
-	    else if (op == "*"){
-       co <- retrieveCoef(lhs, co)
-       if (!is.numeric(co)){
-                stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
-       }
-       return(retrieveCoef(rhs, co))
-	  }
-	  else { 
-		   stop("Operator ", op, " not implemented", "Invalid expression:", e)
-	  }
-	  return(c( retrieveCoef(lhs, lsign)
-		      , retrieveCoef(rhs, rsign)
-		  )
-		)
-   }
-   stop("Invalid expression:", e)
-}
-
-makeEditRow <- function(edt){
-  op <- as.character(edt[[1]])
-  if (!(op %in% COPS)){
-     stop(paste("Invalid edit rule:", edt))
-  }
-  wgt <- retrieveCoef(edt)
-  # simplify the coefficients by summing them
-  wgt <- tapply(wgt, names(wgt), sum)
-  return(wgt)  
-}
-
 #' Transforms a list of R (in)equalities into an edit matrix.
 #'
 #' Transforms a list of R (in)equalities into an edit matrix with coefficients (\code{A}) for each variable, and a constant (\code{b})
@@ -128,12 +62,12 @@ editmatrix <- function( editrules
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
    }
 
-   edts <- parseEdits(edit)   
+    edts <- parseEdits(edit, type="num")   
   	if (is.null(name)){
   	   name <- paste("e", seq_along(edts),sep="")
   	}
    
-    rowedts <- lapply(edts, function(edt){makeEditRow(edt)})
+    rowedts <- lapply(edts, function(edt){parseNum(edt)})
     ops <- sapply(edts, function(e){deparse(e[[1]])})
    
     vars <- unique(names(unlist(rowedts)))
