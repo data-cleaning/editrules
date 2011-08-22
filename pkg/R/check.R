@@ -1,5 +1,6 @@
 
-#' @nord
+#' @rdname checkRows
+#' @method checkRows editmatrix
 #' @export
 checkRows.editmatrix <- function(E, dat){
     stopifnot(is.data.frame(dat))
@@ -19,7 +20,8 @@ checkRows.editmatrix <- function(E, dat){
     return(check)    
 } 
 
-#' @nord
+#' @rdname checkRows
+#' @method checkRows character
 #' @export
 checkRows.character <- function(E, dat){
    ed <- parseEdits(E)
@@ -32,7 +34,8 @@ checkRows.character <- function(E, dat){
     return(check)
 }
 
-#' @nord
+#' @rdname checkRows
+#' @method checkRows data.frame
 #' @export
 checkRows.data.frame <- function(E, dat){
     checkRows(as.character(E$edit),dat)
@@ -40,7 +43,9 @@ checkRows.data.frame <- function(E, dat){
 
 
 
-#' @nord
+#' @rdname violatedEdits
+#' @method violatedEdits character
+#' @param name name of edits
 #' @export
 violatedEdits.character <- function(E, dat, name=NULL, ...){
     ed <- parseEdits(E)
@@ -54,7 +59,8 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
     return(!M)
 }
 
-#' @nord
+#' @rdname violatedEdits
+#' @method violatedEdits editmatrix
 #' @export
 violatedEdits.editmatrix <- function(E, dat, ...){
 # TODO make a real matrix method, add tol argument.
@@ -62,7 +68,8 @@ violatedEdits.editmatrix <- function(E, dat, ...){
     return(violatedEdits.character(er$edit, dat, er$name))
 }
 
-#' @nord
+#' @rdname violatedEdits
+#' @method violatedEdits data.frame
 #' @export
 violatedEdits.data.frame <- function(E, dat, ...){
     if ( !all(c("name","edit","description") %in% names(E)) ){

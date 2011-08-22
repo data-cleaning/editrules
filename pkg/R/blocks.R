@@ -1,9 +1,3 @@
-#' @nord
-findBlocks <- function(M){
-    warning("findBlocks is deprecated, use 'blocks' in stead")
-    blocks(M)
-}
-
 #' Break a matrix into blocks
 #'
 #' @example ../examples/blocks.R

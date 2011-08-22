@@ -180,9 +180,8 @@ print.backtracker <- function(x, ..., VERBOSE=FALSE){
 #' iterate over all solutions of a \code{\link{backtracker}}
 #' This method is identical to calling \code{$searchNext} on a \code{backtracker}. Please note that iterating
 #' a backtracker changes the state of a backtracker.
-#' 
+#'
 #' @export
-#' @method iter backtracker
 #' @param x \code{\link{backtracker}} object
 #' @param ... extra parameters that will given to the \code{searchNext()} function
 #' @return backtracker iterator
