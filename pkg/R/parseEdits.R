@@ -50,7 +50,6 @@ CATCMP <- c("==", "!=", "%in%")
 #' @param edit logical (vector)
 #' @param sep edit separator
 #' @param useLogical (logical), should logicals be treated as a factor or as a logical?
-#' @nord
 parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
        var <- if (useLogical) as.character(x)
@@ -66,13 +65,21 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         edit <- parseCat(x[[2]], val,  edit, sep, useLogical)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]])
-        var <- if (is.logical(cat) && useLogical) as.character(x) 
-               else paste(x[[2]],cat,sep=sep)
+        if (is.logical(cat) && useLogical){
+          var <- as.character(x[[2]])
+          if (!cat) val <- !val
+        } else{
+          var <- paste(x[[2]],cat,sep=sep)
+        }
         edit[var] <- val
     } else if (op == "!=") {
         cat <- eval(x[[3]])
-        var <- if (is.logical(cat) && useLogical) as.character(x) 
-               else paste(x[[2]],cat,sep=sep)
+        if (is.logical(cat) && useLogical){
+          var <- as.character(x[[2]])
+          if (!cat) val <- !val
+        } else{
+          var <- paste(x[[2]],cat,sep=sep)
+        }
         edit[var] <- !val
     } else if (op == "!") {
         edit <- parseCat(x[[2]],!val,  edit, sep, useLogical)
