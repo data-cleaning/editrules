@@ -31,3 +31,4 @@ Collate:
     'pkg.R'
     'reduce.R'
     'S3Generics.R'
+    'localizeError_mip.R'

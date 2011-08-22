@@ -1,8 +1,3 @@
-require(editrules)
-
- parseEdits <- function(x){
-    parse(text=x)
- }
 
 
 # parseTree <- function(expr,prefix=NULL){
@@ -143,57 +138,6 @@ getVarCat.character <- function(x, ...){
    return(data.frame(var=var, cat=cat, fullname=x, stringsAsFactors=FALSE))
 }
 
-#' get all variables with its categories
-#' @method as.character cateditmatrix
-#' @param E \code{cateditmatrix} object
-#' @return \code{character} with the character representation of the edits
-# as.character.cateditmatrix <- function(E, ...){
-    # A <- getA(E)
-    # ops <- getOps(E)
-    
-    # ifc <- A > 0 & ops == "<="
-    # thenc <- A < 0 | ( A > 0 & ops == "==")
-    
-    # #generate %in% statement
-    # inclause <- function(varcat, collapse=NULL){
-       # vc <- getVarCat(varcat)
-       # vc <- split(vc$cat, vc$var)
-       # vc <- sapply( names(vc)
-                   # , function(var){
-                        # cats <- vc[[var]]
-                        # if (length(cats) == 1){ #this is for a logical variable
-                           # if (cats %in% TRUE)
-                               # return(var)
-                           # paste(var," == '",cats,"'", sep="")  # cosmetic, for one category we generate an "==" statement
-                        # } else {
-                            # cats <- paste("'",cats,"'", sep="", collapse=",")
-                            # paste(var," %in% c(",cats,")", sep="")
-                        # }
-                     # }
-                   # )
-       # paste(vc, collapse=collapse)
-    # }
-    
-    # vars <- getVars(E)
-    # catedits <- rownames(E)
-    # for (i in 1:length(catedits)){
-        # if (any(thenc[i,])){
-            # thenvars <- inclause(vars[thenc[i,]], collapse=" || ")
-            # if (any(ifc[i,])){
-                # ifvars <- inclause(vars[ifc[i,]], collapse=" && ")
-                # catedits[i] <- paste("if (",ifvars,") ",thenvars, sep="")
-            # }
-            # else {
-                # catedits[i] <- thenvars
-            # }
-        # } else{
-           # catedits[i] <- paste("!(", inclause(vars[ifc[i,]]), ")",sep="",collapse=" || ")
-        # }
-    # }
-    # names(catedits) <- rownames(E)
-    # catedits
-# }
-
 negateValue <- function(x, variable, value){
    neg <- numeric(ncol(x))
    names(neg) <- colnames(x)
@@ -329,39 +273,33 @@ errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
         wsol = wsol 
     )
 }
+
+parseCatEdit <- function(e){
+  el <- parseCat(e)
+  if (any(is.na(el))){
+    val <- rep(1, length(el)+1)
+    names(val) <- c(names(el), "b")
+  } else {
+    val <- ifelse(el, -1, 1)
+  }
+  val
+}
 # ### examples....
 
 civilStatusLevels <- c("married","unmarried","widowed","divorced")
 
 x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
       , "if (age == '< 16') civilStatus=='unmarried'"
-      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
+#      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
       , "if (pregnant) gender == 'female'"
-      , "if (nace %in% c('A','B')) valid==TRUE"
+      , "if (nace %in% c('A','B')) valid==FALSE"
       , "gender %in% c('male','female')"
       )
 
 
 (E <- cateditmatrix(x))
 getVarCat(E)
-#negateValue(E, "age", "< 16")
-#negateValue(E, "gender", "female")
-#negateValue(E, "pregnant", FALSE)
 
-# bt <- errorLocalizer.cateditmatrix( E
-#                                   , x =c( civilStatus='married'
-#                                         , age='< 16'
-#                                         , positionInHousehold='marriage partner'
-#                                         , gender='male'
-#                                         , pregnant=TRUE
-#                                         , nace='A'
-#                                         , valid=TRUE
-#                                         )
-#                                   )
-# 
-# #bt$searchNext()$adapt
-# #bt$searchNext()$adapt
-# bt$searchNext(VERBOSE=TRUE)
-# 
-# 
-# substValue.cateditmatrix(E, c("gender", "pregnant"), c("male", TRUE))
+es <- parseEdits(x)
+parseCatEdit(es[[4]])
+parseCatEdit(es[[5]])

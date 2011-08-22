@@ -1,19 +1,18 @@
-# Error localization using an linear programming library
-# Advantage: can be very fast for localization problems with hundreds of variables
+# Error localization formulated as a mixed integer programming problem
+# Advantage: can be very fast for localization problems with hundreds to thousands 
+# of variables
 # Disadvantage:
 #           * gives only one solution out of possibly multiple
 #           * numeric instability may give no, or false solutions, how ever these can
 # be checked with editrules isFeasible functionality. Furthermore, numeric instability can be decreased by using appropiate upper
 # and lower bounds
 
-require(editrules)
-
 #' Extends an editmatrix with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
-#' @nord
+#' @keywords internal
 buildELMatrix <- function(E,x, weight=rep(1, length(x))){
   vars <- getVars(E)
   x <- x[vars]
@@ -110,8 +109,13 @@ localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
 #' @param x named numeric with data
 #' @param weight  numeric with weights
 #' @return list with w, adapt and x_c
-#' @nord
-localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
+#' @keywords internal
+localizeError_mip <- function( E
+                            , x
+                            , weight=rep(1, length(x))
+                            , verbose="neutral"
+                            , ...
+                            ){
    vars <- getVars(E)
    elm <- buildELMatrix(E, x, weight)
    E <- elm$E
@@ -119,20 +123,20 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    binidx <- which(objfn > 0)
    
    ops <- getOps(E)
-   ops[ops=="=="] <- "="
- 
+   
    if (!require(lpSolveAPI)){
       stop("Install 'lpSolveAPI' to use this function")
    }
+   lps <- as.lp.editmatrix(E)
    
-   A <- getA(E)
-   lps <- make.lp(nrow(A), ncol(A), verbose=verbose)
-   dimnames(lps) <- dimnames(A)
-   for (v in 1:ncol(A)){
-     set.column(lps, v, A[,v])
-   }
-   set.constr.type(lps,types=ops)
-   set.constr.value(lps, getb(E))
+#    A <- getA(E)
+#    lps <- make.lp(nrow(A), ncol(A), verbose=verbose)
+#    dimnames(lps) <- dimnames(A)
+#    for (v in 1:ncol(A)){
+#      set.column(lps, v, A[,v])
+#    }
+#    set.constr.type(lps,types=ops)
+#    set.constr.value(lps, getb(E))
    set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
@@ -147,8 +151,6 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
  
-   #delete.lp(lps)
-   
    names(sol) <- c(vars,vars)
    list( w=w
        , adapt=(sol > 0)[binidx]
@@ -156,9 +158,10 @@ localizeError_lp <- function(E, x, weight=rep(1, length(x)), verbose="neutral"){
        )
 }
 
-em2lp <- function(E){
+as.lp.editmatrix <- function(E){
    A <- getA(E)
    ops <- getOps(E)
+   ops[ops=="=="] <- "="
    lps <- make.lp(nrow(A), ncol(A))
    dimnames(lps) <- dimnames(A)
    for (v in 1:ncol(A)){
@@ -169,16 +172,20 @@ em2lp <- function(E){
    lps
 }
 
+as.editmatrix.lpExtPtr <- function(x){
+  #TODO
+}
+
 #testing...
-Et <- editmatrix(c(
-        "p + c == t",
-        "c - 0.6*t >= 0",
-        "c>=0",
-        "p >=0"
-        )
-               )
 
-x <- c(p=755,c=125,t=200)
-
-localizeError_lp(Et, x)
-#localizeError_glpk(Et, x)
+# Et <- editmatrix(c(
+#         "p + c == t",
+#         "c - 0.6*t >= 0",
+#         "c>=0",
+#         "p >=0"
+#         )
+#                )
+# 
+# x <- c(p=755,c=125,t=200)
+# 
+# localizeError_mip(Et, x)
