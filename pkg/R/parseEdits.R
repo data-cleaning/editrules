@@ -49,44 +49,49 @@ CATCMP <- c("==", "!=", "%in%")
 #' @param val logical (scalar)
 #' @param edit logical (vector)
 #' @param sep edit separator
+#' @param useLogical (logical), should logicals be treated as a factor or as a logical?
 #' @nord
-parseCat <- function(x, val=NA, edit=logical(0), sep=":"){
+parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
-       var <- paste(x,"TRUE",sep=sep)
+       var <- if (useLogical) as.character(x)
+              else paste(x,"TRUE",sep=sep)
        edit[var] <- val
        return(edit)
     }
     op <- as.character(x[[1]])
     if ( op == "if" ){
-        edit <- parseCat(x[[2]],TRUE,  edit, sep)
-        edit <- parseCat(x[[3]],FALSE, edit, sep)
+        edit <- parseCat(x[[2]],TRUE,  edit, sep, useLogical)
+        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical)
     } else if ( op %in% c("(","{") ){
-        edit <- parseCat(x[[2]], val,  edit, sep)
+        edit <- parseCat(x[[2]], val,  edit, sep, useLogical)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]])
-        var <- paste(x[[2]],cat,sep=sep)
+        var <- if (is.logical(cat) && useLogical) as.character(x) 
+               else paste(x[[2]],cat,sep=sep)
         edit[var] <- val
     } else if (op == "!=") {
-        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
+        cat <- eval(x[[3]])
+        var <- if (is.logical(cat) && useLogical) as.character(x) 
+               else paste(x[[2]],cat,sep=sep)
         edit[var] <- !val
     } else if (op == "!") {
-        edit <- parseCat(x[[2]],!val,  edit, sep)
+        edit <- parseCat(x[[2]],!val,  edit, sep, useLogical)
     } else if (op == "&&"){
         if (is.na(val))
            val <- TRUE
         if (val == FALSE){
             stop("Operator '&&' not allowed in 'if' clause")
         }
-        edit <- parseCat(x[[2]],val, edit, sep)
-        edit <- parseCat(x[[3]],val, edit, sep)
+        edit <- parseCat(x[[2]],val, edit, sep, useLogical)
+        edit <- parseCat(x[[3]],val, edit, sep, useLogical)
     } else if (op == "||"){
         if (is.na(val))
            val <- FALSE
         if (val == TRUE){
             stop("Operator '||' not allowed in 'then' clause")
         }
-        edit <- parseCat(x[[2]],val, edit, sep)
-        edit <- parseCat(x[[3]],val, edit, sep)
+        edit <- parseCat(x[[2]],val, edit, sep, useLogical)
+        edit <- parseCat(x[[3]],val, edit, sep, useLogical)
     } else {
         stop("Operator '",op,"' not implemented")
     }
