@@ -105,6 +105,17 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     edit
 }
 
+parseTree <- function(expr,prefix=NULL){
+   if (length(expr) == 1){
+      indent <- paste("[", prefix,"]", sep="", collapse="")
+      cat(indent, expr,"\n")
+   }
+   else {
+       for (i in 1:length(expr)){
+          parseTree(expr[[i]], c(prefix,i)) 
+       }
+   }
+}
 
 hasNum <- function(e){
   if (length(e) == 1){

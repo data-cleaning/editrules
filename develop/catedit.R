@@ -1,85 +1,3 @@
-
-
-# parseTree <- function(expr,prefix=NULL){
-   # if (length(expr) == 1){
-      # indent <- paste("[", prefix,"]", sep="", collapse="")
-      # cat(indent, expr,"\n")
-   # }
-   # else {
-       # for (i in 1:length(expr)){
-          # parseTree(expr[[i]], c(prefix,i)) 
-       # }
-   # }
-# }
-
-parseCond <- function( e
-                     , pos=1
-                     , l=c(b=1)
-                     , iscond=FALSE
-                     ){
-   if (length(e) == 1){
-      value = pos
-      names(value) <- as.character(e)
-      if (!iscond){
-         l["b"] <- 1
-      }
-      if (pos < 0){
-         l["b"] <- l["b"] - 1
-      }
-      l <- c(l, value) 
-      return(l)
-   }
-   op <- as.character(e[[1]])
-   #TODO add checks for && and ||
-   if (op == "if"){
-      l <- parseCond(e[[2]], -pos, l, iscond=TRUE)
-      l <- parseCond(e[[3]], pos, l, iscond=TRUE)
-   }
-   else if (op %in% c("!", "{","(")){
-      if (op == "!") pos <- -pos
-      l <- parseCond(e[[2]], pos, l, iscond=iscond)
-   }
-   # TODO check if it is a categoral or a numerical constraint
-   # i.e. '==' should be disambigued
-   else if (op %in% c("==", "%in%","!=")){
-      if (op == "!=") pos <- -pos
-      var <- as.character(e[[2]])
-      cat <- eval(e[[3]])
-      if (is.logical(cat)){
-         value <- ifelse(cat, pos, -pos)
-         names(value) <- var
-      } else {
-          value <- rep(pos, length(cat))
-          names(value) <- paste(var,":",cat,sep="")
-      }
-      if (!iscond){
-         l["b"] <- 1
-      }
-      if (pos < 0){
-         l["b"] <- l["b"] - 1
-      }
-      l <- c(l, value)
-   }
-   else if (op == "&&"){
-        if (pos > 0){
-            stop("Invalid use of ", op, " in then clause.")
-        }         
-        l <- parseCond(e[[2]], pos, l, iscond=iscond)
-        l <- parseCond(e[[3]], pos, l, iscond=iscond)
-   }
-   else if (op == "||"){
-         if (pos < 0){
-            stop("Invalid use of ", op, " in if clause.")
-         }         
-         l <- parseCond(e[[2]], pos, l, iscond=iscond)
-         l <- parseCond(e[[3]], pos, l, iscond=iscond)
-   }
-   else {
-      stop("Operator ", op, " not supported.")
-   }
-   l
-}
-
 #' Create an editmatrix with categorical variables
 #'
 #' @param x \code{character} with categorical edits
@@ -87,14 +5,14 @@ parseCond <- function( e
 cateditmatrix <- function(x){
     edts <- parseEdits(x)
     
-    catedits <- lapply(edts, parseCond)
+    catedits <- lapply(edts, parseCatEdit)
     categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
 
     A <- matrix( 0
                , ncol=length(categories)
                , nrow=length(catedits)
-               , dimnames = list( rules = NULL
+               , dimnames = list( rules = names(catedits)
                                 , cats=categories
                                 )
                )
@@ -107,9 +25,9 @@ cateditmatrix <- function(x){
     A <- A[,-ncol(A), drop=FALSE]
     
     ops <- sapply(edts, function(e){deparse(e[[1]])})
-    ops <- ifelse(ops %in% c("if", "||"), ">=", "==")
+    ops <- ifelse(ops %in% c("if", "||"), "<=", "==")
 
-    E <- normalize(as.editmatrix(A,b,ops))
+    E <- as.editmatrix(A,b,ops)
     class(E) <- c("cateditmatrix", "editmatrix")
     E
 }
@@ -274,13 +192,22 @@ errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
     )
 }
 
+#' parse categorial edit
+
+#' @param e \code{expression} with a single edit
+#' @return named \code{numeric} with coefficients
 parseCatEdit <- function(e){
   el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
     val <- rep(1, length(el)+1)
     names(val) <- c(names(el), "b")
   } else {
-    val <- ifelse(el, -1, 1)
+    vars <- gsub(":.+","",names(el))
+    # coefficients in form 
+    val <- ifelse(el, 1, -1)
+    m <- tapply(val, vars, max)
+    b <- sum(m[m>0]) - 1
+    val <- c(val, b=b)
   }
   val
 }
@@ -296,10 +223,4 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
       , "gender %in% c('male','female')"
       )
 
-
 (E <- cateditmatrix(x))
-getVarCat(E)
-
-es <- parseEdits(x)
-parseCatEdit(es[[4]])
-parseCatEdit(es[[5]])
