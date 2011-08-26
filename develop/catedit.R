@@ -36,164 +36,18 @@ cateditmatrix <- function(x){
     E
 }
 
-#' get all variables with its categories
-getVarCat <- function(x, ...){
-    UseMethod("getVarCat")
-}
-
-#' @method getVarCat cateditmatrix
-getVarCat.cateditmatrix <- function(E, ...){
-   getVarCat(getVars(E), ...)
-}
-
-#' @method getVarCat editmatrix
-getVarCat.editmatrix <- function(E, ...){
-   getVarCat(getVars(E), ...)
-}
-
-#' @method getVarCat character
-getVarCat.character <- function(x, ...){
-   
-   var <- gsub(":.+", "", x)
-   cat <- gsub(".+:", "", x)
-   cat[var==cat] <- "TRUE"
-   return(data.frame(var=var, cat=cat, fullname=x, stringsAsFactors=FALSE))
-}
-
-negateValue <- function(x, variable, value){
-   neg <- numeric(ncol(x))
-   names(neg) <- colnames(x)
-   
-   if (is.logical(value)){
-     neg[variable] <- 1
-     neg[ncol(x)]<- !value
-   } else {
-      vc <- subset(getVarCat(x), var==variable & cat==value)
-      #TODO multiple negations
-      neg[vc$fullname] <- 1
-      neg[ncol(x)] <- 0
-      
-   }
-   Ab <- rbind(getAb(x), neg)
-   rownames(Ab)[nrow(Ab)] <- paste("not",variable,value, sep="_")
-   
-   E <- editrules:::neweditmatrix( Ab
-                                 , c(getOps(x),"==")
-                                 )
-   class(E) <- c("cateditmatrix", class(E))
-   E
-}
-
-substValue.cateditmatrix <- function(E, variable, value){
-   vc <- getVarCat(E)
-   vc <- vc[vc$var %in% variable,]
-   if (!nrow(vc))
-      stop("Invalid variable: ", var)
-   
-   for (v in variable){
-       vcv <- vc[vc$var==v,]
-       values <- as.numeric(vcv$cat %in% value)
-       names(values) <- vcv$cat
-       E <- substValue(E, vcv$fullname, values, remove=TRUE)
-   }
-   class(E) <- c("cateditmatrix", class(E))
-   # rngs <- ranges(E)
-   # eq <- rngs[,1] == rngs[,2]
-   # if (any(eq)){ 
-      # ops <- getOps(E)
-      # ops[eq] <- "=="
-      # attr(E, "ops") <- ops
-   # }
-   E
-}
-
-eliminateFM.cateditmatrix <- function(E, variable){
-   vars <- subset(getVarCat(E), var==variable)$fullname
-   for (v in vars) E <- eliminateFM(E,v)
-   class(E) <- c("cateditmatrix", class(E))
-   E
-}
-
-#' finds the min and max value of an categorical edit
-#' 
-#' This can be used to check for infeasibility or redundancy
-#' @param E categorical editmatrix
-#' @return \code{numeric matrix} with columns min and max
-ranges <- function(E){
-  A <- getA(E)
-  vars <- getVarCat(E)$var
-  t(apply(   A
-           , 1
-           , function(r){
-              ub <- tapply(r, vars, max)
-              lb <- tapply(r, vars, min)
-              c(min=sum(lb[lb<0]), max=sum(ub[ub>0]))
-             }
-         )
-    )
-}
-
-isObviouslyRedundant.cateditmatrix <- function(E){
-   (  (getOps(E) %in% c("<=","<") & (getb(E) >= ranges(E)[,"max"]))
-   |  editrules:::isObviouslyRedundant.editmatrix(E)
-   )
-}
-
-#'check which edits are infeasible
-isObviouslyInfeasible.cateditmatrix <- function(E){
-   nrow(E) && any(getb(E) < ranges(E)[,"min"])
-}
-
-errorLocalizer.cateditmatrix <- function(E, x, weight=rep(1,length(x)),...){
-    # store class for backcasting
-    cemclass <- class(E)
-    
-    if ( !isNormalized(E) ) E <- normalize(E)
-    
-    # missings must be adapted, others still have to be treated.
-    adapt <- is.na(x)   
-    names(adapt) <- names(x)
-
-    #order decreasing by weight
-    o <- order(weight, decreasing=TRUE)
-    totreat <- names(x)[o[!adapt]]
-
-    # Eliminate missing variables.
-    vars <- getVars(E)
-    for (v in names(which(adapt))) E <- eliminateFM.cateditmatrix(E,v)
-    
-    wsol <- sum(weight)
-    cp <- backtracker(
-        isSolution = {
-            w <- sum(weight[adapt])
-            if ( w > wsol || isObviouslyInfeasible.cateditmatrix(.E)  ) return(FALSE)
-            if (length(.totreat) == 0){
-                wsol <<- w
-                adapt <- adapt 
-                return(TRUE)
-            }
-        },
-        choiceLeft = {
-            .var <- .totreat[1]
-            .E <- substValue.cateditmatrix(.E, .var , x[.var])
-            .totreat <- .totreat[-1]
-
-            adapt[.var] <- FALSE
-        },
-        choiceRight = {
-            .var <- .totreat[1]
-            #.E <- negateValue(.E, .var, x[.var])
-            .E <- eliminateFM.cateditmatrix(.E, .var)
-            .totreat <- .totreat[-1]
-            adapt[.var] <- TRUE
-        },
-        .E = E,
-        .totreat = totreat,
-        x = x,
-        adapt = adapt,
-        weight = weight,
-        wsol = wsol 
-    )
+substValue.cateditmatrix <- function(E, val, var=NULL){
+  if (missing(var)) var <- names(val)
+  if (is.null(var)) stop("No Variable name found.")
+  
+  variables <- getVars(E)
+  vars <- sub(":.+", "", variables)
+  variables <- variables[vars %in% var]
+  
+  cats <- sub(".+:", "", variables)
+  values <- as.integer(cats %in% val)
+  names(values) <- variables
+  substValue(E, variables, values)
 }
 
 #' parse categorial edit
@@ -228,3 +82,4 @@ x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'
       )
 
 (E <- cateditmatrix(x))
+substValue.cateditmatrix(E, val=c(gender="male"))
