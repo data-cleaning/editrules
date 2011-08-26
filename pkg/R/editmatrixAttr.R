@@ -63,7 +63,6 @@ getH <- function(E){
 #' Returns the number of elimination steps performed on an edit matrix or arrat
 #'
 #' h records the number of variables eliminated from E by \code{\link{eliminate}}
-#' @param E editmatrix
 #'
 #' @rdname geth
 #' @seealso \code{\link{editmatrix}}, \code{\link{eliminate}}

@@ -1,4 +1,3 @@
-#' @nord
 eliminateFM <- function(E, var,...){
     warning("eliminateFM is deprecated. Use 'eliminate' in stead")
     eliminate(E,var,...)
@@ -186,7 +185,6 @@ isObviouslyRedundant.matrix <- function(
 
 #' Redundancy check, \code{editmatrix} method
 #'
-#'
 #' @method isObviouslyRedundant editmatrix
 #'
 #' @param E Augmented matrix [A|b] or \code{\link{editmatrix}}
@@ -241,7 +239,3 @@ isFeasible <- function(E, warn=TRUE){
 duplicated.editmatrix <- function(x,...){
     duplicated.matrix(getAb(x)) & duplicated.default(getOps(x))
 }
-
-
-
-

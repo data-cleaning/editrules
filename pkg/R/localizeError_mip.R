@@ -68,40 +68,33 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
       )
 }
 
-#' Localize an error using RGlpk
-#' localization
-#' @param E editmatrix 
-#' @param x named numeric with data
-#' @param weight  numeric with weights
-#' @return list with w, adapt and x_c
-#' @nord
-localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
-   vars <- getVars(E)
-   elm <- buildELMatrix(E,x, weight)
-   types <- ifelse(elm$objfn, "B", "C")
-   E <- elm$E
-   binidx <- which(elm$objfn > 0)
-
-   if (!require(Rglpk)){
-      stop("Install 'Rglpk' to use this function")
-   }
-   sol <- Rglpk_solve_LP( obj=elm$objfn
-                 , mat=getA(E)
-                 , dir=getOps(E)
-                 , rhs=getb(E)
-                 , types=types
-                 , max=FALSE
-                 , verbose=verbose
-                 , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
-                             , upper=list(ind=seq_along(vars), val=elm$ub)
-                             )
-                )
-   names(sol$solution) <- c(vars,vars) 
-   list( w = sol$optimum
-       , adapt = (sol$solution > 0)[binidx]
-       , x_feasible = sol$solution[-binidx]
-       )
-}
+# localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
+#    vars <- getVars(E)
+#    elm <- buildELMatrix(E,x, weight)
+#    types <- ifelse(elm$objfn, "B", "C")
+#    E <- elm$E
+#    binidx <- which(elm$objfn > 0)
+# 
+#    if (!require(Rglpk)){
+#       stop("Install 'Rglpk' to use this function")
+#    }
+#    sol <- Rglpk_solve_LP( obj=elm$objfn
+#                  , mat=getA(E)
+#                  , dir=getOps(E)
+#                  , rhs=getb(E)
+#                  , types=types
+#                  , max=FALSE
+#                  , verbose=verbose
+#                  , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
+#                              , upper=list(ind=seq_along(vars), val=elm$ub)
+#                              )
+#                 )
+#    names(sol$solution) <- c(vars,vars) 
+#    list( w = sol$optimum
+#        , adapt = (sol$solution > 0)[binidx]
+#        , x_feasible = sol$solution[-binidx]
+#        )
+# }
 
 #' Localize an error using lpSolveApi
 #' localization

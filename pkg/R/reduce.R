@@ -1,7 +1,7 @@
 
 #' Reduce an (edit)matrix by removing empty rows and columns
 #'
-#' @nord
+#' @keywords internal
 #' @param E an object that is coerceable to a \code{matrix}
 removeEmpty  <- function(E){
   m <- as.matrix(E)
@@ -12,8 +12,9 @@ removeEmpty  <- function(E){
 }
 
 
+#' @method echelon editmatrix
+#' @rdname echelon
 #' @export
-#' @nord
 echelon.editmatrix <- function(E,...){
     o <- getOps(E)
     # nothing to eliminate?
@@ -30,11 +31,9 @@ echelon.editmatrix <- function(E,...){
 
 #' Write a system of equations in reduced row echelon form
 #'
-#'
-#' @param E a matrix
-#' @param tol tolerance for checking zero elements in E
-#' @return the matrix in Reduced row echelon form
-#' @nord
+#' @rdname echelon
+#' @method echelon matrix
+#' @param tol tolerance that will be used to determine if a coefficient equals zero.
 #' @export
 echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
     k <- min(ncol(E),nrow(E))
@@ -89,5 +88,4 @@ substValue <- function(E, var, value, remove=FALSE){
         
     E[!isObviouslyRedundant(E),]    
 }
-
 

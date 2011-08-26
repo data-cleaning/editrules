@@ -31,7 +31,7 @@ NUMOPS <- c("+","-","*")
 #' Parse a numerical edit expression into a named \code{numeric}.
 #' The \code{names} are the names of the variables
 #' @param e a valid R expression
-#' @nord
+#' @keywords internal
 parseNum <- function(e){
   if (!isNum(e)){
      stop(paste("Invalid edit rule:", e))
@@ -50,6 +50,7 @@ CATCMP <- c("==", "!=", "%in%")
 #' @param edit logical (vector)
 #' @param sep edit separator
 #' @param useLogical (logical), should logicals be treated as a factor or as a logical?
+#' @keywords internal
 parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
        var <- if (useLogical) as.character(x)
@@ -130,7 +131,7 @@ hasNum <- function(e){
   }
 }
 
-# very basic test for num
+# very basic test for numerical edit
 isNum <- function(e){
   if (length(e) != 3) 
     return(FALSE)  
@@ -138,7 +139,9 @@ isNum <- function(e){
   return(cmp %in% NUMCMP)
 }
 
-# 
+#' basic test for type of edit
+#' @param edts \code{expression}
+#  @keywords internal
 editTypes <- function(edts){
   ops <- sapply(edts, function(e){deparse(e[[1]])})
   
