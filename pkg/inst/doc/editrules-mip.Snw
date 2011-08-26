@@ -1,0 +1,116 @@
+%\VignetteIndexEntry{Error localization as a mixed integer problem}
+\documentclass[11pt, fleqn, a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{threeparttable}
+\usepackage{natbib}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{threeparttable}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\Lor}{\lor}
+\DeclareMathOperator*{\Land}{\land}
+\DeclareMathOperator{\res}{\mathfrak{R}}
+\newcommand{\rhomap}{\xrightarrow{\rho}}
+
+\newtheorem{theorem}{Theorem}
+
+\usepackage{float}
+ 
+\floatstyle{boxed}
+\newfloat{Rcode}{t}{rco}
+\floatname{Rcode}{Figure}
+
+
+
+% stimulate latex to put multiple floats on a page.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{3}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.75}
+\renewcommand{\floatpagefraction}{.9}
+\renewcommand{\dblfloatpagefraction}{.9}
+\renewcommand{\dbltopfraction}{.9}
+\hyphenation{time-stamp}
+
+<<echo=false>>=
+library(editrules)
+@
+
+\title{Error localization as a mixed integer problem with the {\tt editrules} package\\
+{\small package version \Sexpr{packageVersion("editrules")}}}
+\author{Edwin de Jonge and Mark van der Loo}
+\begin{document}
+\maketitle
+\begin{abstract}
+{\em This vignette is far from finished. Version 2.0 fo the package will have
+the full vignette. At the moment, functionality for solving error localization problems
+with lp solvers is experimental.}
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\cite{jonge:2011}, \cite{loo:2011b}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Error localization as a mixed integer problem}
+\subsection{Previous work}
+
+\subsection{Numerical stability}
+
+\section{Formulation in terms of boundaries}
+
+\subsection{numerical edits}
+Assume each variable $x_i$ is bounded by $\alpha_i$ and $\beta_i$
+\begin{equation}
+\alpha_i \leq x_i \leq \beta_i \label{boundary}
+\end{equation}
+
+for each variable $x_i$ introduce a binary variable $u_i \{0,1\}$ that signifies if $x_i$ should be adapted.
+
+For each variable $x_i$ add two edits to the original edit matrix that constrain the value of $x_i$ to $x^0_i$ 
+
+$$ x_i \leq x^0_i + (\beta_i - x^0_i)u_i$$
+$$ (\alpha_i - x^0_i)u_i + x^0_i \leq x_i $$
+
+When $u_i = 0$ this reduces to $x_i = x^0_i$, with $u_i = 1$ it reduces to equation \ref{boundary}.
+\subsection{categorical edits}
+\subsection{mixed edits}
+
+\section{Boundary heuristics}
+\subsection{From data set}
+Minimum and maximum value of each variable in the data set to be checked gives reasonable boundaries for the dataset. 
+\subsection{From observation, per record}
+Assume that maximum values for each observation differ at most a factor $f$ (e.g. 1000) of the reported value.
+
+
+\section{Discussion}
+
+Is a usefull addition to {\tt editrules}, finds quickly solutions to error localization  problems with 
+hundreds to thousands of variables. 
+
+Solutions given by current lp solvers can be numerical unstable, which may result in a false positive 
+or a false negative solution. Luckily {\tt editrules} contains {\tt substValue} and {\tt isFeasible} 
+that can be used together to check the validity of a solution. Furthermore several heuristics can be 
+used to increase the numerical stability by using smaller boundaries for the variables.
+
+\subsection{Comparison to {\tt backtracker}}
+errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.
+It can also find more equivalent solutions, which is not possible or difficult with MIP solvers.
+
+However when speed of finding a solution matters, it is
+
+\bibliographystyle{chicago}
+\bibliography{editrules}
+
+\end{document}
