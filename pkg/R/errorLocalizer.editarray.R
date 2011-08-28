@@ -18,11 +18,7 @@ violatedEdits.editarray <- function(E, dat,...){
 #' Localize errors in categorical data
 #'
 #' @method errorLocalizer editarray
-#' @param E a \code{\link{editarray}}
-#' @param x a named \code{character} vector
-#' @param weight positive reliability weights
-#' @param ... arguments to be passed to or from other methods
-#' 
+#' @rdname errorLocalizer
 #' @export
 errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
     adapt <- is.na(x)

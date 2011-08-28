@@ -2,7 +2,6 @@
 #'
 #' @method errorLocalizer editmatrix
 #' 
-#' @param weight Weight vector, of the same length of \code{x}
 #' @param maxadapt maximum number of variables to adapt
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
 #' maximum number of variables to adapt. 

@@ -22,11 +22,8 @@ eliminateCat <- function(A, J, j, H, h){
 #' Eliminate variable from editarray.
 #' 
 #' @method eliminate editarray
-#' TODO  1. prove that this works --DONE 23.05.2011
-#'       2. redundancy removal    --DONE. 23.05.2011
-#'       3. robustness for empty arrays etc. --Needs testing
-#'       4. history recording for redundancy removal
-#' @nord
+#' @rdname eliminate
+#' @export
 eliminate.editarray <- function(E, var, ...){
     J <- getInd(E)[[var]]
     sep <- getSep(E) 
@@ -34,7 +31,7 @@ eliminate.editarray <- function(E, var, ...){
     h <- geth(E)
     if ( is.null(h) ){
         h <- 0
-        H <- matrix(FALSE,ncol=nrow(E),ncol=nrow(E))
+        H <- matrix(FALSE,ncol=nrow(E),nrow=nrow(E))
         diag(H) <- TRUE
     } else {
         H <- getH(E)

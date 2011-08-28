@@ -84,8 +84,10 @@ violatedEdits <- function(E, dat, ...){
 #'
 #' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
 #'
-#' @param E an \code{\link{editmatrix}}
-#' @param x a named numerical vecor. The record for which errors will be localized.
+#' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
+#' @param x a named numerical vecor (if E is an editmatrix) or a named character vector (if E is an editarray). 
+#'    This is the record for which errors will be localized.
+#' @param weight A \code{length(x)} positive weight vector.
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
 #' @return an object of class \code{\link{backtracker}}. Each execution of \code{$searchNext()} yields a solution
@@ -103,7 +105,7 @@ violatedEdits <- function(E, dat, ...){
 #' http://www.cbs.nl/nl-NL/menu/methoden/onderzoek-methoden/onderzoeksrapporten/proefschriften/2008-proefschrift-de-waal.htm
 #' 
 #' @export
-errorLocalizer <- function(E, x, ...){
+errorLocalizer <- function(E, x, weight=rep(1,length(x)), ...){
     UseMethod("errorLocalizer")
 }
 
@@ -153,7 +155,7 @@ echelon <- function(E,...){
 #' 
 #'
 #'
-#' @param E editmatrix 
+#' @param E \code{\link{editmatrix}} or \code{\link{editarray}} 
 #' @param var name of variable to be eliminated
 #' @param ... argumemts to be passed to or from other methods
 #' @export
