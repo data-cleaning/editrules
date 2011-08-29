@@ -1,53 +1,3 @@
-#' Parse a categorical edit expression 
-#'
-#' @param x a valid R expression
-#' @param val logical (scalar)
-#' @param edit logical (vector)
-#' @param sep edit separator
-#' @nord
-parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-    if ( length(x) == 1 ) {
-       var <- paste(x,"TRUE",sep=sep)
-       edit[var] <- val
-       return(edit)
-    }
-    op <- as.character(x[[1]])
-    if ( op == "if" ){
-        edit <- parseCond(x[[2]],TRUE,  edit, sep)
-        edit <- parseCond(x[[3]],FALSE, edit, sep)
-    } else if ( op %in% c("(","{") ){
-        edit <- parseCond(x[[2]], val,  edit, sep)
-    } else if ( op %in% c("%in%","==") ){
-        cat <- eval(x[[3]])
-        var <- paste(x[[2]],cat,sep=sep)
-        edit[var] <- val
-    } else if (op == "!=") {
-        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
-        edit[var] <- !val
-    } else if (op == "!") {
-        edit <- parseCond(x[[2]],!val,  edit, sep)
-    } else if (op == "&&"){
-        if (is.na(val))
-           val <- TRUE
-        if (val == FALSE){
-            stop("Operator '&&' not allowed in 'if' clause")
-        }
-        edit <- parseCond(x[[2]],val, edit, sep)
-        edit <- parseCond(x[[3]],val, edit, sep)
-    } else if (op == "||"){
-        if (is.na(val))
-           val <- FALSE
-        if (val == TRUE){
-            stop("Operator '||' not allowed in 'then' clause")
-        }
-        edit <- parseCond(x[[2]],val, edit, sep)
-        edit <- parseCond(x[[3]],val, edit, sep)
-    } else {
-        stop("Operator '",op,"' not implemented")
-    }
-    edit
-}
-
 #' Parse textual, categorical edit rules to an editarray
 #'
 #' Transforms a list of categorical edit rules to a boolean array representation.
@@ -95,7 +45,7 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' @export
 editarray <- function(editrules, sep=":"){
     e <- parseEdits(editrules)
-    v <- lapply(e,parseCond,sep=sep)
+    v <- lapply(e,parseCat,sep=sep)
     
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
@@ -163,7 +113,7 @@ editarray <- function(editrules, sep=":"){
 #' @seealso as.character.editarray
 #'
 #' not for export
-#' @nord
+#' @keywords internal
 ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
     v <- names(ivd)
     cats <- lapply(ivd, function(k) paste("'", names(k), "'", sep=""))
@@ -272,7 +222,7 @@ print.editarray <- function(x, ...){
 #' editarray: logical array where every column corresponds to one
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
-#' @nord
+#' @keywords internal
 neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
     if ( is.null(names) & nrow(E)>0 ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
@@ -287,9 +237,10 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
 
 #' get variable names in editarray
 #' 
-#' @param E \code{\link{editmatrix}
+#' get variables names in editarray
+#' @param E \code{\link{editmatrix}}
 #' @return character vector
-#' @nord
+#' @keywords internal
 getVars.editarray <- function(E) names(attr(E,"ind"))
 
 #' get index list from editmatrix
@@ -300,32 +251,32 @@ getVars.editarray <- function(E) names(attr(E,"ind"))
 #' 
 #' @param E \code{\link{editarray}}
 #' @return named list, indexing category levels in the editarray (columns)
-#' @nord
+#' @keywords internal
 getInd <- function(E) attr(E,"ind")
 
 
 #' get seprator used to seperate variables from levels in editarray
 #' @param E \code{\link{editarray}}
 #' @return character
-#' @nord
+#' @keywords internal
 getSep <- function(E) attr(E,"sep")
 
 #' Get named logical array from editarray
 #' @param E \code{\link{editarray}}
 #' @return logical array
-#' @nord
+#' @keywords internal
 getArr <- function(E) E[,,drop=FALSE]
 
 #' retrieve level names from editarray
 #' @param editarray \code{\link{editarray}}
 #' @return character vector
-#' @nord
+#' @keywords internal
 getlevels <- function(E) colnames(E)
 
 #' retrieve edit names from editarray
 #' @param E \code{\link{editarray}}
 #' @return character vector
-#' @nord
+#' @keywords internal
 getnames <- function(E) rownames(E)
 
 #' determine which edits in an editmatrix contain a variable.

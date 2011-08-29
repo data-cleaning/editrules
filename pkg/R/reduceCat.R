@@ -1,6 +1,6 @@
 #' eliminate one category from a logical array, not for export.
 #' TODO redundancy removal by recording derivation history.
-#' @nord
+#' @keywords internal
 eliminateCat <- function(A, J, j, H, h){
     j1 <- A[,J[j]]
     j2 <- !j1
