@@ -1,0 +1,88 @@
+#' Find obvious redundancies in set of edits
+#' 
+#' 
+#' 
+#' @param E Augmented matrix A|b, editmatrix 
+#' @param duplicates \code{logical}: check for duplicate edits?
+#' @param ... parameters to be passed to or from other methods. 
+#' 
+#' @return logical vector indicating which edits are (obviously) redundant
+#'
+#' @export 
+isObviouslyRedundant <- function(E, duplicates=TRUE, ...){
+    UseMethod("isObviouslyRedundant")
+}
+
+
+#' Redundancy check, \code{matrix} method
+#'
+#' 
+#' Lower-level method, to be called directly from internal functions of the editrules package.
+#'
+#' @method isObviouslyRedundant matrix
+#'
+#' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
+#' @param tol tolerance to check for zeros.
+#' @param duplicates.tol tolerance for duplicate search
+#'
+#' @rdname isObviouslyRedundant
+#' @export
+#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
+isObviouslyRedundant.matrix <- function(
+    E, 
+    duplicates=TRUE, 
+    operators, 
+    tol=sqrt(.Machine$double.eps), 
+    duplicates.tol=tol,
+    ... ){
+    ib <- ncol(E)
+    zeroCoef <- rowSums(abs(E[,-ib,drop=FALSE])) < tol
+    v <- as.vector(
+        zeroCoef & ( (operators %in% c("==","<=")  & abs(E[,ib]) < tol) 
+                   | (operators %in% c("<", "<=")  & E[,ib] > tol)
+                   )
+    )
+    if (duplicates){
+        if ( duplicates.tol > 0 )  E <- round(E, ceiling(-log10(duplicates.tol)))
+        v <- v | (duplicated.matrix(E) & duplicated.default(operators))
+    }
+    return(v)
+}
+
+
+#' Redundancy check for \code{editmatrix}
+#'
+#' Normalizes the editmatrix if necessary, converts it and passes it to the \code{matrix} method. All options
+#' of the \code{matrix} method may be passed. Obvious redundancies, amounting
+#' to statements as 0==0 or 0 < 1 will be detected, as well as duplicates.
+#'
+#' @method isObviouslyRedundant editmatrix
+#' @rdname isObviouslyRedundant
+#' 
+#' @export
+isObviouslyRedundant.editmatrix <- function(E, duplicates=TRUE, ...){
+    if ( !isNormalized(E) ) E <- normalize(E)
+    isObviouslyRedundant.matrix(getAb(E),duplicates=duplicates, operators=getOps(E), ...)
+}
+
+
+#' Redundancy check for \code{editarray}
+#'
+#' Check if any of the variables has FALSE for every category (a record can never be contained in such a set).
+#'
+#' @method isObviouslyRedundant editarray
+#' @rdname isObviouslyRedundant
+#' @export
+isObviouslyRedundant.editarray <- function(E, duplicates=TRUE, ...){
+    if ( ncol(E) == 0 ) return(logical(0))
+    if ( ncol(E) == 1 ) return(as.vector(E))
+    ind <- getInd(E)
+    red <- apply(sapply(I,function(i) rowSums(E[,i,drop=FALSE])==0),1,any)
+    if ( duplicates ) red <- red | duplicated.editarray(E)
+    red
+}
+
+
+
+
+
