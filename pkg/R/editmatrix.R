@@ -143,16 +143,6 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 
 
 
-#' Check if object is an editmatrix
-#' 
-#' @seealso \code{\link{editmatrix}}
-#' @export
-#' @param x object to be checked
-#' @return TRUE if \code{x} is an \code{editmatrix}
-is.editmatrix <- function(x){
-   return(inherits(x, "editmatrix"))
-}
-
 #' Coerce a matrix to an edit matrix.
 #'
 #' \code{as.editmatrix} interpretes the matrix as an editmatrix.
@@ -301,26 +291,6 @@ as.expression.editmatrix <- function(x, ...){
  )
 }
 
-#' print edit matrix
-#'
-#' @export
-#' @method print editmatrix
-#'
-#' @param x editmatrix object to be printed
-#' @param ... further arguments passed to or from other methods.
-print.editmatrix <- function(x, ...){
-   cat("Edit matrix:\n")
-   print(as.data.frame(x), ...)
-   cat("\nEdit rules:\n")
-   info <- editrules(x)
-   desc <- paste("[",info$description,"]")
-   desc <- ifelse(info$description=="","", desc)
-   cat( paste( info$name,":", info$edit, desc, collapse="\n")
-      , "\n"
-      )
-}
-
-
 #' \code{\link{str}} method for editmatrix object
 #'
 #'
@@ -328,7 +298,6 @@ print.editmatrix <- function(x, ...){
 #' @param ... methods to pass to other methods
 #' @export
 str.editmatrix <- function(object,...){
-#    ivar <- rowSums(abs(object)) > 0
     vars <- paste(getVars(object),collapse=", ")
     if (nchar(vars) > 20 ) vars <-  paste(strtrim(vars,16),"...") 
     cat(paste("editmatrix with", nrow(object), "edits containing variables",vars,"\n"))

@@ -120,22 +120,6 @@ getOps <- function(E){
   attr(E, "ops")
 }
 
-#' Returns the variable names of an (in)equality \code{editmatrix} E
-#'
-#' @export
-#' @seealso \code{\link{editmatrix}}
-#'
-#' @example ../examples/editmatrixAttr.R
-#' 
-#' @param E editmatrix
-#'
-#' @return \code{character} vector with the names of the variables. 
-getVars <- function(E){
-  if (!is.editmatrix(E)){
-     stop("E has to be an editmatrix.")
-  }
-  colnames(E)[-ncol(E)]
-}
 
 #' Check if an editmatrix is normalized
 #'
@@ -149,7 +133,7 @@ getVars <- function(E){
 #' @return TRUE if editmatrix was normalized or created with \code{normalize=TRUE} 
 isNormalized <- function(E){
   if (!is.editmatrix(E)){
-     stop("E has to be an editmatrix.")
+     stop("Argument not of class editmatrix")
   }
   
   attr(E, "normalized") == TRUE ||
@@ -171,6 +155,7 @@ isNormalized <- function(E){
 #' @return If E was normalized, the original editmatrix is returned, otherwise 
 #' a new normalized editmatrix will be returned 
 normalize <- function(E){
+  if (!is.editmatrix(E)) stop("Argument not of class editmatrix")
   if (isNormalized(E)){
      return(E)
   }

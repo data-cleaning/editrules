@@ -174,14 +174,6 @@ as.character.editarray <- function(x,...){
     c(dm, edts) 
 }
 
-#' check if an object is an editarray
-#'
-#' @param x object to be checked
-#' @export
-#' @return \code{TRUE} if \code{x} is an \code{\link{editarray}}
-#' @seealso \code{\link{editarray}}, \code{\link{is.editmatrix}}
-#'
-is.editarray <- function(x) inherits(x,"editarray")
 
 #' Coerce an editarray to a \code{data.frame}
 #'
@@ -193,31 +185,12 @@ is.editarray <- function(x) inherits(x,"editarray")
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.
 #'
-#'
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x)
     data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
 }
 
-#' print  editarray
-#'
-#' @method print editarray
-#' @param x an \code{\link{editarray}}
-#' @param ... arguments to be passed to or from other methods.
-#'
-#' @export
-print.editarray <- function(x, ...){
-    d <- datamodel(x)
-    cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
-    A <- getArr(x)
-    colnames(A) <- cn
-    cat("Edit array:\n")
-    print(A)
-    cat("\nEdit rules:\n")
-    d <- as.data.frame(x)
-    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
-}
 
 #' editarray: logical array where every column corresponds to one
 #' level of one variable. Every row is an edit. Every edit denotes
@@ -233,75 +206,5 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
         ...
     )
 }
-
-
-#' get variable names in editarray
-#' 
-#' get variables names in editarray
-#' @param E \code{\link{editmatrix}}
-#' @return character vector
-#' @keywords internal
-getVars.editarray <- function(E) names(attr(E,"ind"))
-
-#' get index list from editmatrix
-#' 
-#' The 'ind' attribute is a named list of named integer vectors. The list names are the 
-#' variable names. The vectors in the list index the columns in the editarray associated with the
-#' variables. The names of the vectors are the names of the columns of the editarray.
-#' 
-#' @param E \code{\link{editarray}}
-#' @return named list, indexing category levels in the editarray (columns)
-#' @keywords internal
-getInd <- function(E) attr(E,"ind")
-
-
-#' get seprator used to seperate variables from levels in editarray
-#' @param E \code{\link{editarray}}
-#' @return character
-#' @keywords internal
-getSep <- function(E) attr(E,"sep")
-
-#' Get named logical array from editarray
-#' @param E \code{\link{editarray}}
-#' @return logical array
-#' @keywords internal
-getArr <- function(E) E[,,drop=FALSE]
-
-#' retrieve level names from editarray
-#' @param editarray \code{\link{editarray}}
-#' @return character vector
-#' @keywords internal
-getlevels <- function(E) colnames(E)
-
-#' retrieve edit names from editarray
-#' @param E \code{\link{editarray}}
-#' @return character vector
-#' @keywords internal
-getnames <- function(E) rownames(E)
-
-#' determine which edits in an editmatrix contain a variable.
-#'
-#'
-#' @param E \code{\link{editarray}}
-#' @param var character, name of a categorical variable of \code{E}
-#' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
-#' @export
-contains <- function(E,var){
-    I <- getInd(E)[[var]]
-    V <- getArr(E)[,I,drop=FALSE]
-    rowSums(V) < length(getInd(E)[[var]])
-}
-
-#' Summarize data model of an editarray in a data.frame
-#'
-#' @param E editarray
-#' @return \code{data.frame} describing the categorical variables and their levels.
-#' 
-#' @export
-datamodel <- function(E){
-    st <- stack(getInd(E))
-    data.frame(variable=as.character(st[,2]),value=rownames(st))
-}
-
 
 
