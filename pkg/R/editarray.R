@@ -1,53 +1,3 @@
-#' Parse a categorical edit expression 
-#'
-#' @param x a valid R expression
-#' @param val logical (scalar)
-#' @param edit logical (vector)
-#' @param sep edit separator
-#' @nord
-parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
-    if ( length(x) == 1 ) {
-       var <- paste(x,"TRUE",sep=sep)
-       edit[var] <- val
-       return(edit)
-    }
-    op <- as.character(x[[1]])
-    if ( op == "if" ){
-        edit <- parseCond(x[[2]],TRUE,  edit, sep)
-        edit <- parseCond(x[[3]],FALSE, edit, sep)
-    } else if ( op %in% c("(","{") ){
-        edit <- parseCond(x[[2]], val,  edit, sep)
-    } else if ( op %in% c("%in%","==") ){
-        cat <- eval(x[[3]])
-        var <- paste(x[[2]],cat,sep=sep)
-        edit[var] <- val
-    } else if (op == "!=") {
-        var <- paste(x[[2]],eval(x[[3]]),sep=sep)
-        edit[var] <- !val
-    } else if (op == "!") {
-        edit <- parseCond(x[[2]],!val,  edit, sep)
-    } else if (op == "&&"){
-        if (is.na(val))
-           val <- TRUE
-        if (val == FALSE){
-            stop("Operator '&&' not allowed in 'if' clause")
-        }
-        edit <- parseCond(x[[2]],val, edit, sep)
-        edit <- parseCond(x[[3]],val, edit, sep)
-    } else if (op == "||"){
-        if (is.na(val))
-           val <- FALSE
-        if (val == TRUE){
-            stop("Operator '||' not allowed in 'then' clause")
-        }
-        edit <- parseCond(x[[2]],val, edit, sep)
-        edit <- parseCond(x[[3]],val, edit, sep)
-    } else {
-        stop("Operator '",op,"' not implemented")
-    }
-    edit
-}
-
 #' Parse textual, categorical edit rules to an editarray
 #'
 #' Transforms a list of categorical edit rules to a boolean array representation.
@@ -95,7 +45,7 @@ parseCond <- function(x, val=NA, edit=logical(0), sep=":"){
 #' @export
 editarray <- function(editrules, sep=":"){
     e <- parseEdits(editrules)
-    v <- lapply(e,parseCond,sep=sep)
+    v <- lapply(e,parseCat,sep=sep)
     
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
@@ -163,7 +113,7 @@ editarray <- function(editrules, sep=":"){
 #' @seealso as.character.editarray
 #'
 #' not for export
-#' @nord
+#' @keywords internal
 ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
     v <- names(ivd)
     cats <- lapply(ivd, function(k) paste("'", names(k), "'", sep=""))
@@ -224,14 +174,6 @@ as.character.editarray <- function(x,...){
     c(dm, edts) 
 }
 
-#' check if an object is an editarray
-#'
-#' @param x object to be checked
-#' @export
-#' @return \code{TRUE} if \code{x} is an \code{\link{editarray}}
-#' @seealso \code{\link{editarray}}, \code{\link{is.editmatrix}}
-#'
-is.editarray <- function(x) inherits(x,"editarray")
 
 #' Coerce an editarray to a \code{data.frame}
 #'
@@ -243,36 +185,17 @@ is.editarray <- function(x) inherits(x,"editarray")
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.
 #'
-#'
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x)
     data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
 }
 
-#' print  editarray
-#'
-#' @method print editarray
-#' @param x an \code{\link{editarray}}
-#' @param ... arguments to be passed to or from other methods.
-#'
-#' @export
-print.editarray <- function(x, ...){
-    d <- datamodel(x)
-    cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
-    A <- getArr(x)
-    colnames(A) <- cn
-    cat("Edit array:\n")
-    print(A)
-    cat("\nEdit rules:\n")
-    d <- as.data.frame(x)
-    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
-}
 
 #' editarray: logical array where every column corresponds to one
 #' level of one variable. Every row is an edit. Every edit denotes
 #' a *forbidden* combination.
-#' @nord
+#' @keywords internal
 neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
     if ( is.null(names) & nrow(E)>0 ) names <- paste("e",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
@@ -283,74 +206,5 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
         ...
     )
 }
-
-
-#' get variable names in editarray
-#' 
-#' @param E \code{\link{editmatrix}
-#' @return character vector
-#' @nord
-getVars.editarray <- function(E) names(attr(E,"ind"))
-
-#' get index list from editmatrix
-#' 
-#' The 'ind' attribute is a named list of named integer vectors. The list names are the 
-#' variable names. The vectors in the list index the columns in the editarray associated with the
-#' variables. The names of the vectors are the names of the columns of the editarray.
-#' 
-#' @param E \code{\link{editarray}}
-#' @return named list, indexing category levels in the editarray (columns)
-#' @nord
-getInd <- function(E) attr(E,"ind")
-
-
-#' get seprator used to seperate variables from levels in editarray
-#' @param E \code{\link{editarray}}
-#' @return character
-#' @nord
-getSep <- function(E) attr(E,"sep")
-
-#' Get named logical array from editarray
-#' @param E \code{\link{editarray}}
-#' @return logical array
-#' @nord
-getArr <- function(E) E[,,drop=FALSE]
-
-#' retrieve level names from editarray
-#' @param editarray \code{\link{editarray}}
-#' @return character vector
-#' @nord
-getlevels <- function(E) colnames(E)
-
-#' retrieve edit names from editarray
-#' @param E \code{\link{editarray}}
-#' @return character vector
-#' @nord
-getnames <- function(E) rownames(E)
-
-#' determine which edits in an editmatrix contain a variable.
-#'
-#'
-#' @param E \code{\link{editarray}}
-#' @param var character, name of a categorical variable of \code{E}
-#' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
-#' @export
-contains <- function(E,var){
-    I <- getInd(E)[[var]]
-    V <- getArr(E)[,I,drop=FALSE]
-    rowSums(V) < length(getInd(E)[[var]])
-}
-
-#' Summarize data model of an editarray in a data.frame
-#'
-#' @param E editarray
-#' @return \code{data.frame} describing the categorical variables and their levels.
-#' 
-#' @export
-datamodel <- function(E){
-    st <- stack(getInd(E))
-    data.frame(variable=as.character(st[,2]),value=rownames(st))
-}
-
 
 

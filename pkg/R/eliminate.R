@@ -4,6 +4,21 @@ eliminateFM <- function(E, var,...){
 }
 
 
+
+#' eliminate a variable from a set of edit rules
+#' 
+#' 
+#'
+#'
+#' @param E \code{\link{editmatrix}} or \code{\link{editarray}} 
+#' @param var name of variable to be eliminated
+#' @param ... argumemts to be passed to or from other methods
+#' @export
+eliminate <- function(E, var, ...){
+    UseMethod("eliminate")
+}
+
+
 #' Eliminate a variable from an editmatrix
 #'
 #' Uses Fourier-Motzkin elimination to eliminate a variable from a set
@@ -12,13 +27,12 @@ eliminateFM <- function(E, var,...){
 #' restrictions. Obvious redundancies of the type 0 < 1 are removed as well. 
 #'
 #' @method eliminate editmatrix
-#' @param E an object of class \code{\link{editmatrix}}
-#' @param var \code{character} name of the variable to eliminate
 #' @param fancynames \code{logical} If true, the derived restrictions have rownames derived from the original restrictions (slower).
 #' @param ... other arguments to be passed to or from other methods
 #' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
 #'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
-#' 
+#'
+#' @rdname eliminate 
 #' @example ../examples/eliminate.R
 #'
 #' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyInfeasible}}
@@ -102,7 +116,7 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
     m <- rbind(ml,mu,me,m[!I,,drop=FALSE])
     d <- rbind(dl,du,de,d[!I,,drop=FALSE])
     o <- c(ol,ou,oe,ops[!I])
-    redundant <- rowSums(d) > n + 1 | isObviouslyRedundant.matrix(m,o)
+    redundant <- rowSums(d) > n + 1 | isObviouslyRedundant.matrix(E=m, operators=o)
 
     m <- m[!redundant,,drop=FALSE]
     d <- d[!redundant,,drop=FALSE]
@@ -123,119 +137,55 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 }
 
 
-#' Check for obvious contradictions in set of (in)equalities
+
+#' eliminate one category from a logical array, not for export.
 #' 
-#' If any edit in E is an obvious contradictions of a form similar to 0 < -1, the function.
-#' returns TRUE, otherwise FALSE. Obvious inconsistencies may arise during elimination processes.
+#' TODO redundancy removal by recording derivation history -- if possible.
+#' @keywords internal
+eliminateCat <- function(A, J, j, H, h){
+    j1 <- A[,J[j]]
+    j2 <- !j1
+    n1 <- sum(j1)
+    n2 <- sum(j2)
+    if (n1==0 || n2==0) return(A)
+    I1 <- rep(which(j1), times=n2)
+    I2 <- rep(which(j2), each=n1)
+    B <- array(FALSE,dim=c(n1*n2,ncol(A)))
+    B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
+    B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
+    A <- rbind(A[j1,,drop=FALSE],B)
+    # detect redundancies and get rid of them
+    H <- rbind(H[j1,,drop=FALSE],H[I1,,drop=FALSE] | H[I2,,drop=FALSE])
+    I3 <- rowSums(H) > h+1
+    list(A=A[!I3,,drop=FALSE], H=H[I3,,drop=FALSE], h=h+1)
+}
+
+#' Eliminate variable from editarray.
 #' 
-#' @param E An normalized \code{link{editmatrix}}. If E is not normalized on entry, it will be normalized internally prior to checking. 
-#' @param tol Tolerance for checking against zero.
-#' @seealso \code{\link{eliminate}} \code{\link{editmatrix}}
+#' The elimination method is based on repeated logical reduction on categories.
+#'
+#' @method eliminate editarray
+#' @rdname eliminate
 #' @export
-isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
-    if ( !isNormalized(E) ) E <- normalize(E)
-    A <- getAb(E)
-    operators <- getOps(E)
-    ib <- ncol(A)
-    zeroCoef <- rowSums(abs(A[,-ib,drop=FALSE])) < tol  
-    b <- round(A[,ib],ceiling(-log10(tol)))    
-    if ( any(zeroCoef & operators == "<"    &  b <= 0) || 
-         any(zeroCoef & operators == "<="   &  b <  0) || 
-         any(zeroCoef & operators == c("==") &  abs(b) > tol)) return(TRUE)
-    return(FALSE)
-}
-
-
-
-#' Redundancy check, \code{matrix} method
-#'
-#'
-#' @method isObviouslyRedundant matrix
-#'
-#' @param E Augmented matrix [A|b] or \code{\link{editmatrix}}
-#' @param ... parameters to be passed to other methods. 
-#' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
-#' @param tol tolerance to check for zeros.
-#' @param duplicates logical: check for duplicate rows?
-#' @param duplicates.tol tolerance for duplicate search
-#'
-#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
-#' @S3method isObviouslyRedundant matrix
-isObviouslyRedundant.matrix <- function(
-    E, 
-    operators, 
-    tol=sqrt(.Machine$double.eps), 
-    duplicates=TRUE, 
-    duplicates.tol=tol,
-    ... ){
-    ib <- ncol(E)
-    zeroCoef <- rowSums(abs(E[,-ib,drop=FALSE])) < tol
-    v <- as.vector(
-        zeroCoef & ( (operators %in% c("==","<=")  & abs(E[,ib]) < tol) 
-                   | (operators %in% c("<", "<=")  & E[,ib] > tol)
-                   )
-    )
-    if (duplicates){
-        if ( duplicates.tol > 0 )  E <- round(E, ceiling(-log10(duplicates.tol)))
-        v <- v | (duplicated.matrix(E) & duplicated.default(operators))
+eliminate.editarray <- function(E, var, ...){
+    J <- getInd(E)[[var]]
+    sep <- getSep(E) 
+    A <- getArr(E)
+    h <- geth(E)
+    if ( is.null(h) ){
+        h <- 0
+        H <- matrix(FALSE,ncol=nrow(E),nrow=nrow(E))
+        diag(H) <- TRUE
+    } else {
+        H <- getH(E)
     }
-    return(v)
-}
-
-
-#' Redundancy check, \code{editmatrix} method
-#'
-#' @method isObviouslyRedundant editmatrix
-#'
-#' @param E Augmented matrix [A|b] or \code{\link{editmatrix}}
-#' @param ... parameters to be passed to other methods. Currently, only \code{tol} is implemented (see \code{\link{isObviouslyRedundant.matrix}}).
-#'
-#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.matrix}}
-#'
-#' @S3method isObviouslyRedundant editmatrix
-isObviouslyRedundant.editmatrix <- function(E, ...){
-    if ( !isNormalized(E) ) E <- normalize(E)
-    isObviouslyRedundant.matrix(getAb(E),getOps(E), ...)
-}
-
-#' Check consistency of editmatrix 
-#'
-#' Applies fourier-motzkin elimination untill either all
-#' variables are eliminated or the editmatrix becomes obviously
-#' infeasible. The check rests on the theorem that a set of linear
-#' inequalities is infeasible if and only if  0 < -1 can be derived from it. 
-#'
-#' @param E an \code{\link{editmatrix}}
-#' @param warn logical: should a warning be raised when system is infeasible?
-#' @return TRUE or FALSE
-#'
-#'
-#' @export
-isFeasible <- function(E, warn=TRUE){
-    vars <- getVars(E)
-    vars2 <- vars
-    feasible <- !isObviouslyInfeasible(E)
-    while( feasible && length(vars) > 0 ){
-        E <- eliminate(E,vars[1])
-        vars <- vars[-1]
-        feasible <- !isObviouslyInfeasible(E)
-        if ( !feasible && warn )
-            warning(
-                paste("system becomes obviously infeasible after eliminating",
-                paste(vars2[!(vars2 %in% vars)],collapse=", "))
-            ) 
+    for ( j in 1:length(J)){
+         red <- duplicated(A) | isObviouslyRedundant(A)
+         L <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         A <- L$A
+         H <- L$H
+         h <- L$h
     }
-    return(feasible)
+    neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E), H=H, h=h)
 }
 
-
-#' Check for duplicate edit rules
-#'
-#' @param x an \code{\link{editmatrix}}
-#' @param ... options to be passed to other methods
-#' @return logical vector
-#' @S3method duplicated editmatrix
-#' @export
-duplicated.editmatrix <- function(x,...){
-    duplicated.matrix(getAb(x)) & duplicated.default(getOps(x))
-}

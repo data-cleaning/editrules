@@ -19,5 +19,5 @@ Suggests: lpSolveAPI,iterators
 Collate: 'backtracker.R' 'blocks.R' 'check.R' 'editarray.R'
     'editmatrixAttr.R' 'editmatrix.R' 'editrules-data.R' 'eliminate.R'
     'errorLocalizer.editarray.R' 'errorLocalizer.editmatrix.R'
-    'localizeError_mip.R' 'parseEdits.R' 'pkg.R' 'reduceCat.R'
-    'reduce.R' 'S3Generics.R'
+    'isObviouslyInfeasible.R' 'localizeError_mip.R' 'parseEdits.R'
+    'pkg.R' 'reduceCat.R' 'reduce.R' 'S3Generics.R'
