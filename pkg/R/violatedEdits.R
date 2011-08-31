@@ -58,6 +58,19 @@ violatedEdits.data.frame <- function(E, dat, ...){
     return(violatedEdits.character(as.character(E$edit), dat, E$name))
 }
 
+#' @method violatedEdits editarray
+#' @rdname violatedEdits
+#' @export
+violatedEdits.editarray <- function(E, dat,...){
+    s <- getSep(E)
+    for ( v in colnames(dat) ) dat[,v] <- paste(v,dat[,v],sep=s)
+    apply(dat,1, function(r) {
+        apply(E[,r,drop=FALSE],1,all)
+        }
+    )
+}
+
+
 
 #' Lists which rows of \code{data.frame dat} violate which constraints
 #'
