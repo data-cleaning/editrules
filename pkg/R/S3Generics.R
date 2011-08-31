@@ -111,29 +111,6 @@ errorLocalizer <- function(E, x, weight=rep(1,length(x)), ...){
 
 
 
-#' Find obvious redundancies in set of edits
-#'
-#' The function returns a logical vector which is TRUE at any row of the system 
-#' Ax <operators> b which is obviously redundant. Obvious redundancies, amounting
-#' to statements as 0==0 or 0 < 1 may arise durining elimination processes. The 
-#' function also checks for duplicate rows in the augmented matrix [A|b]
-#' 
-#' Extra paramters:
-#' \itemize{
-#' \item{tol: tolerance to check for zeros, default square root of machine accuracy}
-#' \item{duplicates: logical, check for duplicate rows?, default \code{TRUE}}
-#' \item{duplicates.tol: tolerance for duplicate search, standard: \code{tol}}
-#' }
-#' @param E Augmented matrix A|b, editmatrix 
-#' @param ... parameters to be passed to or from other methods. 
-#' 
-#'
-#'
-#' @seealso \code{\link{isObviouslyRedundant.matrix}}, \code{\link{isObviouslyRedundant.editmatrix}}
-#' @export 
-isObviouslyRedundant <- function(E, ...){
-    UseMethod("isObviouslyRedundant")
-}
 
 #' Bring an (edit) matrix to reduced row echelon form.
 #'

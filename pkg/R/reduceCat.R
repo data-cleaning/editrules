@@ -46,13 +46,6 @@ eliminate.editarray <- function(E, var, ...){
     neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E), H=H, h=h)
 }
 
-#' duplicated method for editarray
-#' @method duplicated editarray
-#' @param x a \code{\link{editarray}}
-#' @param ... other parameters to be passed to or from other methods.
-#' @export
-duplicated.editarray <- function(x, ...) duplicated(getArr(x))
-
 
 #' check if any edit rule is a subset of another one)
 #'
@@ -93,16 +86,5 @@ substValue.editarray <- function(E, var, value, ...){
     A[,ii] <- FALSE
     I <- A[,ival]
     neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), sep=sep, levels=getlevels(E))
-}
-
-#' check if any of the variables has FALSE for every category (a record can never be contained in such a set)
-#' @method isObviouslyRedundant editarray
-#' @param E \code{editarray} 
-#' @param ... other arguments to be passed to or from other methods.
-#' @export
-isObviouslyRedundant.editarray <- function(E,...){
-    ind <- getInd(E)
-    for ( I in ind ) if ( any(apply(!E[,I,drop=FALSE],1,all)) ) return(TRUE)
-    return(FALSE)
 }
 
