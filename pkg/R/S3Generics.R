@@ -1,59 +1,3 @@
-#' Check rows of data.frame against edits.
-#'
-#' This is an S3 generic function for checking rows of a \code{data.frame} against
-#' a number of edit restrictions. The edits can be entered either in \code{character}
-#' \code{data.frame} or \code{editmatrix} format.
-#'
-#' If edits are represented as a \code{character} vector, the entries of \code{E} are parsed
-#' and evaluated in the environment of \code{dat}
-#'
-#' If the edits are  represented in a \code{data.frame}, the \code{data.frame} must have the format
-#' described in \code{\link{editmatrix}}. The edits are coerced to a character vector, and passed
-#' to \code{checkRows.character}.
-#'
-#' If the edits are represented by an \code{\link{editmatrix}} (representing linear (in)equalities)
-#' verbose edits are extracted and passed on to \code{checkRows.character}
-#'
-#'
-#' @aliases checkRows.character checkRows.data.frame checkRows.editmatrix
-#'
-#' @param E Edits, in \code{character}, \code{data.frame} or \code{\link{editmatrix}} representation
-#' @param dat The data to check.
-#' @return a logical vector with \code{length} equal to \code{nrow(dat)}. If a row is violates 
-#'      no edit restrictions, \code{TRUE} otherwise \code{FALSE}
-#'
-#' @seealso violatedEdits
-#' @example ../examples/checkRows.R
-#' @export
-checkRows <- function(E, dat){
-    UseMethod("checkRows")
-}
-
-
-#' Retrieve which rows of \code{data.frame dat} violate which constraints
-#'
-#' This is an S3 generic function for checking rows of a \code{data.frame} against
-#' a number of edit restrictions. The edits can be entered either in \code{character}
-#' \code{data.frame} or \code{editmatrix} format. The returned value is a logical matrix
-#' with dimension (number of records )\eqn{times}(number of edits), indicating which
-#' record violates (\code{TRUE}) which edit.
-#'
-#' This function can be used as an input for automatic corrections methods.
-#' This method will fail if \code{E} contains variables that are not available in \code{dat}
-#' 
-#' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
-#' @example ../examples/violatedEdits.R
-#' @export
-#' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
-#' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
-#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a data.frame
-#' @param ... further arguments that can be used by methods implementing this generic function
-#' @return a logical matrix where each row indicates which contraints are violated
-violatedEdits <- function(E, dat, ...){
-    UseMethod("violatedEdits")
-}
-
-
 #' Localize errors in a record based on Fellegi and Holt's paradigm
 #' 
 #' Returns a \code{\link{backtracker}} object for error localization in numerical data.
@@ -110,35 +54,6 @@ errorLocalizer <- function(E, x, weight=rep(1,length(x)), ...){
 }
 
 
-
-
-#' Bring an (edit) matrix to reduced row echelon form.
-#'
-#' If E is a matrix, a matrix in reduced row echelon form is returned.
-#' If E is an \code{\link{editmatrix}} the equality part of E is transformed
-#' to reduced row echelon form.
-#'
-#' @aliases echelon.editmatrix echelon.matrix
-#'
-#' @param E a matrix or editmatrix
-#' @param ... options to pass on to further methods.
-#' @export
-echelon <- function(E,...){
-    UseMethod("echelon")
-}
-
-#' eliminate a variable from a set of edit rules
-#' 
-#' 
-#'
-#'
-#' @param E \code{\link{editmatrix}} or \code{\link{editarray}} 
-#' @param var name of variable to be eliminated
-#' @param ... argumemts to be passed to or from other methods
-#' @export
-eliminate <- function(E, var, ...){
-    UseMethod("eliminate")
-}
 
 
 

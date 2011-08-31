@@ -4,6 +4,21 @@ eliminateFM <- function(E, var,...){
 }
 
 
+
+#' eliminate a variable from a set of edit rules
+#' 
+#' 
+#'
+#'
+#' @param E \code{\link{editmatrix}} or \code{\link{editarray}} 
+#' @param var name of variable to be eliminated
+#' @param ... argumemts to be passed to or from other methods
+#' @export
+eliminate <- function(E, var, ...){
+    UseMethod("eliminate")
+}
+
+
 #' Eliminate a variable from an editmatrix
 #'
 #' Uses Fourier-Motzkin elimination to eliminate a variable from a set
@@ -12,13 +27,12 @@ eliminateFM <- function(E, var,...){
 #' restrictions. Obvious redundancies of the type 0 < 1 are removed as well. 
 #'
 #' @method eliminate editmatrix
-#' @param E an object of class \code{\link{editmatrix}}
-#' @param var \code{character} name of the variable to eliminate
 #' @param fancynames \code{logical} If true, the derived restrictions have rownames derived from the original restrictions (slower).
 #' @param ... other arguments to be passed to or from other methods
 #' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
 #'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
-#' 
+#'
+#' @rdname eliminate 
 #' @example ../examples/eliminate.R
 #'
 #' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyInfeasible}}
@@ -124,5 +138,54 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 
 
 
+#' eliminate one category from a logical array, not for export.
+#' 
+#' TODO redundancy removal by recording derivation history -- if possible.
+#' @keywords internal
+eliminateCat <- function(A, J, j, H, h){
+    j1 <- A[,J[j]]
+    j2 <- !j1
+    n1 <- sum(j1)
+    n2 <- sum(j2)
+    if (n1==0 || n2==0) return(A)
+    I1 <- rep(which(j1), times=n2)
+    I2 <- rep(which(j2), each=n1)
+    B <- array(FALSE,dim=c(n1*n2,ncol(A)))
+    B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
+    B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
+    A <- rbind(A[j1,,drop=FALSE],B)
+    # detect redundancies and get rid of them
+    H <- rbind(H[j1,,drop=FALSE],H[I1,,drop=FALSE] | H[I2,,drop=FALSE])
+    I3 <- rowSums(H) > h+1
+    list(A=A[!I3,,drop=FALSE], H=H[I3,,drop=FALSE], h=h+1)
+}
 
+#' Eliminate variable from editarray.
+#' 
+#' The elimination method is based on repeated logical reduction on categories.
+#'
+#' @method eliminate editarray
+#' @rdname eliminate
+#' @export
+eliminate.editarray <- function(E, var, ...){
+    J <- getInd(E)[[var]]
+    sep <- getSep(E) 
+    A <- getArr(E)
+    h <- geth(E)
+    if ( is.null(h) ){
+        h <- 0
+        H <- matrix(FALSE,ncol=nrow(E),nrow=nrow(E))
+        diag(H) <- TRUE
+    } else {
+        H <- getH(E)
+    }
+    for ( j in 1:length(J)){
+         red <- duplicated(A) | isObviouslyRedundant(A)
+         L <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         A <- L$A
+         H <- L$H
+         h <- L$h
+    }
+    neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E), H=H, h=h)
+}
 

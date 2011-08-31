@@ -1,46 +1,26 @@
 
-#' @rdname checkRows
-#' @method checkRows editmatrix
+#' Retrieve which rows of \code{data.frame dat} violate which constraints
+#'
+#' This is an S3 generic function for checking rows of a \code{data.frame} against
+#' a number of edit restrictions. The edits can be entered either in \code{character}
+#' \code{data.frame} or \code{editmatrix} format. The returned value is a logical matrix
+#' with dimension (number of records )\eqn{times}(number of edits), indicating which
+#' record violates (\code{TRUE}) which edit.
+#'
+#' This function can be used as an input for automatic corrections methods.
+#' This method will fail if \code{E} contains variables that are not available in \code{dat}
+#' 
+#' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
+#' @example ../examples/violatedEdits.R
 #' @export
-checkRows.editmatrix <- function(E, dat){
-    stopifnot(is.data.frame(dat))
-    vars <- getVars(E) %in% names(dat)
-    if (!all(vars)){
-       stop("Edits contain variable(s):", paste(colnames(E)[!vars], collapse=","), 
-            ", that are not available in the data.frame")
-    }
-    
-    check <- !logical(nrow(dat))
-    ed <- as.expression(E)
-    for ( i in 1:length(ed)){
-        check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
-            stop(paste("Edit",ed[[i]],"can not be checked. Evaluation returned",e$message,sep="\n" ))
-        })
-    }
-    return(check)    
-} 
-
-#' @rdname checkRows
-#' @method checkRows character
-#' @export
-checkRows.character <- function(E, dat){
-   ed <- parseEdits(E)
-    check <- !logical(nrow(dat))
-    for ( i in 1:length(E)){
-        check <- check & tryCatch(eval(ed[[i]], envir=dat), error=function(e){
-            stop(paste("Edit",ed[[i]],"can not be checked. Evaluation returned",e$message,sep="\n" ))
-        })
-    }
-    return(check)
+#' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
+#' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
+#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a data.frame
+#' @param ... further arguments that can be used by methods implementing this generic function
+#' @return a logical matrix where each row indicates which contraints are violated
+violatedEdits <- function(E, dat, ...){
+    UseMethod("violatedEdits")
 }
-
-#' @rdname checkRows
-#' @method checkRows data.frame
-#' @export
-checkRows.data.frame <- function(E, dat){
-    checkRows(as.character(E$edit),dat)
-}
-
 
 
 #' @rdname violatedEdits
@@ -93,3 +73,11 @@ listViolatedEdits <- function(E, dat){
     errorlist <- apply(errors, 1, which)
     return(apply(errors, 1, which))
 }
+
+
+
+
+
+
+
+
