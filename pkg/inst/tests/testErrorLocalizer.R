@@ -1,5 +1,5 @@
 require(testthat)
-
+context("Error Localization")
 
 test_that("errorLocalizer for numerical data",{
     bt <- errorLocalizer(
@@ -18,13 +18,16 @@ test_that("errorLocalizer for numerical data",{
 
 test_that("errorLocalizer for categorical data",{
     E <- editarray(c(
-        "positionInHousHold %in% c('marriage partner','child','other')",
+        "positionInHouseHold %in% c('marriage partner','child','other')",
         "age %in% c('child','adult')",
         "maritalStatus %in% c('unmarried','married','widowed')",
         "if (age == 'child') maritalStatus == 'unmarried'",
         "if (maritalStatus == 'unmarried') positionInHouseHold != 'marriage partner'"
         ))
 
+r <- c(age='child',maritalStatus='married',positionInHouseHold='child')
+e <- errorLocalizer(E,r)
+e$searchNext()
 
 })
 

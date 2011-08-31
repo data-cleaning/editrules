@@ -1,4 +1,7 @@
 
+context("Echelon")
+
+
 test_that("Matrix reduces to echelon form",{
     expect_equal(
         round(echelon(

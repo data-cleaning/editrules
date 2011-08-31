@@ -77,7 +77,7 @@ isObviouslyRedundant.editarray <- function(E, duplicates=TRUE, ...){
     if ( ncol(E) == 0 ) return(logical(0))
     if ( ncol(E) == 1 ) return(as.vector(E))
     ind <- getInd(E)
-    red <- apply(sapply(I,function(i) rowSums(E[,i,drop=FALSE])==0),1,any)
+    red <- apply(sapply(ind,function(i) rowSums(E[,i,drop=FALSE])==0),1,any)
     if ( duplicates ) red <- red | duplicated.editarray(E)
     red
 }

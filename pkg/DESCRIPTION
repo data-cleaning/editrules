@@ -16,8 +16,10 @@ Version: 1.5
 URL: http://code.google.com/p/editrules/
 Date: 2011-08-01
 Suggests: lpSolveAPI,iterators
-Collate: 'backtracker.R' 'blocks.R' 'check.R' 'editarray.R'
-    'editmatrixAttr.R' 'editmatrix.R' 'editrules-data.R' 'eliminate.R'
-    'errorLocalizer.editarray.R' 'errorLocalizer.editmatrix.R'
-    'isObviouslyInfeasible.R' 'localizeError_mip.R' 'parseEdits.R'
-    'pkg.R' 'reduceCat.R' 'reduce.R' 'S3Generics.R'
+Collate: 'backtracker.R' 'blocks.R' 'checkRows.R' 'duplicated.R'
+    'echelon.R' 'editarrayAttr.R' 'editarray.R' 'editmatrixAttr.R'
+    'editmatrix.R' 'editrules-data.R' 'eliminate.R' 'errorLocalizer.R'
+    'getVars.R' 'isFeasible.R' 'isObviouslyInfeasible.R'
+    'isObviouslyRedundant.R' 'is.R' 'isSubset.R' 'localizeError_mip.R'
+    'parseEdits.R' 'pkg.R' 'print.R' 'removeEmpty.R' 'substValue.R'
+    'violatedEdits.R'

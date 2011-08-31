@@ -1,5 +1,7 @@
 library(testthat)
 
+context("Obvious infeasibility")
+
 test_that("Obvious infeasibility is detected",{
     expect_true(isObviouslyInfeasible(editmatrix("0*x == 1")))    
     expect_true(isObviouslyInfeasible(editmatrix("0*x < -1")))

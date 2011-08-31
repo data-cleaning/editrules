@@ -1,6 +1,6 @@
 
 require(testthat)
-
+context("Obvious redundancy")
 
 test_that("Obviously redundant rows are detected",{
     expect_true(isObviouslyRedundant(editmatrix("0*x == 1e-12")))

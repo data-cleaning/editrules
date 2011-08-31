@@ -57,6 +57,7 @@ contains <- function(E,var){
 #' @export
 datamodel <- function(E){
     st <- stack(getInd(E))
-    data.frame(variable=as.character(st[,2]),value=rownames(st))
+    vals <- do.call(c,lapply(getInd(E),names))
+    data.frame(variable=as.character(st[,2]),value=vals,row.names=1:nrow(st))
 }
 
