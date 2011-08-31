@@ -20,7 +20,15 @@ violatedEdits.editarray <- function(E, dat,...){
 #' @method errorLocalizer editarray
 #' @rdname errorLocalizer
 #' @export
-errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
+errorLocalizer.editarray <- function(
+    E, 
+    x, 
+    weight=rep(1,length(x)), 
+    maxadapt=length(x),
+    maxweight=sum(weight),
+    maxduration=600,
+    ...){
+
     adapt <- is.na(x)
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
@@ -34,8 +42,9 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
         isSolution = {
             w <- sum(weight[adapt])
 
-            if ( w > wsol )  return(FALSE) 
-  
+            if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
+
+            # check feasibility 
             I <- unique(do.call(c, c(ind[totreat],ind[adapt])))
             if ( length(totreat) > 0 &&  any(rowSums(E[,I,drop=FALSE]) == length(I)) ) return(FALSE)
             
@@ -66,6 +75,8 @@ errorLocalizer.editarray <- function(E, x, weight=rep(1,length(x)), ...){
         },
         E       = E,
         x       = x,
+        maxadapt= maxadapt,
+        maxweight=maxweight,
         totreat = totreat,
         adapt   = adapt,
         weight  = weight,

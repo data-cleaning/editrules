@@ -123,28 +123,6 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 }
 
 
-#' Check for obvious contradictions in set of (in)equalities
-#' 
-#' If any edit in E is an obvious contradictions of a form similar to 0 < -1, the function.
-#' returns TRUE, otherwise FALSE. Obvious inconsistencies may arise during elimination processes.
-#' 
-#' @param E An normalized \code{link{editmatrix}}. If E is not normalized on entry, it will be normalized internally prior to checking. 
-#' @param tol Tolerance for checking against zero.
-#' @seealso \code{\link{eliminate}} \code{\link{editmatrix}}
-#' @export
-isObviouslyInfeasible <- function(E, tol=sqrt(.Machine$double.eps)){
-    if ( !isNormalized(E) ) E <- normalize(E)
-    A <- getAb(E)
-    operators <- getOps(E)
-    ib <- ncol(A)
-    zeroCoef <- rowSums(abs(A[,-ib,drop=FALSE])) < tol  
-    b <- round(A[,ib],ceiling(-log10(tol)))    
-    if ( any(zeroCoef & operators == "<"    &  b <= 0) || 
-         any(zeroCoef & operators == "<="   &  b <  0) || 
-         any(zeroCoef & operators == c("==") &  abs(b) > tol)) return(TRUE)
-    return(FALSE)
-}
-
 
 
 #' Redundancy check, \code{matrix} method

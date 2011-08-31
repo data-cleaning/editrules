@@ -70,16 +70,6 @@ isSubset <- function(E){
     })
 }
 
-#' Check for obvious infeasibility
-#'
-#' Check if boolean rep. of an edit is TRUE for every variable and every category?
-#' @param E editarray
-#' @param ... Other arguments to be passed to or from other methods
-#' @export
-isObviouslyInfeasible.editarray <- function(E,...){
-    any(rowSums(E)==ncol(E))
-}
-
 
 #' Substitute a value in an editarray: 
 #'

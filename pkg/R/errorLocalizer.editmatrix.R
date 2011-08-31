@@ -17,7 +17,6 @@ errorLocalizer.editmatrix <- function(
             maxweight=sum(weight),
             maxduration=600,
             ...){
-    # search space larger then 1M:
 
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
@@ -38,12 +37,12 @@ errorLocalizer.editmatrix <- function(
         maxduration=maxduration,
         isSolution = {
             w <- sum(weight[adapt])
-            if ( w > wsol 
+            if ( w > min(wsol,maxweight) 
               || sum(adapt) > maxadapt
-              || isObviouslyInfeasible(.E)
+              || isObviouslyInfeasible.editmatrix(.E)
                ) return(FALSE)
 
-            if ( w == wsol && isObviouslyInfeasible(substValue(.E,totreat,x[totreat])) ) 
+            if ( w == wsol && isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat])) ) 
                     return(FALSE)
             # TODO report status
             if (length(totreat) == 0){
@@ -68,6 +67,7 @@ errorLocalizer.editmatrix <- function(
         .E = E,
         x = x,
         maxadapt=maxadapt,
+        maxweight=maxweight,
         totreat = totreat,
         adapt = adapt,
         weight = weight,

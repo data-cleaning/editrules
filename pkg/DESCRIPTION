@@ -7,31 +7,17 @@ Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
 Description: Facilitates reading and manipulation of linear
-    (in)equalities, converting them into matrix format (and
-    vice versa) and checking if data are valid according to
-    these rules. Sets of linear edits can be manipulated
-    using Fourier-Motzkin elimination and variable
-    substitution and solving error localization problems
+    (in)equalities, converting them into matrix format (and vice versa)
+    and checking if data are valid according to these rules. Sets of
+    linear edits can be manipulated using Fourier-Motzkin elimination
+    and variable substitution and solving error localization problems
     based on the generalized principle of Felligi and Holt.
 Version: 1.5
 URL: http://code.google.com/p/editrules/
 Date: 2011-08-01
-Suggests:
-    lpSolveAPI,iterators
-Collate:
-    'backtracker.R'
-    'blocks.R'
-    'check.R'
-    'editmatrix.R'
-    'editmatrixAttr.R'
-    'editrules-data.R'
-    'eliminate.R'
-    'localizeError_mip.R'
-    'parseEdits.R'
-    'pkg.R'
-    'reduce.R'
-    'S3Generics.R'
-    'editarray.R'
-    'errorLocalizer.editarray.R'
-    'errorLocalizer.editmatrix.R'
-    'reduceCat.R'
+Suggests: lpSolveAPI,iterators
+Collate: 'backtracker.R' 'blocks.R' 'check.R' 'editarray.R'
+    'editmatrixAttr.R' 'editmatrix.R' 'editrules-data.R' 'eliminate.R'
+    'errorLocalizer.editarray.R' 'errorLocalizer.editmatrix.R'
+    'isObviouslyInfeasible.R' 'localizeError_mip.R' 'parseEdits.R'
+    'pkg.R' 'reduceCat.R' 'reduce.R' 'S3Generics.R'
