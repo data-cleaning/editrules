@@ -49,7 +49,6 @@ editarray <- function(editrules, sep=":"){
     
     # derive datamodel
     cols <- sort(unique(do.call(c,lapply(v,names))))
-    
     # get variable names
     vr <- sub(paste(sep,".+","",sep=""),"",cols)
     vars <- unique(vr)

@@ -1,5 +1,7 @@
 library(testthat)
 
+context("Linear editrow derivarions")
+
 test_that("Various rows work",{
    edt <- parse(text=c("x==y", "x+w ==y"))
    e <- parseNum(edt[[1]])

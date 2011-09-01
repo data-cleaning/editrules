@@ -2,7 +2,7 @@
 
 library(testthat)
 
-
+context("Editarray")
 
 
 test_that("2x2 categorical datamodel",{

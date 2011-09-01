@@ -1,5 +1,7 @@
 library(testthat)
 
+context("Editmatrix attributes")
+
 test_that("editrules can derive the correct info from a matrix",{
    mat <- matrix( c( 1,-2, 0
                    , 2, 0, 1

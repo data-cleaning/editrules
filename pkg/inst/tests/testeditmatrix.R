@@ -1,5 +1,7 @@
 library(testthat)
 
+context("Editmatrix")
+
 test_that("editmatrix works correcly with character",{
    cond <- c( "x == y"
             , "z + w == y + x"
