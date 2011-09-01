@@ -17,7 +17,7 @@
 
 \newtheorem{theorem}{Theorem}
 
-\usepackage{float}
+\usepackage{float} 
  
 \floatstyle{boxed}
 \newfloat{Rcode}{t}{rco}
@@ -48,7 +48,7 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is far from finished. Version 2.0 fo the package will have
+{\em This vignette is far from finished. Version 2.0 of the package will have
 the full vignette. At the moment, functionality for solving error localization problems
 with lp solvers is experimental.}
 \end{abstract}
@@ -65,22 +65,28 @@ with lp solvers is experimental.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Error localization as a mixed integer problem}
 \subsection{Previous work}
-
-\subsection{Numerical stability}
-
 \section{Formulation as a mixed integer problem}
+For each record to be checked a new mixed integer problem is formulated.
+The mip consist of the original edits plus additional edits involving the reported values of this record. 
+Furthermore it involves an objective function that should be minimized.
+
 
 \subsection{Numerical edits}
-Numerical variables in practice are always bounded, e.g. age, income, height.
+Numerical variables are always bounded in practice, e.g. age, income, height.
 In our formulation of the error localization problem as a mixed integer 
-problem we use the boundaries explicitly: first of all it allows an easy 
-to understand and to implement equations, but our formulation also improves 
-numerical stability for suitable choosen boundaries. We use greek symbols to note 
-constants.
+problem we use the boundaries explicitly: first of all it allows for easy 
+to understand and to implement equations. Secondly our formulation improves 
+numerical stability of the MIP for suitable choosen boundaries. 
 
-The record to be checked has the following (numerical) values:
+We use greek symbols to note constants. The record ${\bf x} = (x_1,\dots,x_m)$ to be validated 
+has the following reported (numerical) values, that may be incorrect:
 \begin{equation}
 x_i = \chi_i \label{eq:values}
+\end{equation}
+under the restriction of
+\begin{equation}
+%a_i \cdot x_i \odot_i b_i \textrm{ with }\odot_i \in {=, \leq, <}
+A {\bf x} {\bf\odot} b \textrm{ with } \bf \odot \in \{=, \leq, <\}^n
 \end{equation}
 
 We assume each variable $x_i$ is bounded by $\alpha_i$ and $\beta_i$
@@ -88,33 +94,74 @@ We assume each variable $x_i$ is bounded by $\alpha_i$ and $\beta_i$
 \alpha_i \leq x_i \leq \beta_i \label{eq:boundary}
 \end{equation}
 
-For each variable $x_i$ we introduce a binary variable $u_i \in \{0,1\}$ and we add two edits 
+For each variable $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and we add two edits 
 to the original edit matrix that conditionally constrain the value of $x_i$ to $\chi_i$ 
 
 \begin{eqnarray}
-x_i &\leq& \chi_i + (\beta_i - \chi_i)u_i \\
-(\alpha_i - \chi_i)u_i + \chi_i &\leq& x_i
+x_i &\leq& \chi_i + (\beta_i - \chi_i)d_i \\
+(\alpha_i - \chi_i)d_i + \chi_i &\leq& x_i
 \end{eqnarray}
-Variable $u_i$ signifies if $x_i$ should be adapted: if $u_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
-that the reported $\chi_i$ is assumed correct. When $u_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that
+Variable $d_i$ signifies if $x_i$ should be adapted: if $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
+that the reported $\chi_i$ is assumed correct. When $d_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that
 the value of $x_i$ is unconstrained and can take any feasible value.
 
-Felligi Holt, minimize the weigthed sum of adaptations.
+The principle of Felligi Holt \cite{} is to minimize the weigthed sum of adaptations.
 
-The error localization problem can now be formulated as the mixed integer problem:
-Minimize $\sum_i w_i u_i$, with:
+The error localization problem can now be formulated as the folowing mixed integer problem:
+
+Minimize $\sum^m_{j=1} w_j d_j$, with:
 \begin{equation}
 \begin{array}{rcrcl}
-a_i x_i &&                  &\odot_i& b_i    \\
-    x_i &-& \beta^*_i u_i   &\leq   & \chi_i \\
-   -x_i &+& \alpha^*_i u_i  &\leq   & -\chi_i
+\sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
+\ldots                 &&                  &\ldots& \ldots  \\
+\sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
+    x_1 &-& \beta^*_1 d_1   &\leq   & \chi_1 \\
+   -x_1 &+& \alpha^*_1 d_1  &\leq   & -\chi_1 \\
+\ldots  & & \ldots          &       & \ldots \\
+    x_m &-& \beta^*_m d_m   &\leq   & \chi_m \\
+   -x_m &+& \alpha^*_m d_m  &\leq   & -\chi_m
+
 \end{array}
 \end{equation}
 
+with $\beta^*_i = \beta_i - \chi_i$ and $\alpha^*_i = \alpha_i - \chi_i$.
+
+For large values of  $\beta^*_i$ or $\alpha^*_i$ the resulting MIP problem becomes numerical unstable
+so it is wise to choose suitable boundaries, which we will discuss later on.
+
 \subsection{Implementation}
+We will use {\tt lpSolveAPI} to solve the mix integer problem. Other candidates are {\tt glpk}
+will extend an existing {\tt editmatrix} with the edits and give the 
 
 \subsection{categorical edits}
-\subsection{mixed edits}
+In (ref naar categorical edit paper) we choose an boolean representation for categorical edits.
+To solve the error localization problem for (purely) categorical edits we have to formulate categorical
+edits as a integer problem.
+
+Each edit should hold (conjunction) and each edit states that at least one statement has to be true.
+An categorical editmatrix can be seen as a conjunction of disjunctions: it is in conjunctive normal form (reference). 
+
+* Write a categorical variable as a disjunction of boolean variables for each category, with the restriction that their sum is atmost 1. (equals 1 for a closed domain).
+
+* each edit can be written as a disjunction of statements
+
+* each disjunction can be written as a numerical edit where at least one of the variables has to be one
+
+\begin{equation}
+A \in {a_j} \lor B \in {b_k}
+\end{equation}
+
+$$\lnot (A \in {a_j})$$
+
+* error localizing edits: for each variable $c_i$ $c^\chi_i$, introduce an edit with $d_i = 1 - $c^\chi_i$. When $d_i = 0$,  $c_i = \chi_i$, meaning that the reported value of $c_i$ is assumed correct,  When $d_i = 1$, $c^\chi_i = 0$, meaning that $c_i$ should be adapted.
+
+\subsection{Open vs close domains}
+
+\subsection{Mixed edits}
+
+* Each mixed edit can be written as a categorical edit plus numerical edits for all enclosed numerical edits
+
+
 
 \section{Boundary heuristics}
 \subsection{From data set}
