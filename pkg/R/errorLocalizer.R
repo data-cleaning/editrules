@@ -31,7 +31,6 @@
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
 #' @param x a named numerical vecor (if E is an editmatrix) or a named character vector (if E is an editarray). 
 #'    This is the record for which errors will be localized.
-#' @param weight A \code{length(x)} positive weight vector.
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
 #' @return an object of class \code{\link{backtracker}}. Each execution of \code{$searchNext()} yields a solution
@@ -49,7 +48,7 @@
 #' http://www.cbs.nl/nl-NL/menu/methoden/onderzoek-methoden/onderzoeksrapporten/proefschriften/2008-proefschrift-de-waal.htm
 #' 
 #' @export
-errorLocalizer <- function(E, x, weight=rep(1,length(x)), ...){
+errorLocalizer <- function(E, x, ...){
     UseMethod("errorLocalizer")
 }
 
@@ -57,7 +56,7 @@ errorLocalizer <- function(E, x, weight=rep(1,length(x)), ...){
 #' Localize errors in numerical data
 #'
 #' @method errorLocalizer editmatrix
-#' 
+#' @param weight a \code{lengt(x)} positive weight vector
 #' @param maxadapt maximum number of variables to adapt
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
 #' maximum number of variables to adapt. 
