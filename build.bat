@@ -3,6 +3,10 @@
 echo Removing building information...
 rm -rf output
 
+echo Copying DESCRIPTION and NAMESPACE to pkg directory..."
+copy build\DESCRIPTION pkg
+copy build\NAMESPACE pkg
+
 echo Generate documentation...
 Rscript roxygen.R
 echo export(`[.editmatrix`) >> pkg/NAMESPACE
