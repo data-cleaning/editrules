@@ -6,6 +6,10 @@
 #           * numeric instability may give no, or false solutions, how ever these can
 # be checked with editrules isFeasible functionality. Furthermore, numeric instability can be decreased by using appropiate upper
 # and lower bounds
+#
+# TODO 
+# * support for NA
+# * 
 
 #' Extends an editmatrix with extra constraints needed for error
 #' localization
@@ -122,14 +126,6 @@ localizeError_mip <- function( E
    }
    lps <- as.lp.editmatrix(E)
    
-#    A <- getA(E)
-#    lps <- make.lp(nrow(A), ncol(A), verbose=verbose)
-#    dimnames(lps) <- dimnames(A)
-#    for (v in 1:ncol(A)){
-#      set.column(lps, v, A[,v])
-#    }
-#    set.constr.type(lps,types=ops)
-#    set.constr.value(lps, getb(E))
    set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)

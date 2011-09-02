@@ -875,7 +875,7 @@ altered.
 %
 %
 \begin{figure}
-\input{tree.tex}
+\input{fig/tree.tex}
 \caption{Graphical representation of the binary tree used to solve the error
 localization problem for the record $(x=-2,y=-1)$, subject to the edits of
 Eqn.\eqref{E1}.  Each node contains an edit set, a (partially completed) record
