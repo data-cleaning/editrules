@@ -21,7 +21,7 @@ getSep <- function(E) attr(E,"sep")
 #' @param E \code{\link{editarray}}
 #' @return logical array
 #' @keywords internal
-getArr <- function(E) E[,,drop=FALSE]
+getArr <- function(E) unclass(E)[,,drop=FALSE]
 
 #' retrieve level names from editarray
 #' @param editarray \code{\link{editarray}}
@@ -53,7 +53,7 @@ contains <- function(E,var){
 #'
 #' @param E editarray
 #' @return \code{data.frame} describing the categorical variables and their levels.
-#' 
+#' @example ../examples/datamodel.R
 #' @export
 datamodel <- function(E){
     st <- stack(getInd(E))

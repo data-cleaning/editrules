@@ -24,6 +24,7 @@ test_that("2x{TRUE,FALSE} datamodel",{
      is_equivalent_to(getArr(editarray(c(dm,"!p || g=='f'"))),array(c(F,T,F,T),dim=c(1,4)))
 })
 
+context("Editarray parsing")
 test_that("parse editarray to character and back",{
     edts <- c(
         "g %in% c('m','f')",

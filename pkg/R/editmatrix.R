@@ -119,27 +119,6 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 
 
 
-#' Row index operator for \code{editmatrix}.
-#'
-#' Use this operator to select edits from an editmatrix object.
-#'
-#' @usage `[.editmatrix`(x,i,j,...)
-#' @param x an object of class \code{\link{editmatrix}}
-#' @param i the row index in the edit matrix
-#' @param j the column index in the edit matrix
-#' @param ... arguments to be passed to other methods. Currently ignored.
-#' @rdname editmatrix-subscript
-#' @export
-`[.editmatrix` <- function(x, i, j, ...){
-    E <- neweditmatrix(
-        A = as.matrix(x)[i, j, drop=FALSE],
-        ops = getOps(x)[i]
-    )
-    attr(E,"H") <- attr(x,"H")[i, , drop=FALSE]
-    attr(E,"h") <- attr(x,"h")
-    E
-}
-
 
 
 #' Coerce a matrix to an edit matrix.

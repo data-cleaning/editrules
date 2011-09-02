@@ -30,10 +30,9 @@ editarray(c(
     "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
     "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
     "if( gender == 'male' ) !pregnant",
-    "if( maritalStatus \%in\% c('married','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
+    "if( maritalStatus \%in\% c('unmarried','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
     )
 )
-
 
 
 
