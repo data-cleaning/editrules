@@ -1,6 +1,6 @@
 
-Sweave("editrules-linear.Snw")
-Sweave("editrules-categorical.Snw")
+Sweave("editrules-linear.Rnw")
+Sweave("editrules-categorical.Rnw")
 
 
 

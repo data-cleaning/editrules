@@ -1,4 +1,4 @@
-
+#### examples with numerical edits
 # example with a single editrule
 # p = profit, c = cost, t = turnover
 E <- editmatrix(c("p + c == t"))
@@ -51,3 +51,35 @@ cp <- errorLocalizer(E,x=c(p=755, c1=50, c2=NA,t=200))
 # There are two solutions. Both demand that c2 is adapted:
 cp$searchNext()
 cp$searchNext()
+
+##### Examples with categorical edits
+# 
+# 3 variables, recording age class, position in household, and marital status:
+# We define the datamodel and the rules
+E <- editarray(c(
+    "age \%in\% c('under aged','adult')",
+    "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
+    "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
+    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+    "if( maritalStatus \%in\% c('married','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
+    )
+)
+E
+
+# Let's define a record with an obvious error:
+r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
+# The age class and position in household are consistent, while the marital status conflicts. 
+# Therefore, changing only the marital status (in stead of both age class and postition in household)
+# seems reasonable. 
+el <- errorLocalizer(E,r)
+el$searchNext()
+
+
+
+
+
+
+
+
+
+

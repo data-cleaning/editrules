@@ -87,7 +87,11 @@ isObviouslyRedundant.editarray <- function(E, duplicates=TRUE, ...){
 #'
 #' @keywords internal
 isRedundant.boolmat <- function(A, ind){
-    apply(sapply(ind,function(i) rowSums(A[,i,drop=FALSE])==0),1,any)
+    if ( nrow(A) == 1 ) return(any(vapply(ind,function(i) sum(A[,i])==0,FUN.VALUE=TRUE)))
+    apply(
+        vapply(ind, function(i) rowSums(A[,i,drop=FALSE])==0, FUN.VALUE=logical(nrow(A))),
+        1,any
+    )
 }
 
 

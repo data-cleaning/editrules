@@ -47,7 +47,8 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
 
 #' Substitute a value in an editarray
 #'
-#' Multiple replacements is not yet implemented.
+#' Only rows with \code{<var>:<value>==TRUE} are kept. In the kept rows, categories not equal to <value> are set to \code{FALSE}
+#' Multiple replacements is not yet implemented. 
 #'
 #' @method substValue editarray
 #'
@@ -58,14 +59,14 @@ substValue.editarray <- function(E, var, value, ...){
 # TODO: make this work for multiple variables and values.
     J <- getInd(E)[[var]]
     sep=getSep(E)
-    value <- paste(var,value,sep=sep)
-    ival <- intersect(which(colnames(E) == value), J) 
-    if ( length(ival) != 1 ) 
+
+    i <- J[value]
+    if ( is.na(i) ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
-    ii <- setdiff(J,ival)
+    ii <- setdiff(J,i)
     A <- getArr(E)
     A[,ii] <- FALSE
-    I <- A[,ival]
+    I <- A[,i]
     neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), sep=sep, levels=getlevels(E))
 }
 

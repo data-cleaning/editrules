@@ -213,6 +213,18 @@ errorLocalizer.editarray <- function(
         wsol    = wsol,
         ind     = ind
     )
+    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    with(bt,{
+        searchBest <- function(maxduration=600, VERBOSE=FALSE){
+            l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
+            if (length(l)>0){ 
+                ws <- sapply(l,function(s) s$w)
+                iwmin <- which(ws==min(ws))
+                if (length(iwmin) == 1) return(l[[iwmin]])
+                return(l[[sample(iwmin,1)]])
+            }
+        }
+    })
     bt
 }
 
