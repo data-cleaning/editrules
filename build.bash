@@ -10,7 +10,6 @@ cp build/NAMESPACE pkg
 
 echo "######## Generate documentation..."
 R -q -f roxygen.R
-echo "export(\`[.editmatrix\`)" >> pkg/NAMESPACE
 
 echo "######## Building package in output..."
 mkdir output

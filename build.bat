@@ -9,7 +9,6 @@ copy build\NAMESPACE pkg
 
 echo Generate documentation...
 Rscript roxygen.R
-echo export(`[.editmatrix`) >> pkg/NAMESPACE
 
 md output
 cd output

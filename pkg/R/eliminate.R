@@ -28,7 +28,7 @@ eliminate <- function(E, var, ...){
 #'
 #' @method eliminate editmatrix
 #' @param fancynames \code{logical} If true, the derived restrictions have rownames derived from the original restrictions (slower).
-#' @param ... other arguments to be passed to or from other methods
+#'
 #' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
 #'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
 #'

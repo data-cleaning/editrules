@@ -118,8 +118,6 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 }
 
 
-# NOTE: cannot export subscript function directly because Roxygen removes backticks in export
-# directive. Added explicitly in build.bash
 
 #' Row index operator for \code{editmatrix}.
 #'
@@ -131,6 +129,7 @@ neweditmatrix <- function(A, ops, normalized=FALSE,...){
 #' @param j the column index in the edit matrix
 #' @param ... arguments to be passed to other methods. Currently ignored.
 #' @rdname editmatrix-subscript
+#' @export
 `[.editmatrix` <- function(x, i, j, ...){
     E <- neweditmatrix(
         A = as.matrix(x)[i, j, drop=FALSE],
