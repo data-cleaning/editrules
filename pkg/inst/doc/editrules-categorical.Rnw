@@ -42,7 +42,7 @@
 library(editrules)
 @
 
-\title{Manipulation of categorical and mixed data edits and error localization with the {\tt editrules} package\\
+\title{Manipulation of categorical data edits and error localization with the {\tt editrules} package\\
 {\small package version \Sexpr{packageVersion("editrules")}}}
 \author{Mark van der Loo and Edwin de Jonge}
 \begin{document}
@@ -58,78 +58,134 @@ Refer to the accompanying paper \cite{jonge:2011} for manipulation of linear edi
 \tableofcontents
 \newpage
 
+
 \section{Introduction}
+The value domain of categorical data records is usually limited by domain rules
+interrelating these variables.  The simplest examples are cases where the value
+of one variable excludes values of another variable. For example: if the age
+class of a person is ``child'', then (by law) the marital status cannot be
+``married''. In survey or administrative data, violations of such rules are
+frequently encountered. Resolving such violations is an important step prior to 
+data analysis and estimation.
+
+A categorical data record $\bf v$ is defined as an element of the cartesian product space $D$:
+\begin{equation}
+D = D_1\times D_2\times\ldots\times D_n,
+\end{equation}
+where each $D_k$ is a finite set of $d_k$ possible categories for the $i$th
+variable.  Each restriction $e$ is a subset of $D$ and we say that that {\em if
+${\bf v}\in e$ then $\bf v$ violates $e$}. In data editing literature, such
+rules are referred to as {\em edit rules} or {\em edits}, in short. In the
+context of contingency tables they are referred to as {\em structural zeros}
+since each rule implies one or more cells in the $d_1\times d_2\times\ldots
+d_n$ contingency table must be zero.
+
+Large, complex surveys may consist of hundreds of interrelated rules and
+variables, which impedes resolution of edit violations and renders manual
+manipulation infeasible. The {\sf editerules} package offers functionality to
+define, manipulate and maintain sets of edit rules with relative ease. It also
+implements error localization functionality based on the generalized principle
+of \citep{fellegi:1976}, which states that one should find the smallest
+(weighted) number of variables whose values can be adapted such that all edits
+can be obeyed. Fellegi and Holt's principle should be considered as the last
+resort of data editing. It is useful in situations where a record violates one
+or more edits and there is no information about the cause of the error. In
+certain cases, the cause of error can be estimated with near certainty, for
+example in the case of typing errors in numerical data.  We refer the reader to
+\cite{loo:2011} for such cases.
+
+In the remainder of this paper the representation and manipulation of edits is
+discussed and algorithms are given in pseudocode. Also, coded examples are
+given, al of which can be executed after loading the editrules package.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Defining and checking categorical constraints}
-We spend some time to define the boolean representation, since it eventually allows for an elegant
-elimination method.
+In the next section we describe the representation of edits and records 
+as implemented in the {\sf editrules} package. Readers who are just interested
+in the practical examples can skip Section \ref{sectBoolrep}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Boolean representation of edits }
-A categorical record ${\bf v}$ is a combination of values from the
-cartesian product space
-\begin{equation}
-    D = D_1\times D_2\times\ldots\times D_n,
-\end{equation}
-where each $D_k$ is a finite set of $d_k$ categories. The total number of
-categories is $d = \sum_{k=1}^n d_k$.
-Categorical records can be represented as  a boolean vector. A boolean
-vector of dimension $d$ is an element of the boolean algebra 
+\label{sectBoolrep}
+Categorical records may be represented as  a vector of boolean values. A
+boolean vector of dimension $d$ is an element of the boolean algebra 
 \begin{equation}
 \mathbb{B}^{d}=\left(\{0,1\}^{d},\land,\lor,\lnot\right),
 \end{equation}
 where 0 and 1 have the usual interpretations {\sc false} and {\sc true} and the
-logical operators work elementwise on their operands. To represent a record
-${\bf v}$, assign to every category $i$ in $D_k$ a unique standard 
-basisvector $\vec{\delta}_k(i)$ of $\mathbb{B}^{d_k}$. 
-The boolean representation $\rho({\bf v})$ of the full record reads
+logical operators work elementwise on their operands. To facilitate the
+discussion we will also allow the standard arithmetic operations addition and
+subtraction on boolean vectors (this is also consistent with the way {\sf R}
+handles vectors of class {\sf logical}. 
+
+To represent a record ${\bf v}$, assign to every category $i$ in $D_k$ a unique
+standard basisvector $\vec{\delta}_k(i)$ of $\mathbb{B}^{d_k}$.  The boolean
+representation $\rho({\bf v})$ of the full record reads
 %
 \begin{equation}
     {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
 \end{equation}
+The diminsion $d$ of $\rho({\bf v})$ is given by the total number of categories over all variables
+\begin{equation}
+d = \sum_{k=1}^n d_k.
+\end{equation}
+When each record in a dataset is represented this way, summing the vectors yields the 
+$d$-dimensional vecorized representation of the $d_1\times d_2\times\ldots\times d_n$ contingency
+table of the dataset (this is sometimes called the complete disjunctive table). 
+
 An edit $e$ is a subset of $D$, which can be written as the cartesian product
 \begin{equation}
-    e = {\bf e}_1\times{\bf e}_2\ldots\times{\bf e}_n,
+    e = A_1\times A_2\ldots\times A_n\textrm{, where } A_{k}\subseteq D_k,\: k=1,2,\ldots n. 
     \label{eqDefEdit}
 \end{equation}
-where each ${\bf e}_k\subseteq D_k$.  The interpretation of an edit is that if
-a record ${\bf v}\in e$, then ${\bf v}$ is considered invalid.  We say that a
-record {\em fails} an edit when it satisfies Eq.\ \eqref{eqCheckEdit}.  A
-variable $v_i$ is {\em involved} in an edit if ${\bf e}_i\subset D_j$ is a
-proper subset.  Conversely, we say that $e$ contains $v_k$ if $v_k$ is involved
-in $e$. A variable $v_k$ for which ${\bf e}_k=D_k$ is not contained in $e$, or:
-$e$ does not involve $v_k$. An edit is redundant if it is the subset of another
-edit.
+The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
+v}$ is considered invalid.  A variable $v_k$ is {\em involved} in an edit if
+$A_k\subset D_k$.  Conversely, we say that $e$ {\em contains} $v_k$ if $v_k$ is
+involved in $e$. A variable $v_k$ for which $A_k=D_k$ is not contained in
+$e$. An edit is redundant if it is the subset of another edit.
 
 Since every category $i$ of $D_k$ is mapped to a unique basis vector
 $\vec{\delta}_k(i)$,  edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
     e &\xrightarrow{\rho}&
-    \Lor_{i\in{\bf e}_1}\vec{\delta}_1(i)\oplus
-    \Lor_{i\in{\bf e}_2}\vec{\delta}_2(i)\oplus\ldots
-    \oplus\Lor_{i\in{\bf e}_k}\vec{\delta}_n(i),
+    \Lor_{i\in A_1}\vec{\delta}_1(i)\oplus
+    \Lor_{i\in A_2}\vec{\delta}_2(i)\oplus\ldots
+    \oplus\Lor_{i\in A_n}\vec{\delta}_n(i),
 \end{eqnarray}
 which may simply be written as
 \begin{equation}
     \rho(e) ={\bf a} = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n.
 \label{EqRhoE}
 \end{equation}
-One may think of the ${\bf a}_k$ as boolean vectors indicating which elements of $D_k$
-occur in ${\bf e}_k$.
-
-
-
+A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
+boolean representation this can be written as a condition on the standard inner
+product between the boolean representation of a record and an edit:
+\begin{equation}
+\rho({\bf v})'{\bf a} = \sum_{k=1}^n \vec{\delta}_k(v_k)'{\bf a}_k = n.
+\end{equation}
 
 \subsection{The {\tt editarray} object}
 In the {\tt editrules} package, a set of categorical edits is represented as an {\tt editarray}
 object. Formally, we denote an edit array $E$ for $n$ categorical variables and $m$ edits as
 \begin{equation}
     E = \langle {\bf A}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}\textrm{ and }
-    d = \sum_{k=1}^n d_k.
+    d = \sum_{k=1}^n d_k,
     \label{eqEditarray}
 \end{equation}
 Here, each row of ${\bf A}$ contains the boolean representation of one edit,
@@ -274,7 +330,7 @@ arguments.}
 Function        & description \\
 \hline
 {\tt datamodel(E)}           & get datamodel \\
-{\tt getArr}                 & get array ${\bf A}$\\
+{\tt getArr(E)}              & get array ${\bf A}$\\
 {\tt as.data.frame(E)}       & coerce to {\tt data.frame}\\
 {\tt as.character(E)}        & coerce to {\tt character} vector\\
 {\tt violatedEdits(E,x)}     & check which edits are violated by {\tt x}\\
