@@ -153,7 +153,10 @@ A \in {a_j} \lor B \in {b_k}
 
 $$\lnot (A \in {a_j})$$
 
-* error localizing edits: for each variable $c_i$ $c^\chi_i$, introduce an edit with $d_i = 1 - $c^\chi_i$. When $d_i = 0$,  $c_i = \chi_i$, meaning that the reported value of $c_i$ is assumed correct,  When $d_i = 1$, $c^\chi_i = 0$, meaning that $c_i$ should be adapted.
+* error localizing edits: for each variable $c_i$ $c^{\chi_i}$, introduce an edit
+with $d_i = 1 - c^{\chi_i}$. When $d_i = 0$,  $c_i = \chi_{i}$, meaning that the
+reported value of $c_i$ is assumed correct,  When $d_i = 1$, $c^\chi_i = 0$,
+meaning that $c_i$ should be adapted.
 
 \subsection{Open vs close domains}
 

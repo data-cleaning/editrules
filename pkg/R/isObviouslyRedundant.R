@@ -77,12 +77,20 @@ isObviouslyRedundant.editarray <- function(E, duplicates=TRUE, ...){
     if ( ncol(E) == 0 ) return(logical(0))
     if ( ncol(E) == 1 ) return(as.vector(E))
     ind <- getInd(E)
-    red <- apply(sapply(ind,function(i) rowSums(E[,i,drop=FALSE])==0),1,any)
+    red <- isRedundant.boolmat(getArr(E),getInd(E))
     if ( duplicates ) red <- red | duplicated.editarray(E)
     red
 }
 
 
+#' Check redundancy in editarray after disection
+#'
+#' @param A getArr(E), with E an editarray
+#' @param ind getInd(E), with E an editarray
+#' @keywords internal
+isRedundant.boolmat <- function(A, ind){
+    apply(sapply(ind,function(i) rowSums(E[,i,drop=FALSE])==0),1,any)
+}
 
 
 

@@ -164,16 +164,15 @@ eliminateCat <- function(A, J, j){
 #' @rdname eliminate
 #' @export
 eliminate.editarray <- function(E, var, ...){
-    J <- getInd(E)[[var]]
-    sep <- getSep(E) 
+    ind <- getInd(E)
     A <- getArr(E)
+    red <- logical(nrow(E))
+    J <- ind[[var]]
     for ( j in 1:length(J)){
-         red <- duplicated(A) 
          A <- eliminateCat(A[!red,,drop=FALSE],J,j)
+         red <- duplicated(A) | isRedundant.boolmat(A,ind)
     }
-    E <- neweditarray(E=A, ind=getInd(E), sep=sep, levels=getlevels(E))
-#    E[!isObviouslyRedundant(E),]
-E
+    neweditarray(E=A, ind=getInd(E), sep=getSep(E), levels=getlevels(E))
 }
 
 
