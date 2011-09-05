@@ -269,9 +269,10 @@ speedup in error localization problems.
 The function {\tt violatedEdits} expects an {\tt editmatrix} and a {\tt
 data.frame} or a named numeric vector. It returns a {\tt logical} {\tt array}
 where every row indicates which edits are violated ({\tt TRUE}) by records in
-the {\tt data.frame}. Figure \ref{violatedEdits} demonstrates the result of
-checking two records against the edit rules defined in Eqs.\
-\eqref{e1}--\eqref{e9}.
+the {\tt data.frame}. It has an optional argument {\tt tol}, (default: square
+root of machine precision) which can be increased to ignore rounding errors.
+Figure \ref{violatedEdits} demonstrates the result of checking two records
+against the edit rules defined in Eqs.\ \eqref{e1}--\eqref{e9}.
 %
 %
 \begin{table}

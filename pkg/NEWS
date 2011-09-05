@@ -1,6 +1,7 @@
 version 1.5-0
-- Error localization, variable elimination etc. for categorical variables
-- Argument maxweight was ignored by errorLocalizer, now works
+- Error localization, variable elimination etc. for categorical variables.
+- Argument maxweight was ignored by errorLocalizer.editmatrix, now works.
+- violatedEdits has better (more clear) output.
 
 version 1.0-2
 - solved bug in as.character.editmatrix (thanks to Sander Scholtus)

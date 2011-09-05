@@ -39,13 +39,31 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
     return(!M)
 }
 
+#' Method for editmatrix
+#'
+#' For rules of the form Ax == b or Ax <= b, |Ax - b| <= tol is returned.
+#' For rules of the form Ax < b, |Ax - b| < tol is returned. The editmatrix is normalized before
+#' checks are performed.
+#'
 #' @rdname violatedEdits
 #' @method violatedEdits editmatrix
+#' @param tol tolerance to check rules against.
 #' @export
-violatedEdits.editmatrix <- function(E, dat, ...){
-# TODO make a real matrix method, add tol argument.
-    er <- editrules(E)
-    return(violatedEdits.character(er$edit, dat, er$name))
+violatedEdits.editmatrix <- function(E, dat, tol=sqrt(.Machine$double.eps), ...){
+     if (tol < 0 ) stop("Argument tol must be nonnegative")
+     if ( !isNormalized(E) ) E <- normalize(E)
+
+     if ( is.vector(dat) ){ X <- t(dat) } else { X <- as.matrix(dat) }
+     
+     ops <- getOps(E)
+     v <- abs(getA(E) %*% t(X) - getb(E))
+     val <- matrix(logical(length(v)),nrow=nrow(v))
+     I <- ops %in% c("==","<=")
+     val[I,] <- v[I,,drop=FALSE] <= tol
+     val[!I] <- v[!I,,drop=FALSE] < tol
+
+     dimnames(val) <- list(edit=rownames(E),record=rownames(dat))
+     !t(val)
 }
 
 #' @rdname violatedEdits

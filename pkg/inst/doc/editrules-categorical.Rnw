@@ -322,21 +322,23 @@ $^*${\small Right-hand side is evaluated.}
 \end{table}
 %
 
-\subsection{Basic manipulations and edit checking}
+\subsection{Coercion, checking, redundancy and infeasibility}
 Table \ref{tabBasicfunctions} lists basic functions of {\tt editarray} objects.
 The {\tt datamodel} function retrieves the variables and categories in an edit
 array, and returns them as a two-column {\tt data.frame}. With {\tt
 as.data.frame} or {\tt as.character} one can coerce an editarray so that it can
-be written to a file or database. The {\tt data.frame} version contains a
-columns with edit names, a character representaition of the edits and a column
-for remarks.
+be written to a file or database. Character coercion is used when edeits are
+printed to the screen. Optionally, coercing the datamodel to character form can
+be switched off. The result of {\tt as.data.frame} version contains columns
+with edit names, a character representaition of the edits and a column for
+remarks.
 
 The function {\tt violatedEdits} takes an {\tt editarray} and a {\tt
 data.frame} as input and returns a logical matrix indicating which record
-(rows) violate which edits (columns) It uses the relation of Eq.
-(\ref{eqViolatedEdits}) to test the validity of records. 
-
-
+(rows) violate which edits (columns). It works by parsing the {\tt editarray}
+to R-expressions and evaluating them within the {\tt data.frame} environment.
+By default, the records are checked against the data model. This can be turned
+off by providing the optional argument {\tt datamodel=FALSE}. 
 
 
 \begin{table}
@@ -365,16 +367,12 @@ Function        & description \\
 \end{table}
 
 
-\subsection{Obvious redundancy and infeasibility}
-When manipulating edit sets, edits may arise which have ${\bf e}_k=\varnothing$
-for one of the variables. A record can never be an element of such an edit, and
-such edits are therefore redundant. Such redundancies are easily detected since
-all coefficients of the corresponding ${\bf a}_k$ (Eq.\ \eqref{EqRhoE}) are
-equal to zero for these edits. The function {\tt isObviouslyRedundant} returns
-a logical vector indicating which edits in an editarray have become obviously
-redundant. If an edit is a subset of another edit, it is also redundant. The
-function {\tt isSubset} returns a logical, indicating if an edit is a subset of
-any other edit in the {\tt editarray}.
+When manipulating edit sets, redundant edits of the form in Eq.\ \eqref{eqRedundancy1}
+may arise. Such redundancies can be detected in the boolean representation with
+{\tt isObviouslyRedundant}. By default, this funciton also checks for duplicate edits,
+but this may be turned off. The function {\tt duplicated} is overloaded from the standard
+{\sf R} function and the function {\tt isSubset} detects which edits are a subset or
+duplicate of another one.
 
 Manipulations may also lead to edits of the form $e=D$, in which case every possible
 record is invalid, and the editarray has become impossible to satisfy. The function
