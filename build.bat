@@ -8,7 +8,7 @@ copy build\DESCRIPTION pkg
 copy build\NAMESPACE pkg
 
 echo Generate documentation...
-Rscript roxygen.R
+R -q -f roxygen.R
 
 md output
 cd output
