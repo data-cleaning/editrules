@@ -132,7 +132,7 @@ where 0 and 1 have the usual interpretations {\sc false} and {\sc true} and the
 logical operators work elementwise on their operands. To facilitate the
 discussion we will also allow the standard arithmetic operations addition and
 subtraction on boolean vectors (this is also consistent with the way {\sf R}
-handles vectors of class {\sf logical}. 
+handles vectors of class {\sf logical}). 
 
 To represent a record ${\bf v}$, assign to every category $i$ in $D_k$ a unique
 standard basisvector $\vec{\delta}_k(i)$ of $\mathbb{B}^{d_k}$.  The boolean
@@ -141,13 +141,14 @@ representation $\rho({\bf v})$ of the full record reads
 \begin{equation}
     {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
 \end{equation}
-The diminsion $d$ of $\rho({\bf v})$ is given by the total number of categories over all variables
+The diminsion $d$ of $\rho({\bf v})$ is given by the total number of categories of all variables
 \begin{equation}
 d = \sum_{k=1}^n d_k.
 \end{equation}
-When each record in a dataset is represented this way, summing the vectors yields the 
-$d$-dimensional vecorized representation of the $d_1\times d_2\times\ldots\times d_n$ contingency
-table of the dataset (this is sometimes called the complete disjunctive table). 
+When each record in a dataset is represented this way, summing the vectors
+yields the $d$-dimensional vecorized representation of the $d_1\times
+d_2\times\ldots\times d_n$ contingency table of the dataset (this is sometimes
+called the complete disjunctive table). 
 
 An edit $e$ is a subset of $D$, which can be written as the cartesian product
 \begin{equation}
@@ -173,27 +174,39 @@ which may simply be written as
     \rho(e) ={\bf a} = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n.
 \label{EqRhoE}
 \end{equation}
-A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
-boolean representation this can be written as a condition on the standard inner
-product between the boolean representation of a record and an edit:
+A simple example is given in Figure \ref{Reditarray}.  A record ${\bf v}$
+violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the boolean
+representation this can be written as a condition on the standard inner product
+between the boolean representation of a record and an edit:
 \begin{equation}
 \rho({\bf v})'{\bf a} = \sum_{k=1}^n \vec{\delta}_k(v_k)'{\bf a}_k = n.
+\label{eqViolatedEdits}
 \end{equation}
 
 \subsection{The {\tt editarray} object}
 In the {\tt editrules} package, a set of categorical edits is represented as an {\tt editarray}
 object. Formally, we denote an edit array $E$ for $n$ categorical variables and $m$ edits as
 \begin{equation}
-    E = \langle {\bf A}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}\textrm{ and }
+    E = \langle {\bf A},{\bf ind}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}\textrm{ and }
     d = \sum_{k=1}^n d_k,
     \label{eqEditarray}
 \end{equation}
 Here, each row of ${\bf A}$ contains the boolean representation of one edit,
-and the $d_k$ denote the number of categories of each variable. The brackets
-are used to indicate a combination of objects.{\tt editarray} is the
-central object for computing with catgegorical edits, just like {\tt
-editmatrix} is the central object for computations with linear edits.
+and the $d_k$ denote the number of categories of each variable.  The object
+{\bf ind} is a {\sf list} which relates columns of {\bf A} to variable names
+and categories. The brackets are used to indicate a combination of objects.
+The {\tt editarray} is the central object for computing with catgegorical
+edits, just like the {\tt editmatrix} is the central object for computations
+with linear edits.
  
+
+It is both tedious and error prone to define and maintain an editarray by hand.
+In practice, categorical edits are usually stated verbosely, such as: ``if the
+gender is male, then pregnant must be false'', or ``if you are under-aged, you
+cannot be married''. To facilitate the definition of edit arrays, {\tt
+editrules} is equipped with a parser, which takes R-statements in {\tt
+character} format, and translates them to an {\tt editarray}.
+
 %
 \begin{Rcode}
 <<keep.source=true>>=
@@ -204,22 +217,15 @@ editarray(c(
     )
 )
 @
-\caption{Defining a simple {\tt editarray} with the {\tt editarray} function. 
-Column heads of the array are abbreviated versions of variable names and categories
-seperated by a colon (by default). When printed to screen, a {\tt character} version
-of the edits is shown as well, for readability.
+\caption{Defining a simple {\tt editarray} with the {\tt editarray} function.
+The array is printed with abbreviated column heads, which themselves consist of
+variable names and categories seperated by a colon (by default). When printed
+to screen, a {\tt character} version of the edits is shown as well, for
+readability.
 }
 \label{Reditarray}
 \end{Rcode}
 %
-
-It is both tedious and error prone to define and maintain an edit array by hand.
-In practice, categorical edits are usually stated verbosely, such as: ``if the
-gender is male, then you cannot be pregnant'', or ``if you are under-aged, you
-cannot be married''. To facilitate the definition of edit arrays, {\tt
-editrules} is equipped with a parser which takes R-statements in {\tt
-character} format, and translates them to an {\tt editarray}.
-
 Figure \ref{Reditarray} shows a simple example of defining an editmatrix with
 the editrules package.  The first two edits in Figure \ref{Reditarray} define
 the data model. The {\tt editarray} function derives the datamodel based on the
@@ -256,7 +262,24 @@ follows standard {\sf R} syntax, which should be already familliar to the
 reader. Note that double quotes are used to enclose the whole string, while
 single quotes are used for category names. Table \ref{tabOperators} shows
 which operators and functions can be used to specify categorical edit rules.
+
+
+
+Categories may be litaral characters, or booleans.  It is worth noting that
+expressions on the right hand side of the {\tt \%in\%}  and {\tt ==} operators
+are evaluated. One useful application of this is that the categories, or data
+model can be defined outside of the edits:
 %
+<<keep.source=true>>=
+xval <- letters[1:4]
+yval <- c(TRUE,FALSE)
+editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
+@
+%
+The above example also illustrates the use of boolean categories.
+
+
+
 \begin{table}
 \begin{threeparttable}
 \caption{Functions and operators that may be used to define edits with {\tt editarray} }
@@ -278,43 +301,20 @@ $^*${\small Right-hand side is evaluated.}
 \end{threeparttable}
 \end{table}
 %
-%
-Categories may be litaral characters, or booleans.  It is worth noting that
-expressions on the right hand side of the {\tt \%in\%}  and {\tt ==} operators
-are evaluated. One useful application of this is that the categories, or data
-model can be defined outside of the edits:
-%
-<<keep.source=true>>=
-xval <- letters[1:4]
-yval <- c(TRUE,FALSE)
-editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
-@
-%
-The above example also illustrates the use of boolean categories.
-
-
 
 \subsection{Basic manipulations and edit checking}
-Table \ref{tabBasicfunctions} shows lists basic functions of {\tt editmatarray}
+Table \ref{tabBasicfunctions} lists basic functions of {\tt editmatarray}
 objects.  The {\tt datamodel} function retrieves the variables and categories
-in an edit array, and returns them as a two-column {\tt data.frame}.
+in an edit array, and returns them as a two-column {\tt data.frame}. With {\tt
+as.data.frame} or {\tt as.character} one can coerce an editarray so that it
+can be written to a file or database. The {\tt data.frame} version contains
+a columns with edit names, a character representaition of the edits and a column
+for remarks.
 
-With {\tt getArr} the array part of an {\tt editarray} can be retrieved. The
-other contents of an {\tt editarrray} are of no use for users and are {\tt
-editrules} internal.
-
-The function {\tt violatedEdits} takes a {\tt data.frame} or named {\tt
-character} vector as input and returns a logical array where each row indicates
-which edits are violated by the input data.
-The relation 
-\begin{equation}
-    {\bf v}\in{e}\Leftrightarrow \sum_{j=1}^d(\rho({\bf v})\land\rho({ e}))_j = n,
-    \label{eqCheckEdit}
-\end{equation}
-is used to test the validity of records. Here, $n$ is the number of variables
-and the sum is over the coefficients of $\rho({\bf v})\land\rho({ e})$,
-interpreted as numbers. The relation holds since a record can have at most one
-coefficient per variable equal to $1$ in the boolean representation.
+The function {\tt violatedEdits} takes an {\tt editarray} and a {\tt
+data.frame} as input and returns a logical matrix indicating which record
+(rows) violate which edits (columns) It uses the relation of Eqn.
+\ref{eqViolatedEdits} to test the validity of records. 
 
 
 
@@ -330,14 +330,15 @@ arguments.}
 Function        & description \\
 \hline
 {\tt datamodel(E)}           & get datamodel \\
-{\tt getArr(E)}              & get array ${\bf A}$\\
-{\tt as.data.frame(E)}       & coerce to {\tt data.frame}\\
-{\tt as.character(E)}        & coerce to {\tt character} vector\\
+%{\tt getArr(E)}              & get array ${\bf A}$\\
+%{\tt getInd(E)}              & get index list ${\bf ind}$\\
+{\tt as.data.frame(E)}       & coerce edits to {\tt data.frame}\\
+{\tt as.character(E)}        & coerce edits to {\tt character} vector\\
 {\tt violatedEdits(E,x)}     & check which edits are violated by {\tt x}\\
 {\tt duplicated(E)}          & detect duplicate edits\\
 {\tt isObviouslyRedundant(E)}& detect simple redundancies\\
 {\tt isSubset(E)}            & detect edits contained in another edit\\
-{\tt isObviouslyInfeasible}  & detect if {\tt E} contains a contradiction\\ 
+{\tt isObviouslyInfeasible(E)}& detect contradictions\\ 
 {\tt substValue}             & substitute a value\\
 \hline
 \end{tabular}
@@ -373,7 +374,7 @@ Substituting a value in an editarray consists of two steps. First, all edits
 that exclude the value which is to be subsituted are removed. They have become
 redundant, since no record can be contained in such edits. Second, if variable
 $k$ is substituted by category $j\in D_k$, for every remaining edit, all
-coefficients of ${\bf a}_k$ except the $j$th are set to 0.  The function {\tt
+coefficients of ${\bf a}_k$ except the $j$th are set to {\sc false}.  The function {\tt
 substValue} can be used to substitute one or more values in an {\tt editarray}.
 
 
