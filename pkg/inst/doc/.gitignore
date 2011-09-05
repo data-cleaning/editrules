@@ -1,0 +1,15 @@
+
+*.log
+*.aux
+*.bbl
+*.blg
+*.loa
+*.log
+*.tex
+*.toc
+*.aux
+*.bbl
+*.blg
+*.idx
+*.ilg
+*.ind
