@@ -39,14 +39,17 @@ getnames <- function(E) rownames(E)
 #'
 #'
 #' @param E \code{\link{editarray}}
-#' @param var character, name of a categorical variable of \code{E}
+#' @param var \code{character}, names of a categorical variables in \code{E}. If var=NULL, all variables are treated.
 #' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
 #' @export
-contains <- function(E,var){
+contains <- function(E,var=NULL){
     if ( !is.editarray(E) ) stop("Argument not of class editarray")
-    I <- getInd(E)[[var]]
-    V <- getArr(E)[,I,drop=FALSE]
-    rowSums(V) < length(getInd(E)[[var]])
+    I <- getInd(E)
+    if ( is.null(var)) var <- names(I)
+    I <- I[var]
+    
+    A <- getArr(E)
+    vapply(I, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
 }
 
 #' Summarize data model of an editarray in a data.frame

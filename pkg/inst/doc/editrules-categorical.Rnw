@@ -159,8 +159,7 @@ The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
 v}$ is considered invalid.  A variable $v_k$ is {\em involved} in an edit if
 $A_k\subset D_k$.  Conversely, we say that $e$ {\em contains} $v_k$ if $v_k$ is
 involved in $e$. A variable $v_k$ for which $A_k=D_k$ is not contained in
-$e$. An edit is redundant if it is the subset of another edit.
-
+$e$. 
 Since every category $i$ of $D_k$ is mapped to a unique basis vector
 $\vec{\delta}_k(i)$,  edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
@@ -171,17 +170,38 @@ $\vec{\delta}_k(i)$,  edits have a boolean representation $\rho(e)$, given by
 \end{eqnarray}
 which may simply be written as
 \begin{equation}
-    \rho(e) ={\bf a} = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n.
+    \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n={\bf a} .
 \label{EqRhoE}
 \end{equation}
-A simple example is given in Figure \ref{Reditarray}.  A record ${\bf v}$
+A simple example is given in Figure \ref{Reditarray}. It is easy to check that
+an edit contains variable $k$  if and only if the inner product ${\bf 1}_{d_k}'{\bf a}_k<d_k$,
+where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
+
+A record ${\bf v}$
 violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the boolean
 representation this can be written as a condition on the standard inner product
 between the boolean representation of a record and an edit:
 \begin{equation}
-\rho({\bf v})'{\bf a} = \sum_{k=1}^n \vec{\delta}_k(v_k)'{\bf a}_k = n.
+\sum_{k=1}^n \vec{\delta}_k(v_k)'{\bf a}_k =\rho({\bf v})'{\bf a} =  n.
 \label{eqViolatedEdits}
 \end{equation}
+
+Suppose that $E$ is a set of edits of the form \eqref{eqDefEdit}. It is not difficult to verify that an 
+edit $e\in E$ is redundant if
+%
+\begin{eqnarray}
+    \label{eqRedundancy1}
+    A_k &=&\varnothing,\textrm{ for any } k\in1,2,\ldots,n\\
+    \lefteqn{\textrm{or}}\nonumber\\
+    \label{eqRedundancy2}
+    e   &\subseteq& \tilde{e}\textrm{ with  } \tilde{e}\in E.
+\end{eqnarray}
+In \eqref{eqRedundancy1}, $e$ is redundant since it cannot contain any records.
+It can be tested by checking if any ${\bf 1}_{d_k}'{\bf a}_k=0$.  In the case
+of \eqref{eqRedundancy2}, $e$ is redundant because any edit violating $e$ also
+violates $e'$. Using $\rho(e)={\bf a}$ and $\rho(\tilde{e})=\tilde{\bf a}$, this can be
+tested by checking if ${\bf a}\land\tilde{\bf a}={\bf a}$ or equivalently if ${\bf
+a}\lor \tilde{\bf a}=\tilde{\bf a}$.
 
 \subsection{The {\tt editarray} object}
 In the {\tt editrules} package, a set of categorical edits is represented as an {\tt editarray}
@@ -303,18 +323,18 @@ $^*${\small Right-hand side is evaluated.}
 %
 
 \subsection{Basic manipulations and edit checking}
-Table \ref{tabBasicfunctions} lists basic functions of {\tt editmatarray}
-objects.  The {\tt datamodel} function retrieves the variables and categories
-in an edit array, and returns them as a two-column {\tt data.frame}. With {\tt
-as.data.frame} or {\tt as.character} one can coerce an editarray so that it
-can be written to a file or database. The {\tt data.frame} version contains
-a columns with edit names, a character representaition of the edits and a column
+Table \ref{tabBasicfunctions} lists basic functions of {\tt editarray} objects.
+The {\tt datamodel} function retrieves the variables and categories in an edit
+array, and returns them as a two-column {\tt data.frame}. With {\tt
+as.data.frame} or {\tt as.character} one can coerce an editarray so that it can
+be written to a file or database. The {\tt data.frame} version contains a
+columns with edit names, a character representaition of the edits and a column
 for remarks.
 
 The function {\tt violatedEdits} takes an {\tt editarray} and a {\tt
 data.frame} as input and returns a logical matrix indicating which record
-(rows) violate which edits (columns) It uses the relation of Eqn.
-\ref{eqViolatedEdits} to test the validity of records. 
+(rows) violate which edits (columns) It uses the relation of Eq.
+(\ref{eqViolatedEdits}) to test the validity of records. 
 
 
 
@@ -330,16 +350,15 @@ arguments.}
 Function        & description \\
 \hline
 {\tt datamodel(E)}           & get datamodel \\
-%{\tt getArr(E)}              & get array ${\bf A}$\\
-%{\tt getInd(E)}              & get index list ${\bf ind}$\\
 {\tt as.data.frame(E)}       & coerce edits to {\tt data.frame}\\
+{\tt contains(E)}            & which edits contains which variable\\
 {\tt as.character(E)}        & coerce edits to {\tt character} vector\\
 {\tt violatedEdits(E,x)}     & check which edits are violated by {\tt x}\\
-{\tt duplicated(E)}          & detect duplicate edits\\
-{\tt isObviouslyRedundant(E)}& detect simple redundancies\\
-{\tt isSubset(E)}            & detect edits contained in another edit\\
+{\tt isObviouslyRedundant(E)}& find redundancies [Eq.\ \eqref{eqRedundancy1}], duplicates\\
+{\tt duplicated(E)}          & find duplicate edits\\
+{\tt isSubset(E)}            & find edits, subset of another edit [Eq.\ \eqref{eqRedundancy2}]\\
 {\tt isObviouslyInfeasible(E)}& detect contradictions\\ 
-{\tt substValue}             & substitute a value\\
+{\tt substValue(E,var,value)} & substitute a value\\
 \hline
 \end{tabular}
 \end{threeparttable}
@@ -353,7 +372,7 @@ such edits are therefore redundant. Such redundancies are easily detected since
 all coefficients of the corresponding ${\bf a}_k$ (Eq.\ \eqref{EqRhoE}) are
 equal to zero for these edits. The function {\tt isObviouslyRedundant} returns
 a logical vector indicating which edits in an editarray have become obviously
-redundant.  If an edit is a subset of another edit, it is also redundant. The
+redundant. If an edit is a subset of another edit, it is also redundant. The
 function {\tt isSubset} returns a logical, indicating if an edit is a subset of
 any other edit in the {\tt editarray}.
 
@@ -374,8 +393,9 @@ Substituting a value in an editarray consists of two steps. First, all edits
 that exclude the value which is to be subsituted are removed. They have become
 redundant, since no record can be contained in such edits. Second, if variable
 $k$ is substituted by category $j\in D_k$, for every remaining edit, all
-coefficients of ${\bf a}_k$ except the $j$th are set to {\sc false}.  The function {\tt
-substValue} can be used to substitute one or more values in an {\tt editarray}.
+coefficients of ${\bf a}_k$ except the $j$th are set to {\sc true}, so $k$ is
+not contained in the edits anymore.  The function {\tt substValue} can be used
+to substitute one or more values in an {\tt editarray}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

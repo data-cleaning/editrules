@@ -35,7 +35,7 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
     M <- tryCatch(sapply(ed, eval, envir=dat), error=function(e){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
     if ( is.vector(M) )  M <- array(M, dim=c(1,length(M)))
-    colnames(M) <- name
+    dimnames(M) <- list(record=rownames(dat),edit=names(E))
     return(!M)
 }
 
@@ -58,16 +58,18 @@ violatedEdits.data.frame <- function(E, dat, ...){
     return(violatedEdits.character(as.character(E$edit), dat, E$name))
 }
 
+#'
+#' If \code{datamodel=TRUE} the first n edits (n being the number of variables) represent the datamodel.
+#'
 #' @method violatedEdits editarray
+#' @param datamodel Also check against datamodel?
 #' @rdname violatedEdits
 #' @export
-violatedEdits.editarray <- function(E, dat,...){
-    s <- getSep(E)
-    for ( v in colnames(dat) ) dat[,v] <- paste(v,dat[,v],sep=s)
-    apply(dat,1, function(r) {
-        apply(E[,r,drop=FALSE],1,all)
-        }
-    )
+violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
+    edits <- as.character(E, useIf=FALSE, datamodel=datamodel)
+    v <- violatedEdits.character(edits,dat,...)
+#    dimnames(v) <- list(rownames(dat),names(edits))
+    v
 }
 
 

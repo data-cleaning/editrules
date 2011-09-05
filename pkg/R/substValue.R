@@ -57,16 +57,24 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
 #' @export
 substValue.editarray <- function(E, var, value, ...){
 # TODO: make this work for multiple variables and values.
+
     J <- getInd(E)[[var]]
     sep=getSep(E)
-
     i <- J[value]
     if ( is.na(i) ) 
         stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
-    ii <- setdiff(J,i)
+
     A <- getArr(E)
-    A[,ii] <- FALSE
     I <- A[,i]
-    neweditarray(E=A[I,,drop=FALSE], ind=getInd(E), sep=sep, levels=getlevels(E))
+    A[,J] <- TRUE
+    neweditarray(
+        E = A[I,,drop=FALSE], 
+        ind = getInd(E), 
+        sep = sep, 
+        levels = getlevels(E) 
+    )
 }
+
+
+
 

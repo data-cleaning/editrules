@@ -94,7 +94,6 @@ editarray <- function(editrules, sep=":"){
             e
         }))
     }
-
     neweditarray(E,ind,sep=sep)
 }
 
@@ -140,15 +139,19 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
 #'
 #' @method as.character editarray
 #' @param x editarray object
+#' @param useIf \code{logical}. Use if( <condition> ) <statement> or !<condition> | <statement> ? 
+#' @param datamodel \code{logical}. Include datamodel explicitly?
 #' @param ... further arguments passed to or from other methods
 #'
 #' @export
-as.character.editarray <- function(x,...){
+as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     A <- getArr(x)
     ind <- getInd(x)
-    # data model
-    dm <- ind2char(ind)
-    names(dm) <- paste("d",1:length(dm),sep="")
+    dm <- c()
+    if ( datamodel ){
+        dm <- ind2char(ind)
+        names(dm) <- paste("d",1:length(dm),sep="")
+    }
     # edits
     if ( nrow(x) == 0 ) return(dm)
     edts <- character(nrow(x))
@@ -164,8 +167,11 @@ as.character.editarray <- function(x,...){
             inv <- logical(n)
             inv[n] <- TRUE
             ch <- ind2char(ivd, ind, invert=inv)
-            edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" && "), ")",ch[n])
-    
+            if ( useIf ){
+                edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" && "), ")",ch[n])
+            } else {
+                edts[i] <- paste("!(", paste(ch[1:(n-1)],collapse=" && "), ") |",ch[n])
+            }
         }
     }
     names(edts) <- rownames(x)
