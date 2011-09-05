@@ -21,8 +21,6 @@ test_that("Showing data errors works",{
    errors <- violatedEdits(edt, dat)
    
    # rule names equal?
-   #print(dat)
-   #print(errors)
    expect_equal(colnames(errors), rownames(edt))
    
    dimnames(errors) <- NULL
