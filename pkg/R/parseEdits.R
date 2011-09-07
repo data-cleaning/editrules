@@ -19,8 +19,8 @@ parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
      type <- match.arg(type)
      if (type=="all"){
        return(edits)
-     }
-     else return(edits[editTypes(edits) == type])
+     } 
+     return(edits[editTypes(edits) == type])
 }
 
 NUMCMP <- c("==","<","<=",">",">=")
@@ -92,7 +92,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)
-    } else if (op == "||"){
+    } else if (op %in% c("||","|")){
         if (is.na(val))
            val <- FALSE
         if (val == TRUE){
