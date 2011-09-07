@@ -193,7 +193,7 @@ errorLocalizer.editarray <- function(
         },
         choiceLeft = {
             .var <- totreat[1]
-            E <- substValue.editarray(E, .var , x[.var])
+            E <- substValue.editarray(E, .var , x[.var], remove=FALSE)
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },

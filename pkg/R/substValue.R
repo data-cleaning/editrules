@@ -55,10 +55,10 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
 #'
 #' @rdname substValue
 #' @export
-substValue.editarray <- function(E, var, value, ...){
+substValue.editarray <- function(E, var, value, remove=TRUE, ...){
 # TODO: make this work for multiple variables and values.
-
-    J <- getInd(E)[[var]]
+    ind <- getInd(E)
+    J <- ind[[var]]
     sep=getSep(E)
     i <- J[value]
     if ( is.na(i) ) 
@@ -66,14 +66,40 @@ substValue.editarray <- function(E, var, value, ...){
 
     A <- getArr(E)
     I <- A[,i]
-    A[,J] <- TRUE
+    if ( remove ){
+        v <- 
+        A <- A[ ,-setdiff(J,i) ,drop=FALSE]
+        ind <- indFromArray(A, sep)
+    } else {
+        A[,J] <- TRUE
+    }
     neweditarray(
         E = A[I,,drop=FALSE], 
-        ind = getInd(E), 
+        ind = ind, 
         sep = sep, 
-        levels = getlevels(E) 
+        levels = colnames(A) 
     )
 }
+
+#' Compute index from array part of editarray
+#' 
+#' @param A boolean array
+#' @param sep separator
+#' @keywords internal
+#'
+indFromArray <- function(A,sep){
+    cn <- colnames(A)
+    l <- strsplit(cn,sep)
+    V <- sapply(l,`[`,1)
+    C <- sapply(l,`[`,-1)
+    vars <- unique(V)
+    ind <- lapply(vars, function(v) which(v==V))
+    names(ind) <- vars
+    ind <- lapply(ind, function(k){ names(k) <- C[k]; k})
+    ind
+}
+
+
 
 
 
