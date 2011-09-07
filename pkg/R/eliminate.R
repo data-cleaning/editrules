@@ -138,23 +138,6 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 
 
 
-#' eliminate one category from a logical array, not for export.
-#' 
-#' TODO redundancy removal by recording derivation history -- if possible.
-#' @keywords internal
-eliminateCat <- function(A, J, j){
-    j1 <- A[,J[j]]
-    j2 <- !j1
-    n1 <- sum(j1)
-    n2 <- sum(j2)
-    if (n1==0 || n2==0) return(A)
-    I1 <- rep(which(j1), times=n2)
-    I2 <- rep(which(j2), each=n1)
-    B <- array(FALSE,dim=c(n1*n2,ncol(A)))
-    B[,J] <- A[I1,J,drop=FALSE] | A[I2,J,drop=FALSE]
-    B[,-J] <- A[I1,-J,drop=FALSE] & A[I2,-J,drop=FALSE]
-    rbind(A[j1,,drop=FALSE],B)
-}
 
 #' Eliminate variable from editarray.
 #' 
@@ -164,18 +147,41 @@ eliminateCat <- function(A, J, j){
 #' @rdname eliminate
 #' @export
 eliminate.editarray <- function(E, var, ...){
+    # do not bother with edits not containing var
+    I <- contains(E,var)
+    # nothing to eliminate...
+    if ( sum(I) == 0 ) return(E) 
+
     ind <- getInd(E)
     A <- getArr(E)
-    red <- logical(nrow(E))
+    At <- A[!I,,drop=FALSE]
+    A <- A[I,,drop=FALSE]
     J <- ind[[var]]
-    for ( j in 1:length(J)){
-         A <- eliminateCat(A[!red,,drop=FALSE],J,j)
-         red <- duplicated(A) | isRedundant.boolmat(A,ind)
+
+    k <- integer(0)
+    for ( j in J ){
+        if (nrow(A) <= 1) break
+        aPlus <- A[ A[,j],,drop=FALSE]
+        aMin  <- A[!A[,j],,drop=FALSE]  
+        n <- nrow(aPlus)
+        m <- nrow(aMin)
+        if ( n == 0 ){
+            A <- A[logical(0),,drop=FALSE]
+            break
+        }
+        if ( m == 0 ) next
+        B <- array(FALSE,dim=c(n*m,ncol(A)))
+        I1 <- rep(1:n,times=m)
+        I2 <- rep(1:m,each=n)
+        B[I1,J] <-  aPlus[I1,J,drop=FALSE] | aMin[I2,J,drop=FALSE]
+        B[I1,-J] <- aPlus[I1,-J,drop=FALSE] & aMin[I2,-J,drop=FALSE]
+        A <- B[!isRedundant.boolmat(B,ind),,drop=FALSE]
+        A <- A[!isSubset.boolmat(A),,drop=FALSE]      
     }
-    neweditarray(E=A, ind=getInd(E), sep=getSep(E), levels=getlevels(E))
+    # drop edits where var could not be eliminated
+    A <- A[!contains.boolmat(A,ind,var),,drop=FALSE]
+    neweditarray(rbind(At,A),ind=ind,sep=getSep(E),levels=getlevels(E))
 }
-
-
 
 
 

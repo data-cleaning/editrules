@@ -54,9 +54,10 @@ isObviouslyInfeasible(eliminate(E,"x"))
 # for categorical data, elimination amounts to logical derivartions. For example
 E <- editarray(c(
     "age \%in\% c('under aged','adult')",
-    "positionInHouseholda  \%in\% c('marriage partner', 'child', 'other')",
+    "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
     "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
     "if (maritalStatus \%in\% c('married','widowed','divorced') ) positionInHousehold != 'child'",
+    "if (maritalStatus == 'unmarried') positionInHousehold != 'marriage partner' ",
     "if ( age == 'under aged') maritalStatus == 'unmarried'"
     )
 )

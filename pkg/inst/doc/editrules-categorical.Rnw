@@ -445,9 +445,28 @@ Suppose $e_1$ and $e_2$ are edits, with boolean representations ${\bf a}$ and
 ${\bf b}$ respectively.  We define the {\em resolution operator} $\res_j$ as
 follows:
 \begin{eqnarray}
-    {\bf a} \res_j {\bf b} = 
-    (a_1\land b_1,\ldots,a_{j-1}\land b_{j-1},a_{j}\lor b_{j},a_{j+1}\land b_{j+1},\ldots,a_d\land b_d).
+\lefteqn{
+    {\bf a} \res_k {\bf b} = {\bf a}_1\land{\bf b}_1\oplus\ldots\oplus
+    {\bf a}_{k-1}\land{\bf b}_{k-1}}\nonumber\\
+&\oplus&    {\bf a}_k\lor{\bf b}_k\oplus
+    {\bf a}_{k+1}\land{\bf b}_{k+1}\oplus\ldots\oplus
+    {\bf a}_n\land{\bf b}_n
 \end{eqnarray}
+%\begin{eqnarray}
+%    {\bf a} \res_k {\bf b} = 
+%\left(
+%\bigoplus_{i=1}^{k-1}{\bf a}_i\land{\bf b}_i
+%\right)
+%\oplus
+%\left(
+%{\bf a}_k\lor{\bf b}_k
+%\right)
+%\oplus
+%\left(
+%\bigoplus_{i=k+1}^n{\bf a}_i\land{\bf b}_i
+%\right)
+%\end{eqnarray}
+
 Observe that this operator has the following properties, relevant for record checking.
 \begin{eqnarray}
    \rho({\bf v})\in {\bf a}\res_j{\bf b} &\Rightarrow& \rho({\bf v})\in{\bf a} \lor \rho({\bf v})\in{\bf b}\\
@@ -516,6 +535,11 @@ on the value of $v_k$ if a record ${\bf v}$ fails one of the resulting edits.
 \end{algorithmic}
 \end{algorithm}
 
+
+\section{Equivalence to Fellegi and Holt's method}
+\begin{equation}
+F_k({\bf A}) = {\bf a}\res_k{\bf b}\res_k,\ldots,\quad {\bf a}, {\bf b},\ldots \in \rows({\bf A})
+\end{equation}
 
 \section{Error localization in categorical data}
 \label{secErrLocCat}

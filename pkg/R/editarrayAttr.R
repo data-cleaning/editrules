@@ -44,12 +44,21 @@ getnames <- function(E) rownames(E)
 #' @export
 contains <- function(E,var=NULL){
     if ( !is.editarray(E) ) stop("Argument not of class editarray")
-    I <- getInd(E)
-    if ( is.null(var)) var <- names(I)
-    I <- I[var]
-    
-    A <- getArr(E)
-    vapply(I, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
+    ind <- getInd(E)
+    if ( is.null(var)) var <- names(ind)
+   
+    contains.boolmat(getArr(E),ind,var)
+}
+
+#' determine if a boolean matrix contains var
+#'
+#' @param A array
+#' @param ind index
+#' @param var variable name
+#' @keywords internal
+contains.boolmat <- function(A, ind, var){
+    ind <- ind[var]
+    vapply(ind, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
 }
 
 #' Summarize data model of an editarray in a data.frame
