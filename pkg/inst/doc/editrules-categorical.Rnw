@@ -15,6 +15,7 @@
 \DeclareMathOperator{\res}{\mathfrak{R}}
 \newcommand{\rhomap}{\xrightarrow{\rho}}
 \newcommand{\rows}{\textrm{rows}}
+\newcommand{\columns}{\textrm{columns}}
 \newcommand{\ind}{\textrm{\bf ind}}
 \newcommand{\true}{\textrm{\sc true}}
 \newcommand{\false}{\textrm{\sc false}}
@@ -182,7 +183,7 @@ which may simply be written as
 \label{EqRhoE}
 \end{equation}
 A simple example is given in Figure \ref{Reditarray}. It is easy to check that
-an edit contains variable $k$  if and only if the inner product ${\bf 1}_{d_k}'{\bf a}_k<d_k$,
+an edit contains variable $k$  if and only if the inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$,
 where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
 
 A record ${\bf v}$
@@ -190,7 +191,7 @@ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the boolean
 representation this can be written as a condition on the standard inner product
 between the boolean representation of a record and an edit:
 \begin{equation}
-\sum_{k=1}^n \vec{\delta}_k(v_k)'{\bf a}_k =\rho({\bf v})'{\bf a} =  n.
+\sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k =\rho({\bf v})\cdot{\bf a} =  n.
 \label{eqViolatedEdits}
 \end{equation}
 
@@ -202,18 +203,18 @@ edit $e\in E$ is redundant if
     A_k &=&\varnothing,\textrm{ for any } k\in1,2,\ldots,n\\
     \lefteqn{\textrm{or}}\nonumber\\
     \label{eqRedundancy2}
-    e   &\subseteq& \tilde{e}\textrm{ with  } \tilde{e}\in E.
+    e   &\subseteq& e'\textrm{ with  } e'\in E.
 \end{eqnarray}
 In \eqref{eqRedundancy1}, $e$ is redundant since it cannot contain any records.
-It can be tested by checking if any ${\bf 1}_{d_k}'{\bf a}_k=0$.  In the case
+It can be tested by checking if any ${\bf 1}_{d_k}\cdot{\bf a}_k=0$.  In the case
 of \eqref{eqRedundancy2}, $e$ is redundant because any edit violating $e$ also
-violates $e'$. Using $\rho(e)={\bf a}$ and $\rho(\tilde{e})=\tilde{\bf a}$, this can be
-tested by checking if ${\bf a}\land\tilde{\bf a}={\bf a}$ or equivalently if ${\bf
-a}\lor \tilde{\bf a}=\tilde{\bf a}$.
+violates $e'$. Using $\rho(e)={\bf a}$ and $\rho(e')={\bf a}'$, this can be
+tested by checking if ${\bf a}\land{\bf a}'={\bf a}$ or equivalently if ${\bf
+a}\lor {\bf a}'={\bf a}'$.
 
-In the {\sf editrules} packages, records treated as if every variable is of
-{\sf character} type. The boolean representation of edits is mainly used for
-storage, and manipulations like variable substitution and elimination.
+In the {\sf editrules} the boolean representation is mainly used to store edits
+and to manipulate them with methods like variable substitution and elimination.
+Data records can be stored in {\sf data.frame} objects, as usual. 
 
 \subsection{The {\sf editarray} object}
 In the {\sf editrules} package, a set of categorical edits is represented as an {\sf editarray}
@@ -399,7 +400,7 @@ duplicate of another one.
 
 Manipulations may also lead to edits of the form $e=D$, in which case every possible
 record is invalid, and the editarray has become impossible to satisfy. The function
-{\sf isObviouslyInfeasible} detects whether any such edits are present.They can be 
+{\sf isObviouslyInfeasible} detects whether any such edits are present. They can be 
 detected by checking if $\sum_{j=1}^d\rho(e)_j=d$.
 
 
@@ -418,18 +419,20 @@ except the one that was substituted. In the boolean representation, a variable i
 removed by setting all its categories to \true. Pseudocode is given in Algorithm \ref{substValue}.
 %
 \begin{algorithm}[t]
-\caption{{\sc subsValue($E$,$k$,$i$)}}
+\caption{{\sc substValue($E$,$k$,$v$)}}
 \label{substValue}
 \begin{algorithmic}
-    \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$ and a value $i$
-    \State $i \leftarrow \ind(k,i)$
-    \State ${\bf A}\leftarrow {\bf A}\backslash\{{\bf a}\in\rows({\bf A})\,|\,a_i=\false\}$
-    \For {${\bf a}\in\rows({\bf A})$}
-    \For {$i\in {\bf ind}(k)$}
-    \State $a_i\leftarrow\true$
-    \EndFor
-    \EndFor
-    \Ensure
+    \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$ and a value $v$
+    \State $i \leftarrow \ind(k,v)$
+    \State ${\bf A}\leftarrow {\bf A}\backslash\{{\bf a}\in\rows({\bf A})\,|\,a_i=\false\}$\Comment{Remove rows not involving $v$ }
+    \State ${\bf A} \leftarrow{\bf A}\backslash\{{\bf a}^t_j\in\columns({\bf A})\,|\, j\in\ind(k)\backslash i\}$\Comment{Remove categories $\not=v$}
+    \State Update {\bf ind}
+%    \For {${\bf a}\in\rows({\bf A})$}
+%    \For {$i\in {\bf ind}(k)$}
+%    \State $a_i\leftarrow\true$
+%    \EndFor
+%    \EndFor
+    \Ensure $\langle{\bf A},{\bf ind}\rangle$ with $v$ substituted for variable $k$.
 \end{algorithmic}
 \end{algorithm}
 % 
@@ -441,42 +444,32 @@ substValue(E,"gender","female")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Variable elimination by category resolution}
-Suppose $e_1$ and $e_2$ are edits, with boolean representations ${\bf a}$ and
-${\bf b}$ respectively.  We define the {\em resolution operator} $\res_j$ as
-follows:
+Given two edits $e$ and $e'$, with boolean representations ${\bf a}$ and
+${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
 \begin{eqnarray}
 \lefteqn{
-    {\bf a} \res_k {\bf b} = {\bf a}_1\land{\bf b}_1\oplus\ldots\oplus
-    {\bf a}_{k-1}\land{\bf b}_{k-1}}\nonumber\\
-&\oplus&    {\bf a}_k\lor{\bf b}_k\oplus
-    {\bf a}_{k+1}\land{\bf b}_{k+1}\oplus\ldots\oplus
-    {\bf a}_n\land{\bf b}_n
+    {\bf a} \res_k {\bf a}' = {\bf a}_1\land{\bf a}'_1\oplus\ldots\oplus
+    {\bf a}_{k-1}\land{\bf a}'_{k-1}}\nonumber\\
+&\oplus&    {\bf a}_k\lor{\bf a}'_k\oplus
+    {\bf a}_{k+1}\land{\bf a}'_{k+1}\oplus\ldots\oplus
+    {\bf a}_n\land{\bf a}'_n
 \end{eqnarray}
-%\begin{eqnarray}
-%    {\bf a} \res_k {\bf b} = 
-%\left(
-%\bigoplus_{i=1}^{k-1}{\bf a}_i\land{\bf b}_i
-%\right)
-%\oplus
-%\left(
-%{\bf a}_k\lor{\bf b}_k
-%\right)
-%\oplus
-%\left(
-%\bigoplus_{i=k+1}^n{\bf a}_i\land{\bf b}_i
-%\right)
-%\end{eqnarray}
-
+%
 Observe that this operator has the following properties, relevant for record checking.
 \begin{eqnarray}
    \rho({\bf v})\in {\bf a}\res_j{\bf b} &\Rightarrow& \rho({\bf v})\in{\bf a} \lor \rho({\bf v})\in{\bf b}\\
    \rho({\bf v})\in {\bf a} &\Rightarrow& \rho({\bf v})\in{\bf a}\res_j{\bf b} \lor {\bf a}\res_j{\bf b}=\varnothing\\
-   a_j = b_j &\Rightarrow& {\bf a}\res_j{\bf b} = {\bf a}\land {\bf b} 
+   a_j = b_j &\Rightarrow& {\bf a}\res_j{\bf b} = {\bf a}\land {\bf b}. 
     \label{eqRedundant}
 \end{eqnarray}
 The operator is called resolution operator since its action strongly resembles
-a resolution operation from formal logic.  If $a_j= \lnot b_j$, the operator
-``resolves'' or eliminates one of the categories $j\in D$. That is, the
+a resolution operation from formal logic.  If ${\bf a}_k= \lnot {\bf a}'_k$,
+the operator ``resolves'' or eliminates the $k$th variable in $D$. 
+
+
+
+
+That is, the
 resulting edit (if any) is guaranteed to have $({\bf a}\res_j{\bf
 a})_j=\textrm{\sc true}$.  The resolution operator is only defined on the
 boolean representation of edits, and has no direct equivalent in the
