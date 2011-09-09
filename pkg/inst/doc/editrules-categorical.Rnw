@@ -12,15 +12,19 @@
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
+\DeclareMathOperator{\ocup}{\cup}
+\DeclareMathOperator{\ocap}{\cap}
 \DeclareMathOperator{\res}{\mathfrak{R}}
 \newcommand{\rhomap}{\xrightarrow{\rho}}
 \newcommand{\rows}{\textrm{rows}}
 \newcommand{\columns}{\textrm{columns}}
 \newcommand{\ind}{\textrm{\bf ind}}
-\newcommand{\true}{\textrm{\sc true}}
-\newcommand{\false}{\textrm{\sc false}}
+\newcommand{\true}{\textrm{\sc true} }
+\newcommand{\false}{\textrm{\sc false} }
 
-\newtheorem{theorem}{Theorem}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{definition}{Definition}[section]
 
 \usepackage{float}
  
@@ -166,11 +170,12 @@ An edit $e$ is a subset of $D$ which can be written as the cartesian product
     \label{eqDefEdit}
 \end{equation}
 The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
-v}$ is considered invalid.  A variable $v_k$ is {\em involved} in an edit if
-$A_k\subset D_k$.  Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is
-involved in $e$. A variable $v_k$ for which $A_k=D_k$ is not involved in $e$.
-Since every category $i$ of $D_k$ is mapped to a unique basis vector
-$\vec{\delta}_k(i)$,  edits have a boolean representation $\rho(e)$, given by
+v}$ is considered invalid. An edit, expressed as above is said to be in {\rm
+normal form}.  A variable $v_k$ is {\em involved} in an edit if $A_k\subset
+D_k$.  Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is involved in
+$e$. A variable $v_k$ for which $A_k=D_k$ is not involved in $e$.  Since every
+category $i$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(i)$,
+edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
     e &\xrightarrow{\rho}&
     \Lor_{i\in A_1}\vec{\delta}_1(i)\oplus
@@ -225,7 +230,7 @@ object. Formally, we denote an edit array $E$ for $n$ categorical variables and 
     d = \sum_{k=1}^n d_k,
     \label{eqEditarray}
 \end{equation}
-Each row of ${\bf A}$ contains the boolean representation of one edit, and the
+Each row ${\bf a}$ of ${\bf A}$ contains the boolean representation of one edit, and the
 $d_k$ denote the number of categories of each variable.  The object {\bf ind}
 is a nested {\sf list} which relates columns of {\bf A} to variable names and
 categories.  Labeling variables with $k\in1,2,\ldots,n$ and category values
@@ -408,15 +413,32 @@ detected by checking if $\sum_{j=1}^d\rho(e)_j=d$.
 %%% SECTION 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Manipulation of categorical restrictions}
+Just like for linear edits, the basic operations on categorical edits are value
+substitution and variable elimination. The former amounts to adapting the
+datamodel underlying the edit set while the latter amounts to deriving relations
+between variables not involving the eliminated variable. 
+
+In the next subsection we give an example of value subsitution with the {\sf
+editrules} package, as well as some background. In subsection
+\ref{sscategoryresolution} we describe an elimination method, which appears to
+be new to the field of data editing. In subsection \ref{ssequivalence} it is
+shown that the method yields results equivalent to Fellegi and Holt's
+elimination method while running in polynomial in stead of exponential time.
+Finally, in subsection \ref{sseliminateexample} we given an example of
+eliminating variables with the {\sf editrules} package. Readers not interested in 
+the technical background can skip subsections \ref{sscategoryresolution} and 
+\ref{ssequivalence}.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Value substitution}
-If we assume that in a record, one of the variables (say, $k$) takes a certain value
-(say, $i$), we may substitute that value in the edit rules. In the boolean representation
-this amounts to removing all edits which exclude that value, since the record cannot 
-fall in that edit anymore. What remains, are relations between all other variables, 
-except the one that was substituted. In the boolean representation, a variable is
-removed by setting all its categories to \true. Pseudocode is given in Algorithm \ref{substValue}.
+If it is assumed that in a record, one of the variables takes a certain value,
+that value may be substituted in the edit rules. In the boolean representation
+this amounts to removing all edits which exclude that value, since the record
+cannot violate those edits. Secondly, the columns related to the substituted variable,
+but not to the substituted category are removed, thus adapting the datamodel to the
+new assumption. Algorithm \ref{substValue} gives the pseudocode for reference purposes.
 %
 \begin{algorithm}[t]
 \caption{{\sc substValue($E$,$k$,$v$)}}
@@ -427,23 +449,29 @@ removed by setting all its categories to \true. Pseudocode is given in Algorithm
     \State ${\bf A}\leftarrow {\bf A}\backslash\{{\bf a}\in\rows({\bf A})\,|\,a_i=\false\}$\Comment{Remove rows not involving $v$ }
     \State ${\bf A} \leftarrow{\bf A}\backslash\{{\bf a}^t_j\in\columns({\bf A})\,|\, j\in\ind(k)\backslash i\}$\Comment{Remove categories $\not=v$}
     \State Update {\bf ind}
-%    \For {${\bf a}\in\rows({\bf A})$}
-%    \For {$i\in {\bf ind}(k)$}
-%    \State $a_i\leftarrow\true$
-%    \EndFor
-%    \EndFor
     \Ensure $\langle{\bf A},{\bf ind}\rangle$ with $v$ substituted for variable $k$.
 \end{algorithmic}
 \end{algorithm}
 % 
+
 In the {\sf editrules} package, value substitution is performed by the {\sf substValue} function,
-which accepts variable and category names.
+which accepts variable and category names. In the following example the editmatrix defined in 
+Figure \ref{Reditarray} is used.
 <<echo=true>>=
 substValue(E,"gender","female")
 @
+In this case, the variable ``gender'' is substituted by the value ``female''.
+With the gender is fixed, the datamodel reduces to
+$\{\textrm{male}\}\times\{\textrm{no},\textrm{yes}\}$ and the restriction ``if
+male then pregnant = true'' becomes meaningless and is therefore removed.
+
+The {\sf R} implementation of {\sf substValue} has an extra option, allowing to choose
+if the datamodel is reduced or not, which by default is set to \true.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Variable elimination by category resolution}
+\label{sscategoryresolution}
 Given two edits $e$ and $e'$, with boolean representations ${\bf a}$ and
 ${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
 \begin{eqnarray}
@@ -454,88 +482,199 @@ ${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
     {\bf a}_{k+1}\land{\bf a}'_{k+1}\oplus\ldots\oplus
     {\bf a}_n\land{\bf a}'_n
 \end{eqnarray}
+For two edit sets ${\bf A}$ and ${\bf A'}$, we alse introduce the notation
+\begin{equation}
+{\bf A}\res_k{\bf A}' = \{{\bf a}\res_k{\bf a}'\,|\, ({\bf a},{\bf a}')\in\rows({\bf A})\times\rows({\bf A}')\}.
+\end{equation}
 %
-Observe that this operator has the following properties, relevant for record checking.
+Observe that the resolution operator has the following properties, relevant for record checking.
 \begin{eqnarray}
-   \rho({\bf v})\in {\bf a}\res_j{\bf b} &\Rightarrow& \rho({\bf v})\in{\bf a} \lor \rho({\bf v})\in{\bf b}\\
-   \rho({\bf v})\in {\bf a} &\Rightarrow& \rho({\bf v})\in{\bf a}\res_j{\bf b} \lor {\bf a}\res_j{\bf b}=\varnothing\\
-   a_j = b_j &\Rightarrow& {\bf a}\res_j{\bf b} = {\bf a}\land {\bf b}. 
+   \rho({\bf v})\in {\bf a}\res_k{\bf a}' &\Rightarrow& \rho({\bf v})\in{\bf a} \lor \rho({\bf v})\in{\bf a}'\\
+   \rho({\bf v})\in {\bf a} &\Rightarrow& \rho({\bf v})\in{\bf a}\res_k{\bf a}' \lor {\bf a}\res_k{\bf a}'=\varnothing
     \label{eqRedundant}
 \end{eqnarray}
+That is, if a record violates ${\bf a}\res_k{\bf a}'$, it does so because it
+violates ${\bf a}$ and/or ${\bf a}'$. Therefore, ${\bf a}\res_k{\bf a}'$ is
+also an edit in the sense that a record is invalid if violates it.
+
 The operator is called resolution operator since its action strongly resembles
-a resolution operation from formal logic.  If ${\bf a}_k= \lnot {\bf a}'_k$,
-the operator ``resolves'' or eliminates the $k$th variable in $D$. 
+a resolution operation from formal logic.  If ${\bf a}_k\lor {\bf
+a}'_k=(\true)^{d_k}$, the operator ``resolves'' or eliminates the $k^{\rm th}$
+variable and we are left with a relation between the other variables,
+regardless of the value of variable $k$. The edit resulting from a resolution
+operation on two explicitly defined edits is called an {\em implied edit}. If
+the resolution operation happens to eliminate one of the variables, it is
+called an {\em essential implied edit}. These terms were introduced by
+\citet{fellegi:1976} who first solved the problem of error localization in
+categorical data. 
 
 
 
+When ${\bf a}_k={\bf a}'_k$, the resulting edit is
+the intersection of the original edits, in which case the resulting edit is
+redundant.  
+The resolution operator can be used to eliminate a variable $k$ from a set of
+edits represented by ${\bf A}$ category by category. Suppose that $i$ is the
+column index of the first category of $k$.  Collect all pairs of $({\bf
+a}^+,{\bf a}^-)$ obeying $a^+_i=\true$ and $a^-_i=\false$. Generate a new set
+of edits, consisting of every pair ${\bf a}^+\res_k{\bf a}^-$. By construction,
+these new edits all have $a_i=\true$. Iterate for every category of
+$k$. There is one exception to take care of. If at any iteration, there are no
+edits of type ${\bf a}^+$, the variable cannot be eliminated and in stead, an
+empty set is returned. 
 
-That is, the
-resulting edit (if any) is guaranteed to have $({\bf a}\res_j{\bf
-a})_j=\textrm{\sc true}$.  The resolution operator is only defined on the
-boolean representation of edits, and has no direct equivalent in the
-set-theoretical representation of edits (Eq.\ \eqref{eqDefEdit}).  The only
-exception is the special case of Eq.\ \eqref{eqRedundant}.  When
-$a_j=b_j=\textrm{\sc true}$, the resulting edit is the intersection of the
-original edits, in which case the resulting edit is redundant. 
-
-By substitution in the definition, it can be shown that the resolution operator is
-symmetrical, associative and idempotent. As a reminder, these properties are defined
-as follows.
-\begin{equation}
-\begin{array}{ll}
-\textrm{symmetry:}  &{\bf a}\res_j{\bf b} = {\bf b} \res_j {\bf a} \\
-\textrm{associativity:}& ({\bf a}\res_j{\bf b})\res_j {\bf c} = {\bf a}\res_j({\bf b}\res_j {\bf c}).\\
-\textrm{idempotency:} &{\bf a}\res_j {\bf a} = {\bf a}.
-\end{array}
-\end{equation}
-The following distributive property also holds
-\begin{equation}
-\begin{array}{ll}
-\textrm{distributivity:}& ({\bf a}\res_i{\bf b})\res_j{\bf c} = ({\bf a}\res_j{\bf c})\res_i({\bf b}\res_j{\bf c}).
-\end{array}
-\end{equation}
-
-The resolution operator can be used to eliminate a category $j$ from a set of
-edits as follows. First, collect all pairs of edits $({\bf a}^+,{\bf a}^-)$
-which have $a^+_j=\lnot b^+_j$. Next, a new set of edits is created, consisting
-of the ${\bf a}^+$ and every combination ${\bf a}^+\res_j{\bf a}^-$. A variable
-$v_k$ can be eliminated by applying this procedure repeatedly to all categories
-of a variable. The resulting boolean representation of the edits have
-$a_j=\textrm{\sc true}$ for all $j\in D_k$. In set-theoretical terms this means
-that for every resulting edit ${\bf e}_k=D_k$. Or in words: it does not depend
-on the value of $v_k$ if a record ${\bf v}$ fails one of the resulting edits.
+The pseudocode of Algorithm {\sf eliminate} elaborates on this scheme by adding
+redundancy removal at every step.
 
 
 
 %
 %
 \begin{algorithm}[t]
-\caption{{\sc eliminate($E$,$j$)}}
+\caption{{\sc eliminate($E$,$k$)}}
 \label{eliminate}
 \begin{algorithmic}
     \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$
-    \For{$j\in D_k$}
-    \State $A^+ = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_j=\textrm{\sc true}\}$
-    \State $A^- = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_j=\textrm{\sc false}\}$ 
-    \State ${\bf A}\leftarrow A^+$
-    \State $i\leftarrow |A^+|$
-    \For{$({\bf a},{\bf b})\in A^+\times A^-$}
-    \State $i \leftarrow i+1$
-    \State ${\bf A}_{i}\leftarrow {\bf a}\res_j{\bf b}$
+    \For{$i\in \ind(k)$}
+    \State ${\bf A}^+ = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_i=\textrm{\sc true}\}$
+    \State ${\bf A}^- = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_i=\textrm{\sc false}\}$ 
+    \If{${\bf A}^+=\varnothing$}
+        \State ${\bf A}\leftarrow\varnothing$
+        \State {\bf break}
+    \EndIf
+    \State ${\bf A}\leftarrow {\bf A}^+\res_k {\bf A}^-$
+    \State Delete redundant rows from {\bf A}.
     \EndFor
-    \EndFor
-    \Ensure {\sf editarray} $\langle{\bf A}\rangle$ with variable $j$ eliminated
+    \Ensure {\sf editarray} $\langle{\bf A},\ind\rangle$ with variable $k$ eliminated
 \end{algorithmic}
 \end{algorithm}
 
 
-\section{Equivalence to Fellegi and Holt's method}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Equivalence to Fellegi and Holt's elimination method}
+\label{ssequivalence}
+
+Given a set of $m$ edits in normal form \eqref{eqDefEdit}:
 \begin{equation}
-F_k({\bf A}) = {\bf a}\res_k{\bf b}\res_k,\ldots,\quad {\bf a}, {\bf b},\ldots \in \rows({\bf A})
+E = \{ e^{(i)} \in \mathcal{P}(D),i\in 1,2,\ldots,m\},
+%A_^(i)_1\times
+%A_^(i)_2\times\ldots\times
+%A_^(i)_n :
+\label{eqEditSet}
 \end{equation}
+where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+\cite{waal:2011} define a way to derive new edits, which may be written as a
+function $F_k$,
+\begin{eqnarray}
+\lefteqn{F_k(E) = 
+\ocap_{i=1}^m A^{(i)}_1\times
+\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
+\ocap_{i=1}^m A^{(i)}_{k-1}\times 
+}\nonumber\\
+&\times& 
+\ocup_{i=1}^m A^{(i)}_k\times
+\ocap_{i=1}^m A^{(i)}_{k+1}\times
+\ldots\times
+\ocap_{i=1}^m A^{(i)}_m
+\end{eqnarray}
+where $k$ is called the {\em generating variable}. In the boolean representation, we have
+${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
+and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
+\begin{equation}
+F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k,\ldots,\res_k{\bf a}^{(m)}
+\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+\end{equation}
+where we used some obvious properties (symmetry, associativity) of the $\land$
+and $\lor$ operators as well  In fact, substitution in the definition and using
+those properties, it can be shown that the resolution operator is symmetrical,
+associative and idempotent. As a reminder, these properties are defined as
+follows.
+\begin{equation}
+\begin{array}{ll}
+\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
+\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
+\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
+\end{array}
+\end{equation}
+%
+This following property shows that combining an edit with a redundant edit yields a redundant edit.
+\begin{lemma}
+If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+\label{lemma}
+\end{lemma}
+\begin{proof}
+We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
+\begin{eqnarray*}
+{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
+&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
+&=& ({\bf a}_k\land{\bf b}_k)\lor ({\bf a}_k\land{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
+&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+\end{eqnarray*}
+and we are done.
+\end{proof}
+%
+This lemma is important because it shows that no information is lost when
+redundant edits are removed in Algorithm \ref{eliminate}.
+
+
+%
+
+We now define more formally the notion of variable elimination.
+\begin{definition}
+Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$. If none of the edits in
+$f(E)$ contain variable $k$, we say that $f$ eliminates that variable from $E$.
+\end{definition}
+%
+\cite{fellegi:1976} use the following scheme to generate all essential implied edits
+from a set of explicit edits.
+%
+\begin{center}
+\begin{tabular}{lp{0.9\textwidth}}
+\multicolumn{2}{l}{{\bf Procedure} {$\textrm{\sc FH}(E,k)$}}\\
+1 &Find all minimal index sets $I_1, I_2,\ldots,I_s$ of $E$, such that $F_k(E[{I_j}])$ eliminates $k$ for every $\{j\in 1,2,\ldots,s\}$.
+Here we used the notation $E[{I_j}]=\{e^{ (i)}\in E\,|\,i\in I_j\}$. \\
+2 &Generate a new set of edits $E=\ocup_{j=1}^sF_k(E[I_j])$. 
+\end{tabular}
+\end{center}
+%
+The following theorem establishes equivalence between Fellegi-Holt elimination
+and the resolution operator method of Algorithm  \ref{eliminate}.
+\begin{theorem}
+Given a set of edits $E$ as in \eqref{eqEditSet} The function $F_k$ eliminates $k$ from $E$, if and
+only if {\sc eliminate} eliminates $k$ from $E$.
+\end{theorem}
+
+\begin{proof}
+First note that $F_k$ does not eliminate $k$ if and only if there is a category
+$i$ of $k$ for which $a_i^{(1)}=a_i^{(2)}=\ldots=a_i^{(m)}=\false$.  We call
+this property $P$. We will now prove equivalence by showing that {\sc
+eliminate} does not eliminate $k$ if and only if $P$. For the if-direction,
+suppose that $P$ holds. The order of the for-loop in {\sc eliminate} is
+unimportant because $\res_k$ is symmetric and we may therefore assume without
+loss of generality that $a_1^{(i)}=\false$ for $i\in1,2,\ldots,m$. {\sc
+eliminate} will return $\varnothing$ so all edits in the result contain $k$.
+For the reverse statement write ${\bf A}(j)$  for the state of ${\bf A}$ after the $j^{\rm th}$
+iteration and similarly for ${\bf A}^+$ and ${\bf A}^-$. Now suppose that {\sc eliminate}
+does not eliminate $k$. Then for some $j$, we have ${\bf A}^+(j+1)=\varnothing$,
+implying that the $1+j^{\rm th}$ column of ${\bf A}(j+1)$ is \false.
+Ignoring the redundancy removal step, we then have
+\begin{equation}
+{\bf A}^-(j+1) = {\bf A}(j+1) = {\bf A}^+(j)\res_k{\bf A}^-(j)
+\end{equation}
+This implies that every combination $({\bf a}^+,{\bf a}^-)\in \rows({\bf
+A}^+(j))\times\rows({\bf A}^-(j))$ has $a^+_{j+1}=a^+_{j+1}=\false$, showing
+that the $1+j^{\rm th}$ column of ${\bf A}(j)$ is \false. By induction, the
+matrix ${\bf A}(0)$ must have the $1+j^{\rm th}$ column equal to \false as
+well, and we are done.
+\end{proof}
+
+\subsection{An examples of variable elimination}
+\label{sseliminateexample}
+
 
 \section{Error localization in categorical data}
 \label{secErrLocCat}
+
 
 
 
@@ -543,3 +682,12 @@ F_k({\bf A}) = {\bf a}\res_k{\bf b}\res_k,\ldots,\quad {\bf a}, {\bf b},\ldots \
 \bibliography{editrules}
 
 \end{document}
+
+
+%The following distributive property also holds
+%\begin{equation}
+%\begin{array}{ll}
+%\textrm{distributivity:}& ({\bf a}\res_i{\bf b})\res_j{\bf c} = ({\bf a}\res_j{\bf c})\res_i({\bf b}\res_j{\bf c}).
+%\end{array}
+%\end{equation}
+
