@@ -594,8 +594,10 @@ follows.
 \textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
 \end{array}
 \end{equation}
+The resolution operator was actually defined earlyer, and independently of the
+current authors by \cite{willenborg:1988}, who also found these properties.
 %
-This following property shows that the resolution operator leaves redundancy relations untouched.
+The following property shows that the resolution operator leaves redundancy relations untouched.
 \begin{lemma}
 If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
 \label{lemma}
@@ -667,8 +669,15 @@ from a set of explicit edits.
 \end{tabular}
 \end{center}
 %
+\begin{theorem}
+If $E_1,E_2,\ldots,E_s$ is the minimal irredundant set of subsets of  of $E$ eliminating $k$, then 
+\begin{equation}
+\textrm{\sc eliminate}(\ocup_{j=1}^s E_j,k)=\ocup_{j=1}^s \textrm{\sc eliminate}(E_j,k).
+\end{equation}
+\end{theorem}
 \subsection{An examples of variable elimination}
 \label{sseliminateexample}
+
 
 
 \section{Error localization in categorical data}
