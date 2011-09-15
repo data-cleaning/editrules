@@ -413,10 +413,10 @@ detected by checking if $\sum_{j=1}^d\rho(e)_j=d$.
 %%% SECTION 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Manipulation of categorical restrictions}
-Just like for linear edits, the basic operations on categorical edits are value
-substitution and variable elimination. The former amounts to adapting the
-datamodel underlying the edit set while the latter amounts to deriving relations
-between variables not involving the eliminated variable. 
+The basic operations on sets of categorical edits are value substitution and
+variable elimination. The former amounts to adapting the datamodel underlying
+the edit set while the latter amounts to deriving relations between variables
+not involving the eliminated variable. 
 
 In the next subsection we give an example of value subsitution with the {\sf
 editrules} package, as well as some background. In subsection
@@ -482,7 +482,7 @@ ${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
     {\bf a}_{k+1}\land{\bf a}'_{k+1}\oplus\ldots\oplus
     {\bf a}_n\land{\bf a}'_n
 \end{eqnarray}
-For two edit sets ${\bf A}$ and ${\bf A'}$, we alse introduce the notation
+For two edit sets ${\bf A}$ and ${\bf A'}$, we also introduce the notation
 \begin{equation}
 {\bf A}\res_k{\bf A}' = \{{\bf a}\res_k{\bf a}'\,|\, ({\bf a},{\bf a}')\in\rows({\bf A})\times\rows({\bf A}')\}.
 \end{equation}
@@ -495,7 +495,10 @@ Observe that the resolution operator has the following properties, relevant for 
 \end{eqnarray}
 That is, if a record violates ${\bf a}\res_k{\bf a}'$, it does so because it
 violates ${\bf a}$ and/or ${\bf a}'$. Therefore, ${\bf a}\res_k{\bf a}'$ is
-also an edit in the sense that a record is invalid if violates it.
+also an edit in the sense that a record is invalid if it is falls in the
+derived edit.When ${\bf a}_k={\bf a}'_k$, the resulting edit is
+the intersection of the original edits, in which case the resulting edit is
+redundant.  
 
 The operator is called resolution operator since its action strongly resembles
 a resolution operation from formal logic.  If ${\bf a}_k\lor {\bf
@@ -505,29 +508,22 @@ regardless of the value of variable $k$. The edit resulting from a resolution
 operation on two explicitly defined edits is called an {\em implied edit}. If
 the resolution operation happens to eliminate one of the variables, it is
 called an {\em essential implied edit}. These terms were introduced by
-\citet{fellegi:1976} who first solved the problem of error localization in
+\citet{fellegi:1976} who first solved the problem of error localization for
 categorical data. 
 
 
 
-When ${\bf a}_k={\bf a}'_k$, the resulting edit is
-the intersection of the original edits, in which case the resulting edit is
-redundant.  
 The resolution operator can be used to eliminate a variable $k$ from a set of
-edits represented by ${\bf A}$ category by category. Suppose that $i$ is the
-column index of the first category of $k$.  Collect all pairs of $({\bf
-a}^+,{\bf a}^-)$ obeying $a^+_i=\true$ and $a^-_i=\false$. Generate a new set
-of edits, consisting of every pair ${\bf a}^+\res_k{\bf a}^-$. By construction,
-these new edits all have $a_i=\true$. Iterate for every category of
-$k$. There is one exception to take care of. If at any iteration, there are no
-edits of type ${\bf a}^+$, the variable cannot be eliminated and in stead, an
-empty set is returned. 
-
-The pseudocode of Algorithm {\sf eliminate} elaborates on this scheme by adding
-redundancy removal at every step.
-
-
-
+edits represented by ${\bf A}$ category by category as follows (Algorithm
+\ref{eliminate}).  Suppose that $i$ is the column index of the first category
+of $k$.  Collect all pairs of $({\bf a}^+,{\bf a}^-)$ obeying $a^+_i=\true$ and
+$a^-_i=\false$.  If there are no edits of type ${\bf a}^+$, the variable cannot
+be eliminated and the empty set is returned. Otherwise, generate a new set of
+edits, consisting of every pair ${\bf a}^+\res_k{\bf a}^-$. By construction,
+these new edits all have $a_i=\true$. Possibly, redundant edits have been
+produced, and these may be removed. The procedure is iterated for every
+category of $k$, adding a category for which each $a_i=\true$ at each
+iteration.
 %
 %
 \begin{algorithm}[t]
@@ -553,13 +549,14 @@ redundancy removal at every step.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Equivalence to Fellegi and Holt's elimination method}
 \label{ssequivalence}
-
-Given a set of $m$ edits in normal form \eqref{eqDefEdit}:
+In this subsection we prove that the function {\sc eliminate} of Algorithm 
+\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+Given a set of $m$ edits:
 \begin{equation}
-E = \{ e^{(i)} \in \mathcal{P}(D),i\in 1,2,\ldots,m\},
-%A_^(i)_1\times
-%A_^(i)_2\times\ldots\times
-%A_^(i)_n :
+    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
+    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
+    \textrm{, } 
+    i\in 1,2,\ldots,m\}
 \label{eqEditSet}
 \end{equation}
 where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
@@ -583,10 +580,11 @@ and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
 \begin{equation}
 F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k,\ldots,\res_k{\bf a}^{(m)}
 \quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+\label{eqFkBoolRep}
 \end{equation}
 where we used some obvious properties (symmetry, associativity) of the $\land$
-and $\lor$ operators as well  In fact, substitution in the definition and using
-those properties, it can be shown that the resolution operator is symmetrical,
+and $\lor$ operators as well.  In fact, substitution in the definition and using
+those properties, it can be shown that the resolution operator is symmetric,
 associative and idempotent. As a reminder, these properties are defined as
 follows.
 \begin{equation}
@@ -597,7 +595,7 @@ follows.
 \end{array}
 \end{equation}
 %
-This following property shows that combining an edit with a redundant edit yields a redundant edit.
+This following property shows that the resolution operator leaves redundancy relations untouched.
 \begin{lemma}
 If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
 \label{lemma}
@@ -613,32 +611,21 @@ We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {
 and we are done.
 \end{proof}
 %
-This lemma is important because it shows that no information is lost when
-redundant edits are removed in Algorithm \ref{eliminate}.
+This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
+does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
+of $D$ with or without the redundancy removal step.
 
-
-%
 
 We now define more formally the notion of variable elimination.
 \begin{definition}
-Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$. If none of the edits in
-$f(E)$ contain variable $k$, we say that $f$ eliminates that variable from $E$.
+    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
+    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
+    that $f$ eliminates that variable from $E$.
 \end{definition}
 %
-\cite{fellegi:1976} use the following scheme to generate all essential implied edits
-from a set of explicit edits.
-%
-\begin{center}
-\begin{tabular}{lp{0.9\textwidth}}
-\multicolumn{2}{l}{{\bf Procedure} {$\textrm{\sc FH}(E,k)$}}\\
-1 &Find all minimal index sets $I_1, I_2,\ldots,I_s$ of $E$, such that $F_k(E[{I_j}])$ eliminates $k$ for every $\{j\in 1,2,\ldots,s\}$.
-Here we used the notation $E[{I_j}]=\{e^{ (i)}\in E\,|\,i\in I_j\}$. \\
-2 &Generate a new set of edits $E=\ocup_{j=1}^sF_k(E[I_j])$. 
-\end{tabular}
-\end{center}
-%
-The following theorem establishes equivalence between Fellegi-Holt elimination
-and the resolution operator method of Algorithm  \ref{eliminate}.
+The following theorem establishes equivalence between the function $F_k$ Eq.\
+\eqref{eqFkBoolRep} and the resolution operator method of Algorithm
+\ref{eliminate}.
 \begin{theorem}
 Given a set of edits $E$ as in \eqref{eqEditSet} The function $F_k$ eliminates $k$ from $E$, if and
 only if {\sc eliminate} eliminates $k$ from $E$.
@@ -668,6 +655,18 @@ matrix ${\bf A}(0)$ must have the $1+j^{\rm th}$ column equal to \false as
 well, and we are done.
 \end{proof}
 
+\cite{fellegi:1976} use the following scheme to generate all essential implied edits
+from a set of explicit edits.
+%
+\begin{center}
+\begin{tabular}{lp{0.9\textwidth}}
+\multicolumn{2}{l}{{\bf Procedure} {$\textrm{\sc FH}(E,k)$}}\\
+1 &Find all minimal subsets $E_1, E_2,\ldots,E_s$ of $E$, such that $F_k(E_j)$ eliminates $k$ for every $\{j\in 1,2,\ldots,s\}$.
+\\
+2 &Generate a new set of edits $E=\ocup_{j=1}^sF_k(E_j)$. 
+\end{tabular}
+\end{center}
+%
 \subsection{An examples of variable elimination}
 \label{sseliminateexample}
 
