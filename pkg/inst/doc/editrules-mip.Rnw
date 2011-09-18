@@ -164,7 +164,7 @@ meaning that $c_i$ should be adapted.
 
 * Each mixed edit can be written as a categorical edit plus numerical edits for all enclosed numerical edits
 
-
+$$\argmin$$
 
 \section{Boundary heuristics}
 \subsection{From data set}
