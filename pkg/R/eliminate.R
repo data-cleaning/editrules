@@ -175,6 +175,7 @@ eliminate.editarray <- function(E, var, ...){
         I2 <- rep(1:m,each=n)
         B[I1,J] <-  aPlus[I1,J,drop=FALSE] | aMin[I2,J,drop=FALSE]
         B[I1,-J] <- aPlus[I1,-J,drop=FALSE] & aMin[I2,-J,drop=FALSE]
+        B <- rbind(B,aPlus)
         A <- B[!isRedundant.boolmat(B,ind),,drop=FALSE]
         A <- A[!isSubset.boolmat(A),,drop=FALSE]      
     }
