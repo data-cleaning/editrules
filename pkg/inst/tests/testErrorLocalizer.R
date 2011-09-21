@@ -16,6 +16,10 @@ test_that("errorLocalizer for numerical data",{
 })
 
 
+
+#d <- "../../../pkg/R"
+#for ( b in file.path(d,dir(d)) ) dmp <- source(b,echo=FALSE)
+
 test_that("errorLocalizer for categorical data",{
     E <- editarray(c(
         "positionInHouseHold %in% c('marriage partner','child','other')",
