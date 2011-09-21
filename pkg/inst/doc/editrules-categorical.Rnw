@@ -24,10 +24,11 @@
 \newcommand{\false}{\textrm{\sc false} }
 
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}[section]
-\newtheorem{corollary}{Corollary}[section]
-\newtheorem{example}{Example}[section]
-\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
 
 \usepackage{float}
  
@@ -155,7 +156,11 @@ $\mathbb{B}^{d_k}$.  The boolean representation $\rho(r)$ of the full
 record is the direct sum
 %
 \begin{equation}
-    r \xrightarrow{\rho} \vec{\delta}_{1}(r_1)\oplus\vec{\delta}_{2}(r_2)\oplus\ldots\oplus\vec{\delta}_n(r_n).
+    r \xrightarrow{\rho} \vec{\delta}_{1}(r_1)\oplus\vec{\delta}_{2}(r_2)\oplus\ldots\oplus\vec{\delta}_n(r_n),
+\end{equation}
+which we will write as
+\begin{equation}
+\rho(r) = {\bf v}_1 \oplus{\bf v}_2\oplus\cdots\oplus{\bf v}_n \equiv {\bf v}.
 \end{equation}
 The dimension $d$ of $\rho(r)$ is given by the total number of categories of all variables
 \begin{equation}
@@ -173,7 +178,14 @@ An edit $e$ is a subset of $D$ which can be written as the cartesian product
     \label{eqDefEdit}
 \end{equation}
 The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
-v}$ is considered invalid. An edit, expressed as above is said to be in {\rm
+v}$ is considered invalid. The following properties follow immediately.
+\begin{remark}
+If $e\subset D$ and $e'\subset D$ are edits, then $e\cup e' = \{e,e'\}$ and 
+$e\cap e'= A_1\cap A'_1\times A_2\cap A'_2\times\cdots\times A_n\cap A'_n$
+are also edits.
+\label{editremark}
+\end{remark}
+An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm
 normal form}.  A variable $v_k$ is {\em involved} in an edit if $A_k\subset
 D_k$.  Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is involved in
 $e$. A variable $v_k$ for which $A_k=D_k$ is not involved in $e$.  Since every
@@ -187,17 +199,16 @@ edits have a boolean representation $\rho(e)$, given by
 \end{eqnarray}
 which may simply be written as
 \begin{equation}
-    \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n={\bf a} .
+    \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n\equiv{\bf a}.
 \label{EqRhoE}
 \end{equation}
 A simple example is given in Figure \ref{Reditarray}. It is easy to check that
-an edit contains variable $k$  if and only if the inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$,
-where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
+an edit contains variable $k$  if and only if the inner product ${\bf
+1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
 
-A record ${\bf v}$
-violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the boolean
-representation this can be written as a condition on the standard inner product
-between the boolean representation of a record and an edit:
+A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
+boolean representation this can be written as a condition on the standard inner
+product between the boolean representation of a record and an edit:
 \begin{equation}
 \sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k =\rho({\bf v})\cdot{\bf a} =  n.
 \label{eqViolatedEdits}
@@ -528,24 +539,22 @@ a resolution operation from formal logic.  If ${\bf a}_k\lor {\bf
 a}'_k=(\true)^{d_k}$, the operator ``resolves'' or eliminates the $k^{\rm th}$
 variable and we are left with a relation between the other variables,
 regardless of the value of variable $k$. The edit resulting from a resolution
-operation on two explicitly defined edits is called an {\em implied edit}. If
-the resolution operation happens to eliminate one of the variables, it is
-called an {\em essential implied edit}. These terms were introduced by
+operation on two explicitly defined edits is called an {\em implied edit}. 
+If the resolution operation happens to eliminate one of the variables, it is
+called an {\em essentially new implied edit}. These terms were introduced by
 \citet{fellegi:1976} who first solved the problem of error localization for
 categorical data. 
 
-
-
 The resolution operator can be used to eliminate a variable $k$ from a set of
 edits represented by ${\bf A}$ category by category as follows (Algorithm
-\ref{eliminate}).  Suppose that $i$ is the column index of the first category
-of $k$.  Collect all pairs of $({\bf a}^+,{\bf a}^-)$ obeying $a^+_i=\true$ and
-$a^-_i=\false$.  If there are no edits of type ${\bf a}^+$, the variable cannot
+\ref{eliminate}).  Suppose that $j$ is the column index of the first category
+of $k$.  Collect all pairs of $({\bf a}^+,{\bf a}^-)$ obeying $a^+_j=\true$ and
+$a^-_j=\false$.  If there are no edits of type ${\bf a}^+$, the variable cannot
 be eliminated and the empty set is returned. Otherwise, copy all ${\bf a}^+$ to
 a new set of edits and add every ${\bf a}^+\res_k{\bf a}^-$. By construction,
-these new edits all have $a_i=\true$. Possibly, redundant edits have been
+these new edits all have $a_j=\true$. Possibly, redundant edits have been
 produced, and these may be removed. The procedure is iterated for every
-category of $k$, adding a category for which each $a_i=\true$ at each
+category of $k$, adding a category for which each $a_j=\true$ at each
 iteration.
 %
 %
@@ -562,91 +571,147 @@ iteration.
         \State {\bf break}
     \EndIf
     \State ${\bf A}\leftarrow {\bf A}^+\cup {\bf A}^+\res_k {\bf A}^-$
-    \State Delete redundant rows from {\bf A}.
+    \State Delete rows which have $\textrm{\sc isSubset}(\langle{\bf A},\ind\rangle)=\true$.
     \EndFor
     \Ensure {\sf editarray} $\langle{\bf A},\ind\rangle$ with variable $k$ eliminated
 \end{algorithmic}
 \end{algorithm}
 
 
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Equivalence to Fellegi and Holt's elimination method}
-%\label{ssequivalence}
-%In this subsection we prove that the function {\sc eliminate} of Algorithm 
-%\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
-%Given a set of $m$ edits:
-%\begin{equation}
-%    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
-%    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
-%    \textrm{, } 
-%    i\in 1,2,\ldots,m\}
-%\label{eqEditSet}
-%\end{equation}
-%where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
-%\cite{waal:2011} define a way to derive new edits, which may be written as a
-%function $F_k$,
-%\begin{eqnarray}
-%\lefteqn{F_k(E) = 
-%\ocap_{i=1}^m A^{(i)}_1\times
-%\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
-%\ocap_{i=1}^m A^{(i)}_{k-1}\times 
-%}\nonumber\\
-%&\times& 
-%\ocup_{i=1}^m A^{(i)}_k\times
-%\ocap_{i=1}^m A^{(i)}_{k+1}\times
-%\ldots\times
-%\ocap_{i=1}^m A^{(i)}_m
-%\end{eqnarray}
-%where $k$ is called the {\em generating variable}. In the boolean representation, we have
-%${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
-%and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
-%\begin{equation}
-%F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
-%\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
-%\label{eqFkBoolRep}
-%\end{equation}
-%where we used some obvious properties (symmetry, associativity) of the $\land$
-%and $\lor$ operators as well.  In fact, substitution in the definition and using
-%those properties, it can be shown that the resolution operator is symmetric,
-%associative and idempotent. As a reminder, these properties are defined as
-%follows.
-%\begin{equation}
-%\begin{array}{ll}
-%\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
-%\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
-%\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
-%\end{array}
-%\end{equation}
-%The resolution operator was actually defined earlyer, and independently of the
-%current authors by \cite{willenborg:1988}, who also found these properties.
-%%
-%The following property shows that the resolution operator leaves redundancy relations untouched.
-%\begin{lemma}
-%If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
-%\label{lemma}
-%\end{lemma}
-%\begin{proof}
-%We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
-%\begin{eqnarray*}
-%{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
-%&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
-%&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
-%&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
-%\end{eqnarray*}
-%and we are done.
-%\end{proof}
-%%
-%This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
-%does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
-%of $D$ with or without the redundancy removal step.
+\subsection{Equivalence to Fellegi and Holt's elimination method}
+\label{ssequivalence}
+In this subsection we prove that the function {\sc eliminate} of Algorithm 
+\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+Given a set of $m$ edits:
+\begin{equation}
+    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
+    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
+    \textrm{, } 
+    i\in 1,2,\ldots,m\}
+\label{eqEditSet}
+\end{equation}
+where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+\cite{waal:2011} define a way to derive new edits, which may be written as a
+function $F_k$,
+\begin{eqnarray}
+\lefteqn{F_k(E) = 
+\ocap_{i=1}^m A^{(i)}_1\times
+\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
+\ocap_{i=1}^m A^{(i)}_{k-1}\times 
+}\nonumber\\
+&\times& 
+\ocup_{i=1}^m A^{(i)}_k\times
+\ocap_{i=1}^m A^{(i)}_{k+1}\times
+\ldots\times
+\ocap_{i=1}^m A^{(i)}_m
+\label{eqFkSetRep}
+\end{eqnarray}
+where $k$ is called the {\em generating variable}. In the boolean representation, we have
+${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
+and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
+\begin{equation}
+F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
+\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+\label{eqFkBoolRep}
+\end{equation}
+where we used some obvious properties (symmetry, associativity) of the $\land$
+and $\lor$ operators as well. The following lemma and corrolary show that we can do
+all the work, necessary for implied edit derivation with the resolution operator. 
 %
+\begin{lemma}[\citet{fellegi:1976}]
+If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
+on subsets of $E$.
+\end{lemma}
+\begin{proof}
+The proof is given in the reference and will not be repeated here.
+\end{proof}
+\begin{corollary}
+If $E$ is a set of edits, all implied edits can be derived by repeated
+application of the resolution operator on elements of the boolean
+representation of $E$.
+\label{corResolution}
+\end{corollary}
+\begin{proof}
+This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
+\end{proof}
 %
-%We now define more formally the notion of variable elimination.
-%\begin{definition}
-%    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
-%    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
-%    that $f$ eliminates that variable from $E$.
-%\end{definition}
+Having established the use of the resolution operator, it becomes interesting
+to study its algebraic properties.  By substitution in the definition, it is
+easily shown that the resolution operator is symmetric, associative and
+idempotent. As a reminder, these properties are defined as follows.
+\begin{equation}
+\begin{array}{ll}
+\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
+\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
+\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
+\end{array}
+\end{equation}
+The resolution operator (although not called as such) was found earlyer and
+independently of the current authors by \cite{willenborg:1988}, who also
+discovered these properties.
+%
+The following property shows that the resolution operator leaves redundancy relations untouched.
+\begin{lemma}
+If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+\label{keepRedundancy}
+\end{lemma}
+\begin{proof}
+We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
+\begin{eqnarray*}
+{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
+&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
+&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
+&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+\end{eqnarray*}
+and we are done.
+\end{proof}
+%
+This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
+does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
+of $D$ with or without the redundancy removal step.
+
+We now define more formally the notion of variable elimination.
+\begin{definition}
+    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
+    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
+    that $f$ eliminates that variable from $E$.
+\end{definition}
+Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
+The following theorem shows that every essentially new implied edit, generated by $k$ is found
+by Algorithm \ref{eliminate}.
+\begin{theorem}
+If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
+every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
+edits are mutually non-redundant.
+\end{theorem}
+\begin{proof}
+The fact that the resulting rows are mutually nonredundant follows from Lemma
+\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
+iterations. We have
+\begin{equation}
+{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
+\end{equation}
+Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
+ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
+\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
+${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
+Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
+A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
+a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
+each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
+definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
+with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
+${\bf A}(j)$ contains all nonredundant edits with columns
+$\ind(k,1),\ldots,\ind(k,j)$ equal to
+\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
+\end{proof}
+
+
+
 %
 %\begin{lemma}
 %If $E$ is a set of edits, then $\textrm{\sc eliminate}(E,k)$ generates every
