@@ -1,8 +1,8 @@
 #' Localize errors on records in a data.frame.
 #' 
-#' Loops over all records in dat and performs error localization with \code{\link{errorLocalizer}}.
-#' For each record, it finds the smallest (weighted) number of variables to be imputed or adapted
-#' such that all violated edits can be satisfied, without violating new ones. If there are multiple,
+#' Loops over all records in \code{dat} and performs error localization with \code{\link{errorLocalizer}}.
+#' For each record it finds the smallest (weighted) number of variables to be imputed or adapted
+#' such that all violated edits can be satisfied, without violating new ones. If there are multiple
 #' optimal (equally weighted) solutions a random solution is chosen. 
 #'
 #'
