@@ -69,9 +69,10 @@ errorLocalizer.editmatrix <- function(
             x, 
             weight=rep(1,length(x)), 
             maxadapt=length(x), 
-            maxweight=sum(weight),
+            maxweight=sum(weight[!is.na(weight)]),
             maxduration=600,
             ...){
+    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
 
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
@@ -87,7 +88,7 @@ errorLocalizer.editmatrix <- function(
     adapt[!(names(adapt) %in% vars)] <- FALSE
     # Eliminate missing variables.
     for (v in names(x)[is.na(x)]) E <- eliminate.editmatrix(E,v)
-    wsol <- min(sum(weight), maxweight)
+    wsol <- min(sum(weight[vars %in% totreat]), maxweight)
     cp <- backtracker(
         maxduration=maxduration,
         isSolution = {
@@ -158,7 +159,7 @@ errorLocalizer.editarray <- function(
     maxweight=sum(weight),
     maxduration=600,
     ...){
-
+    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
     adapt <- is.na(x)
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
@@ -166,7 +167,7 @@ errorLocalizer.editarray <- function(
 
     vars <- getVars.editarray(E)
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
-    wsol <- sum(weight)
+    wsol <- min(sum(weight[vars %in% totreat]),maxweight)
     ind <- getInd(E)
     bt <- backtracker(
         isSolution = {
