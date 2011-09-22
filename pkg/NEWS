@@ -1,5 +1,7 @@
 version 1.5-0
-- Error localization, variable elimination etc. for categorical variables.
+- BETA FUNCTIONALITY: Error localization, variable elimination etc. for categorical variables.
+- new function localizeErrors(E,dat) processes whole dataset with $searchBest() (needs more testing).
+- errorLocalizer throws error at invalid weights (thanks to Kenneth Chin-A-Fat).
 - Argument maxweight was ignored by errorLocalizer.editmatrix, now works.
 - violatedEdits has better (more clear) output.
 
