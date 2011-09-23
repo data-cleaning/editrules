@@ -79,7 +79,12 @@ getDuration <- function(x){
     y
 }
 
-
+#' Print object of class errorLocation 
+#'
+#' @param x object of class errorLocation
+#' @param ... arguments to be passed to other methods
+#' @method print errorLocation
+#' @export
 print.errorLocation <- function(x,...){
     cat("Object of class 'errorLocation' generated at",x$timestamp,'\n')
     cat("call :", as.character(as.expression(x$call)),'\n')

@@ -922,6 +922,7 @@ the accompanying paper \citep{loo:2011b} where the error localization problem fo
 mixed data are treated.
 
 \subsection[{(\bf new!}) Error localization with {\sf localizeErrors}]{Error localization with {\sf localizeErrors} }
+\index{localizeErrors@{\sf localizeErrors}}
 The function {\sf localizeErrors} accepts an {\sf editmatrix} and a {\sf
 data.frame}, and returns an object of class {\sf errorLocation}. An {\sf
 errorLocation} object contains the locations of errors for each record in the
@@ -946,13 +947,17 @@ Slot          & description. \\
 
 Apart from the mandatory arguments (an {\sf editarray} and a {\sf data.frame}),
 there are optional arguments which will be passed to the underlying {\sf
-errorLocalizer} function which is described in detail in the next section. These arguments
-are given in table \ref{tabArglocalize}.
+errorLocalizer} function which is described in detail in the next section.
+These arguments are given in table \ref{tabArglocalize}.
+%
 
 \begin{table}
-\caption{Arguments of {\sf localizeErrors}. Optional arguments are given in square brackets.}
+\begin{threeparttable}
+\caption{Arguments of {\sf localizeErrors}. Optional arguments are given in square brackets.
+The optional arguments are also arguments of the underlying {\sf errorLocalizer} function.
+}
 \label{tabArglocalize}
-\begin{tabular}{lp{0.8\textwidth}}
+\begin{tabular}{lp{0.7\textwidth}}
 \hline
 Argument & description\\
 \hline
@@ -965,9 +970,33 @@ $[\textrm{\sf maxweight}]$& Maximum weight of solution, if weights are not given
 $[\textrm{\sf maxduration}]$  &  Maximum time (in seconds), spent searching for a solution for a single record.\\
 \hline
 \end{tabular}
+\end{threeparttable}
 \end{table}
 
+Figure \ref{RlocalizeErrors} shows an example of localizing errors with {\sf errorLocalizer}.
+The function applies a branch-and-bound algorithm to find the least weighted number of 
+variables which may be adapted in such a way that all edits are satisfied. If there are multiple
+degenerate (equally weighted) solutions, one of those solutions is drawn at random.
+%
+\begin{Rcode}
+<<keep.source=true>>=
+E <- editmatrix(c(
+    "x + y == z",
+    "x > 0",
+    "y > 0",
+    "z > 0"))
 
+dat <- data.frame(
+    x = c(1,-1,1),
+    y = c(-1,1,1),
+    z = c(2,0,2))
+
+# localize all errors in the data
+localizeErrors(E,dat)
+@
+\caption{Localizing errors for every record in a data.frame with {\sf localizeErrors}}
+\label{RlocalizeErrors}
+\end{Rcode}
 
 
 \subsection{Error localization with {\sf errorLocalizer}}
