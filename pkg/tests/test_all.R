@@ -1,5 +1,5 @@
-library(editrules)
+#library(editrules)
 
-if (require(testthat)){
-  test_package("editrules")
-}
+#if (require(testthat)){
+#  test_package("editrules")
+#}
