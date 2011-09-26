@@ -28,6 +28,18 @@ test_that("Numerical edit violations are detected",{
     )
 })
 				 
+test_that("An empty editmatrix is always valid",{
+    expect_equivalent(
+        violatedEdits(
+            editmatrix("x==1")[0],
+                data.frame( 
+                   x = c(0,2,1),
+                   y = c(0,0,1),
+                   z = c(0,1,1))
+        ),
+        matrix(nrow=3, ncol=0)
+    )
+})
 
 test_that("categorical edit violations are detected",{
     E <-  editarray(c(
@@ -55,9 +67,3 @@ test_that("categorical edit violations are detected",{
             FALSE),byrow=TRUE,nrow=4)
     )
 })
-
-
-
-
-
-

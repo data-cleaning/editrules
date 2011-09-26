@@ -1,3 +1,6 @@
+version 1.5-1
+- Fixed a bug in violatedEdits.editmatrix which caused deducorrect correctTypes to fail
+
 version 1.5-0
 - BETA FUNCTIONALITY: Error localization, variable elimination etc. for categorical variables.
 - new function localizeErrors(E,dat) processes whole dataset with $searchBest() (needs more testing).

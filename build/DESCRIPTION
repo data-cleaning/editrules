@@ -12,7 +12,7 @@ Description: Facilitates reading and manipulation of linear
     linear edits can be manipulated using Fourier-Motzkin elimination
     and variable substitution and solving error localization problems
     based on the generalized principle of Felligi and Holt.
-Version: 1.5
+Version: 1.5-1
 URL: http://code.google.com/p/editrules/
-Date: 2011-08-01
+Date: 2011-09-25
 Suggests: lpSolveAPI,iterators
