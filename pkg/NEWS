@@ -1,5 +1,8 @@
+version 1.5-2
+- Fixed column matching bug in violatedEdits.editarray
+
 version 1.5-1
-- Fixed a bug in violatedEdits.editmatrix which caused deducorrect correctTypes to fail
+- Fixed a bug in violatedEdits.editmatrix which caused deducorrect correctTypos to fail (Thanks to Brian Ripley for contacting us)
 
 version 1.5-0
 - BETA FUNCTIONALITY: Error localization, variable elimination etc. for categorical variables.

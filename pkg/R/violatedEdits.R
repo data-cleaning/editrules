@@ -52,8 +52,14 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 violatedEdits.editmatrix <- function(E, dat, tol=sqrt(.Machine$double.eps), ...){
      if (tol < 0 ) stop("Argument tol must be nonnegative")
      if ( !isNormalized(E) ) E <- normalize(E)
-
-     if ( is.vector(dat) ){ X <- t(dat) } else { X <- as.matrix(dat) }
+     
+     if ( is.vector(dat) ){ 
+         I <- match(getVars(E),names(dat),nomatch=0)
+         X <- t(dat[I]) 
+     } else { 
+         I <- match(getVars(E),colnames(dat),nomatch=0)
+         X <- as.matrix(dat[,I,drop=FALSE]) 
+     }
 
      if (nrow(E) == 0){
        return(matrix(logical(), nrow=NROW(dat)))

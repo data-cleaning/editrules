@@ -6,13 +6,13 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
-Description: Facilitates reading and manipulation of linear
-    (in)equalities, converting them into matrix format (and vice versa)
-    and checking if data are valid according to these rules. Sets of
-    linear edits can be manipulated using Fourier-Motzkin elimination
-    and variable substitution and solving error localization problems
-    based on the generalized principle of Felligi and Holt.
-Version: 1.5-1
+Description: Facilitates reading and manipulating (multivariate) data restrictions
+    (edit rules) on numerical and categorical data. Rules can be defined with common R syntax
+    and parsed to an internal (matrix-like format). Rules can be manipulated with
+    variable elimination and value substitution methods, allowing for feasibility checks
+    and more. Data can be tested against the rules and erroneous fields can be found based
+    on Fellegi and Holt's generalized principle.
+Version: 1.5-2
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
 Suggests: lpSolveAPI,iterators
