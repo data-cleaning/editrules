@@ -2,6 +2,7 @@
 \documentclass[11pt, fleqn, a4paper]{article}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
+\usepackage{array}
 \usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
@@ -23,8 +24,11 @@
 \newcommand{\false}{\textrm{\sc false} }
 
 \newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}[section]
-\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
 
 \usepackage{float}
  
@@ -58,9 +62,12 @@ library(editrules)
 \maketitle
 \begin{abstract}
 {\em This vignette is far from finished. Version 2.0 fo the package will have
-the full vignette. At the moment, functionality for treating categorical data has alpha status and is not public yet.
-Refer to the accompanying paper \cite{jonge:2011} for manipulation of linear edits.
-}
+the full vignette. At the moment, {\bf functionality for treating categorical data
+has  beta status} so bugs are likely.
+
+
+Refer to the accompanying paper
+\cite{jonge:2011} for manipulation of linear edits.  }
 \end{abstract}
 
 \newpage
@@ -77,50 +84,49 @@ class of a person is ``child'', then (by law) the marital status cannot be
 frequently encountered. Resolving such violations is an important step prior to 
 data analysis and estimation.
 
-A categorical data record $\bf v$ with $n$ variables may be defined as an
+A categorical data record $r$ with $n$ variables may be defined as an
 element of the cartesian product space $D$:
 \begin{equation}
 D = D_1\times D_2\times\ldots\times D_n,
+\label{eqDomain}
 \end{equation}
-where each $D_k$ is a finite set of $d_k$ possible categories for the $i$th
-variable.  Each restriction $e$ is a subset of $D$ and we say that that {\em if
-${\bf v}\in e$ then $\bf v$ violates $e$}. Conversely, when ${\bf v}\not\in e$
-we say that ${\bf v}$ {\em satisfies} $e$. In data editing literature, such
-rules are referred to as {\em edit rules} or {\em edits}, in short. In the
-context of contingency tables they are referred to as {\em structural zeros}
-since each rule implies one or more cells in the $d_1\times d_2\times\ldots
-\times d_n$ contingency table must be zero. A record is {\em  valid} if it satisfies
-every edit imposed on $D$.
+where each $D_k$ is a finite set of $d_k$ possible categories for variable $k$ 
+We label the categories as follows:
+\begin{equation}
+D_k = \{c\in D_k\,|\,c=1,2,\ldots,d_k\}.
+\label{eqVariableDomain}
+\end{equation}
+%
 
+Each restriction $e$ is a subset of $D$ and we say that that {\em if $r\in e$
+then $r$ violates $e$}. Conversely, when $r\not\in e$ we say that $r$ {\em
+satisfies} $e$. In data editing literature, such rules are referred to as {\em
+edit rules} or {\em edits}, in short. In the context of contingency tables they
+are referred to as {\em structural zeros} since each rule implies that one or
+more cells in the $d_1\times d_2\times\ldots \times d_n$ contingency table must
+be zero. A record is {\em  valid} if it satisfies every edit imposed on $D$.
 
 Large, complex surveys may consist of hundreds of interrelated rules and
 variables, which impedes resolution of edit violations and renders manual
-manipulation infeasible. The {\sf R} package {\sf editrules}  offers functionality to
-define, manipulate and maintain sets of edit rules with relative ease. It also
-implements error localization functionality based on the generalized principle
-of \citep{fellegi:1976}, which states that one should find the smallest
-(weighted) number of variables whose values can be adapted such that all edits
-can be satisfied. Fellegi and Holt's principle should be considered as the last
-resort of data editing. It is useful in situations where a record violates one
-or more edits and there is no information about the cause of the error. In
-certain cases, the cause of error can be estimated with near certainty, for
-example in the case of typing errors in numerical data.  We refer the reader to
+manipulation infeasible. \citet{winkler:1999} mentions practical cases where
+statistical offices handle 250, 300 or 750 categorical edit rules for surveys.
+
+
+The {\sf R} package {\sf editrules}  offers functionality to define, manipulate
+and maintain sets of edit rules with relative ease. It also implements error
+localization functionality based on the generalized principle of
+\citep{fellegi:1976}, which states that one should find the smallest (weighted)
+number of variables whose values can be adapted such that all edits can be
+satisfied. Fellegi and Holt's principle should be considered as the last resort
+of data editing. It is useful in situations where a record violates one or more
+edits and there is no information about the cause of the error. In certain
+cases, the cause of error can be estimated with near certainty, for example in
+the case of typing errors in numerical data.  We refer the reader to
 \cite{scholtus:2008,scholtus:2009} and \cite{loo:2011} for such cases.
 
-In the remainder of this paper the representation and manipulation of edits is
-discussed and algorithms are given in pseudocode. Also, coded examples are
-given, al of which can be executed after loading the editrules package.
-
-
-
-
-
-
-
-
-
-
-
+The purpose of this paper is to give a technical overview of the representation
+and manipulation of edits in the {\sf editrules} package, as well as some coded
+examples to get new users started.  
 
 
 
@@ -134,7 +140,7 @@ implemented in the {\sf editrules} package. Readers not interested in the
 underlying principles may skip Section \ref{sectBoolrep}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Boolean representation of edits and records}
+\subsection{Boolean representation of records and edits}
 \label{sectBoolrep}
 Categorical records may be represented as  a vector of boolean values. A
 boolean vector of dimension $d$ is an element of the boolean algebra 
@@ -147,17 +153,22 @@ discussion we will also allow the standard arithmetic operations addition and
 subtraction on boolean vectors (this is also consistent with the way {\sf R}
 handles vectors of class {\sf logical}). 
 
-To represent a record ${\bf v}=(v_1,v_2,\ldots,v_n)$, assign to every category
-$i$ in $D_k$ a unique standard basisvector $\vec{\delta}_k(i)$ of
-$\mathbb{B}^{d_k}$.  The boolean representation $\rho({\bf v})$ of the full
+To represent a record $r=(r_1,r_2,\ldots,r_n)$, assign to every category
+$c$ in $D_k$ a unique standard basisvector $\vec{\delta}_k(c)$ of
+$\mathbb{B}^{d_k}$.  The boolean representation $\rho(r)$ of the full
 record is the direct sum
 %
 \begin{equation}
-    {\bf v} \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n).
+    r \xrightarrow{\rho} \vec{\delta}_{1}(r_1)\oplus\vec{\delta}_{2}(r_2)\oplus\ldots\oplus\vec{\delta}_n(r_n),
 \end{equation}
-The diminsion $d$ of $\rho({\bf v})$ is given by the total number of categories of all variables
+which we will write as
+\begin{equation}
+\rho(r) = {\bf v}_1 \oplus{\bf v}_2\oplus\cdots\oplus{\bf v}_n \equiv {\bf v}.
+\end{equation}
+The dimension $d$ of $\rho(r)$ is given by the total number of categories of all variables
 \begin{equation}
 d = \sum_{k=1}^n d_k.
+\label{eqSumdk}
 \end{equation}
 When each record in a dataset is represented this way, summing the vectors
 yields the $d$-dimensional vecorized representation of the $d_1\times
@@ -170,7 +181,14 @@ An edit $e$ is a subset of $D$ which can be written as the cartesian product
     \label{eqDefEdit}
 \end{equation}
 The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
-v}$ is considered invalid. An edit, expressed as above is said to be in {\rm
+v}$ is considered invalid. The following properties follow immediately.
+\begin{remark}
+If $e\subset D$ and $e'\subset D$ are edits, then $e\cup e' = \{e,e'\}$ and 
+$e\cap e'= A_1\cap A'_1\times A_2\cap A'_2\times\cdots\times A_n\cap A'_n$
+are also edits.
+\label{editremark}
+\end{remark}
+An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm
 normal form}.  A variable $v_k$ is {\em involved} in an edit if $A_k\subset
 D_k$.  Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is involved in
 $e$. A variable $v_k$ for which $A_k=D_k$ is not involved in $e$.  Since every
@@ -184,17 +202,16 @@ edits have a boolean representation $\rho(e)$, given by
 \end{eqnarray}
 which may simply be written as
 \begin{equation}
-    \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n={\bf a} .
+    \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n\equiv{\bf a}.
 \label{EqRhoE}
 \end{equation}
 A simple example is given in Figure \ref{Reditarray}. It is easy to check that
-an edit contains variable $k$  if and only if the inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$,
-where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
+an edit contains variable $k$  if and only if the inner product ${\bf
+1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
 
-A record ${\bf v}$
-violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the boolean
-representation this can be written as a condition on the standard inner product
-between the boolean representation of a record and an edit:
+A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
+boolean representation this can be written as a condition on the standard inner
+product between the boolean representation of a record and an edit:
 \begin{equation}
 \sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k =\rho({\bf v})\cdot{\bf a} =  n.
 \label{eqViolatedEdits}
@@ -223,7 +240,7 @@ Data records can be stored in {\sf data.frame} objects, as usual.
 
 \subsection{The {\sf editarray} object}
 In the {\sf editrules} package, a set of categorical edits is represented as an {\sf editarray}
-object. Formally, we denote an edit array $E$ for $n$ categorical variables and $m$ edits as
+object. Formally, we denote an {\sf editarray} $E$ for $n$ categorical variables and $m$ edits as
 (brackets indicate a combination of objects)  
 \begin{equation}
     E = \langle {\bf A},{\bf ind}\rangle\textrm{, with }{\bf A}\in\{0,1\}^{m\times d}\textrm{ and }
@@ -234,22 +251,24 @@ Each row ${\bf a}$ of ${\bf A}$ contains the boolean representation of one edit,
 $d_k$ denote the number of categories of each variable.  The object {\bf ind}
 is a nested {\sf list} which relates columns of {\bf A} to variable names and
 categories.  Labeling variables with $k\in1,2,\ldots,n$ and category values
-with $i\in 1,2,\ldots,d_k$, we use the following notations:
+with $c\in 1,2,\ldots,d_k$, we use the following notations:
 \begin{eqnarray}
-    {\bf ind}(k,i) &=& \sum_{j< k }d_j + i\\
-    {\bf ind}(k)   &=& \{{\bf ind}(k,i)\,|\, i\in D_k\}.
+\label{eqInd1}
+    {\bf ind}(k,c) &=& \sum_{l< k }d_l + c\\
+    {\bf ind}(k)   &=& \{{\bf ind}(k,c)\,|\, c\in D_k\}.
+\label{eqInd2}
 \end{eqnarray}
-So $\ind(k,i)$ is the column index in {\bf A} for variable $k$ and category $i$
+So $\ind(k,c)$ is the column index in {\bf A} for variable $k$ and category $c$
 and $\ind(k)$ is the set of column indices corresponding to the categories of
 variable $k$.  The {\sf editarray} is the central object for computing with
 catgegorical edits, just like the {\sf editmatrix} is the central object for
 computations with linear edits.
 
-It is both tedious and error prone to define and maintain an editarray by hand.
+It is both tedious and error prone to define and maintain an {\sf editarray} by hand.
 In practice, categorical edits are usually stated verbosely, such as: ``a male
 subject cannot be pregnant'', or ``an under-aged subject cannot be married''.
 To facilitate the definition of edit arrays, {\sf editrules} is equipped with a
-parser, which takes R-statements in {\sf character} format, and translates them
+parser, which takes {\sf R}-statements in {\sf character} format, and translates them
 to an {\sf editarray}.
 
 %
@@ -279,15 +298,13 @@ the data model. The {\sf editarray} function derives the datamodel based on the
 variable names and categories it finds in the edits, whether they are
 univariate (defining domains) of multivariate. This means that if all possible
 variables and categories are mentioned in the multivariate edits, the correct
-datamodel will be derived as well. It is important to note that most functions
-working on categorical edits assume that the full datamodel is represented
-in the columns of an {\sf editarray}. The function {\sf datamodel} accepts an
-edit array as input and returns an overview of variables and their categories
-for easy inspection.
+datamodel will be derived as well. 
 
+The function {\sf datamodel} accepts an edit array as input and returns an
+overview of variables and their categories for easy inspection.
 When printed to the screen, the boolean array is shown with column heads of the form
 \begin{quote}
-{\sf <variable><separator><category>}, 
+{\sf <abbreviated var. name><separator><abbreviated cat. label>}, 
 \end{quote}
 where both variable names and categories are abbreviated for readability, and
 the standard separator is a colon ({\sf :}). The separator may not occur as a
@@ -340,8 +357,8 @@ Operator & Description\\
 {\sf ==}     & Equality$^*$ \\
 {\sf if( <condition> ) <expression> } & conditional statement\\
 {\sf c(\verb"'"<cat1>\verb"'",\verb"'"<cat2>\verb"'",...)} & categories, {\sf character} or {\sf logical}\\
-{\sf \&\&}    & logical {\sc and}\\
-{\sf ||}      & logical {\sc or}\\
+{\sf \&\&}, {\sf \&}    & logical {\sc and}\\
+{\sf ||}, {\sf |}      & logical {\sc or}\\
 {\sf !}       & logical {\sc not}\\
 \hline
 \end{tabular}
@@ -358,7 +375,7 @@ as.data.frame} or {\sf as.character} one can coerce an editarray so that it can
 be written to a file or database. Character coercion is used when edeits are
 printed to the screen. Optionally, coercing the datamodel to character form can
 be switched off. The result of {\sf as.data.frame} version contains columns
-with edit names, a character representaition of the edits and a column for
+with edit names, a character representation of the edits and a column for
 remarks.
 
 The function {\sf violatedEdits} takes an {\sf editarray} and a {\sf
@@ -396,12 +413,31 @@ Function        & description \\
 \end{table}
 
 
-When manipulating edit sets, redundant edits of the form in Eq.\ \eqref{eqRedundancy1}
-may arise. Such redundancies can be detected in the boolean representation with
-{\sf isObviouslyRedundant}. By default, this funciton also checks for duplicate edits,
-but this may be turned off. The function {\sf duplicated} is overloaded from the standard
-{\sf R} function and the function {\sf isSubset} detects which edits are a subset or
-duplicate of another one.
+When manipulating edit sets, redundant edits of the form of Eq.\
+\eqref{eqRedundancy1} may arise. Such redundancies can be detected in the
+boolean representation with {\sf isObviouslyRedundant}. By default, this
+function also checks for duplicate edits, but this may be turned off. The
+function {\sf duplicated} is overloaded from the standard {\sf R} function and
+the function {\sf isSubset} (pseudocode in Algorithm \ref{algIsSubset}) detects which edits are a subset or duplicate of
+another one. In the actual {\sf R} implementation, the only explicit loop is a call to {\sf R}'s {\sf vapply} function.
+The other loops are avoided using {\sf R}'s indexing  and vectorization properties.
+%
+\begin{algorithm}[t]
+\caption{{\sc isSubset}$(E)$}
+\label{algIsSubset}
+\begin{algorithmic}
+\Require An editarray $E=\langle{\bf A},\ind\rangle$.
+\State ${\bf s} \leftarrow (\false)^m$
+\For {$({\bf a}^{(i)},{\bf a}^{(i')})\in \rows({\bf A})\times\rows({\bf A})$ }
+  \If {${\bf a}^{(i)}\lor {\bf a}^{(i')}={\bf a}^{(i')} $}
+    \State $s_i\leftarrow\true$
+  \EndIf
+\EndFor
+\Ensure Boolean vector $\bf s$ indicating which edits represented by  {\bf A} are a subset of another edit. 
+\end{algorithmic}
+\end{algorithm}
+
+
 
 Manipulations may also lead to edits of the form $e=D$, in which case every possible
 record is invalid, and the editarray has become impossible to satisfy. The function
@@ -418,16 +454,17 @@ variable elimination. The former amounts to adapting the datamodel underlying
 the edit set while the latter amounts to deriving relations between variables
 not involving the eliminated variable. 
 
-In the next subsection we give an example of value subsitution with the {\sf
-editrules} package, as well as some background. In subsection
-\ref{sscategoryresolution} we describe an elimination method, which appears to
-be new to the field of data editing. In subsection \ref{ssequivalence} it is
-shown that the method yields results equivalent to Fellegi and Holt's
-elimination method while running in polynomial in stead of exponential time.
-Finally, in subsection \ref{sseliminateexample} we given an example of
-eliminating variables with the {\sf editrules} package. Readers not interested in 
-the technical background can skip subsections \ref{sscategoryresolution} and 
-\ref{ssequivalence}.
+%In the next subsection we give an example of value subsitution with the {\sf
+%editrules} package, as well as some background. In subsection
+%\ref{sscategoryresolution} we describe an elimination method, which appears to
+%be new to the field of data editing. 
+%In subsection \ref{ssequivalence} it is
+%shown that the method yields results equivalent to Fellegi and Holt's
+%elimination method while running in polynomial in stead of exponential time.
+%Finally, in subsection \ref{sseliminateexample} we given an example of
+%eliminating variables with the {\sf editrules} package. Readers not interested in 
+%the technical background can skip subsections \ref{sscategoryresolution} and 
+%\ref{ssequivalence}.
 
 
 
@@ -481,6 +518,7 @@ ${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
 &\oplus&    {\bf a}_k\lor{\bf a}'_k\oplus
     {\bf a}_{k+1}\land{\bf a}'_{k+1}\oplus\ldots\oplus
     {\bf a}_n\land{\bf a}'_n
+\label{eqResolutionOperator}
 \end{eqnarray}
 For two edit sets ${\bf A}$ and ${\bf A'}$, we also introduce the notation
 \begin{equation}
@@ -505,24 +543,22 @@ a resolution operation from formal logic.  If ${\bf a}_k\lor {\bf
 a}'_k=(\true)^{d_k}$, the operator ``resolves'' or eliminates the $k^{\rm th}$
 variable and we are left with a relation between the other variables,
 regardless of the value of variable $k$. The edit resulting from a resolution
-operation on two explicitly defined edits is called an {\em implied edit}. If
-the resolution operation happens to eliminate one of the variables, it is
-called an {\em essential implied edit}. These terms were introduced by
+operation on two explicitly defined edits is called an {\em implied edit}. 
+If the resolution operation happens to eliminate one of the variables, it is
+called an {\em essentially new implied edit}. These terms were introduced by
 \citet{fellegi:1976} who first solved the problem of error localization for
 categorical data. 
 
-
-
 The resolution operator can be used to eliminate a variable $k$ from a set of
 edits represented by ${\bf A}$ category by category as follows (Algorithm
-\ref{eliminate}).  Suppose that $i$ is the column index of the first category
-of $k$.  Collect all pairs of $({\bf a}^+,{\bf a}^-)$ obeying $a^+_i=\true$ and
-$a^-_i=\false$.  If there are no edits of type ${\bf a}^+$, the variable cannot
-be eliminated and the empty set is returned. Otherwise, generate a new set of
-edits, consisting of every pair ${\bf a}^+\res_k{\bf a}^-$. By construction,
-these new edits all have $a_i=\true$. Possibly, redundant edits have been
+\ref{eliminate}).  Suppose that $j$ is the column index of the first category
+of $k$.  Collect all pairs of $({\bf a}^+,{\bf a}^-)$ obeying $a^+_j=\true$ and
+$a^-_j=\false$.  If there are no edits of type ${\bf a}^+$, the variable cannot
+be eliminated and the empty set is returned. Otherwise, copy all ${\bf a}^+$ to
+a new set of edits and add every ${\bf a}^+\res_k{\bf a}^-$. By construction,
+these new edits all have $a_j=\true$. Possibly, redundant edits have been
 produced, and these may be removed. The procedure is iterated for every
-category of $k$, adding a category for which each $a_i=\true$ at each
+category of $k$, adding a category for which each $a_j=\true$ at each
 iteration.
 %
 %
@@ -531,163 +567,198 @@ iteration.
 \label{eliminate}
 \begin{algorithmic}
     \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$
-    \For{$i\in \ind(k)$}
-    \State ${\bf A}^+ = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_i=\textrm{\sc true}\}$
-    \State ${\bf A}^- = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_i=\textrm{\sc false}\}$ 
+    \For{$j\in \ind(k)$}
+    \State ${\bf A}^+ = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_j=\textrm{\sc true}\}$
+    \State ${\bf A}^- = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_j=\textrm{\sc false}\}$ 
     \If{${\bf A}^+=\varnothing$}
         \State ${\bf A}\leftarrow\varnothing$
         \State {\bf break}
     \EndIf
-    \State ${\bf A}\leftarrow {\bf A}^+\res_k {\bf A}^-$
-    \State Delete redundant rows from {\bf A}.
+    \State ${\bf A}\leftarrow {\bf A}^+\cup {\bf A}^+\res_k {\bf A}^-$
+    \State Delete rows which have $\textrm{\sc isSubset}(\langle{\bf A},\ind\rangle)=\true$.
     \EndFor
     \Ensure {\sf editarray} $\langle{\bf A},\ind\rangle$ with variable $k$ eliminated
 \end{algorithmic}
 \end{algorithm}
 
 
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Equivalence to Fellegi and Holt's elimination method}
-\label{ssequivalence}
-In this subsection we prove that the function {\sc eliminate} of Algorithm 
-\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
-Given a set of $m$ edits:
-\begin{equation}
-    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
-    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
-    \textrm{, } 
-    i\in 1,2,\ldots,m\}
-\label{eqEditSet}
-\end{equation}
-where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
-\cite{waal:2011} define a way to derive new edits, which may be written as a
-function $F_k$,
-\begin{eqnarray}
-\lefteqn{F_k(E) = 
-\ocap_{i=1}^m A^{(i)}_1\times
-\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
-\ocap_{i=1}^m A^{(i)}_{k-1}\times 
-}\nonumber\\
-&\times& 
-\ocup_{i=1}^m A^{(i)}_k\times
-\ocap_{i=1}^m A^{(i)}_{k+1}\times
-\ldots\times
-\ocap_{i=1}^m A^{(i)}_m
-\end{eqnarray}
-where $k$ is called the {\em generating variable}. In the boolean representation, we have
-${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
-and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
-\begin{equation}
-F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k,\ldots,\res_k{\bf a}^{(m)}
-\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
-\label{eqFkBoolRep}
-\end{equation}
-where we used some obvious properties (symmetry, associativity) of the $\land$
-and $\lor$ operators as well.  In fact, substitution in the definition and using
-those properties, it can be shown that the resolution operator is symmetric,
-associative and idempotent. As a reminder, these properties are defined as
-follows.
-\begin{equation}
-\begin{array}{ll}
-\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
-\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
-\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
-\end{array}
-\end{equation}
-The resolution operator was actually defined earlyer, and independently of the
-current authors by \cite{willenborg:1988}, who also found these properties.
+%\subsection{Equivalence to Fellegi and Holt's elimination method}
+%\label{ssequivalence}
+%In this subsection we prove that the function {\sc eliminate} of Algorithm 
+%\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+%Given a set of $m$ edits:
+%\begin{equation}
+%    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
+%    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
+%    \textrm{, } 
+%    i\in 1,2,\ldots,m\}
+%\label{eqEditSet}
+%\end{equation}
+%where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+%\cite{waal:2011} define a way to derive new edits, which may be written as a
+%function $F_k$,
+%\begin{eqnarray}
+%\lefteqn{F_k(E) = 
+%\ocap_{i=1}^m A^{(i)}_1\times
+%\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
+%\ocap_{i=1}^m A^{(i)}_{k-1}\times 
+%}\nonumber\\
+%&\times& 
+%\ocup_{i=1}^m A^{(i)}_k\times
+%\ocap_{i=1}^m A^{(i)}_{k+1}\times
+%\ldots\times
+%\ocap_{i=1}^m A^{(i)}_m
+%\label{eqFkSetRep}
+%\end{eqnarray}
+%where $k$ is called the {\em generating variable}. In the boolean representation, we have
+%${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
+%and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
+%\begin{equation}
+%F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
+%\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+%\label{eqFkBoolRep}
+%\end{equation}
+%where we used some obvious properties (symmetry, associativity) of the $\land$
+%and $\lor$ operators as well. The following lemma and corrolary show that we can do
+%all the work, necessary for implied edit derivation with the resolution operator. 
+%%
+%\begin{lemma}[\citet{fellegi:1976}]
+%If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
+%on subsets of $E$.
+%\end{lemma}
+%\begin{proof}
+%The proof is given in the reference and will not be repeated here.
+%\end{proof}
+%\begin{corollary}
+%If $E$ is a set of edits, all implied edits can be derived by repeated
+%application of the resolution operator on elements of the boolean
+%representation of $E$.
+%\label{corResolution}
+%\end{corollary}
+%\begin{proof}
+%This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
+%\end{proof}
+%%
+%Having established the use of the resolution operator, it becomes interesting
+%to study its algebraic properties.  By substitution in the definition, it is
+%easily shown that the resolution operator is symmetric, associative and
+%idempotent. As a reminder, these properties are defined as follows.
+%\begin{equation}
+%\begin{array}{ll}
+%\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
+%\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
+%\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
+%\end{array}
+%\end{equation}
+%The resolution operator (although not called as such) was found earlyer and
+%independently of the current authors by \cite{willenborg:1988}, who also
+%discovered these properties.
+%%
+%The following property shows that the resolution operator leaves redundancy relations untouched.
+%\begin{lemma}
+%If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+%\label{keepRedundancy}
+%\end{lemma}
+%\begin{proof}
+%We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
+%\begin{eqnarray*}
+%{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
+%&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
+%&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
+%&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+%\end{eqnarray*}
+%and we are done.
+%\end{proof}
+%%
+%This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
+%does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
+%of $D$ with or without the redundancy removal step.
 %
-The following property shows that the resolution operator leaves redundancy relations untouched.
-\begin{lemma}
-If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
-\label{lemma}
-\end{lemma}
-\begin{proof}
-We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
-\begin{eqnarray*}
-{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
-&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
-&=& ({\bf a}_k\land{\bf b}_k)\lor ({\bf a}_k\land{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
-&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
-\end{eqnarray*}
-and we are done.
-\end{proof}
-%
-This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
-does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
-of $D$ with or without the redundancy removal step.
+%We now define more formally the notion of variable elimination.
+%\begin{definition}
+%    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
+%    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
+%    that $f$ eliminates that variable from $E$.
+%\end{definition}
+%Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
+%The following theorem shows that every essentially new implied edit, generated by $k$ is found
+%by Algorithm \ref{eliminate}.
+%\begin{theorem}
+%If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
+%every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
+%edits are mutually non-redundant.
+%\end{theorem}
+%\begin{proof}
+%The fact that the resulting rows are mutually nonredundant follows from Lemma
+%\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
+%iterations. We have
+%\begin{equation}
+%{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
+%\end{equation}
+%Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
+%ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
+%\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
+%${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
+%Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
+%A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
+%a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
+%each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
+%definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
+%with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
+%${\bf A}(j)$ contains all nonredundant edits with columns
+%$\ind(k,1),\ldots,\ind(k,j)$ equal to
+%\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
+%\end{proof}
 
 
-We now define more formally the notion of variable elimination.
-\begin{definition}
-    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
-    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
-    that $f$ eliminates that variable from $E$.
-\end{definition}
-%
-The following theorem establishes equivalence between the function $F_k$ Eq.\
-\eqref{eqFkBoolRep} and the resolution operator method of Algorithm
-\ref{eliminate}.
-\begin{theorem}
-Given a set of edits $E$ as in \eqref{eqEditSet} The function $F_k$ eliminates $k$ from $E$, if and
-only if {\sc eliminate} eliminates $k$ from $E$.
-\end{theorem}
-
-\begin{proof}
-First note that $F_k$ does not eliminate $k$ if and only if there is a category
-$i$ of $k$ for which $a_i^{(1)}=a_i^{(2)}=\ldots=a_i^{(m)}=\false$.  We call
-this property $P$. We will now prove equivalence by showing that {\sc
-eliminate} does not eliminate $k$ if and only if $P$. For the if-direction,
-suppose that $P$ holds. The order of the for-loop in {\sc eliminate} is
-unimportant because $\res_k$ is symmetric and we may therefore assume without
-loss of generality that $a_1^{(i)}=\false$ for $i\in1,2,\ldots,m$. {\sc
-eliminate} will return $\varnothing$ so all edits in the result contain $k$.
-For the reverse statement write ${\bf A}(j)$  for the state of ${\bf A}$ after the $j^{\rm th}$
-iteration and similarly for ${\bf A}^+$ and ${\bf A}^-$. Now suppose that {\sc eliminate}
-does not eliminate $k$. Then for some $j$, we have ${\bf A}^+(j+1)=\varnothing$,
-implying that the $1+j^{\rm th}$ column of ${\bf A}(j+1)$ is \false.
-Ignoring the redundancy removal step, we then have
-\begin{equation}
-{\bf A}^-(j+1) = {\bf A}(j+1) = {\bf A}^+(j)\res_k{\bf A}^-(j)
-\end{equation}
-This implies that every combination $({\bf a}^+,{\bf a}^-)\in \rows({\bf
-A}^+(j))\times\rows({\bf A}^-(j))$ has $a^+_{j+1}=a^+_{j+1}=\false$, showing
-that the $1+j^{\rm th}$ column of ${\bf A}(j)$ is \false. By induction, the
-matrix ${\bf A}(0)$ must have the $1+j^{\rm th}$ column equal to \false as
-well, and we are done.
-\end{proof}
-
-\cite{fellegi:1976} use the following scheme to generate all essential implied edits
-from a set of explicit edits.
-%
-\begin{center}
-\begin{tabular}{lp{0.9\textwidth}}
-\multicolumn{2}{l}{{\bf Procedure} {$\textrm{\sc FH}(E,k)$}}\\
-1 &Find all minimal subsets $E_1, E_2,\ldots,E_s$ of $E$, such that $F_k(E_j)$ eliminates $k$ for every $\{j\in 1,2,\ldots,s\}$.
-\\
-2 &Generate a new set of edits $E=\ocup_{j=1}^sF_k(E_j)$. 
-\end{tabular}
-\end{center}
-%
-\begin{theorem}
-If $E_1,E_2,\ldots,E_s$ is the minimal irredundant set of subsets of  of $E$ eliminating $k$, then 
-\begin{equation}
-\textrm{\sc eliminate}(\ocup_{j=1}^s E_j,k)=\ocup_{j=1}^s \textrm{\sc eliminate}(E_j,k).
-\end{equation}
-\end{theorem}
-\subsection{An examples of variable elimination}
-\label{sseliminateexample}
 
 
 
 \section{Error localization in categorical data}
 \label{secErrLocCat}
-
+See the help on {\sf localizeErrors} and {\sf errorLocalizer}.
 
 
 
 \bibliographystyle{chicago}
 \bibliography{editrules}
+
+\clearpage
+
+\appendix
+\section{Notation}
+\begin{table}[h]
+\begin{tabular}{lp{0.8\textwidth}}
+\hline
+Symbol          & Explanation and reference\\
+\hline
+${\bf a}$       & An edit, in boolean representation: ${\bf a}=\rho(e)$, Eq.\ \eqref{EqRhoE}.\\
+${\bf a}_k$     & Boolean representation of one variable in {$\bf a$}. ${\bf a}=\oplus_{k=1}^n{\bf a}_k$.\\
+${\bf A}$       & Set of edits, in $m\times d$ boolean representation.\\
+$c$             & Label for a single category of $D_k$. \\
+$D$             & Set (domain) of all possible categorical records, Eq.\ \eqref{eqDomain}.\\
+$D_k$           & Set of possible categories for variable $k$. Eq.\ \eqref{eqVariableDomain}.\\
+$d$             & Number of categories (in total), Eq.\ \eqref{eqSumdk}.\\
+$d_k$           & Number of categories in $D_k$.\\ 
+$e$             & An edit, in set representation: $e\subseteq D$, [Eq.\ \eqref{eqDefEdit}].\\
+$E$             & An editarray, Eq.\ \eqref{eqEditarray}, or a set of edits in set representation.\\
+$\ind$          & Function relating categories $c$ of variable $k$ to columns in {\bf A}, Eqs.\eqref{eqInd1} and \eqref{eqInd2}.\\
+$i$             & row index in {\bf A} (labeling edits).\\
+$j$             & column index in {\bf A} (labeling categories).\\
+$m$             & Number of edits.\\
+$n$             & Number of variables.\\
+$r$             & Categorical record, in set representation: $r\in D$.\\
+$\res_k$        & Resolution operator Eq.\ \eqref{eqResolutionOperator}.\\
+$\rho$          & Map, sending set representation to boolean representation. \\
+${\bf v}$       & Categorical record, in boolean representation: ${\bf v} = \rho(r)$.\\
+${\bf v}_k$     & Boolean representation of a single variable ${\bf v}=\oplus_{k=1}^n{\bf v}_k$.\\
+\hline
+\end{tabular}
+\end{table}
 
 \end{document}
 

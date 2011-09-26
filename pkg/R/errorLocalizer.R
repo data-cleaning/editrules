@@ -38,7 +38,7 @@
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example ../examples/errorLocalizer.R
-#'
+#' @seealso \code{\link{localizeErrors}}
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
 #' Journal of the American Statistical Association 71, pp 17-25
@@ -69,9 +69,10 @@ errorLocalizer.editmatrix <- function(
             x, 
             weight=rep(1,length(x)), 
             maxadapt=length(x), 
-            maxweight=sum(weight),
+            maxweight=sum(weight[!is.na(weight)]),
             maxduration=600,
             ...){
+    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
 
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
@@ -87,7 +88,7 @@ errorLocalizer.editmatrix <- function(
     adapt[!(names(adapt) %in% vars)] <- FALSE
     # Eliminate missing variables.
     for (v in names(x)[is.na(x)]) E <- eliminate.editmatrix(E,v)
-    wsol <- min(sum(weight), maxweight)
+    wsol <- min(sum(weight[vars %in% totreat]), maxweight)
     cp <- backtracker(
         maxduration=maxduration,
         isSolution = {
@@ -131,11 +132,13 @@ errorLocalizer.editmatrix <- function(
     
     # add a searchBest function, currently returns last solution (which has the lowest weight)
     with(cp,{
+        degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
             l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
             if (length(l)>0){ 
                 ws <- sapply(l,function(s) s$w)
                 iwmin <- which(ws==min(ws))
+                degeneracy <<- length(iwmin)
                 if (length(iwmin) == 1) return(l[[iwmin]])
                 return(l[[sample(iwmin,1)]])
             }
@@ -158,15 +161,15 @@ errorLocalizer.editarray <- function(
     maxweight=sum(weight),
     maxduration=600,
     ...){
-
+    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
     adapt <- is.na(x)
     o <- order(weight, decreasing=TRUE)
     totreat <- names(x)[o[!adapt]]
-    weight <- weight[o[!adapt]]
+#    weight <- weight[o[!adapt]]
 
     vars <- getVars.editarray(E)
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
-    wsol <- sum(weight)
+    wsol <- min(sum(weight[vars %in% totreat]),maxweight)
     ind <- getInd(E)
     bt <- backtracker(
         isSolution = {
@@ -183,7 +186,8 @@ errorLocalizer.editarray <- function(
                 I <- do.call(c,ind[adapt])
                 if ( length(I) > 0 && any(rowSums(E[,I,drop=FALSE]) == length(I)) ) return(FALSE)
                 # Take care of corner case: check that the record is invalid
-                if ( length(I) == 0 &&  any(apply(E[,x,drop=FALSE],1,all)) ) return(FALSE)
+                
+                if ( length(I) == 0 && nrow(E) > 0 && any(apply(E[,,drop=FALSE],1,all)) )  return(FALSE)
                 # prepare output
                 wsol <<- w
                 adapt <- adapt 
@@ -215,11 +219,13 @@ errorLocalizer.editarray <- function(
     )
     # add a searchBest function, currently returns last solution (which has the lowest weight)
     with(bt,{
+        degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
             l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
             if (length(l)>0){ 
                 ws <- sapply(l,function(s) s$w)
                 iwmin <- which(ws==min(ws))
+                degeneracy <<- length(iwmin)
                 if (length(iwmin) == 1) return(l[[iwmin]])
                 return(l[[sample(iwmin,1)]])
             }

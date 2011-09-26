@@ -5,7 +5,7 @@
 #' @return \code{logical} vector
 #' @export
 isSubset <- function(E){
-    if ( is.editarray(E) ) stop('argument is not an editarray')
+    if ( !is.editarray(E) ) stop('argument is not an editarray')
     isSubset.boolmat(getArr(E))
 }
 
@@ -17,6 +17,7 @@ isSubset.boolmat <- function(A){
     m <- nrow(A)
     if ( m == 0 ) return(logical(0))
     M <- (1:m)[!d]
+    if ( length(M) == 1 ) return(d)
     m1 <- length(M)-1
     s <- vapply(
         M, 
