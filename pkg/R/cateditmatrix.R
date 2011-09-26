@@ -6,6 +6,7 @@
 #'
 #' @param x \code{character} with categorical edits
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
+#' @keywords internal
 cateditmatrix <- function(x){
     edts <- parseEdits(x)
     
@@ -36,24 +37,11 @@ cateditmatrix <- function(x){
     E
 }
 
-substValue.cateditmatrix <- function(E, val, var=NULL){
-  if (missing(var)) var <- names(val)
-  if (is.null(var)) stop("No Variable name found.")
-  
-  variables <- getVars(E)
-  vars <- sub(":.+", "", variables)
-  variables <- variables[vars %in% var]
-  
-  cats <- sub(".+:", "", variables)
-  values <- as.integer(cats %in% val)
-  names(values) <- variables
-  substValue(E, variables, values)
-}
-
 #' parse categorial edit
 
 #' @param e \code{expression} with a single edit
 #' @return named \code{numeric} with coefficients
+#' @keywords internal
 parseCatEdit <- function(e){
   el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
@@ -71,15 +59,14 @@ parseCatEdit <- function(e){
 }
 # ### examples....
 
-civilStatusLevels <- c("married","unmarried","widowed","divorced")
-
-x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
-      , "if (age == '< 16') civilStatus=='unmarried'"
-#      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
-      , "if (pregnant) gender == 'female'"
-      , "if (nace %in% c('A','B')) valid==TRUE"
-      , "gender %in% c('male','female')"
-      )
-
-(E <- cateditmatrix(x))
-substValue.cateditmatrix(E, val=c(gender="male"))
+# civilStatusLevels <- c("married","unmarried","widowed","divorced")
+# 
+# x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
+#       , "if (age == '< 16') civilStatus=='unmarried'"
+# #      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
+#       , "if (pregnant) gender == 'female'"
+#       , "if (nace %in% c('A','B')) valid==TRUE"
+#       , "gender %in% c('male','female')"
+#       )
+# 
+# (E <- cateditmatrix(x))
