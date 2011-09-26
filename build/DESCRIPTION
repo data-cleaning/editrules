@@ -6,14 +6,13 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
-Description: Facilitates reading and manipulation of categorical and
-    linear (in)equality constraints on data (edit rules). Numerical 
-    edits are converted to matrix format from text, and categorical rules
-    are converted to a boolean format. Data may be tested against the rules
-    and erroneous fields can be localized based on Fellegi and Holt's 
-    generalized principle. Edits may be manipulated and tested for consistency
-    by means of variable (Fourier-Motzkin) elimination or substitution.
-Version: 1.5-0
+Description: Facilitates reading and manipulation of linear
+    (in)equalities, converting them into matrix format (and vice versa)
+    and checking if data are valid according to these rules. Sets of
+    linear edits can be manipulated using Fourier-Motzkin elimination
+    and variable substitution and solving error localization problems
+    based on the generalized principle of Felligi and Holt.
+Version: 1.5-1
 URL: http://code.google.com/p/editrules/
-Date: 2011-08-01
+Date: 2011-09-25
 Suggests: lpSolveAPI,iterators

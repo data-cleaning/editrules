@@ -54,6 +54,10 @@ violatedEdits.editmatrix <- function(E, dat, tol=sqrt(.Machine$double.eps), ...)
      if ( !isNormalized(E) ) E <- normalize(E)
 
      if ( is.vector(dat) ){ X <- t(dat) } else { X <- as.matrix(dat) }
+
+     if (nrow(E) == 0){
+       return(matrix(logical(), nrow=NROW(dat)))
+     }
      
      ops <- getOps(E)
      v <- abs(getA(E) %*% t(X) - getb(E))
