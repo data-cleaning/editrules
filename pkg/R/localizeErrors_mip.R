@@ -1,16 +1,3 @@
-# Error localization formulated as a mixed integer programming problem
-# Advantage: can be very fast for localization problems with hundreds to thousands 
-# of variables
-# Disadvantage:
-#           * gives only one solution out of possibly multiple
-#           * numeric instability may give no, or false solutions, how ever these can
-# be checked with editrules isFeasible functionality. Furthermore, numeric instability can be decreased by using appropiate upper
-# and lower bounds
-#
-# TODO 
-# * support for NA
-# * 
-
 #' Extends an editmatrix with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
@@ -72,34 +59,6 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
       )
 }
 
-# localizeError_glpk <- function(E, x, weight=rep(1, length(x)), verbose=FALSE){
-#    vars <- getVars(E)
-#    elm <- buildELMatrix(E,x, weight)
-#    types <- ifelse(elm$objfn, "B", "C")
-#    E <- elm$E
-#    binidx <- which(elm$objfn > 0)
-# 
-#    if (!require(Rglpk)){
-#       stop("Install 'Rglpk' to use this function")
-#    }
-#    sol <- Rglpk_solve_LP( obj=elm$objfn
-#                  , mat=getA(E)
-#                  , dir=getOps(E)
-#                  , rhs=getb(E)
-#                  , types=types
-#                  , max=FALSE
-#                  , verbose=verbose
-#                  , bounds=list( lower=list(ind=seq_along(vars), val=elm$lb)
-#                              , upper=list(ind=seq_along(vars), val=elm$ub)
-#                              )
-#                 )
-#    names(sol$solution) <- c(vars,vars) 
-#    list( w = sol$optimum
-#        , adapt = (sol$solution > 0)[binidx]
-#        , x_feasible = sol$solution[-binidx]
-#        )
-# }
-
 #' Localize an error using lpSolveApi
 #' localization
 #' @param E editmatrix 
@@ -107,12 +66,12 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
 #' @param weight  numeric with weights
 #' @return list with w, adapt and x_c
 #' @keywords internal
-localizeError_mip <- function( E
-                            , x
-                            , weight=rep(1, length(x))
-                            , verbose="neutral"
-                            , ...
-                            ){
+localizeErrors_mip <- function( E
+                              , x
+                              , weight=rep(1, length(x))
+                              , verbose="neutral"
+                              , ...
+                              ){
    vars <- getVars(E)
    elm <- buildELMatrix(E, x, weight)
    E <- elm$E

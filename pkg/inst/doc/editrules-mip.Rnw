@@ -1,0 +1,195 @@
+%\VignetteIndexEntry{Error localization as a mixed integer problem}
+\documentclass[11pt, fleqn, a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{threeparttable}
+\usepackage{natbib}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{threeparttable}
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\Lor}{\lor}
+\DeclareMathOperator*{\Land}{\land}
+\DeclareMathOperator{\res}{\mathfrak{R}}
+\newcommand{\rhomap}{\xrightarrow{\rho}}
+
+\newtheorem{theorem}{Theorem}
+
+\usepackage{float} 
+ 
+\floatstyle{boxed}
+\newfloat{Rcode}{t}{rco}
+\floatname{Rcode}{Figure}
+
+
+
+% stimulate latex to put multiple floats on a page.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{3}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.75}
+\renewcommand{\floatpagefraction}{.9}
+\renewcommand{\dblfloatpagefraction}{.9}
+\renewcommand{\dbltopfraction}{.9}
+\hyphenation{time-stamp}
+
+<<echo=false>>=
+library(editrules)
+@
+
+\title{Error localization as a mixed integer problem with the {\tt editrules} package\\
+{\small package version \Sexpr{packageVersion("editrules")}}}
+\author{Edwin de Jonge and Mark van der Loo}
+\begin{document}
+\maketitle
+\begin{abstract}
+{\em This vignette is far from finished. Version 2.0 of the package will have
+the full vignette. At the moment, functionality for solving error localization problems
+with lp solvers is experimental.}
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\cite{jonge:2011}, \cite{loo:2011b}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Error localization as a mixed integer problem}
+\subsection{Previous work}
+\section{Formulation as a mixed integer problem}
+For each record to be checked a new mixed integer problem is formulated.
+The mip consist of the original edits plus additional edits involving the reported values of this record. 
+Furthermore it involves an objective function that should be minimized.
+
+
+\subsection{Numerical edits}
+Numerical variables are always bounded in practice, e.g. age, income, height.
+In our formulation of the error localization problem as a mixed integer 
+problem we use the boundaries explicitly: first of all it allows for easy 
+to understand and to implement equations. Secondly our formulation improves 
+numerical stability of the MIP for suitable choosen boundaries. 
+
+We use greek symbols to note constants. The record ${\bf x} = (x_1,\dots,x_m)$ to be validated 
+has the following reported (numerical) values, that may be incorrect:
+\begin{equation}
+x_i = \chi_i \label{eq:values}
+\end{equation}
+under the restriction of
+\begin{equation}
+%a_i \cdot x_i \odot_i b_i \textrm{ with }\odot_i \in {=, \leq, <}
+A {\bf x} {\bf\odot} b \textrm{ with } \bf \odot \in \{=, \leq, <\}^n
+\end{equation}
+
+We assume each variable $x_i$ is bounded by $\alpha_i$ and $\beta_i$
+\begin{equation}
+\alpha_i \leq x_i \leq \beta_i \label{eq:boundary}
+\end{equation}
+
+For each variable $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and we add two edits 
+to the original edit matrix that conditionally constrain the value of $x_i$ to $\chi_i$ 
+
+\begin{eqnarray}
+x_i &\leq& \chi_i + (\beta_i - \chi_i)d_i \\
+(\alpha_i - \chi_i)d_i + \chi_i &\leq& x_i
+\end{eqnarray}
+Variable $d_i$ signifies if $x_i$ should be adapted: if $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
+that the reported $\chi_i$ is assumed correct. When $d_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that
+the value of $x_i$ is unconstrained and can take any feasible value.
+
+The principle of Felligi Holt \cite{} is to minimize the weigthed sum of adaptations.
+
+The error localization problem can now be formulated as the folowing mixed integer problem:
+
+Minimize $\sum^m_{j=1} w_j d_j$, with:
+\begin{equation}
+\begin{array}{rcrcl}
+\sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
+\ldots                 &&                  &\ldots& \ldots  \\
+\sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
+    x_1 &-& \beta^*_1 d_1   &\leq   & \chi_1 \\
+   -x_1 &+& \alpha^*_1 d_1  &\leq   & -\chi_1 \\
+\ldots  & & \ldots          &       & \ldots \\
+    x_m &-& \beta^*_m d_m   &\leq   & \chi_m \\
+   -x_m &+& \alpha^*_m d_m  &\leq   & -\chi_m
+
+\end{array}
+\end{equation}
+
+with $\beta^*_i = \beta_i - \chi_i$ and $\alpha^*_i = \alpha_i - \chi_i$.
+
+For large values of  $\beta^*_i$ or $\alpha^*_i$ the resulting MIP problem becomes numerical unstable
+so it is wise to choose suitable boundaries, which we will discuss later on.
+
+\subsection{Implementation}
+We will use {\tt lpSolveAPI} to solve the mix integer problem. Other candidates are {\tt glpk}
+will extend an existing {\tt editmatrix} with the edits and give the 
+
+\subsection{categorical edits}
+In (ref naar categorical edit paper) we choose an boolean representation for categorical edits.
+To solve the error localization problem for (purely) categorical edits we have to formulate categorical
+edits as a integer problem.
+
+Each edit should hold (conjunction) and each edit states that at least one statement has to be true.
+An categorical editmatrix can be seen as a conjunction of disjunctions: it is in conjunctive normal form (reference). 
+
+* Write a categorical variable as a disjunction of boolean variables for each category, with the restriction that their sum is atmost 1. (equals 1 for a closed domain).
+
+* each edit can be written as a disjunction of statements
+
+* each disjunction can be written as a numerical edit where at least one of the variables has to be one
+
+\begin{equation}
+A \in {a_j} \lor B \in {b_k}
+\end{equation}
+
+$$\lnot (A \in {a_j})$$
+
+* error localizing edits: for each variable $c_i$ $c^{\chi_i}$, introduce an edit
+with $d_i = 1 - c^{\chi_i}$. When $d_i = 0$,  $c_i = \chi_{i}$, meaning that the
+reported value of $c_i$ is assumed correct,  When $d_i = 1$, $c^\chi_i = 0$,
+meaning that $c_i$ should be adapted.
+
+\subsection{Open vs close domains}
+
+\subsection{Mixed edits}
+
+* Each mixed edit can be written as a categorical edit plus numerical edits for all enclosed numerical edits
+
+$$\argmin$$
+
+\section{Boundary heuristics}
+\subsection{From data set}
+Minimum and maximum value of each variable in the data set to be checked gives reasonable boundaries for the dataset. 
+\subsection{From observation, per record}
+Assume that maximum values for each observation differ at most a factor $f$ (e.g. 1000) of the reported value.
+
+
+\section{Discussion}
+
+Is a usefull addition to {\tt editrules}, finds quickly solutions to error localization  problems with 
+hundreds to thousands of variables. 
+
+Solutions given by current lp solvers can be numerical unstable, which may result in a false positive 
+or a false negative solution. Luckily {\tt editrules} contains {\tt substValue} and {\tt isFeasible} 
+that can be used together to check the validity of a solution. Furthermore several heuristics can be 
+used to increase the numerical stability by using smaller boundaries for the variables.
+
+\subsection{Comparison to {\tt backtracker}}
+errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.
+It can also find more equivalent solutions, which is not possible or difficult with MIP solvers.
+
+However when speed of finding a solution matters, it is
+
+\bibliographystyle{chicago}
+\bibliography{editrules}
+
+\end{document}
