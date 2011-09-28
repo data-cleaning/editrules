@@ -13,6 +13,13 @@ E <- editmatrix(edits)
 
 # Total edit graph
 plot(E)
+
+# Graph with dependent edits
+plot(E, nodetype="rules")
+
+# Graph with dependent variables
+plot(E, nodetype="vars")
+
 # Total edit graph, but with curved lines (option from igraph package)
 plot(E, edge.curved=TRUE)
 

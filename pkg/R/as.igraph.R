@@ -13,12 +13,15 @@ checkigraph <- function(){
 #' 
 #' graph.editmatrix derives adjacency matrix of \code{E} and converts it to an undirected igraph object.
 #'
+#' @param nodetype graph of rules, variables or both?
+#' @param rules selection of edits
+#' @param vars selection of variables
 #' @param weighted Should the number of variables connecting two edits be counted as weight? 
 #'      Passed as \code{weighted} argument to \code{igraph::graph.adjacency}
 #'
 #' @rdname adjacency
 #' @export
-as.igraph <- function(E, vars=getVars(E), weighted=TRUE,...){
+as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE,...){
     stopifnot(all(vars %in% getVars(E)))
     UseMethod('as.igraph')
 }
@@ -28,13 +31,18 @@ as.igraph <- function(E, vars=getVars(E), weighted=TRUE,...){
 #' @rdname adjacency
 #' @method as.igraph editmatrix
 #' @export
-as.igraph.editmatrix <- function(E, vars=getVars(E), weighted=TRUE, ...){
+as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
-    graph.adjacency(
-        adjacency(E=E, vars=vars, ...), 
-        weighted=weighted,
-        mode = 'undirected'
-    )
+    nodetype <- match.arg(nodetype)
+    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    g <- graph.adjacency(
+          a, 
+          weighted=weighted,
+          mode = 'undirected'
+        )
+    # $type is handy for bipartite graph function in igraph...
+    V(g)$type <- V(g)$vars <- attr(a, "vars")
+    g
 }
 
 #' method for converting editmatrix to igraph object
@@ -42,15 +50,15 @@ as.igraph.editmatrix <- function(E, vars=getVars(E), weighted=TRUE, ...){
 #' @rdname adjacency
 #' @method as.igraph editarray
 #' @export
-as.igraph.editarray <- function(E, vars=getVars(E), weighted=TRUE, ...){
+as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
-    graph.adjacency(
-        adjacency(E=E, vars=vars, ...), 
-        weighted=weighted,
-        mode = 'undirected'
-    )
+    nodetype <- match.arg(nodetype)
+    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    g <- graph.adjacency(
+          a, 
+          weighted=weighted,
+          mode = 'undirected'
+        )
+    V(g)$type <- V(g)$vars <- attr(a, "vars")
+    g
 }
-
-
-
-

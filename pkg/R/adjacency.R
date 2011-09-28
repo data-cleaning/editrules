@@ -15,7 +15,9 @@
 #'
 #'
 #' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
-#' @param vars variables linking the edits
+#' @param nodetype adjacency between rules, vars or both?
+#' @param rules selection of edits
+#' @param vars selection of variables
 #' @param ... arguments to be passed to or from other methods
 #'
 #' @return the adjacency matrix of edits in \code{E} with resect to 
@@ -25,7 +27,7 @@
 #'
 #' @seealso \code{\link{plot.editmatrix}}, \code{\link{plot.editarray}}
 #' @export  
-adjacency <- function(E, vars=getVars(E),...){
+adjacency <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),...){
     stopifnot( all(vars %in% getVars(E)) )
     UseMethod('adjacency')
 }
@@ -36,9 +38,10 @@ adjacency <- function(E, vars=getVars(E),...){
 #' @rdname adjacency
 #' @method adjacency editmatrix
 #' @export
-adjacency.editmatrix <- function(E,vars=getVars(E),...){
+adjacency.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),...){
     A <- abs(sign(getA(E)))
-    adjec(A,vars=vars)
+    nodetype <- match.arg(nodetype)
+    adjec(A,nodetype=nodetype, rules=rules, vars=vars)
 }
 
 
@@ -48,15 +51,16 @@ adjacency.editmatrix <- function(E,vars=getVars(E),...){
 #' @rdname adjacency
 #' @method adjacency editarray
 #' @export
-adjacency.editarray <- function(E,vars=getVars(E),...){
+adjacency.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),...){
     A <- contains(E)
-    adjec(A,vars=vars)
+    nodetype <- match.arg(nodetype)
+    adjec(A,nodetype=nodetype, rules=rules, vars=vars)
 }
 
 # derive adjacency from 1/0 or boolean matrix.
 # Internal loops only, but nrow(A)^2 memory complexity. 
 # future optimization options: sparse matrices, lower/upper triangle only.
-adjec <- function(A,vars){
+adjec_old <- function(A,vars){
     I <- rep(1:nrow(A), times=nrow(A))
     J <- rep(1:nrow(A), each=nrow(A)) 
     V <- matrix(
@@ -68,5 +72,35 @@ adjec <- function(A,vars){
     V
 }
 
-
-
+# derive adjacency from 1/0 or boolean matrix.
+# Internal loops only, but nrow(A)^2 memory complexity. 
+# future optimization options: sparse matrices, lower/upper triangle only.
+adjec <- function(A, nodetype="all", rules=rownames(A), vars=colnames(A)){
+  A <- A[rules, vars, drop=FALSE]
+  m <- NULL
+  vars <- NULL
+  if (nodetype=="all"){
+    N <- nrow(A) + ncol(A)
+    nms <- c(rownames(A), colnames(A))
+    vars <- rep(c(FALSE, TRUE), times=c(nrow(A), ncol(A)))
+    m <- matrix(0, nrow=N, ncol=N, dimnames=list(nms, nms))
+    m[!vars, vars] <- A
+    m[vars, !vars] <- t(A)
+  } else{
+    vars <- rep(FALSE, nrow(A))
+    if (nodetype=="vars"){
+      vars <- rep(TRUE, ncol(A))
+      A <- t(A)
+    }
+    I <- rep(1:nrow(A), times=nrow(A))
+    J <- rep(1:nrow(A), each=nrow(A)) 
+    m <- matrix(
+            rowSums(A[I,,drop=FALSE] & A[J,,drop=FALSE]),
+            nrow=nrow(A),
+            dimnames=list(rownames(A), rownames=rownames(A))
+    )
+    diag(m) <- 0
+  }
+  attr(m,"vars") <- vars
+  m
+}
