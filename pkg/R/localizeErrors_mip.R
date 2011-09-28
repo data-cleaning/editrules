@@ -7,7 +7,7 @@ checklpSolveAPI <- function(){
     require(lpSolveAPI) || stop(nolpSolveAPI)
 }
 
- 
+
 #' Extends an editmatrix with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
