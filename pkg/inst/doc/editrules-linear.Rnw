@@ -41,6 +41,7 @@
 \hyphenation{time-stamp}
 
 
+
 \title{Manipulation of linear edits and error localization with the {\sf editrules} package\\
 {\small Package version \Sexpr{packageVersion("editrules")}}}
 \author{Edwin de Jonge and Mark van der Loo}
@@ -69,6 +70,7 @@ corresponds to version {\sf 1.0}.
 
 <<echo=FALSE, keep.source=FALSE>>=
 library(editrules)
+source("pic.R")
 @
 \maketitle
 \newpage

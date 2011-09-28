@@ -12,7 +12,7 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
     variable elimination and value substitution methods, allowing for feasibility checks
     and more. Data can be tested against the rules and erroneous fields can be found based
     on Fellegi and Holt's generalized principle.
-Version: 1.5-2
+Version: 1.5-3
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
 Suggests: lpSolveAPI,iterators
