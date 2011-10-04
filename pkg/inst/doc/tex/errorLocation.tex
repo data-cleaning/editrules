@@ -1,0 +1,15 @@
+\begin{table}
+\caption{Slots in the {\sf errorLocation} object}
+\label{tblErrorLocalization}
+\begin{tabular}{lp{0.8\textwidth}}
+\hline
+Slot          & description. \\
+\hline
+{\sf \$adapt} & boolean array, stating which variables must be adapted for each record.\\
+{\sf \$status}& A {\sf data.frame}, giving solution weights, number of equivalent solutions, timings and wether the maximum search time was exceeded.\\
+{\sf \$user}  & Name of user running R during the error localization\\
+{\sf \$timestamp} & {\sf date()} at the end of the run.\\
+{\sf \$call}  & The call to {\sf localizeErrors}\\
+\hline
+\end{tabular}
+\end{table}

@@ -931,27 +931,13 @@ errorLocation} object contains the locations of errors for each record in the
 {\sf data.frame} as well as logging information, solution weights and
 degeneracy. Table \ref{tblErrorLocalization} gives an overview of the slots.
 %
-\begin{table}
-\caption{Slots in the errorLocalizer object}
-\label{tblErrorLocalization}
-\begin{tabular}{lp{0.8\textwidth}}
-\hline
-Slot          & description. \\
-\hline
-{\sf \$adapt} & boolean array, stating which variables must be adapted for each record.\\
-{\sf \$status}& A {\sf data.frame}, giving solution weights, number of equivalent solutions, timings and wether the maximum search time was exceeded.\\
-{\sf \$user}  & Name of user running R during the error localization\\
-{\sf \$timestamp} & {\sf date()} at the end of the run.\\
-{\sf \$call}  & The call to {\sf localizeErrors}\\
-\hline
-\end{tabular}
-\end{table}
 
 Apart from the mandatory arguments (an {\sf editarray} and a {\sf data.frame}),
 there are optional arguments which will be passed to the underlying {\sf
 errorLocalizer} function which is described in detail in the next section.
 These arguments are given in table \ref{tabArglocalize}.
 %
+\input{tex/errorLocation.tex}
 
 \begin{table}
 \begin{threeparttable}

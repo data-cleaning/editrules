@@ -3,6 +3,8 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{array}
+\usepackage{color, colortbl}
+\usepackage{tex/smalltree}
 \usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
@@ -72,6 +74,18 @@ Refer to the accompanying paper
 
 \newpage
 \tableofcontents
+\listofalgorithms
+
+\paragraph{Reading guide.} This paper contains a fair amount of background on
+the algorithms and methods behind the {\sf editrules} package. Readers who want
+to get started without going through the theory can read the following subsections:
+1   $\rightarrow$ 
+2.2 $\rightarrow$ 
+2.3 $\rightarrow$
+3.1 $\rightarrow$
+3.4 $\rightarrow$
+4.2. 
+
 \newpage
 
 
@@ -175,6 +189,21 @@ yields the $d$-dimensional vecorized representation of the $d_1\times
 d_2\times\ldots\times d_n$ contingency table of the dataset. This is sometimes
 called the complete disjunctive table. 
 
+\begin{example}
+\label{datamodel}
+Consider the variables {\em marital status}, {\em age}, and {\em position in household} from
+the domain $D=D_1\times D_2\times D_3$. We define
+\begin{eqnarray}
+D_1 &=& \{{\rm married},{\rm unmarried},{\rm widowed},{\rm divorced}\}\\
+D_2 &=& \{{\rm under aged},{\rm adult}\}\\
+D_3 &=& \{{\rm partner},{\rm child},{\rm other}\}.
+\end{eqnarray}
+The record $r=({\rm married},{\rm adult},{\rm partner})$ has boolean representation
+\begin{equation}
+\rho(r) = (1,0,0,0)\oplus(0,1)\oplus(1,0,0) = (1,0,0,0,0,1,1,0,0).
+\end{equation}
+\end{example}
+
 An edit $e$ is a subset of $D$ which can be written as the cartesian product
 \begin{equation}
     e = A_1\times A_2\ldots\times A_n\textrm{, where } A_{k}\subseteq D_k,\: k=1,2,\ldots n. 
@@ -205,9 +234,21 @@ which may simply be written as
     \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n\equiv{\bf a}.
 \label{EqRhoE}
 \end{equation}
-A simple example is given in Figure \ref{Reditarray}. It is easy to check that
-an edit contains variable $k$  if and only if the inner product ${\bf
-1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a $d_k$ vector of ones.
+
+\begin{example}
+Using the data model from Example \ref{datamodel}, the edit that says that under aged people
+cannot be married has set representation
+\begin{equation}
+e = \{\textrm{\rm married}\}\times\{\textrm{\rm under aged}\}\times\{{\rm partner},{\rm child},{\rm other}\},
+\end{equation}
+which translates to the boolean representation
+\begin{equation}
+\rho(e) = (1,0,0,0)\oplus(0,1)\oplus(1,1,1) = (1,0,0,0,0,1,1,1,1).
+\end{equation}
+\end{example}
+It is easy to check that an edit contains variable $k$  if and only if the
+inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a
+$d_k$ vector of ones.
 
 A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
 boolean representation this can be written as a condition on the standard inner
@@ -367,6 +408,7 @@ $^*${\small Right-hand side is evaluated.}
 \end{table}
 %
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Coercion, checking, redundancy and infeasibility}
 Table \ref{tabBasicfunctions} lists basic functions of {\sf editarray} objects.
 The {\sf datamodel} function retrieves the variables and categories in an edit
@@ -425,7 +467,7 @@ The other loops are avoided using {\sf R}'s indexing  and vectorization properti
 \begin{algorithm}[t]
 \caption{{\sc isSubset}$(E)$}
 \label{algIsSubset}
-\begin{algorithmic}
+\begin{algorithmic}[1]
 \Require An editarray $E=\langle{\bf A},\ind\rangle$.
 \State ${\bf s} \leftarrow (\false)^m$
 \For {$({\bf a}^{(i)},{\bf a}^{(i')})\in \rows({\bf A})\times\rows({\bf A})$ }
@@ -454,17 +496,17 @@ variable elimination. The former amounts to adapting the datamodel underlying
 the edit set while the latter amounts to deriving relations between variables
 not involving the eliminated variable. 
 
-%In the next subsection we give an example of value subsitution with the {\sf
-%editrules} package, as well as some background. In subsection
-%\ref{sscategoryresolution} we describe an elimination method, which appears to
-%be new to the field of data editing. 
-%In subsection \ref{ssequivalence} it is
-%shown that the method yields results equivalent to Fellegi and Holt's
-%elimination method while running in polynomial in stead of exponential time.
-%Finally, in subsection \ref{sseliminateexample} we given an example of
-%eliminating variables with the {\sf editrules} package. Readers not interested in 
-%the technical background can skip subsections \ref{sscategoryresolution} and 
-%\ref{ssequivalence}.
+In the next subsection we give an example of value subsitution with the {\sf
+editrules} package, as well as some background. In subsection
+\ref{sscategoryresolution} we describe an elimination method, which appears to
+be new to the field of data editing. 
+In subsection \ref{ssequivalence} it is
+shown that the method yields results equivalent to Fellegi and Holt's
+elimination method while running in polynomial in stead of exponential time.
+Finally, in subsection \ref{sseliminateexample} we given an example of
+eliminating variables with the {\sf editrules} package. Readers not interested in 
+the technical background can skip subsections \ref{sscategoryresolution} and 
+\ref{ssequivalence}.
 
 
 
@@ -480,7 +522,7 @@ new assumption. Algorithm \ref{substValue} gives the pseudocode for reference pu
 \begin{algorithm}[t]
 \caption{{\sc substValue($E$,$k$,$v$)}}
 \label{substValue}
-\begin{algorithmic}
+\begin{algorithmic}[1]
     \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$ and a value $v$
     \State $i \leftarrow \ind(k,v)$
     \State ${\bf A}\leftarrow {\bf A}\backslash\{{\bf a}\in\rows({\bf A})\,|\,a_i=\false\}$\Comment{Remove rows not involving $v$ }
@@ -565,7 +607,7 @@ iteration.
 \begin{algorithm}[t]
 \caption{{\sc eliminate($E$,$k$)}}
 \label{eliminate}
-\begin{algorithmic}
+\begin{algorithmic}[1]
     \Require an {\sf editarray} $E=\langle{\bf A},{\bf ind}\rangle$, a variable index $k$
     \For{$j\in \ind(k)$}
     \State ${\bf A}^+ = \{{\bf a}\in{\rm rows}({\bf A})\,:\,a_j=\textrm{\sc true}\}$
@@ -586,144 +628,525 @@ iteration.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Equivalence to Fellegi and Holt's elimination method}
-%\label{ssequivalence}
-%In this subsection we prove that the function {\sc eliminate} of Algorithm 
-%\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
-%Given a set of $m$ edits:
-%\begin{equation}
-%    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
-%    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
-%    \textrm{, } 
-%    i\in 1,2,\ldots,m\}
-%\label{eqEditSet}
-%\end{equation}
-%where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
-%\cite{waal:2011} define a way to derive new edits, which may be written as a
-%function $F_k$,
-%\begin{eqnarray}
-%\lefteqn{F_k(E) = 
-%\ocap_{i=1}^m A^{(i)}_1\times
-%\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
-%\ocap_{i=1}^m A^{(i)}_{k-1}\times 
-%}\nonumber\\
-%&\times& 
-%\ocup_{i=1}^m A^{(i)}_k\times
-%\ocap_{i=1}^m A^{(i)}_{k+1}\times
-%\ldots\times
-%\ocap_{i=1}^m A^{(i)}_m
-%\label{eqFkSetRep}
-%\end{eqnarray}
-%where $k$ is called the {\em generating variable}. In the boolean representation, we have
-%${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
-%and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
-%\begin{equation}
-%F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
-%\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
-%\label{eqFkBoolRep}
-%\end{equation}
-%where we used some obvious properties (symmetry, associativity) of the $\land$
-%and $\lor$ operators as well. The following lemma and corrolary show that we can do
-%all the work, necessary for implied edit derivation with the resolution operator. 
-%%
-%\begin{lemma}[\citet{fellegi:1976}]
-%If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
-%on subsets of $E$.
-%\end{lemma}
-%\begin{proof}
-%The proof is given in the reference and will not be repeated here.
-%\end{proof}
-%\begin{corollary}
-%If $E$ is a set of edits, all implied edits can be derived by repeated
-%application of the resolution operator on elements of the boolean
-%representation of $E$.
-%\label{corResolution}
-%\end{corollary}
-%\begin{proof}
-%This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
-%\end{proof}
-%%
-%Having established the use of the resolution operator, it becomes interesting
-%to study its algebraic properties.  By substitution in the definition, it is
-%easily shown that the resolution operator is symmetric, associative and
-%idempotent. As a reminder, these properties are defined as follows.
-%\begin{equation}
-%\begin{array}{ll}
-%\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
-%\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
-%\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
-%\end{array}
-%\end{equation}
-%The resolution operator (although not called as such) was found earlyer and
-%independently of the current authors by \cite{willenborg:1988}, who also
-%discovered these properties.
-%%
-%The following property shows that the resolution operator leaves redundancy relations untouched.
-%\begin{lemma}
-%If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
-%\label{keepRedundancy}
-%\end{lemma}
-%\begin{proof}
-%We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
-%\begin{eqnarray*}
-%{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
-%&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
-%&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
-%&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
-%\end{eqnarray*}
-%and we are done.
-%\end{proof}
-%%
-%This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
-%does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
-%of $D$ with or without the redundancy removal step.
+\subsection{Equivalence to Fellegi and Holt's elimination method}
+\label{ssequivalence}
+In this subsection we prove that the function {\sc eliminate} of Algorithm 
+\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+Given a set of $m$ edits:
+\begin{equation}
+    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
+    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
+    \textrm{, } 
+    i\in 1,2,\ldots,m\}
+\label{eqEditSet}
+\end{equation}
+where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+\cite{waal:2011} define a way to derive new edits, which may be written as a
+function $F_k$,
+\begin{eqnarray}
+\lefteqn{F_k(E) = 
+\ocap_{i=1}^m A^{(i)}_1\times
+\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
+\ocap_{i=1}^m A^{(i)}_{k-1}\times 
+}\nonumber\\
+&\times& 
+\ocup_{i=1}^m A^{(i)}_k\times
+\ocap_{i=1}^m A^{(i)}_{k+1}\times
+\ldots\times
+\ocap_{i=1}^m A^{(i)}_m
+\label{eqFkSetRep}
+\end{eqnarray}
+where $k$ is called the {\em generating variable}. In the boolean representation, we have
+${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
+and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
+\begin{equation}
+F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
+\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+\label{eqFkBoolRep}
+\end{equation}
+where we used some obvious properties (symmetry, associativity) of the $\land$
+and $\lor$ operators as well. The following lemma and corrolary show that we can do
+all the work, necessary for implied edit derivation with the resolution operator. 
 %
-%We now define more formally the notion of variable elimination.
-%\begin{definition}
-%    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
-%    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
-%    that $f$ eliminates that variable from $E$.
-%\end{definition}
-%Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
-%The following theorem shows that every essentially new implied edit, generated by $k$ is found
-%by Algorithm \ref{eliminate}.
-%\begin{theorem}
-%If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
-%every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
-%edits are mutually non-redundant.
-%\end{theorem}
-%\begin{proof}
-%The fact that the resulting rows are mutually nonredundant follows from Lemma
-%\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
-%iterations. We have
-%\begin{equation}
-%{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
-%\end{equation}
-%Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
-%ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
-%\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
-%${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
-%Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
-%A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
-%a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
-%each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
-%definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
-%with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
-%${\bf A}(j)$ contains all nonredundant edits with columns
-%$\ind(k,1),\ldots,\ind(k,j)$ equal to
-%\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
-%\end{proof}
+\begin{lemma}[\citet{fellegi:1976}]
+If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
+on subsets of $E$.
+\end{lemma}
+\begin{proof}
+The proof is given in the reference and will not be repeated here.
+\end{proof}
+\begin{corollary}
+If $E$ is a set of edits, all implied edits can be derived by repeated
+application of the resolution operator on elements of the boolean
+representation of $E$.
+\label{corResolution}
+\end{corollary}
+\begin{proof}
+This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
+\end{proof}
+%
+Having established the use of the resolution operator, it becomes interesting
+to study its algebraic properties.  By substitution in the definition, it is
+easily shown that the resolution operator is symmetric, associative and
+idempotent. As a reminder, these properties are defined as follows.
+\begin{equation}
+\begin{array}{ll}
+\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
+\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
+\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
+\end{array}
+\end{equation}
+The resolution operator (although not called as such) was found earlyer and
+independently of the current authors by \cite{willenborg:1988}, who also
+discovered these properties.
+%
+The following property shows that the resolution operator leaves redundancy relations untouched.
+\begin{lemma}
+If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+\label{keepRedundancy}
+\end{lemma}
+\begin{proof}
+We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
+\begin{eqnarray*}
+{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
+&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
+&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
+&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+\end{eqnarray*}
+and we are done.
+\end{proof}
+%
+This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
+does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
+of $D$ with or without the redundancy removal step.
+
+We now define more formally the notion of variable elimination.
+\begin{definition}
+    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
+    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
+    that $f$ eliminates that variable from $E$.
+\end{definition}
+Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
+The following theorem shows that every essentially new implied edit, generated by $k$ is found
+by Algorithm \ref{eliminate}.
+\begin{theorem}
+If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
+every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
+edits are mutually non-redundant.
+\label{eliminates}
+\end{theorem}
+\begin{proof}
+The fact that the resulting rows are mutually nonredundant follows from Lemma
+\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
+iterations. We have
+\begin{equation}
+{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
+\end{equation}
+Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
+ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
+\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
+${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
+Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
+A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
+a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
+each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
+definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
+with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
+${\bf A}(j)$ contains all nonredundant edits with columns
+$\ind(k,1),\ldots,\ind(k,j)$ equal to
+\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
+\end{proof}
+
+It is interesting to compare the procedure in Algorithm \ref{eliminate} with 
+Fellegi and Holt's procedure for generating implicit edits. This procedure,
+which is also described by \cite{waal:2011} may be summarized as follows.
+
+\vspace{1ex}
+\begin{algorithmic}[1]
+\Function{\textrm{\sc FH}}{$E$,$k$}
+%\Require A set of edits $E$ and a generating variable $k$.
+\State Find every $E_j\subseteq E$, with $j\in1,2,\ldots,s$ such that 
+\begin{itemize}
+\item $F_k(E_j)$ eliminates $k$.
+\item $E_j$ has a minimal number of elements $|E_j|$.
+\item The $E_j$ are mutually nonredundant in the sense $F_k(E_j)\not\subseteq F_k(E_l)$.
+\end{itemize}
+\State $E\leftarrow\cup_{j=1}^sF_k(E_j)$
+\State \Return $E$
+\EndFunction
+\end{algorithmic}
+\vspace{1ex}
+%
+Here, $E$ is a set of categorical edits in some form, and $k$ the variable to
+eliminate.  Most of the computational complexity is contained in line 2, where
+the search space is determined by the power set of $E$, yielding exponential
+complexity in the number of edits.
+
+The complexity of the {\sc eliminate} algorithm is determined by the 7th line
+in Algorithm \ref{eliminate}, which is quadratic in the current number of edits
+in the for-loop. This recurrence relation also yields exponential complexity in
+the number of edits. However, by removing the redundant edits at every
+iteration (a quadratic operation in itself), the actual number of edits can be
+kept to a minimum which reduces the complexity encountered in practice.
 
 
+By construction, the {\sc FH} function has the property that for two minimal,
+mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
+eliminate $k$, we have
+\begin{equation}
+\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
+\end{equation}
+where $\simeq$ indicates that the set of edits on the left hand side cover the same
+subset of $D$ as the edits on the right hand side.
+The following corollary establishes equivalence between the 
+procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
+\begin{corollary}
+If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
+$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
+\begin{equation}
+\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
+\end{equation}
+\end{corollary}
+\begin{proof}
+This follows immediately from Theorem \ref{eliminates}.
+\end{proof}
 
+\subsection{An example with {\sf eliminate}}
 
 
 \section{Error localization in categorical data}
 \label{secErrLocCat}
-See the help on {\sf localizeErrors} and {\sf errorLocalizer}.
+
+\subsection{A Branch and bound algorithm}
+\label{sBandB}
+The editrules package implements an error localization algorithm, based on the
+branch-and-bound algoritm of \cite{waal:2003a}. The algorithm has been
+extensively described in \cite{waal:2003} and \cite{waal:2011}. The algorithm
+is similar to the branch-and-bound algoritm used for error localization in
+numerical data in the editrules package as described in \citet{jonge:2011},
+except that the elimination and substitution subroutines are implemented for
+categorical data.
+
+In short, a binary tree is created with the full set of edits and an erroneous
+record at the root node. Two child nodes are created. In the first child node
+the first variable of the record is assumed correct, and it's values is
+substituted in the edits. In the second child node the variable is assumed
+incorrect and it is eliminated from the set of edits. The tree is continued
+recursively untill choices are made for each variable. Branches are pruned when
+they cannot lead to a solution, leaving a partial binary tree where each path
+from root to leaf represents a solution to the error localization problem.
+Computational complexity is reduced further by pruning branches leading to
+higher-weight solutions then solutions found earlier.
+
+Recall the datamodel of Example \ref{datamodel}, with variables {\em marital status},
+{\em age} and {\em position in household}. We define the following two edits:
+
+\begin{tabular}{ll}
+\\
+$e^{(1)}$ & under aged people cannot be married\\
+$e^{(2)}$ & If you are not married you cannot be a partner\\
+\\
+\end{tabular}\\
+%
+As an example we treat the following record with the bracnch-and-bound algorithm to 
+localize the errors:
+\begin{equation}
+r = ({\rm married},{\rm under\:aged},{\rm partner }).
+\end{equation}
+At the beginning of the algorithm, only the root node is filled. The situation may be 
+represented as follows:\\
+%%%%%%%%%%%%%
+% T0: ROOT NODE
+%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v}  &1&0&0&0&1&0&1&0&0\\
+        \hline
+        {\bf a}^{(1)}&1&0&0&0&1&0&1&1&1\\
+        {\bf a}^{(2)}&0&1&1&1&1&1&1&0&0
+    \end{array}
+$
+\end{tabular}\hfill  Root node, $w=0$,
+\end{center}
+%
+where ${\bf v}=\rho(r)$, and ${\bf a}_1$ and ${\bf a}_2$ are the boolean
+representations of $e_1$ and $e_2$ respectively.  The weight $w$ counts the
+number of variables that are assumed to be incorrect, which at the root node is
+zero. 
+
+
+The tree is generated in depth-first fashion. In the first step, we substitute
+$r_1$, yielding
+%%%%%%%%%%%
+% T0L
+%%%%%%%%%%
+\begin{center}
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v}  &1& & & &1&0&1&0&0\\
+        \hline
+       {\bf a}^{(1)}&1 & & & &1&0&1&1&1\\
+    \end{array}
+$
+\end{tabular}\hfill Substitute $v_1$, $w=0$.
+\end{center}
+Here, ${\bf a}_2$ is removed, since it has no meaning for {\bf v} anymore. The
+positions for the categories unmarried, widowed and divorced are left empty
+here to signify that the datamodel has a fixed marital status now. The dark
+part of the tree on the left shows which nodes have been treated. Continuing
+we find
+
+%%%%%%%%%%%
+% T0LL
+%%%%%%%%%%
+\begin{center}
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v}  &1& & & &1& &1&0&0\\
+        \hline
+        {\bf a}^{(1)}&1 & & & &1 & &1&1&1\\
+    \end{array}
+$
+\end{tabular}\hfill Substitute $v_2$, $w=0$.
+\end{center}
+At this point we have fixed the value for {\em marital status} and {\bf age}.
+It can be seen from the value of ${\bf a}^{(1)}$ for {\em position in household} that
+no matter what value is chosen for that field, the value ${\bf v}\cdot{\bf a}=3$. Which
+shows that this path will never lead to a valid solution.
+We therefore prune the tree here, go up one node and turn right. 
+%%%%%%%%%%%
+% T0LR
+%%%%%%%%%%
+\begin{center}
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        v &1& & & &\phantom{1}&\phantom{0}&1&0&0\\
+\hline
+\phantom{e_1}&&&&&&&&
+    \end{array}
+$
+\end{tabular}\hfill Eliminate $v_2$, $w=1$.
+\end{center}
+Eliminating the {\em age} variables yields an empty edit set. We may continue down
+and substitute the value for {\em position in household}.
+\begin{center}
+%%%%%%%%%%%
+% T0LRL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v} &1& & & &\phantom{1}&\phantom{0}&1& & \\
+\hline
+\phantom{e_1}&&&&&&&&
+    \end{array}
+$
+\end{tabular}\hfill Substitute $v_3$, $w=1$.
+\end{center}
+Which yields the first solution: only the {\rm age} variable needs to be
+changed.  In search for more solutions, we move up the tree and try to eliminate
+{\em age}. However, since eliminating age would increase the weight to 2 we will prune
+the tree at this point. Moving up to the root node and eliminating {\em marital status}
+gives
+%%%%%%%%%%%
+% T0R
+%%%%%%%%%%
+\begin{center}
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Er\Tr
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v}  &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&0&1&0&0\\
+        \hline
+        {\bf a}^{(3)} &1&1&1&1&1&0&1&0&0\\
+    \end{array}
+$
+\end{tabular}\hfill Eliminate $v_1$, $w=1$.
+\end{center}
+Here ${\bf a}^{(3)}={\bf a}^{(1)}\res_1{\bf a}^{(2)}$. It is interpreted as the rule
+that under-aged people cannot be a partner in the household (no matter what the marital status is).
+Creating the next child node by substituting {\em age}, we get
+\begin{center}
+%%%%%%%%%%%
+% T0RL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Er\Tr\Erl\Trl
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v}  &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&\phantom{0}&1&0&0\\
+        \hline
+        {\bf a}^{(3)} &1&1&1&1& 1 &\phantom{0}&1&0&0\\
+    \end{array}
+$
+\end{tabular}\hfill Substitute $v_2$, $w=1$.
+\end{center}
+Going down the tree and substituting {\em position in household} yields
+\begin{center}
+%%%%%%%%%%%
+% T0RLL
+%%%%%%%%%%
+\begin{tabular}{m{20mm}m{5.5cm}}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Elr\Tlr\Elrl\Tlrl%\Elrr\Tlrr\XTlrr
+    \Er\Tr\Erl\Trl\Erll\Trll
+\end{picture}
+&$
+    \begin{array}{l|cccc|cc|ccc}
+        {\bf v} &\phantom{1}&\phantom{0}&\phantom{0}&\phantom{0}&1&&1&&\\
+        \hline
+        {\bf a}^{(3)} &1&1&1&1&1&\phantom{0}&1&\phantom{0}&\phantom{0}\\
+    \end{array}
+$ 
+\end{tabular}\hfill Substitute $v_3$, $w=1$.
+\end{center}
+However, whatever value we would choose for the {\rm marital status} variable, it would always result
+in an erroneous record (since ${\bf a}^{(3)}$ has \true on all categories). Therefore, we go up one step in the
+tree. Eliminating {\em age} would increase the weight to 2, but since we already found a solution
+with weight equal to 1, this path need not be followed. We go up another node and bound on the fact
+that eliminating {\em position in household} would yield the same problem. The final tree may be represented as follows:
+\begin{center}
+\begin{picture}(1400,1000)
+    \treeframe
+    \Troot\El\Tl\Ell\Tll\XTll
+    \Elr\Tlr\Elrl\Tlrl
+    \Er\Tr\Erl\Trl\Erll\Trll\XTrll
+%    \Elrr\Tlrr\XTlrr
+%    \Err\Trr\XTrr 
+%    \Erlr\Trlr\XTrlr
+\end{picture}$\:$.
+\end{center}
+Here, every evaluated node is colored black, and a node is crossed when a bound
+condition was encountered. The only (minimal) solution created is represented
+by the path substitute {\em marital status} $\rightarrow$ eliminate {\em age}
+$\rightarrow$ substitute {\em position in household}. This corresponds to the
+solution where age has to be altered to fix the record, and indeed changing age
+from {\em under aged} to {\em adult} will make the full record valid. Note that
+the branch-and-bound algorithm reduced the number of nodes to be evaluated from
+$15$ to $8$ in this case.
 
 
 
+\subsection{Error localization with {\sf localizeErrors}}
+The function {\sf localizeErrors} applies the branch-and-bound algorithm to
+determine the minimal weight error location for every record in a {\sf
+data.frame}. The columns may be in {\sf character} or {\sf factor} format.  The
+function has an identical interface for numerical data under linear edits and
+categorical  data under categorical edits. It is implemented as an {\sf S3}
+generic function, accepting eiter an {\sf editmatrix} or an {\sf editarray} as
+the first argument and a {\sf data.frame} as the second argument. Funrther
+arguments are a vector of variable weights, a maximum search time (in seconds)
+to spend on a single record, a maximum weight and the maximum number of
+variables which may be changed. The latter two arguments introduce extra bound
+conditions in the branch-and-bound algorithm.
+
+Even when variables are weighted, the solution to the error localization
+problem may not be unique. In those cases {\sf localizeErrors} will draw
+uniformly from the set of lowest-weight solutions. The degeneracy (number of
+equivalent solutions found) is reported in the output.
+
+The result of a call to {\sf localizeErrors} is an object of class {\sf errorLocalization}.
+It contains a boolean matrix with error locations for each record as well as a status 
+report containging degeneracies, solution weights runtimes and wether the maximum runtime
+was exceeded. It also contains a timestamp (in the form of a {\sf Date} object) and the
+name of the user running {\sf R}. Table \ref{tblErrorLocation} gives an overview of
+the slots involved.
+%
+\input{tex/errorLocation.tex}
+
+In Figure \ref{RlocalizeErrors} an example of the use of {\sf localizeErrors} is
+given. The data model and rules are as in subsection \ref{sBandB}. The records
+are given by
+<<keep.source=false,echo=false>>=
+(dat <- data.frame(
+    maritalStatus=c('married','unmarried','widowed' ), 
+    age = c('under aged','adult','adult' ),
+    positionInHousehold=c('child','other','marriage partner')
+))
+@
+The edits state that under aged cannot be married and that you cannot be a
+marriage partner if you're not married. Clearly, the first and third record
+disobay some rules of these rules while the second record is valid. The first
+record can be repaired by adapting age and the second record can be made
+consistent by changing either {\em positin in household} or {\em marital
+status}. In the latter case, both solutions have equal weight and {\sf
+localizeErrors} has drawn one solution.
+
+
+
+
+\begin{Rcode}
+<<keep.source=true>>=
+E <- editarray(c(
+    "age %in% c('under aged','adult')",
+    "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+    "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+    "if( maritalStatus != 'married' )
+        !positionInHousehold %in% c('marriage partner','child')"
+    )
+)
+
+(dat <- data.frame(
+    maritalStatus=c('married','unmarried','widowed' ), 
+    age = c('under aged','adult','adult' ),
+    positionInHousehold=c('child','other','marriage partner')
+))
+
+set.seed(1)
+localizeErrors(E,dat)
+@
+\caption{Localizing errors in a {\sf data.frame} of records. The data model is as defined in Example \ref{datamodel}.
+The randseed is set before calling {\sf localizeErrors} to make results reproducible. The tird record has degeneracy 2, which means that the chosen solution was
+drawn uniformly from two equivalent solutions with weight 1.}
+\label{RlocalizeErrors}
+\end{Rcode}
+
+
+\subsection{Error localization with {\sf errorLocalizer}}
+
+\section{Conclusions}
+\clearpage
 \bibliographystyle{chicago}
 \bibliography{editrules}
 

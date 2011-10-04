@@ -1,0 +1,62 @@
+
+\setlength{\unitlength}{0.012mm}
+\definecolor{grey}{rgb}{0.8,0.8,0.8}
+
+\newcommand{\greycircle}{\textcolor{grey}{\circle*{100}}}
+\newcommand{\blackcircle}{\circle*{100}}
+\newcommand{\treeframe}{
+    \thinlines
+    \put(700,900){\textcolor{grey}{\line( 2,-1){400}}}
+    \put(700,900){\textcolor{grey}{\line(-2,-1){400}}}
+   
+    \multiput(300,700)(800,000){2}{\textcolor{grey}{\line( 1,-2){200}}}
+    \multiput(300,700)(800,000){2}{\textcolor{grey}{\line(-1,-2){200}}}
+   
+    \multiput(100,300)(400,000){4}{\textcolor{grey}{\line(-1,-3){100}}}
+    \multiput(100,300)(400,000){4}{\textcolor{grey}{\line( 1, -3){100}}}
+   
+    \put(700,900){\blackcircle}
+    \multiput(300,700)(800,000){2}{\greycircle}
+    \multiput(100,300)(400,000){4}{\greycircle}
+    \multiput(000,000)(200,000){8}{\greycircle}
+    \thicklines
+}
+\newcommand{\Troot}{\put(700,900){\blackcircle}}
+\newcommand{\Tl}{\put(300,700){\blackcircle}}
+\newcommand{\Tr}{\put(1100,700){\blackcircle}}
+\newcommand{\Tll}{\put(100,300){\blackcircle}}
+\newcommand{\XTll}{\put(-20,215){{$-$}}}
+\newcommand{\Tlr}{\put(500,300){\blackcircle}}
+\newcommand{\Trl}{\put(900,300){\blackcircle}}
+\newcommand{\Trr}{\put(1300,300){\blackcircle}}
+\newcommand{\XTrr}{\put(1171,215){$-$}}
+
+
+\newcommand{\Tlll}{\put(000,000){\blackcircle}}
+\newcommand{\Tllr}{\put(200,000){\blackcircle}}
+\newcommand{\Tlrl}{\put(400,000){\blackcircle}}
+\newcommand{\Tlrr}{\put(600,000){\blackcircle}}
+\newcommand{\XTlrr}{\put(471,-85){$-$}}
+\newcommand{\Trll}{\put(800,000){\blackcircle}}
+\newcommand{\XTrll}{\put(671,-85){$-$}}
+\newcommand{\Trlr}{\put(1000,000){\blackcircle}}
+\newcommand{\XTrlr}{\put(871,-85){$-$}}
+\newcommand{\Trrl}{\put(1200,000){\blackcircle}}
+\newcommand{\Trrr}{\put(1400,000){\blackcircle}}
+
+\newcommand{\El}{\put(700,900){\line(-2,-1){400}}}
+\newcommand{\Er}{\put(700,900){\line( 2,-1){400}}}
+\newcommand{\Ell}{\put(300,700){\line(-1,-2){200}}}
+\newcommand{\Elr}{\put(300,700){\line( 1,-2){200}}}
+\newcommand{\Erl}{\put(1100,700){\line(-1,-2){200}}}
+\newcommand{\Err}{\put(1100,700){\line( 1,-2){200}}}
+
+\newcommand{\Elll}{\put(100,300){\line(-1,-3){100}}}
+\newcommand{\Ellr}{\put(100,300){\line( 1,-3){100}}}
+\newcommand{\Elrl}{\put(500,300){\line(-1,-3){100}}}
+\newcommand{\Elrr}{\put(500,300){\line( 1,-3){100}}}
+\newcommand{\Erll}{\put(900,300){\line(-1,-3){100}}}
+\newcommand{\Erlr}{\put(900,300){\line( 1,-3){100}}}
+\newcommand{\Errl}{\put(1300,300){\line(-1,-3){100}}}
+\newcommand{\Errr}{\put(1300,300){\line( 1,-3){100}}}
+
