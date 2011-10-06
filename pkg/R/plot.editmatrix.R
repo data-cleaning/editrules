@@ -18,7 +18,7 @@
 #' 
 #' @example ../examples/graph.R
 #' @export
-plot.editmatrix <- function(x,nodetype="all", rules=rownames(E), vars=getVars(E),...){
+plot.editmatrix <- function(x,nodetype="all", rules=rownames(x), vars=getVars(x),...){
     checkigraph()
     plotEditGraph(x, nodetype=nodetype, rules=rules, vars=vars,...)
 }
@@ -28,7 +28,7 @@ plot.editmatrix <- function(x,nodetype="all", rules=rownames(E), vars=getVars(E)
 #' @rdname plot.editmatrix
 #' @method plot editarray
 #' @export
-plot.editarray <- function(x,nodetype="all", rules=rownames(E), vars=getVars(E),...){
+plot.editarray <- function(x,nodetype="all", rules=rownames(x), vars=getVars(x),...){
     checkigraph()
     plotEditGraph(x, nodetype=nodetype, rules=rules, vars=vars,...)
 }

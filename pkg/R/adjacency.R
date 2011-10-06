@@ -57,20 +57,6 @@ adjacency.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rown
     adjec(A,nodetype=nodetype, rules=rules, vars=vars)
 }
 
-# derive adjacency from 1/0 or boolean matrix.
-# Internal loops only, but nrow(A)^2 memory complexity. 
-# future optimization options: sparse matrices, lower/upper triangle only.
-adjec_old <- function(A,vars){
-    I <- rep(1:nrow(A), times=nrow(A))
-    J <- rep(1:nrow(A), each=nrow(A)) 
-    V <- matrix(
-            rowSums(A[I,vars,drop=FALSE] & A[J,vars,drop=FALSE]),
-            nrow=nrow(A),
-            dimnames=list(rownames(A), rownames=rownames(A))
-    )
-    diag(V) <- 0
-    V
-}
 
 # derive adjacency from 1/0 or boolean matrix.
 # Internal loops only, but nrow(A)^2 memory complexity. 
