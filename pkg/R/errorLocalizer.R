@@ -119,7 +119,6 @@ errorLocalizer.editmatrix <- function(
         choiceRight = {
             .var <- totreat[1]
             .E <- eliminate.editmatrix(.E, .var)
-            if (any(is.na(rownames(.E)))) browser()
             adapt[.var] <- TRUE
             totreat <- totreat[-1]
         },
