@@ -1,3 +1,5 @@
+version 1.6-1
+- Solved bug in blocks
 
 version 1.6-0
 - Added functionality for plotting edit graphs directly from edit sets
