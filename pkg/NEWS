@@ -1,4 +1,9 @@
-version 1.5-3
+
+version 1.6-0
+- Added functionality for plotting edit graphs directly from edit sets
+- Added functionality for deriving igraph objects directly from edit sets
+- Added functionality for deriving adjacency matrices for edit sets
+- Package now suggests igraph package for graphical analysis of edit sets
 - Fixed bug causing wrong error localization or crash when weights are used. (Thanks to Kenneth Chin-A-Fat)
 
 version 1.5-2
