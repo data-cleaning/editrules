@@ -1,3 +1,6 @@
+version 1.5-3
+- Fixed bug causing wrong error localization or crash when weights are used. (Thanks to Kenneth Chin-A-Fat)
+
 version 1.5-2
 - Fixed column matching bug in violatedEdits.editarray
 

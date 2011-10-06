@@ -69,7 +69,7 @@ errorLocalizer.editmatrix <- function(
             x, 
             weight=rep(1,length(x)), 
             maxadapt=length(x), 
-            maxweight=sum(weight[!is.na(weight)]),
+            maxweight=sum(weight),
             maxduration=600,
             ...){
     stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
@@ -79,19 +79,21 @@ errorLocalizer.editmatrix <- function(
     adapt <- is.na(x)   
     vars <- getVars(E)
 
-    #order decreasing by weight
-    o <- order(weight, decreasing=TRUE)
-    totreat <- names(x)[o[!adapt]]
+    o <- order(weight[!adapt], decreasing=TRUE)
+    totreat <- names(x)[!adapt][o]
+
     # only treat variables in occuring in editmatrix.
     totreat <- totreat[totreat %in% vars]
     # if variables do not occur in editmatrix, do not adapt.
     adapt[!(names(adapt) %in% vars)] <- FALSE
     # Eliminate missing variables.
     for (v in names(x)[is.na(x)]) E <- eliminate.editmatrix(E,v)
+
     wsol <- min(sum(weight[vars %in% totreat]), maxweight)
     cp <- backtracker(
         maxduration=maxduration,
         isSolution = {
+
             w <- sum(weight[adapt])
             if ( w > min(wsol,maxweight) 
               || sum(adapt) > maxadapt
@@ -110,13 +112,14 @@ errorLocalizer.editmatrix <- function(
         },
         choiceLeft = {
             .var <- totreat[1]
-            .E <- substValue(.E, .var , x[.var])
+            .E <- substValue.editmatrix(.E, .var , x[.var])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
         choiceRight = {
             .var <- totreat[1]
             .E <- eliminate.editmatrix(.E, .var)
+            if (any(is.na(rownames(.E)))) browser()
             adapt[.var] <- TRUE
             totreat <- totreat[-1]
         },
@@ -163,8 +166,12 @@ errorLocalizer.editarray <- function(
     ...){
     stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
     adapt <- is.na(x)
-    o <- order(weight, decreasing=TRUE)
-    totreat <- names(x)[o[!adapt]]
+
+
+    o <- order(weight[!adapt], decreasing=TRUE)
+    totreat <- names(x)[!adapt][o]
+#    o <- order(weight, decreasing=TRUE)
+#    totreat <- names(x)[o[!adapt]]
 #    weight <- weight[o[!adapt]]
 
     vars <- getVars.editarray(E)
