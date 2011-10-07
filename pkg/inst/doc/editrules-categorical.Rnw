@@ -362,7 +362,7 @@ representation are shown.
 
 The character expressions that can be read by {\sf editarray}, such as
 \begin{quote}
-\verb+"if ( gender == 'male' ) pregnant = 'no'"+ 
+\verb+"if ( gender == 'male' ) pregnant == 'no'"+ 
 \end{quote}
 follows standard {\sf R} syntax, which should be already familliar to the
 reader. Note that double quotes are used to enclose the whole string, while
@@ -628,190 +628,231 @@ iteration.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Equivalence to Fellegi and Holt's elimination method}
-%\label{ssequivalence}
-%In this subsection we prove that the function {\sc eliminate} of Algorithm 
-%\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
-%Given a set of $m$ edits:
-%\begin{equation}
-%    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
-%    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
-%    \textrm{, } 
-%    i\in 1,2,\ldots,m\}
-%\label{eqEditSet}
-%\end{equation}
-%where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
-%\cite{waal:2011} define a way to derive new edits, which may be written as a
-%function $F_k$,
-%\begin{eqnarray}
-%\lefteqn{F_k(E) = 
-%\ocap_{i=1}^m A^{(i)}_1\times
-%\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
-%\ocap_{i=1}^m A^{(i)}_{k-1}\times 
-%}\nonumber\\
-%&\times& 
-%\ocup_{i=1}^m A^{(i)}_k\times
-%\ocap_{i=1}^m A^{(i)}_{k+1}\times
-%\ldots\times
-%\ocap_{i=1}^m A^{(i)}_m
-%\label{eqFkSetRep}
-%\end{eqnarray}
-%where $k$ is called the {\em generating variable}. In the boolean representation, we have
-%${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
-%and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
-%\begin{equation}
-%F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
-%\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
-%\label{eqFkBoolRep}
-%\end{equation}
-%where we used some obvious properties (symmetry, associativity) of the $\land$
-%and $\lor$ operators as well. The following lemma and corrolary show that we can do
-%all the work, necessary for implied edit derivation with the resolution operator. 
-%%
-%\begin{lemma}[\citet{fellegi:1976}]
-%If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
-%on subsets of $E$.
-%\end{lemma}
-%\begin{proof}
-%The proof is given in the reference and will not be repeated here.
-%\end{proof}
-%\begin{corollary}
-%If $E$ is a set of edits, all implied edits can be derived by repeated
-%application of the resolution operator on elements of the boolean
-%representation of $E$.
-%\label{corResolution}
-%\end{corollary}
-%\begin{proof}
-%This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
-%\end{proof}
-%%
-%Having established the use of the resolution operator, it becomes interesting
-%to study its algebraic properties.  By substitution in the definition, it is
-%easily shown that the resolution operator is symmetric, associative and
-%idempotent. As a reminder, these properties are defined as follows.
-%\begin{equation}
-%\begin{array}{ll}
-%\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
-%\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
-%\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
-%\end{array}
-%\end{equation}
-%The resolution operator (although not called as such) was found earlyer and
-%independently of the current authors by \cite{willenborg:1988}, who also
-%discovered these properties.
-%%
-%The following property shows that the resolution operator leaves redundancy relations untouched.
-%\begin{lemma}
-%If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
-%\label{keepRedundancy}
-%\end{lemma}
-%\begin{proof}
-%We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
-%\begin{eqnarray*}
-%{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
-%&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
-%&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
-%&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
-%\end{eqnarray*}
-%and we are done.
-%\end{proof}
-%%
-%This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
-%does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
-%of $D$ with or without the redundancy removal step.
+\subsection{Equivalence to Fellegi and Holt's elimination method}
+\label{ssequivalence}
+In this subsection we prove that the function {\sc eliminate} of Algorithm 
+\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+Given a set of $m$ edits:
+\begin{equation}
+    E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
+    e^{(i)} \textrm{ as in Eq.\ \eqref{eqDefEdit}}
+    \textrm{, } 
+    i\in 1,2,\ldots,m\}
+\label{eqEditSet}
+\end{equation}
+where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+\cite{waal:2011} define a way to derive new edits, which may be written as a
+function $F_k$,
+\begin{eqnarray}
+\lefteqn{F_k(E) = 
+\ocap_{i=1}^m A^{(i)}_1\times
+\ocap_{i=1}^m A^{(i)}_2\times\ldots\times
+\ocap_{i=1}^m A^{(i)}_{k-1}\times 
+}\nonumber\\
+&\times& 
+\ocup_{i=1}^m A^{(i)}_k\times
+\ocap_{i=1}^m A^{(i)}_{k+1}\times
+\ldots\times
+\ocap_{i=1}^m A^{(i)}_m
+\label{eqFkSetRep}
+\end{eqnarray}
+where $k$ is called the {\em generating variable}. In the boolean representation, we have
+${\bf A}=\rho(E)$. Using the relations $\rho(e\cap e')=\rho({\bf e})\land\rho({\bf e})$
+and $\rho(e\cup e')=\rho(e)\lor\rho(e')$ we may write
+\begin{equation}
+F_k({\bf A}) = {\bf a}^{(1)}\res_k{\bf a}^{(2)}\res_k\cdots\res_k{\bf a}^{(m)},
+\quad {\bf a}^{(i)}=\rho\left(e^{(i)}\right),
+\label{eqFkBoolRep}
+\end{equation}
+where we used some obvious properties (symmetry, associativity) of the $\land$
+and $\lor$ operators as well. The following lemma and corrolary show that we can do
+all the work, necessary for implied edit derivation with the resolution operator. 
 %
-%We now define more formally the notion of variable elimination.
-%\begin{definition}
-%    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
-%    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
-%    that $f$ eliminates that variable from $E$.
-%\end{definition}
-%Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
-%The following theorem shows that every essentially new implied edit, generated by $k$ is found
-%by Algorithm \ref{eliminate}.
-%\begin{theorem}
-%If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
-%every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
-%edits are mutually non-redundant.
-%\label{eliminates}
-%\end{theorem}
-%\begin{proof}
-%The fact that the resulting rows are mutually nonredundant follows from Lemma
-%\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
-%iterations. We have
-%\begin{equation}
-%{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
-%\end{equation}
-%Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
-%ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
-%\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
-%${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
-%Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
-%A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
-%a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
-%each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
-%definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
-%with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
-%${\bf A}(j)$ contains all nonredundant edits with columns
-%$\ind(k,1),\ldots,\ind(k,j)$ equal to
-%\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
-%\end{proof}
+\begin{lemma}[\citet{fellegi:1976}]
+If $E$ is a set of edits, every edit, logically implied by $E$ can be derived by repeated application of Eq.\ \eqref{eqFkSetRep}
+on subsets of $E$.
+\end{lemma}
+\begin{proof}
+The proof is given in the reference and will not be repeated here.
+\end{proof}
+\begin{corollary}
+If $E$ is a set of edits, all implied edits can be derived by repeated
+application of the resolution operator on elements of the boolean
+representation of $E$.
+\label{corResolution}
+\end{corollary}
+\begin{proof}
+This follows from the equivalence between Eqs.\ \eqref{eqFkSetRep} and \eqref{eqFkBoolRep}.
+\end{proof}
 %
-%It is interesting to compare the procedure in Algorithm \ref{eliminate} with 
-%Fellegi and Holt's procedure for generating implicit edits. This procedure,
-%which is also described by \cite{waal:2011} may be summarized as follows.
+Having established the use of the resolution operator, it becomes interesting
+to study its algebraic properties.  By substitution in the definition, it is
+easily shown that the resolution operator is symmetric, associative and
+idempotent. As a reminder, these properties are defined as follows.
+\begin{equation}
+\begin{array}{ll}
+\textrm{symmetry:}  &{\bf a}\res_k{\bf b} = {\bf b} \res_k {\bf a} \\
+\textrm{associativity:}& ({\bf a}\res_k{\bf b})\res_k {\bf c} = {\bf a}\res_k({\bf b}\res_k {\bf c}).\\
+\textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
+\end{array}
+\end{equation}
+The resolution operator (although not called as such) was found earlyer and
+independently of the current authors by \cite{willenborg:1988}, who also
+discovered these properties.
 %
-%\vspace{1ex}
-%\begin{algorithmic}[1]
-%\Function{\textrm{\sc FH}}{$E$,$k$}
-%%\Require A set of edits $E$ and a generating variable $k$.
-%\State Find every $E_j\subseteq E$, with $j\in1,2,\ldots,s$ such that 
-%\begin{itemize}
-%\item $F_k(E_j)$ eliminates $k$.
-%\item $E_j$ has a minimal number of elements $|E_j|$.
-%\item The $E_j$ are mutually nonredundant in the sense $F_k(E_j)\not\subseteq F_k(E_l)$.
-%\end{itemize}
-%\State $E\leftarrow\cup_{j=1}^sF_k(E_j)$
-%\State \Return $E$
-%\EndFunction
-%\end{algorithmic}
-%\vspace{1ex}
-%%
-%Here, $E$ is a set of categorical edits in some form, and $k$ the variable to
-%eliminate.  Most of the computational complexity is contained in line 2, where
-%the search space is determined by the power set of $E$, yielding exponential
-%complexity in the number of edits.
+The following property shows that the resolution operator leaves redundancy relations untouched.
+\begin{lemma}
+If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+\label{keepRedundancy}
+\end{lemma}
+\begin{proof}
+We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {\bf c}. This gives
+\begin{eqnarray*}
+{\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
+&=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
+&=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
+&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+\end{eqnarray*}
+and we are done.
+\end{proof}
 %
-%The complexity of the {\sc eliminate} algorithm is determined by the 7th line
-%in Algorithm \ref{eliminate}, which is quadratic in the current number of edits
-%in the for-loop. This recurrence relation also yields exponential complexity in
-%the number of edits. However, by removing the redundant edits at every
-%iteration (a quadratic operation in itself), the actual number of edits can be
-%kept to a minimum which reduces the complexity encountered in practice.
+This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
+does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
+of $D$ with or without the redundancy removal step.
+
+We now define more formally the notion of variable elimination.
+\begin{definition}
+    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and $E\in
+    \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
+    that $f$ eliminates that variable from $E$.
+\end{definition}
+Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
+The following theorem shows that every essentially new implied edit, generated by $k$ is found
+by Algorithm \ref{eliminate}.
+\begin{theorem}
+If $E$ is a set of edits. The function $\textrm{\sc eliminate}(E,k)$ generates
+every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
+edits are mutually non-redundant.
+\label{eliminates}
+\end{theorem}
+\begin{proof}
+The fact that the resulting rows are mutually nonredundant follows from Lemma
+\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
+iterations. We have
+\begin{equation}
+{\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
+\end{equation}
+Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
+ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
+\ref{corResolution} it must be in ${\bf A}^+\res_k {\bf A}^+$, since
+${\bf A}^-\res_k {\bf A}^-$ only generates edits where $a_{\ind(k,1)}=\false$.
+Now, consider two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf
+A}^+$.  We have ${\bf a}^+\res_l{\bf a}^{\prime+}\subseteq {{\bf
+a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf A}^+\subseteq{\bf A}(1)$ so
+each element of ${\bf A}^+\res_k{\bf A}^+$ is redundant (remember Remark \ref{editremark}). It follows from the
+definition of $\res_k$ that if ${\bf A}(j-1)$ contains every nonredundant edit
+with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then
+${\bf A}(j)$ contains all nonredundant edits with columns
+$\ind(k,1),\ldots,\ind(k,j)$ equal to
+\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
+\end{proof}
+
+It is interesting to compare the procedure in Algorithm \ref{eliminate} with 
+Fellegi and Holt's procedure for generating implicit edits. This procedure,
+which is also described by \cite{waal:2011} may be summarized as follows.
+
+\vspace{1ex}
+\begin{algorithmic}[1]
+\Function{\textrm{\sc FH}}{$E$,$k$}
+%\Require A set of edits $E$ and a generating variable $k$.
+\State Find every $E_j\subseteq E$, with $j\in1,2,\ldots,s$ such that 
+\begin{itemize}
+\item $F_k(E_j)$ eliminates $k$.
+\item $E_j$ has a minimal number of elements $|E_j|$.
+\item The $E_j$ are mutually nonredundant in the sense $F_k(E_j)\not\subseteq F_k(E_l)$.
+\end{itemize}
+\State $E\leftarrow\cup_{j=1}^sF_k(E_j)$
+\State \Return $E$
+\EndFunction
+\end{algorithmic}
+\vspace{1ex}
 %
-%
-%By construction, the {\sc FH} function has the property that for two minimal,
-%mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
-%eliminate $k$, we have
-%\begin{equation}
-%\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
-%\end{equation}
-%where $\simeq$ indicates that the set of edits on the left hand side cover the same
-%subset of $D$ as the edits on the right hand side.
-%The following corollary establishes equivalence between the 
-%procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
-%\begin{corollary}
-%If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
-%$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
-%\begin{equation}
-%\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
-%\end{equation}
-%\end{corollary}
-%\begin{proof}
-%This follows immediately from Theorem \ref{eliminates}.
-%\end{proof}
+Here, $E$ is a set of categorical edits in some form, and $k$ the variable to
+eliminate.  Most of the computational complexity is contained in line 2, where
+the search space is determined by the power set of $E$, yielding exponential
+complexity in the number of edits.
+
+The complexity of the {\sc eliminate} algorithm is determined by the 7th line
+in Algorithm \ref{eliminate}, which is quadratic in the current number of edits
+in the for-loop. This recurrence relation also yields exponential complexity in
+the number of edits. However, by removing the redundant edits at every
+iteration (a quadratic operation in itself), the actual number of edits can be
+kept to a minimum which reduces the complexity encountered in practice.
+
+
+By construction, the {\sc FH} function has the property that for two minimal,
+mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
+eliminate $k$, we have
+\begin{equation}
+\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
+\end{equation}
+where $\simeq$ indicates that the set of edits on the left hand side cover the same
+subset of $D$ as the edits on the right hand side.
+The following corollary establishes equivalence between the 
+procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
+\begin{corollary}
+If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
+$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
+\begin{equation}
+\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
+\end{equation}
+\end{corollary}
+\begin{proof}
+This follows from the fact that ${\sf eliminate}(E,k)$ generates all possible
+nonredundant edits from $E$ with $k$ eliminated (Theorem \ref{eliminates}).
+\end{proof}
 
 \subsection{An example with {\sf eliminate}}
+The purpose of the {\sf eliminate} function is to derive all possible nonredundant
+edits from an edit set that do not contain a certain variable. For categorical data
+edits, this amounts to logical resolution. For example, suppose we have the following
+rules
+
+\begin{tabular}{lm{0.8\textwidth}}
+\\
+$P_1$ & Under aged people cannot be married\\
+$P_2$ & If you are not married you cannot be a marriage partner\\
+\hline
+$C$ & Under aged people cannot be a marriage partner.\\
+\\
+\end{tabular}\\
+Here, the conclusion $C$ is derived from premisses $P_1$ and $P_2$ by eliminating
+the marital status variable. In {\sf editrules} the above example can be performed as
+follows. We first define a data model and edit rules:
+
+<<keep.source=true>>=
+E <- editarray(c(
+    "age %in% c('under aged','adult')",
+    "maritalStatus %in% c('married','not married')",
+    "positionInHousehold %in% c('partner','child','other')",
+    "if (age == 'under aged') maritalStatus != 'married'",
+    "if (maritalStatus != 'married') positionInHousehold != 'partner'"
+))
+@
+We may derive the conclusion by eliminating the {\em marital status} variable:
+<<>>=
+eliminate(E,'maritalStatus')
+@
+This indeed yields the right conclusion. Alternatively, we may eliminate {\em age}:
+<<>>=
+eliminate(E,'age')
+@
+This deletes the only rule actually involving {\em age}. That is, no new rules not involving
+{\em age} can be derived.
+
+
+
+
 
 
 \section{Error localization in categorical data}
@@ -1142,10 +1183,58 @@ drawn uniformly from two equivalent solutions with weight 1.}
 \label{RlocalizeErrors}
 \end{Rcode}
 
-
 \subsection{Error localization with {\sf errorLocalizer}}
+Just like for linear edits, the function {\sf errorLocalizer} gives more
+control over the error localization process since it allows to set different
+parameters for each record. This can be usefull, for example when 
+reliability weights are calculated for each record.
+
+The errorLocalizer function is described extensively in \cite{jonge:2011}, so here
+we will discuss the example shown Figure \ref{RcatErrorLocalizer}.
+
+The data model and edits are the same as in Figure \ref{RlocalizeErrors}. The difference
+here is that a record must be offered as a named {\sf character} vector. A call to
+{\sf errorLocalizer} generates a {\sf backtracker} object which contains all information
+necessary to start searching the binary tree. After calling {\sf \$searchNext()}
+the weight and first found solution are returned, while the backtracker object stores some
+meta-information about the process, most significantly the duration of the search.
+A second call yields a better solution and the third call returns {\sf NULL}, indicating
+that all minimal weight solutions have been found.
+%
+\begin{Rcode}
+<<keep.source=TRUE>>=
+# Define a record 
+r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
+el <- errorLocalizer(E,r)
+el$searchNext()
+
+el$duration
+el$maxdurationExceeded
+el$searchNext()
+el$searchNext()
+@
+\caption{Finding errors with {\sf errorLocalizer}. The data model and edits in {\sf E} are as in
+Figure \ref{RlocalizeErrors}.}
+\label{RcatErrorLocalizer}
+\end{Rcode}
+
+
 
 \section{Conclusions}
+This paper descibes the theory and implementation of categorical edit
+manipulation of the {\sf editrules} package. Categorical restrictions may be
+defined textually in standard {\sf R} syntax. New edits may be derived with the
+resolution method. A new formulation of the elimination method in terms of the
+resolution operator was developed which facilitated the development of a fast
+elimination algorithm wich seems to be new in the field of data editing.
+
+The package offers functionality to check records against rules and can 
+determine the location of errors based on the generalized principle of 
+Fellegi and Holt. 
+
+
+
+
 \clearpage
 \bibliographystyle{chicago}
 \bibliography{editrules}

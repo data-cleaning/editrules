@@ -1,5 +1,6 @@
 version 1.6-1
-- Solved bug in blocks
+- Solved bug in blocks (constants were ignored)
+- Output of errorLocalizer.editarray is now equivalent to errorLocalizer.editmatrix
 
 version 1.6-0
 - Added functionality for plotting edit graphs directly from edit sets

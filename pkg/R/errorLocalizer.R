@@ -169,9 +169,6 @@ errorLocalizer.editarray <- function(
 
     o <- order(weight[!adapt], decreasing=TRUE)
     totreat <- names(x)[!adapt][o]
-#    o <- order(weight, decreasing=TRUE)
-#    totreat <- names(x)[o[!adapt]]
-#    weight <- weight[o[!adapt]]
 
     vars <- getVars.editarray(E)
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
@@ -184,40 +181,39 @@ errorLocalizer.editarray <- function(
             if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
-            I <- unique(do.call(c, c(ind[totreat],ind[adapt])))
-            if ( length(totreat) > 0 &&  any(rowSums(E[,I,drop=FALSE]) == length(I)) ) return(FALSE)
+            .I <- unique(do.call(c, c(ind[.totreat],ind[adapt])))
+            if ( length(.totreat) > 0 &&  any(rowSums(.E[,.I,drop=FALSE]) == length(.I)) ) return(FALSE)
             
-            if ( length(totreat) == 0 ){
+            if ( length(.totreat) == 0 ){
                 # can eliminated variables be filled in?
-                I <- do.call(c,ind[adapt])
-                if ( length(I) > 0 && any(rowSums(E[,I,drop=FALSE]) == length(I)) ) return(FALSE)
+                .I <- do.call(c,ind[adapt])
+                if ( length(.I) > 0 && any(rowSums(.E[,.I,drop=FALSE]) == length(.I)) ) return(FALSE)
                 # Take care of corner case: check that the record is invalid
                 
-                if ( length(I) == 0 && nrow(E) > 0 && any(apply(E[,,drop=FALSE],1,all)) )  return(FALSE)
+                if ( length(.I) == 0 && nrow(.E) > 0 && any(apply(.E[,,drop=FALSE],1,all)) )  return(FALSE)
                 # prepare output
                 wsol <<- w
                 adapt <- adapt 
-                rm(totreat)
                 return(TRUE)
             } 
         },
         choiceLeft = {
-            .var <- totreat[1]
-            E <- substValue.editarray(E, .var , x[.var], remove=FALSE)
+            .var <- .totreat[1]
+            .E <- substValue.editarray(.E, .var , x[.var], remove=FALSE)
             adapt[.var] <- FALSE
-            totreat <- totreat[-1]
+            .totreat <- .totreat[-1]
         },
         choiceRight = {
-            .var <- totreat[1]
-            E <- eliminate.editarray(E, .var)
+            .var <- .totreat[1]
+            .E <- eliminate.editarray(.E, .var)
             adapt[.var] <- TRUE
-            totreat <- totreat[-1]
+            .totreat <- .totreat[-1]
         },
-        E       = E,
+        .E       = E,
         x       = x,
         maxadapt= maxadapt,
         maxweight=maxweight,
-        totreat = totreat,
+        .totreat = totreat,
         adapt   = adapt,
         weight  = weight,
         wsol    = wsol,
