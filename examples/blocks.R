@@ -15,3 +15,16 @@ E <- editmatrix( c( "x1 + x2 == x3"
                   , "z1 + z2 == z3")
                )
 blocks(E)
+
+# two categorical blocks, will they be found?
+E <- editarray(c(
+ "x %in% c('a','b','c')",
+ "y %in% c('d','e')",
+ "z %in% c('f','g')",
+ "u %in% c('w','t')",
+ "if ( x == 'a') y != 'd'",
+ "if ( z == 'f') u != 'w'")
+)
+blocks(E)
+
+
