@@ -628,10 +628,13 @@ iteration.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Equivalence to Fellegi and Holt's elimination method}
+\subsection{Some properties of the elimination method}
 \label{ssequivalence}
 In this subsection we prove that the function {\sc eliminate} of Algorithm 
-\ref{eliminate} is equivalent the elimination method of \cite{fellegi:1976}.
+\ref{eliminate} generates all edits necessary to solve the error localization
+problem. A short comparison with the elimination method of \cite{fellegi:1976}
+is given as well.
+
 Given a set of $m$ edits:
 \begin{equation}
     E = \{ e^{(i)} \in \mathcal{P}(D)\,|\,
@@ -790,27 +793,27 @@ iteration (a quadratic operation in itself), the actual number of edits can be
 kept to a minimum which reduces the complexity encountered in practice.
 
 
-By construction, the {\sc FH} function has the property that for two minimal,
-mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
-eliminate $k$, we have
-\begin{equation}
-\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
-\end{equation}
-where $\simeq$ indicates that the set of edits on the left hand side cover the same
-subset of $D$ as the edits on the right hand side.
-The following corollary establishes equivalence between the 
-procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
-\begin{corollary}
-If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
-$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
-\begin{equation}
-\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
-\end{equation}
-\end{corollary}
-\begin{proof}
-This follows from the fact that ${\sf eliminate}(E,k)$ generates all possible
-nonredundant edits from $E$ with $k$ eliminated (Theorem \ref{eliminates}).
-\end{proof}
+%By construction, the {\sc FH} function has the property that for two minimal,
+%mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
+%eliminate $k$, we have
+%\begin{equation}
+%\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
+%\end{equation}
+%where $\simeq$ indicates that the set of edits on the left hand side cover the same
+%subset of $D$ as the edits on the right hand side.
+%The following corollary establishes equivalence between the 
+%procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
+%\begin{corollary}
+%If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
+%$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
+%\begin{equation}
+%\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
+%\end{equation}
+%\end{corollary}
+%\begin{proof}
+%This follows from the fact that ${\sf eliminate}(E,k)$ generates all possible
+%nonredundant edits from $E$ with $k$ eliminated (Theorem \ref{eliminates}).
+%\end{proof}
 
 \subsection{An example with {\sf eliminate}}
 The purpose of the {\sf eliminate} function is to derive all possible nonredundant

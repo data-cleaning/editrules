@@ -55,7 +55,7 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
 #'
 #' @rdname substValue
 #' @export
-substValue.editarray <- function(E, var, value, remove=TRUE, ...){
+substValue.editarray <- function(E, var, value, remove=FALSE, ...){
 # TODO: make this work for multiple variables and values.
     ind <- getInd(E)
     J <- ind[[var]]
@@ -88,6 +88,7 @@ substValue.editarray <- function(E, var, value, remove=TRUE, ...){
 #' @keywords internal
 #'
 indFromArray <- function(A,sep){
+    if (ncol(A) == 0 ) return(list())
     cn <- colnames(A)
     l <- strsplit(cn,sep)
     V <- sapply(l,`[`,1)

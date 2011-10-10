@@ -28,7 +28,7 @@ editrules <- function(x){
 #' @export getb 
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #' @return \code{numeric} vector \code{b}
 getb <- function(E){
   if (!is.editmatrix(E)){
@@ -48,7 +48,7 @@ getb <- function(E){
 #'
 #' Attributes H and h are used to detect redundant derived edits.
 #'
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #' @rdname geth
 #' @seealso \code{\link{editmatrix}}, \code{\link{eliminate}}
 #'
@@ -79,7 +79,7 @@ geth <- function(E){
 #' @seealso \code{\link{editmatrix}}
 #' @aliases getA 
 #'
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #' @return \code{numeric} matrix \code{A}
 getA <- function(E){
   if ( is.editmatrix(E) ){
@@ -95,7 +95,7 @@ getA <- function(E){
 #' @example ../examples/editmatrixAttr.R
 #' @seealso \code{\link{editmatrix}} \code{\link{as.matrix.editmatrix}}
 #'
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #' @return \code{numeric} matrix \code{A|b}
 #' @export 
 getAb <- function(E){
@@ -110,7 +110,7 @@ getAb <- function(E){
 #'
 #' @example ../examples/editmatrixAttr.R
 #' 
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #'
 #' @return \code{character} vector with the (in)equality operators. 
 getOps <- function(E){
@@ -128,7 +128,7 @@ getOps <- function(E){
 #'
 #' @example ../examples/editmatrixAttr.R
 #' 
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #'
 #' @return TRUE if editmatrix was normalized or created with \code{normalize=TRUE} 
 isNormalized <- function(E){
@@ -150,7 +150,7 @@ isNormalized <- function(E){
 #'
 #' @example ../examples/editmatrixAttr.R
 #' 
-#' @param E editmatrix
+#' @param E \code{\link{editmatrix}}
 #'
 #' @return If E was normalized, the original editmatrix is returned, otherwise 
 #' a new normalized editmatrix will be returned 

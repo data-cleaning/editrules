@@ -15,7 +15,7 @@ duplicated.editarray <- function(x, ...) duplicated(getArr(x))
 #' @param x an \code{\link{editmatrix}}
 #' @param ... options to be passed to other methods
 #' @return logical vector
-#' @S3method duplicated editmatrix
+#' @method duplicated editmatrix
 #' @export
 #' @keywords internal
 duplicated.editmatrix <- function(x,...){

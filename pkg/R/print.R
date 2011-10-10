@@ -8,9 +8,11 @@
 #' @export
 print.editarray <- function(x, ...){
     d <- datamodel(x)
-    cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
     A <- getArr(x)
-    colnames(A) <- cn
+    if ( ncol(A) > 0 ){
+        cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
+        colnames(A) <- cn
+    }
     cat("Edit array:\n")
     print(A)
     cat("\nEdit rules:\n")

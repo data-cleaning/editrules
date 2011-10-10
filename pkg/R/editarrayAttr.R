@@ -68,6 +68,7 @@ contains.boolmat <- function(A, ind, var){
 #' @example ../examples/datamodel.R
 #' @export
 datamodel <- function(E){
+    if (ncol(E) == 0 ) return(data.frame(variable=character(0),value=character(0)))
     st <- stack(getInd(E))
     vals <- do.call(c,lapply(getInd(E),names))
     data.frame(variable=as.character(st[,2]),value=vals,row.names=1:nrow(st))

@@ -1,9 +1,9 @@
 
-#' Row index operator for \code{editmatrix} or \code{editarray}
+#' Row index operator for \code{editmatrix}
 #'
 #' Use this operator to select edits from an editmatrix or editarray object.
 #'
-#' @usage `[.editmatrix`(x,i,j,...)
+#' @method [ editmatrix 
 #' @param x an object of class \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param i the row index in the edit matrix
 #' @param j the column index in the edit matrix
@@ -20,13 +20,17 @@
     E
 }
 
-# Row index operator for \code{editarray}
-# 
-# @rdname subsetting
-# @export
-#
-#`[.editarray` <- function(x, i, j, ...){
-#    neweditarray(getArr(x)[i, j, drop=FALSE], getInd(x), sep=getSep(x), names=getnames(x),levels=getlevels(x))
-#}
+#' Row index operator for \code{editarray}
+#'
+#' @method [ editarray
+#' @rdname subsetting
+#' @export
+#'
+`[.editarray` <- function(x, i, j, ...){
+    A <- getArr(x)[i,j,drop=FALSE]
+    sep <- getSep(x)
+    ind <- indFromArray(A,sep)
+    neweditarray(E=A, ind=ind, sep=sep, names=getnames(x)[i],levels=getlevels(x)[j])
+}
 
 

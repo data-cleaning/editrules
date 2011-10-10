@@ -146,6 +146,11 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
 #' @export
 as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     A <- getArr(x)
+    if (ncol(A) == 0 ){ 
+        s <- character(nrow(A))
+        if ( nrow(A)>0 ) names(s) <- rownames(A)
+        return(s)
+    }
     ind <- getInd(x)
     dm <- c()
     if ( datamodel ){
@@ -153,10 +158,10 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
         names(dm) <- paste("d",1:length(dm),sep="")
     }
     # edits
-    if ( nrow(x) == 0 ) return(dm)
-    edts <- character(nrow(x))
-    for ( i in 1:nrow(x) ){
-        a <- x[i,]
+    if ( nrow(A) == 0 ) return(dm)
+    edts <- character(nrow(A))
+    for ( i in 1:nrow(A) ){
+        a <- A[i,]
         involved <- sapply(ind, function(J) sum(a[J]) < length(J))
         ivd <- ind[involved]
         ivd <- lapply(ivd, function(J) J[a[J]])

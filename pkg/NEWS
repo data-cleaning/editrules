@@ -1,6 +1,11 @@
-version 1.6-1
-- Solved bug in blocks (constants were ignored)
+version 1.7-0
+- Solved bug in blocks (constants were ignored for obects of class editmatrix)
 - Output of errorLocalizer.editarray is now equivalent to errorLocalizer.editmatrix
+- isFeasible tested for objects of class editarray (works)
+- blocks now also works for objects of class editarray
+- overloaded indexing for objects of class editarray
+- NOTE: Default value for argument 'warn' in isFeasible is now set to TRUE
+- NOTE: Default value for argument 'remove' in substValue.editarray is now set to FALSE
 
 version 1.6-0
 - Added functionality for plotting edit graphs directly from edit sets

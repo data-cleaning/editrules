@@ -25,7 +25,9 @@ blocks <- function(M){
    if (is.editmatrix(M)){
       m <- getA(M)
    }
-   else {
+   else if ( is.editarray(M) ) { # also works for editarray:
+      m <- contains(M)
+   } else {
       m <- as.matrix(M)
    }
    
@@ -58,7 +60,7 @@ blocks <- function(M){
    #return decomposed original matrix 
    lapply( blocks
          , function(b){
-              removeEmpty(M[b,,drop=FALSE])
+              reduce(M[b,,drop=FALSE])
            }
          )
 }

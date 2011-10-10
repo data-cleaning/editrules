@@ -165,24 +165,6 @@ as.editmatrix <- function( A
     E
 }
 
-#' Coerce an editmatrix to a normal matrix
-#' 
-#' An \code{editmatrix} is a matrix and can be used as such, but it has extra attributes.
-#' In some cases it is preferable to convert the editmatrix to a normal matrix.
-#
-#' Please note that coercion returns the augmented matrix \code{A|b} and not the \code{ops} part.
-#'
-#' @export
-#' @method as.matrix editmatrix
-#'
-#' @param x editmatrix object
-#' @param ... further arguments passed to or from other methods.
-#'
-#' @return augmented matrix of editmatrix
-as.matrix.editmatrix <- function(x, ...){
-   array(x, dim=dim(x), dimnames=dimnames(x))
-}
-
 #' Coerce an editmatrix to a \code{data.frame}
 #'
 #' Coerces an editmatrix to a \code{data.frame}. Useful for storing/viewing the matrix representation of editrules.
@@ -271,9 +253,9 @@ as.expression.editmatrix <- function(x, ...){
 
 #' \code{\link{str}} method for editmatrix object
 #'
-#'
+#' @method str editmatrix
 #' @param object \code{\link{editmatrix}} object
-#' @param ... methods to pass to other methods
+#' @param ... arguments to pass to other methods
 #' @export
 str.editmatrix <- function(object,...){
     vars <- paste(getVars(object),collapse=", ")
