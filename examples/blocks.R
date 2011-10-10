@@ -18,10 +18,10 @@ blocks(E)
 
 # two categorical blocks, will they be found?
 E <- editarray(c(
- "x %in% c('a','b','c')",
- "y %in% c('d','e')",
- "z %in% c('f','g')",
- "u %in% c('w','t')",
+ "x \%in\% c('a','b','c')",
+ "y \%in\% c('d','e')",
+ "z \%in\% c('f','g')",
+ "u \%in\% c('w','t')",
  "if ( x == 'a') y != 'd'",
  "if ( z == 'f') u != 'w'")
 )

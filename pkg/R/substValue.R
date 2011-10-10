@@ -22,11 +22,11 @@ substValue <- function(E, var, value, ...){
 #' \eqn{\tilde{\bf x}}.
 #'
 #' @method substValue editmatrix
-#' @param remove \code{logical} should variable columns be removed from editmatrix?
+#' @param reduce \code{logical} should variable columns be removed from editmatrix?
 #'
 #' @rdname substValue 
 #' @export
-substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
+substValue.editmatrix <- function(E, var, value, reduce=FALSE, ...){
     v <- match(var, getVars(E), nomatch=0)
     if (any(v==0)){
         warning("Parameter var (", var[v==0], ") is not a variable of editmatrix E")
@@ -35,7 +35,7 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
     ib <- ncol(E)
     E[,ib] <- E[ ,ib] - E[ ,v]%*%value
     
-    if (remove)
+    if (reduce)
         E <- E[,-v, drop=FALSE]
     else 
         E[,v] <- 0
@@ -55,7 +55,7 @@ substValue.editmatrix <- function(E, var, value, remove=FALSE, ...){
 #'
 #' @rdname substValue
 #' @export
-substValue.editarray <- function(E, var, value, remove=FALSE, ...){
+substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
 # TODO: make this work for multiple variables and values.
     ind <- getInd(E)
     J <- ind[[var]]
@@ -66,7 +66,7 @@ substValue.editarray <- function(E, var, value, remove=FALSE, ...){
 
     A <- getArr(E)
     I <- A[,i]
-    if ( remove ){
+    if ( reduce ){
         v <- 
         A <- A[ ,-setdiff(J,i) ,drop=FALSE]
         ind <- indFromArray(A, sep)

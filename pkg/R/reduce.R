@@ -21,6 +21,7 @@ reduce <- function(E,...){
 #' @param tol elements of \code{E} with absolute value < \code{tol} are considered 0.
 #' 
 #' @rdname reduce
+#' @export
 reduce.editmatrix  <- function(E, tol=sqrt(.Machine$double.eps),...){
  
   m <- as.matrix(E)
@@ -36,7 +37,7 @@ reduce.editmatrix  <- function(E, tol=sqrt(.Machine$double.eps),...){
 #'
 #' @method reduce editarray
 #' 
-#' 
+#' @export
 #' @rdname reduce
 reduce.editarray <- function(E,...){
     E <- E[!isObviouslyRedundant.editarray(E),,drop=FALSE]

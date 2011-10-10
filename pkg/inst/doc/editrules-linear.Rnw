@@ -929,7 +929,7 @@ The function {\sf localizeErrors} accepts an {\sf editmatrix} and a {\sf
 data.frame}, and returns an object of class {\sf errorLocation}. An {\sf
 errorLocation} object contains the locations of errors for each record in the
 {\sf data.frame} as well as logging information, solution weights and
-degeneracy. Table \ref{tblErrorLocalization} gives an overview of the slots.
+degeneracy. Table \ref{tblErrorLocation} gives an overview of the slots.
 %
 
 Apart from the mandatory arguments (an {\sf editarray} and a {\sf data.frame}),

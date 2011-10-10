@@ -5,13 +5,15 @@
 \usepackage{array}
 \usepackage{color, colortbl}
 \usepackage{tex/smalltree}
-\usepackage{threeparttable}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
+\usepackage{makeidx}
+\makeindex
+
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
@@ -31,6 +33,8 @@
 \newtheorem{remark}[theorem]{Remark}
 \newtheorem{example}[theorem]{Example}
 \newtheorem{definition}[theorem]{Definition}
+\newcommand{\theend}{\hfill$\Box$}
+
 
 \usepackage{float}
  
@@ -63,13 +67,23 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is far from finished. Version 2.0 fo the package will have
+{\em This vignette is nearly finished. Version 2.0 fo the package will have
 the full vignette. At the moment, {\bf functionality for treating categorical data
 has  beta status} so bugs are likely.
+}
 
-
-Refer to the accompanying paper
-\cite{jonge:2011} for manipulation of linear edits.  }
+This paper is the second paper describing functionalities of the {\sf R} {\sf
+editrules} package.  The first paper \citep{jonge:2011} describes methods and
+implementation for handeling numerical data while this paper is concerned with
+purely categorical data. The {\sf editrules} package is designed to offer a
+user-friendly interface for edit definition, manipulation, and error
+localization based on the generalized paradigm of Fellegi and Holt for users of
+the {\sf R} language.  By providing  basic manipulations, such as are error
+checking, feasibility tests, variable elimination, value substitution, and
+redundancy checks, this package offers a toolset which may be used to
+invesitgate and maintain large sets of categorical or numerical edit sets.
+Finally, we note that the variable elimination method described in this paper
+appears to be new in the field of data editing.
 \end{abstract}
 
 \newpage
@@ -78,19 +92,21 @@ Refer to the accompanying paper
 
 \paragraph{Reading guide.} This paper contains a fair amount of background on
 the algorithms and methods behind the {\sf editrules} package. Readers who want
-to get started without going through the theory can read the following subsections:
-1   $\rightarrow$ 
-2.2 $\rightarrow$ 
-2.3 $\rightarrow$
-3.1 $\rightarrow$
-3.4 $\rightarrow$
-4.2. 
+to get started without going through the theory can read subsections
+\ref{sIntroduction}   $\rightarrow$ 
+\ref{sseditarray} $\rightarrow$
+\ref{sscommonfunctions} $\rightarrow$
+\ref{ssvaluesubstitution} $\rightarrow$ 
+\ref{sseliminateexample} $\rightarrow$
+\ref{sslocalizeerrors} $\rightarrow$
+\ref{sserrorlocalizer} 
 
 \newpage
 
 
 \section{Introduction}
-The value domain of categorical data records is usually limited by domain rules
+\label{sIntroduction}
+The value domain of categorical data records is usually limited by rules
 interrelating these variables.  The simplest examples are cases where the value
 of one variable excludes values of another variable. For example: if the age
 class of a person is ``child'', then (by law) the marital status cannot be
@@ -98,8 +114,8 @@ class of a person is ``child'', then (by law) the marital status cannot be
 frequently encountered. Resolving such violations is an important step prior to 
 data analysis and estimation.
 
-A categorical data record $r$ with $n$ variables may be defined as an
-element of the cartesian product space $D$:
+A categorical data record $v$ with $n$ variables may be defined as an
+element of the cartesian product space $D$ (for domain):\index{record!value domain}
 \begin{equation}
 D = D_1\times D_2\times\ldots\times D_n,
 \label{eqDomain}
@@ -112,13 +128,14 @@ D_k = \{c\in D_k\,|\,c=1,2,\ldots,d_k\}.
 \end{equation}
 %
 
-Each restriction $e$ is a subset of $D$ and we say that that {\em if $r\in e$
-then $r$ violates $e$}. Conversely, when $r\not\in e$ we say that $r$ {\em
-satisfies} $e$. In data editing literature, such rules are referred to as {\em
-edit rules} or {\em edits}, in short. In the context of contingency tables they
-are referred to as {\em structural zeros} since each rule implies that one or
-more cells in the $d_1\times d_2\times\ldots \times d_n$ contingency table must
-be zero. A record is {\em  valid} if it satisfies every edit imposed on $D$.
+Each restriction $e$ is a subset of $D$ and we say that that {\em if $v\in e$
+then $v$ violates $e$}. \index{violates}. Conversely, when $r\not\in e$ we say
+that $v$ {\em satisfies} $e$.\index{satisfies} In data editing literature, such
+rules are referred to as {\em edit rules} or {\em edits},\index{edit} in short.
+In the context of contingency tables they are referred to as {\em structural
+zeros} since each rule implies that one or more cells in the $d_1\times
+d_2\times\ldots \times d_n$ contingency table must be zero. A record is {\em
+valid} if it satisfies every edit imposed on $D$.
 
 Large, complex surveys may consist of hundreds of interrelated rules and
 variables, which impedes resolution of edit violations and renders manual
@@ -129,7 +146,7 @@ statistical offices handle 250, 300 or 750 categorical edit rules for surveys.
 The {\sf R} package {\sf editrules}  offers functionality to define, manipulate
 and maintain sets of edit rules with relative ease. It also implements error
 localization functionality based on the generalized principle of
-\citep{fellegi:1976}, which states that one should find the smallest (weighted)
+\cite{fellegi:1976}, which states that one should find the smallest (weighted)
 number of variables whose values can be adapted such that all edits can be
 satisfied. Fellegi and Holt's principle should be considered as the last resort
 of data editing. It is useful in situations where a record violates one or more
@@ -158,6 +175,7 @@ underlying principles may skip Section \ref{sectBoolrep}.
 \label{sectBoolrep}
 Categorical records may be represented as  a vector of boolean values. A
 boolean vector of dimension $d$ is an element of the boolean algebra 
+\index{boolean algebra}
 \begin{equation}
 \mathbb{B}^{d}=\left(\{0,1\}^{d},\land,\lor,\lnot\right),
 \end{equation}
@@ -167,25 +185,25 @@ discussion we will also allow the standard arithmetic operations addition and
 subtraction on boolean vectors (this is also consistent with the way {\sf R}
 handles vectors of class {\sf logical}). 
 
-To represent a record $r=(r_1,r_2,\ldots,r_n)$, assign to every category
+To represent a record $v=(v_1,v_2,\ldots,v_n)$, assign to every category
 $c$ in $D_k$ a unique standard basisvector $\vec{\delta}_k(c)$ of
-$\mathbb{B}^{d_k}$.  The boolean representation $\rho(r)$ of the full
+$\mathbb{B}^{d_k}$.  The boolean representation $\rho(v)$ of the full
 record is the direct sum
 %
 \begin{equation}
-    r \xrightarrow{\rho} \vec{\delta}_{1}(r_1)\oplus\vec{\delta}_{2}(r_2)\oplus\ldots\oplus\vec{\delta}_n(r_n),
+    v \xrightarrow{\rho} \vec{\delta}_{1}(v_1)\oplus\vec{\delta}_{2}(v_2)\oplus\ldots\oplus\vec{\delta}_n(v_n),
 \end{equation}
-which we will write as
+which we will write as \index{record!boolean representation} the direct vector sum
 \begin{equation}
-\rho(r) = {\bf v}_1 \oplus{\bf v}_2\oplus\cdots\oplus{\bf v}_n \equiv {\bf v}.
+\rho(v) = {\bf v}_1 \oplus{\bf v}_2\oplus\cdots\oplus{\bf v}_n \equiv {\bf v}.
 \end{equation}
-The dimension $d$ of $\rho(r)$ is given by the total number of categories of all variables
+The dimension $d$ of $\rho(v)$ is given by the total number of categories of all variables
 \begin{equation}
 d = \sum_{k=1}^n d_k.
 \label{eqSumdk}
 \end{equation}
 When each record in a dataset is represented this way, summing the vectors
-yields the $d$-dimensional vecorized representation of the $d_1\times
+yields the $d$-dimensional vectorized representation of the $d_1\times
 d_2\times\ldots\times d_n$ contingency table of the dataset. This is sometimes
 called the complete disjunctive table. 
 
@@ -194,42 +212,43 @@ called the complete disjunctive table.
 Consider the variables {\em marital status}, {\em age}, and {\em position in household} from
 the domain $D=D_1\times D_2\times D_3$. We define
 \begin{eqnarray}
-D_1 &=& \{{\rm married},{\rm unmarried},{\rm widowed},{\rm divorced}\}\\
-D_2 &=& \{{\rm under aged},{\rm adult}\}\\
-D_3 &=& \{{\rm partner},{\rm child},{\rm other}\}.
+D_1 &=& \{{\sf married},{\sf unmarried},{\sf widowed},{\sf divorced}\}\\
+D_2 &=& \{{\sf under aged},{\sf adult}\}\\
+D_3 &=& \{{\sf partner},{\sf child},{\sf other}\}.
 \end{eqnarray}
-The record $r=({\rm married},{\rm adult},{\rm partner})$ has boolean representation
+The record $r=({\sf married},{\sf adult},{\sf partner})$ has boolean representation
 \begin{equation}
 \rho(r) = (1,0,0,0)\oplus(0,1)\oplus(1,0,0) = (1,0,0,0,0,1,1,0,0).
 \end{equation}
 \end{example}
 
-An edit $e$ is a subset of $D$ which can be written as the cartesian product
+An edit $e$ is a subset of $D$ which can be written as the cartesian product \index{edit}
 \begin{equation}
     e = A_1\times A_2\ldots\times A_n\textrm{, where } A_{k}\subseteq D_k,\: k=1,2,\ldots n. 
     \label{eqDefEdit}
 \end{equation}
-The interpretation of an edit is that if a record ${\bf v}\in e$, then ${\bf
-v}$ is considered invalid. The following properties follow immediately.
+\index{edit!normal form}
+The interpretation of an edit is that if a record $v\in e$, then $v$ is
+considered invalid. The following properties follow immediately.
 \begin{remark}
 If $e\subset D$ and $e'\subset D$ are edits, then $e\cup e' = \{e,e'\}$ and 
 $e\cap e'= A_1\cap A'_1\times A_2\cap A'_2\times\cdots\times A_n\cap A'_n$
-are also edits.
+are also edits. \theend
 \label{editremark}
 \end{remark}
-An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm
-normal form}.  A variable $v_k$ is {\em involved} in an edit if $A_k\subset
-D_k$.  Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is involved in
-$e$. A variable $v_k$ for which $A_k=D_k$ is not involved in $e$.  Since every
-category $i$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(i)$,
+An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm normal
+form}.  A variable $k$ is {\em involved} in an edit if $A_k\subset D_k$.
+Conversely, we say that $e$ {\em involves} $k$ if $k$ is involved in $e$. A
+variable $k$ for which $A_k=D_k$ is not involved in $e$.  Since every
+category $c$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(c)$,
 edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
     e &\xrightarrow{\rho}&
-    \Lor_{i\in A_1}\vec{\delta}_1(i)\oplus
-    \Lor_{i\in A_2}\vec{\delta}_2(i)\oplus\ldots
-    \oplus\Lor_{i\in A_n}\vec{\delta}_n(i),
+    \Lor_{c\in A_1}\vec{\delta}_1(c)\oplus
+    \Lor_{c\in A_2}\vec{\delta}_2(c)\oplus\ldots
+    \oplus\Lor_{c\in A_n}\vec{\delta}_n(c),
 \end{eqnarray}
-which may simply be written as
+which may simply be written as\index{edit!boolean representation}
 \begin{equation}
     \rho(e) = {\bf a}_1\oplus{\bf a}_2\oplus\ldots\oplus{\bf a}_n\equiv{\bf a}.
 \label{EqRhoE}
@@ -246,7 +265,8 @@ which translates to the boolean representation
 \rho(e) = (1,0,0,0)\oplus(0,1)\oplus(1,1,1) = (1,0,0,0,0,1,1,1,1).
 \end{equation}
 \end{example}
-It is easy to check that an edit contains variable $k$  if and only if the
+In the boolean representation some properties can be checked by simple
+calculations. For example, an edit contains variable $k$  if and only if the
 inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a
 $d_k$ vector of ones.
 
@@ -254,12 +274,11 @@ A record ${\bf v}$ violates an edit if $v_k\in A_k$, $k=1,2,\ldots n$.  In the
 boolean representation this can be written as a condition on the standard inner
 product between the boolean representation of a record and an edit:
 \begin{equation}
-\sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k =\rho({\bf v})\cdot{\bf a} =  n.
+\sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k ={\bf v}\cdot{\bf a} =  n.
 \label{eqViolatedEdits}
 \end{equation}
-
 Suppose that $E$ is a set of edits of the form \eqref{eqDefEdit}. It is not difficult to verify that an 
-edit $e\in E$ is redundant if
+edit $e\in E$ is redundant if \index{edit!redundancy}
 %
 \begin{eqnarray}
     \label{eqRedundancy1}
@@ -274,12 +293,23 @@ of \eqref{eqRedundancy2}, $e$ is redundant because any edit violating $e$ also
 violates $e'$. Using $\rho(e)={\bf a}$ and $\rho(e')={\bf a}'$, this can be
 tested by checking if ${\bf a}\land{\bf a}'={\bf a}$ or equivalently if ${\bf
 a}\lor {\bf a}'={\bf a}'$.
-
+%
+%
+\begin{remark}
+The boolean representation of records and edits is invertible. For convenience we
+use the symbols $\in$, $\subset$ and $\subseteq$ for edits and record in set as wel as in 
+boolean representation. For example, in stead of writing ${\bf v}\cdot {\bf a}=n$ we write 
+${\bf v}\in {\bf a}$ (which is equivalent to $v\in e$) when convenient.
+\theend
+\end{remark}
 In the {\sf editrules} the boolean representation is mainly used to store edits
-and to manipulate them with methods like variable substitution and elimination.
+and to manipulate them through variable substitution and elimination.
 Data records can be stored in {\sf data.frame} objects, as usual. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{The {\sf editarray} object}
+\label{sseditarray}
+\index{editarray@{\sf editarray}}
 In the {\sf editrules} package, a set of categorical edits is represented as an {\sf editarray}
 object. Formally, we denote an {\sf editarray} $E$ for $n$ categorical variables and $m$ edits as
 (brackets indicate a combination of objects)  
@@ -341,8 +371,6 @@ univariate (defining domains) of multivariate. This means that if all possible
 variables and categories are mentioned in the multivariate edits, the correct
 datamodel will be derived as well. 
 
-The function {\sf datamodel} accepts an edit array as input and returns an
-overview of variables and their categories for easy inspection.
 When printed to the screen, the boolean array is shown with column heads of the form
 \begin{quote}
 {\sf <abbreviated var. name><separator><abbreviated cat. label>}, 
@@ -351,6 +379,9 @@ where both variable names and categories are abbreviated for readability, and
 the standard separator is a colon ({\sf :}). The separator may not occur as a
 symbol in either variable or category name, and its value can be determined by
 passing a custom {\sf sep} argument to {\sf editarray}.
+For convinience, the function {\sf datamodel} accepts an {\sf editarray} as
+input and returns an overview of variables and their categories for easy
+inspection in the form of a {\sf data.frame}.
 
 Internally, {\sf editarray} uses the {\sf R} internal {\sf parse} function to
 transform the {\sf character} expressions to a parse tree, which is
@@ -360,21 +391,27 @@ been overloaded to derive a {\sf character} representation from a boolean
 representation. When printed to the screen, both the boolean and textual
 representation are shown.
 
-The character expressions that can be read by {\sf editarray}, such as
+The character expressions that can be read by {\sf editarray}, are either ${\sf \%in\%}$ statements
+of the form 
 \begin{quote}
-\verb+"if ( gender == 'male' ) pregnant == 'no'"+ 
+\verb+<variable> %in% <expression>+
 \end{quote}
-follows standard {\sf R} syntax, which should be already familliar to the
-reader. Note that double quotes are used to enclose the whole string, while
-single quotes are used for category names. Table \ref{tabOperators} shows
-which operators and functions can be used to specify categorical edit rules.
+to define the data model or {\sf if}-statements of the form
+\begin{quote}
+\verb+"if ( <condition> ) <expression>"+ 
+\end{quote}
+to define rules relating variables. The expressions follows standard {\sf R}
+syntax, which should be already familliar to the reader. 
 
+Note (see Figure \ref{Reditarray}) that double quotes are used to enclose the
+whole expression, while single quotes are used for category names. Table
+\ref{tabOperators} shows which operators and functions can be used to specify
+categorical edit rules.
 
-
-Categories may be litaral characters, or booleans.  It is worth noting that
-expressions on the right hand side of the {\sf \%in\%}  and {\sf ==} operators
-are evaluated. One useful application of this is that the categories, or data
-model can be defined outside of the edits:
+Categories may be {\sf character} or {\sf logical} literals.  It is worth
+noting that expressions on the right hand side of the {\sf \%in\%}  and {\sf
+==} operators are evaluated. One useful application of this is that the
+categories, or data model can be defined outside of the edits:
 %
 <<keep.source=true>>=
 xval <- letters[1:4]
@@ -383,7 +420,6 @@ editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
 @
 %
 The above example also illustrates the use of boolean categories.
-
 
 
 \begin{table}
@@ -409,7 +445,8 @@ $^*${\small Right-hand side is evaluated.}
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Coercion, checking, redundancy and infeasibility}
+\subsection{Coercion, checking, redundancy and feasibility}
+\label{sscommonfunctions}
 Table \ref{tabBasicfunctions} lists basic functions of {\sf editarray} objects.
 The {\sf datamodel} function retrieves the variables and categories in an edit
 array, and returns them as a two-column {\sf data.frame}. With {\sf
@@ -427,10 +464,10 @@ to R-expressions and evaluating them within the {\sf data.frame} environment.
 By default, the records are checked against the data model. This can be turned
 off by providing the optional argument {\sf datamodel=FALSE}. 
 
-
+\index{editarray@{\sf editarray}!functions}
 \begin{table}
 \begin{threeparttable}
-\caption{Basic functions for objects of class {\sf editarray}. Only mandatory
+\caption{Functions for objects of class {\sf editarray}. Only mandatory
 arguments are shown, refer to the built-in documentation for optional
 arguments.}
 \label{tabBasicfunctions}
@@ -438,17 +475,23 @@ arguments.}
 \hline
 Function        & description \\
 \hline
-{\sf datamodel(E)}           & get datamodel \\
-{\sf getVars(E)}             & get a list of variables\\
-{\sf as.data.frame(E)}       & coerce edits to {\sf data.frame}\\
-{\sf contains(E)}            & which edits contains which variable\\
-{\sf as.character(E)}        & coerce edits to {\sf character} vector\\
-{\sf violatedEdits(E,x)}     & check which edits are violated by {\sf x}\\
-{\sf isObviouslyRedundant(E)}& find redundancies [Eq.\ \eqref{eqRedundancy1}], duplicates\\
-{\sf duplicated(E)}          & find duplicate edits\\
-{\sf isSubset(E)}            & find edits, subset of another edit [Eq.\ \eqref{eqRedundancy2}]\\
-{\sf isObviouslyInfeasible(E)}& detect contradictions\\ 
+{\sf datamodel(E)}            & get datamodel \\
+{\sf getVars(E)}              & get a list of variables\\
+{\sf as.data.frame(E)}        & coerce edits to {\sf data.frame}\\
+{\sf contains(E)}             & which edits contains which variable\\
+{\sf as.character(E)}         & coerce edits to {\sf character} vector\\
+{\sf blocks(E)}               & Get list of independent blocks of edits\\
+{\sf reduce(E)}               & Remove empty unnecessary variables and rows\\
+{\sf isObviouslyRedundant(E)} & find redundancies [Eq.\ \eqref{eqRedundancy1}], duplicates\\
+{\sf duplicated(E)}           & find duplicate edits\\
+{\sf isSubset(E)}             & find edits, subset of another edit [Eq.\ \eqref{eqRedundancy2}]\\
+{\sf isObviouslyInfeasible(E)}& detect simple contradictions\\ 
+{\sf isFeasible(E)}           & detect if at least 1 valid record exists\\
 {\sf substValue(E,var,value)} & substitute a value\\
+{\sf eliminate(E,var)}        & eliminate a variable (sect.\ \ref{sseliminateexample})\\
+{\sf violatedEdits(E,dat)}    & check which edits are violated by {\sf x}\\
+{\sf localizeErrors(E,dat)}   & localize errors (sect.\ \ref{sslocalizeerrors})\\
+{\sf errorLocalizer(E,x)}     & {\sf backtracker} for error localization (sect.\ \ref{sserrorlocalizer})\\
 \hline
 \end{tabular}
 \end{threeparttable}
@@ -460,9 +503,12 @@ When manipulating edit sets, redundant edits of the form of Eq.\
 boolean representation with {\sf isObviouslyRedundant}. By default, this
 function also checks for duplicate edits, but this may be turned off. The
 function {\sf duplicated} is overloaded from the standard {\sf R} function and
-the function {\sf isSubset} (pseudocode in Algorithm \ref{algIsSubset}) detects which edits are a subset or duplicate of
-another one. In the actual {\sf R} implementation, the only explicit loop is a call to {\sf R}'s {\sf vapply} function.
-The other loops are avoided using {\sf R}'s indexing  and vectorization properties.
+the function {\sf isSubset} (pseudocode in Algorithm \ref{algIsSubset}) detects
+which edits are a subset or duplicate of another one. In the actual {\sf R}
+implementation, the only explicit loop is a call to {\sf R}'s {\sf vapply}
+function.  The other loops are avoided using {\sf R}'s indexing  and
+vectorization properties.
+\index{editarray@{\sf editarray}!redundancy}
 %
 \begin{algorithm}[t]
 \caption{{\sc isSubset}$(E)$}
@@ -480,15 +526,44 @@ The other loops are avoided using {\sf R}'s indexing  and vectorization properti
 \end{algorithm}
 
 
-
 Manipulations may also lead to edits of the form $e=D$, in which case every possible
 record is invalid, and the editarray has become impossible to satisfy. The function
-{\sf isObviouslyInfeasible} detects whether any such edits are present. They can be 
-detected by checking if $\sum_{j=1}^d\rho(e)_j=d$.
+{\sf isObviouslyInfeasible} detects whether any such edits are present. The function
+{\sf isFeasible} checks if the set of edits in it's argument allows at least one
+\index{editarray@{\sf editarray}!feasibility}
+valid record. This may yield results which are counterintuitive at first glance.
+For example, consider set of edits on the domain $D=\{(x,y)\in\{{\sf a},{\sf b}\}\times\{{\sf c},{\sf d}\}\}$.
+<<keep.source=true>>=
+M <- editarray(c(
+    "x %in% c('a','b')",
+    "y %in% c('c','d')",
+    "if ( x == 'a' ) y == 'c'",
+    "if ( x == 'a' ) y != 'c'"))
+
+@
+This set of edits is feasible, even though edits $e_1$ and $e_2$ seem contradictory: 
+<<>>=
+isFeasible(M)
+@
+The explanation is that $e_1$ and $e_2$ contradict eachother only when 
+$x={\sf a}$, so
+<<keep.source=true>>=
+isFeasible(substValue(M,'x','a'))
+@
+where the function {\sf substValue} is discussed in the next section. One can check
+that the record $(x={\sf b},y={\sf d})$ indeed satisfies all edits in ${\sf M}$.
+
+The feasibility check works by eliminating all variables in an {\sf editarray} one by
+one untill either no edits are left or an obvious contradiction is found. Eliminating
+all variables amounts construcing the solution of an error localization problem
+in the branch-and-bound algorithm of \cite{waal:2003} where all variables have to be 
+adapted. Variable elimination is discussed further in the next section while error localization is discussed
+in Section \ref{secErrLocCat}.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% SECTION 2
+%%% SECTION 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Manipulation of categorical restrictions}
 The basic operations on sets of categorical edits are value substitution and
@@ -499,25 +574,25 @@ not involving the eliminated variable.
 In the next subsection we give an example of value subsitution with the {\sf
 editrules} package, as well as some background. In subsection
 \ref{sscategoryresolution} we describe an elimination method, which appears to
-be new to the field of data editing. 
-In subsection \ref{ssequivalence} it is
+be new to the field of data editing.  In subsection \ref{ssequivalence} it is
 shown that the method yields results equivalent to Fellegi and Holt's
-elimination method while running in polynomial in stead of exponential time.
-Finally, in subsection \ref{sseliminateexample} we given an example of
-eliminating variables with the {\sf editrules} package. Readers not interested in 
-the technical background can skip subsections \ref{sscategoryresolution} and 
-\ref{ssequivalence}.
+elimination method.  Finally, in subsection \ref{sseliminateexample} we given
+an example of eliminating variables with the {\sf editrules} package. Readers
+not interested in the technical background can skip subsections
+\ref{sscategoryresolution} and \ref{ssequivalence}.
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Value substitution}
+\label{ssvaluesubstitution}
 If it is assumed that in a record, one of the variables takes a certain value,
 that value may be substituted in the edit rules. In the boolean representation
 this amounts to removing all edits which exclude that value, since the record
 cannot violate those edits. Secondly, the columns related to the substituted variable,
 but not to the substituted category are removed, thus adapting the datamodel to the
 new assumption. Algorithm \ref{substValue} gives the pseudocode for reference purposes.
+\index{editarray@{\sf editarray}!value substitution}
 %
 \begin{algorithm}[t]
 \caption{{\sc substValue($E$,$k$,$v$)}}
@@ -533,19 +608,22 @@ new assumption. Algorithm \ref{substValue} gives the pseudocode for reference pu
 \end{algorithm}
 % 
 
-In the {\sf editrules} package, value substitution is performed by the {\sf substValue} function,
-which accepts variable and category names. In the following example the editmatrix defined in 
-Figure \ref{Reditarray} is used.
+In the {\sf editrules} package, value substitution is performed by the {\sf
+substValue} function, which accepts an {\sf editarray}, a variablename and a
+category name. In the following example the editmatrix defined in Figure
+\ref{Reditarray} is used.
 <<echo=true>>=
 substValue(E,"gender","female")
 @
-In this case, the variable ``gender'' is substituted by the value ``female''.
-With the gender is fixed, the datamodel reduces to
-$\{\textrm{male}\}\times\{\textrm{no},\textrm{yes}\}$ and the restriction ``if
-male then pregnant = true'' becomes meaningless and is therefore removed.
+In this case, the variable {\em gender} is substituted by the value {\sf female}. The rules
+concering $gender={\sf male}$ may be deleted, so here only the datamodel is left with
+no multivariate rules left. In fact, the datamodel itself may be reduced, which
+can be achieved by setting the option {\sf reduce=TRUE}.
+<<>>=
+substValue(E,"gender","female",reduce=TRUE)
+@
 
-The {\sf R} implementation of {\sf substValue} has an extra option, allowing to choose
-if the datamodel is reduced or not, which by default is set to \true.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -553,6 +631,7 @@ if the datamodel is reduced or not, which by default is set to \true.
 \label{sscategoryresolution}
 Given two edits $e$ and $e'$, with boolean representations ${\bf a}$ and
 ${\bf a}'$ respectively.  We define the {\em resolution operator} $\res_k$ as:
+\index{resolution operator}
 \begin{eqnarray}
 \lefteqn{
     {\bf a} \res_k {\bf a}' = {\bf a}_1\land{\bf a}'_1\oplus\ldots\oplus
@@ -569,8 +648,8 @@ For two edit sets ${\bf A}$ and ${\bf A'}$, we also introduce the notation
 %
 Observe that the resolution operator has the following properties, relevant for record checking.
 \begin{eqnarray}
-   \rho({\bf v})\in {\bf a}\res_k{\bf a}' &\Rightarrow& \rho({\bf v})\in{\bf a} \lor \rho({\bf v})\in{\bf a}'\\
-   \rho({\bf v})\in {\bf a} &\Rightarrow& \rho({\bf v})\in{\bf a}\res_k{\bf a}' \lor {\bf a}\res_k{\bf a}'=\varnothing
+   {\bf v}\in {\bf a}\res_k{\bf a}' &\Rightarrow& \rho({\bf v})\in{\bf a} \lor {\bf v}\in{\bf a}'\\
+   {\bf v}\in {\bf a} &\Rightarrow& {\bf v}\in{\bf a}\res_k{\bf a}' \lor {\bf a}\res_k{\bf a}'=\varnothing
     \label{eqRedundant}
 \end{eqnarray}
 That is, if a record violates ${\bf a}\res_k{\bf a}'$, it does so because it
@@ -580,17 +659,20 @@ derived edit.When ${\bf a}_k={\bf a}'_k$, the resulting edit is
 the intersection of the original edits, in which case the resulting edit is
 redundant.  
 
-The operator is called resolution operator since its action strongly resembles
-a resolution operation from formal logic.  If ${\bf a}_k\lor {\bf
-a}'_k=(\true)^{d_k}$, the operator ``resolves'' or eliminates the $k^{\rm th}$
-variable and we are left with a relation between the other variables,
-regardless of the value of variable $k$. The edit resulting from a resolution
-operation on two explicitly defined edits is called an {\em implied edit}. 
-If the resolution operation happens to eliminate one of the variables, it is
-called an {\em essentially new implied edit}. These terms were introduced by
-\citet{fellegi:1976} who first solved the problem of error localization for
-categorical data. 
+The operator is called resolution operator since in certain cases its action is
+equivalent to a resolution operation from formal and automated logic derivation
+\citep{robinson:1965}.  If ${\bf a}_k\lor {\bf a}'_k=(\true)^{d_k}$, the
+operator ``resolves'' or eliminates the $k^{\rm th}$ variable and we are left
+with a relation between the other variables, regardless of the value of
+variable $k$. The edit resulting from a resolution operation on two explicitly
+defined edits is called an {\em implied edit}. \index{edits!inplied} If the
+resolution operation happens to eliminate one of the variables, it is called an
+{\em essentially new implied edit}.\index{edits!essentially new} These terms
+were introduced by \citet{fellegi:1976} who first solved the problem of error
+localization for categorical data. 
 
+
+\index{editarray@{\sf editarray}!variable elimination}
 The resolution operator can be used to eliminate a variable $k$ from a set of
 edits represented by ${\bf A}$ category by category as follows (Algorithm
 \ref{eliminate}).  Suppose that $j$ is the column index of the first category
@@ -739,8 +821,12 @@ edits are mutually non-redundant.
 \label{eliminates}
 \end{theorem}
 \begin{proof}
-The fact that the resulting rows are mutually nonredundant follows from Lemma
-\ref{keepRedundancy}. Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
+The rows are mutually non-redundant since redundant rows are removed explicitly in
+line 8 of the algorithm. The fact that the removing these rows does not alter the
+result (in the sense that the resulting edits will cover the same subdomain of $D$) 
+is a consequence of Lemma \ref{keepRedundancy}. 
+
+Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
 iterations. We have
 \begin{equation}
 {\bf A}(1) = {\bf A}^+\cup {\bf A}^+\res_k{\bf A}^-.
@@ -793,44 +879,24 @@ iteration (a quadratic operation in itself), the actual number of edits can be
 kept to a minimum which reduces the complexity encountered in practice.
 
 
-%By construction, the {\sc FH} function has the property that for two minimal,
-%mutually nonredundant edit sets $E_j$ and $E_l$, such that $F_k(E_j)$ and $F_k(E_l)$
-%eliminate $k$, we have
-%\begin{equation}
-%\textrm{\sc FH}(E_j\cup E_l,k)\simeq \textrm{\sc FH}(E_j,k)\cup\textrm{\sc FH}(E_l,k),
-%\end{equation}
-%where $\simeq$ indicates that the set of edits on the left hand side cover the same
-%subset of $D$ as the edits on the right hand side.
-%The following corollary establishes equivalence between the 
-%procedure of Fellegi and Holt and the {\sc eliminate} algorithm.
-%\begin{corollary}
-%If $E_j$ and $E_l$ are minimal, mutually nonredundant edit sets such that 
-%$F_k(E_j)$ and $F_k(E_l)$ eliminate $k$, then
-%\begin{equation}
-%\textrm{\sc eliminate}(E_j\cup E_l,k) \simeq \textrm{\sc eliminate}(E_j,k)\cup\textrm{\sc eliminate}(E_l,k).
-%\end{equation}
-%\end{corollary}
-%\begin{proof}
-%This follows from the fact that ${\sf eliminate}(E,k)$ generates all possible
-%nonredundant edits from $E$ with $k$ eliminated (Theorem \ref{eliminates}).
-%\end{proof}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{An example with {\sf eliminate}}
+\label{sseliminateexample}
+\index{editarray@{\sf editarray}!variable elimination}
 The purpose of the {\sf eliminate} function is to derive all possible nonredundant
 edits from an edit set that do not contain a certain variable. For categorical data
-edits, this amounts to logical resolution. For example, suppose we have the following
-rules
+edits, this amounts to logical resolution. For example, consider the syllogism
 
 \begin{tabular}{lm{0.8\textwidth}}
 \\
 $P_1$ & Under aged people cannot be married\\
-$P_2$ & If you are not married you cannot be a marriage partner\\
+$P_2$ & People who are not married cannot be a marriage partner\\
 \hline
 $C$ & Under aged people cannot be a marriage partner.\\
 \\
 \end{tabular}\\
 Here, the conclusion $C$ is derived from premisses $P_1$ and $P_2$ by eliminating
-the marital status variable. In {\sf editrules} the above example can be performed as
+{\em marital status}. In {\sf editrules} the above example can be performed as
 follows. We first define a data model and edit rules:
 
 <<keep.source=true>>=
@@ -857,7 +923,7 @@ This deletes the only rule actually involving {\em age}. That is, no new rules n
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Error localization in categorical data}
 \label{secErrLocCat}
 
@@ -892,10 +958,10 @@ $e^{(2)}$ & If you are not married you cannot be a partner\\
 \\
 \end{tabular}\\
 %
-As an example we treat the following record with the bracnch-and-bound algorithm to 
+As an example we treat the following record with the branch-and-bound algorithm to 
 localize the errors:
 \begin{equation}
-r = ({\rm married},{\rm under\:aged},{\rm partner }).
+v = ({\rm married},{\rm under\:aged},{\rm partner }).
 \end{equation}
 At the beginning of the algorithm, only the root node is filled. The situation may be 
 represented as follows:\\
@@ -919,14 +985,16 @@ $
 \end{tabular}\hfill  Root node, $w=0$,
 \end{center}
 %
-where ${\bf v}=\rho(r)$, and ${\bf a}_1$ and ${\bf a}_2$ are the boolean
-representations of $e_1$ and $e_2$ respectively.  The weight $w$ counts the
+where ${\bf v}=\rho(v)$, and ${\bf a}_1$ and ${\bf a}_2$ are the boolean
+representations of $e_1$ and $e_2$ respectively. The record and edits are denoted in boolean
+representation as shown in Example \ref{datamodel}. 
+The weight $w$ counts the
 number of variables that are assumed to be incorrect, which at the root node is
 zero. 
 
 
-The tree is generated in depth-first fashion. In the first step, we substitute
-$r_1$, yielding
+The tree is traversed in depth-first fashion. In the first step, we substitute
+$v_1$, yielding
 %%%%%%%%%%%
 % T0L
 %%%%%%%%%%
@@ -969,7 +1037,7 @@ we find
 $
 \end{tabular}\hfill Substitute $v_2$, $w=0$.
 \end{center}
-At this point we have fixed the value for {\em marital status} and {\bf age}.
+At this point we have fixed the value for {\em marital status} and {\em age}.
 It can be seen from the value of ${\bf a}^{(1)}$ for {\em position in household} that
 no matter what value is chosen for that field, the value ${\bf v}\cdot{\bf a}=3$. Which
 shows that this path will never lead to a valid solution.
@@ -1039,9 +1107,10 @@ gives
 $
 \end{tabular}\hfill Eliminate $v_1$, $w=1$.
 \end{center}
-Here ${\bf a}^{(3)}={\bf a}^{(1)}\res_1{\bf a}^{(2)}$. It is interpreted as the rule
-that under-aged people cannot be a partner in the household (no matter what the marital status is).
-Creating the next child node by substituting {\em age}, we get
+Here ${\bf a}^{(3)}={\bf a}^{(1)}\res_1{\bf a}^{(2)}$. It is interpreted as the
+rule that under-aged people cannot be a partner in the household (no matter
+what the value of {\em marital status} is).  Creating the next child node by
+substituting {\em age}, we get
 \begin{center}
 %%%%%%%%%%%
 % T0RL
@@ -1084,81 +1153,38 @@ Going down the tree and substituting {\em position in household} yields
 $ 
 \end{tabular}\hfill Substitute $v_3$, $w=1$.
 \end{center}
-However, whatever value we would choose for the {\rm marital status} variable, it would always result
-in an erroneous record (since ${\bf a}^{(3)}$ has \true on all categories). Therefore, we go up one step in the
-tree. Eliminating {\em age} would increase the weight to 2, but since we already found a solution
-with weight equal to 1, this path need not be followed. We go up another node and bound on the fact
-that eliminating {\em position in household} would yield the same problem. The final tree may be represented as follows:
+However, whatever value we would choose for {\em marital status}, it would
+always result in an erroneous record since ${\bf a}^{(3)}$ has \true on all
+categories of that variable. Therefore, we go up one step in the tree.
+Eliminating {\em age} would increase the weight to 2, but since we already
+found a solution with weight equal to 1, this path need not be followed. We go
+up another node and bound on the fact that eliminating {\em position in
+household} would yield the same problem. The final tree may be represented as
+follows:
 \begin{center}
 \begin{picture}(1400,1000)
     \treeframe
     \Troot\El\Tl\Ell\Tll\XTll
     \Elr\Tlr\Elrl\Tlrl
     \Er\Tr\Erl\Trl\Erll\Trll\XTrll
-%    \Elrr\Tlrr\XTlrr
-%    \Err\Trr\XTrr 
-%    \Erlr\Trlr\XTrlr
 \end{picture}$\:$.
 \end{center}
 Here, every evaluated node is colored black, and a node is crossed when a bound
 condition was encountered. The only (minimal) solution created is represented
 by the path substitute {\em marital status} $\rightarrow$ eliminate {\em age}
 $\rightarrow$ substitute {\em position in household}. This corresponds to the
-solution where age has to be altered to fix the record, and indeed changing age
-from {\em under aged} to {\em adult} will make the full record valid. Note that
+solution where {\em age} has to be altered to fix the record, and indeed changing {\em age}
+from {\sf under aged} to {\sf adult} will make the full record valid. Note that
 the branch-and-bound algorithm reduced the number of nodes to be evaluated from
 $15$ to $8$ in this case.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Error localization with {\sf localizeErrors}}
-The function {\sf localizeErrors} applies the branch-and-bound algorithm to
-determine the minimal weight error location for every record in a {\sf
-data.frame}. The columns may be in {\sf character} or {\sf factor} format.  The
-function has an identical interface for numerical data under linear edits and
-categorical  data under categorical edits. It is implemented as an {\sf S3}
-generic function, accepting eiter an {\sf editmatrix} or an {\sf editarray} as
-the first argument and a {\sf data.frame} as the second argument. Funrther
-arguments are a vector of variable weights, a maximum search time (in seconds)
-to spend on a single record, a maximum weight and the maximum number of
-variables which may be changed. The latter two arguments introduce extra bound
-conditions in the branch-and-bound algorithm.
-
-Even when variables are weighted, the solution to the error localization
-problem may not be unique. In those cases {\sf localizeErrors} will draw
-uniformly from the set of lowest-weight solutions. The degeneracy (number of
-equivalent solutions found) is reported in the output.
-
-The result of a call to {\sf localizeErrors} is an object of class {\sf errorLocalization}.
-It contains a boolean matrix with error locations for each record as well as a status 
-report containging degeneracies, solution weights runtimes and wether the maximum runtime
-was exceeded. It also contains a timestamp (in the form of a {\sf Date} object) and the
-name of the user running {\sf R}. Table \ref{tblErrorLocation} gives an overview of
-the slots involved.
+\label{sslocalizeerrors}
+\index{error localization!with {\sf localizeErrors}}
 %
-\input{tex/errorLocation.tex}
-
-In Figure \ref{RlocalizeErrors} an example of the use of {\sf localizeErrors} is
-given. The data model and rules are as in subsection \ref{sBandB}. The records
-are given by
-<<keep.source=false,echo=false>>=
-(dat <- data.frame(
-    maritalStatus=c('married','unmarried','widowed' ), 
-    age = c('under aged','adult','adult' ),
-    positionInHousehold=c('child','other','marriage partner')
-))
-@
-The edits state that under aged cannot be married and that you cannot be a
-marriage partner if you're not married. Clearly, the first and third record
-disobay some rules of these rules while the second record is valid. The first
-record can be repaired by adapting age and the second record can be made
-consistent by changing either {\em positin in household} or {\em marital
-status}. In the latter case, both solutions have equal weight and {\sf
-localizeErrors} has drawn one solution.
-
-
-
-
+%
 \begin{Rcode}
 <<keep.source=true>>=
 E <- editarray(c(
@@ -1180,19 +1206,67 @@ E <- editarray(c(
 set.seed(1)
 localizeErrors(E,dat)
 @
-\caption{Localizing errors in a {\sf data.frame} of records. The data model is as defined in Example \ref{datamodel}.
-The randseed is set before calling {\sf localizeErrors} to make results reproducible. The tird record has degeneracy 2, which means that the chosen solution was
-drawn uniformly from two equivalent solutions with weight 1.}
+\caption{Localizing errors in a {\sf data.frame} of records. The data model is
+as defined in Example \ref{datamodel}.  The randseed is set before calling {\sf
+localizeErrors} to make results reproducible. The third record has degeneracy 2,
+which means that the chosen solution was drawn uniformly from two equivalent
+solutions with weight 1.}
 \label{RlocalizeErrors}
 \end{Rcode}
+The function {\sf localizeErrors} applies the branch-and-bound algorithm to
+determine the minimal weight error location for every record in a {\sf
+data.frame}. The columns may be in {\sf character} or {\sf factor} format.  The
+function has an identical interface for numerical data under linear edits and
+categorical  data under categorical edits. It is implemented as an {\sf S3}
+generic function, accepting eiter an {\sf editmatrix} or an {\sf editarray} as
+the first argument and a {\sf data.frame} as the second argument. Further
+arguments are a vector of variable weights, a maximum search time (in seconds)
+to spend on a single record, a maximum weight and the maximum number of
+variables which may be changed. The latter two arguments introduce extra bound
+conditions in the branch-and-bound algorithm.
 
+Even when variables are weighted, the solution to the error localization
+problem may not be unique. In those cases {\sf localizeErrors} will draw
+uniformly from the set of lowest-weight solutions. The degeneracy (number of
+equivalent solutions found) is reported in the output.
+
+The result of a call to {\sf localizeErrors} is an object of class {\sf errorLocation}.
+It contains a boolean matrix with error locations for each record as well as a status 
+report containing degeneracies, solution weights runtimes and wether the maximum runtime
+was exceeded. It also contains a timestamp (in the form of a {\sf Date} object) and the
+name of the user running {\sf R}. Table \ref{tblErrorLocation} gives an overview of
+the slots involved.
+%
+\input{tex/errorLocation.tex}
+
+In Figure \ref{RlocalizeErrors} an example of the use of {\sf localizeErrors} is
+given. The data model and rules are as in subsection \ref{sBandB}. The records
+are given by
+<<keep.source=false,echo=false>>=
+(dat <- data.frame(
+    maritalStatus=c('married','unmarried','widowed' ), 
+    age = c('under aged','adult','adult' ),
+    positionInHousehold=c('child','other','marriage partner')
+))
+@
+The edits state that under aged cannot be married and that you cannot be a
+marriage partner if you're not married. Clearly, the first and third record
+disobay some rules of these rules while the second record is valid. The first
+record can be repaired by adapting age and the second record can be made
+consistent by changing either {\em position in household} or {\em marital
+status}. In the latter case, both solutions have equal weight and {\sf
+localizeErrors} has drawn one solution.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \subsection{Error localization with {\sf errorLocalizer}}
+\label{sserrorlocalizer}
+\index{error localization!with {\sf errorLocalizer}}
 Just like for linear edits, the function {\sf errorLocalizer} gives more
 control over the error localization process since it allows to set different
-parameters for each record. This can be usefull, for example when 
+parameters for each record. This can be useful, for example when 
 reliability weights are calculated for each record.
 
-The errorLocalizer function is described extensively in \cite{jonge:2011}, so here
+The {\sf errorLocalizer} function is described extensively in \cite{jonge:2011}, so here
 we will discuss the example shown Figure \ref{RcatErrorLocalizer}.
 
 The data model and edits are the same as in Figure \ref{RlocalizeErrors}. The difference
@@ -1222,7 +1296,7 @@ Figure \ref{RlocalizeErrors}.}
 \end{Rcode}
 
 
-
+%\clearpage
 \section{Conclusions}
 This paper descibes the theory and implementation of categorical edit
 manipulation of the {\sf editrules} package. Categorical restrictions may be
@@ -1251,6 +1325,7 @@ Fellegi and Holt.
 \hline
 Symbol          & Explanation and reference\\
 \hline
+$\oplus$        & Direct vector sum.\\
 ${\bf a}$       & An edit, in boolean representation: ${\bf a}=\rho(e)$, Eq.\ \eqref{EqRhoE}.\\
 ${\bf a}_k$     & Boolean representation of one variable in {$\bf a$}. ${\bf a}=\oplus_{k=1}^n{\bf a}_k$.\\
 ${\bf A}$       & Set of edits, in $m\times d$ boolean representation.\\
@@ -1266,22 +1341,21 @@ $i$             & row index in {\bf A} (labeling edits).\\
 $j$             & column index in {\bf A} (labeling categories).\\
 $m$             & Number of edits.\\
 $n$             & Number of variables.\\
-$r$             & Categorical record, in set representation: $r\in D$.\\
 $\res_k$        & Resolution operator Eq.\ \eqref{eqResolutionOperator}.\\
 $\rho$          & Map, sending set representation to boolean representation. \\
-${\bf v}$       & Categorical record, in boolean representation: ${\bf v} = \rho(r)$.\\
+$v$             & Categorical record, in set representation: $v=(v_1,\ldots,v_n)\in D$.\\
+${\bf v}$       & Categorical record, in boolean representation: ${\bf v} = \rho(v)$.\\
 ${\bf v}_k$     & Boolean representation of a single variable ${\bf v}=\oplus_{k=1}^n{\bf v}_k$.\\
 \hline
 \end{tabular}
 \end{table}
 
+\clearpage
+\addcontentsline{toc}{section}{Index}
+\printindex
+
+
+
 \end{document}
 
-
-%The following distributive property also holds
-%\begin{equation}
-%\begin{array}{ll}
-%\textrm{distributivity:}& ({\bf a}\res_i{\bf b})\res_j{\bf c} = ({\bf a}\res_j{\bf c})\res_i({\bf b}\res_j{\bf c}).
-%\end{array}
-%\end{equation}
 
