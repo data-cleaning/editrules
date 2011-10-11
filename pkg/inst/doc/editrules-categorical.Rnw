@@ -3,6 +3,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{array}
+\usepackage[rounded]{syntax}
 \usepackage{color, colortbl}
 \usepackage{tex/smalltree}
 \usepackage{natbib}
@@ -13,6 +14,10 @@
 \usepackage{threeparttable}
 \usepackage{makeidx}
 \makeindex
+
+% shorthand to make '<category>' in syntax diagram
+\newcommand{\syncat}{ $\textrm{\sf '}\langle category\rangle\textrm{\sf '}$ }
+
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
@@ -404,6 +409,44 @@ to define the data model or {\sf if}-statements of the form
 \end{quote}
 to define rules relating variables. The expressions follows standard {\sf R}
 syntax, which should be already familliar to the reader. 
+
+Syntax diagram:
+\begin{syntdiag}
+"\"if("
+\begin{rep}
+    \begin{stack}
+        <variable> == \syncat \\
+        <variable> "\%in\% c("
+        \begin{rep}
+            \syncat\\
+            ","
+        \end{rep}
+        ")"
+    \end{stack}\\
+    \begin{stack}
+        "\&"\\ "\&\&"
+    \end{stack}
+\end{rep}
+")"
+\begin{rep}
+    \begin{stack}
+        <variable> ==  \syncat \\
+        <variable> "\%in\% c("
+        \begin{rep}
+            \syncat\\
+            ","
+        \end{rep}
+        ")"
+    \end{stack}\\
+    \begin{stack}
+        "\&"\\ "\&\&"
+    \end{stack}
+\end{rep}
+"\""
+\end{syntdiag}
+
+
+
 
 Note (see Figure \ref{Reditarray}) that double quotes are used to enclose the
 whole expression, while single quotes are used for category names. Table

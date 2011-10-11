@@ -1,4 +1,8 @@
 version 1.7-0
+- substValue.editarray now works for multiple variables
+- Introduced the special FALSE edit (indicating that the set of valid records is empty)
+- editarray now emits error when the | or || operator is used in conjuncion with an 'if' statement.
+- Solved inconsistent parsing character->editmatrix->character in case a (derived) edit reduces the datamodel
 - Solved bug in blocks (constants were ignored for obects of class editmatrix)
 - Output of errorLocalizer.editarray is now equivalent to errorLocalizer.editmatrix
 - isFeasible tested for objects of class editarray (works)
