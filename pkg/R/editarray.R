@@ -67,7 +67,7 @@ editarray <- function(editrules, sep=":"){
     # edits with NA only extend the data model, is.null detects the always FALSE edit
     v <- v[sapply(v,function(u) is.null(u) || !is.na(u[1]))]
     # replace NULL with NA so the allways FALSE edit is included explicitly
-    v[sapply(v,is.null)] <- NA
+    if ( length(v) > 0 )  v[sapply(v,is.null)] <- NA
         
     # set editarray values
     n <- length(cols)
@@ -117,13 +117,15 @@ editarray <- function(editrules, sep=":"){
 #'
 #' not for export
 #' @keywords internal
-ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd))){
+ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
     v <- names(ivd)
     cats <- lapply(ivd, function(k) paste("'", names(k), "'", sep=""))
     op <- rep("%in%",length(ivd))
     l <- sapply(cats,length)
-    op[l == 1 & !invert] <- "=="
-    op[l == 1 &  invert] <- "!="
+    if (useEqual){
+        op[l == 1 & !invert] <- "=="
+        op[l == 1 &  invert] <- "!="
+    }
     cats[l>1] <- lapply(cats[l>1], function(cc) paste("c(",paste(cc,collapse=", "),")",sep=""))
     u <- paste(v,op,cats)
     u[l>1 &  invert] <- paste("!(",u[l>1 & invert],")")
@@ -159,7 +161,7 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     ind <- getInd(x)
     dm <- c()
     if ( datamodel ){
-        dm <- ind2char(ind)
+        dm <- ind2char(ind,useEqual=FALSE)
         names(dm) <- paste("d",1:length(dm),sep="")
     }
     # edits
