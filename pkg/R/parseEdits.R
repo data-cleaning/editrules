@@ -53,6 +53,8 @@ CATCMP <- c("==", "!=", "%in%")
 #' @keywords internal
 parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
+       # corner case: the always FALSE edit (array must be TRUE at every category)
+       if ( is.na(val) && !x[[1]] ) return(NULL)
        var <- if (useLogical) as.character(x)
               else paste(x,"TRUE",sep=sep)
        edit[var] <- val

@@ -47,8 +47,11 @@ editarray <- function(editrules, sep=":"){
     e <- parseEdits(editrules)
     v <- lapply(e,parseCat,sep=sep)
     
+    # find always FALSE edits:
+    iNull <- sapply(v,is.null)  
+    
     # derive datamodel
-    cols <- sort(unique(do.call(c,lapply(v,names))))
+    cols <- sort(unique(do.call(c,lapply(v[!iNull],names))))
     # get variable names
     vr <- sub(paste(sep,".+","",sep=""),"",cols)
     vars <- unique(vr)
@@ -61,8 +64,10 @@ editarray <- function(editrules, sep=":"){
     ind <- lapply(ind,function(I) {names(I) <- cat[I];I})
     names(ind) <- vars
     
-    # edits with NA only extend the data model.
-    v <- v[!sapply(v,function(u) is.na(u[1]))]
+    # edits with NA only extend the data model, is.null detects the always FALSE edit
+    v <- v[sapply(v,function(u) is.null(u) || !is.na(u[1]))]
+    # replace NULL with NA so the allways FALSE edit is included explicitly
+    v[sapply(v,is.null)] <- NA
         
     # set editarray values
     n <- length(cols)
@@ -163,14 +168,22 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     for ( i in 1:nrow(A) ){
         a <- A[i,]
         involved <- sapply(ind, function(J) sum(a[J]) < length(J))
+        # corner case: every record fails the edit (all categories TRUE).
+        #if (!any(involved)) involved <- !involved
+        
         ivd <- ind[involved]
         ivd <- lapply(ivd, function(J) J[a[J]])
-        if ( length(ivd) == 1 ){
+        if ( length(ivd) == 0 ){
+            edts[i] <- FALSE
+        } else if ( length(ivd) == 1 ){
             edts[i] <- ind2char(ivd, ind)
         } else {
+            
             n <- length(ivd)
             inv <- logical(n)
             inv[n] <- TRUE
+            # corner case: all categories TRUE
+            #if (all(involved) ) inv <- !inv
             ch <- ind2char(ivd, ind, invert=inv)
             if ( useIf ){
                 edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" && "), ")",ch[n])
