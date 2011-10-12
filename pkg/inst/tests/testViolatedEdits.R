@@ -41,6 +41,19 @@ test_that("An empty editmatrix is always valid",{
     )
 })
 
+test_that("violation of inequalities are detected",{
+    expect_true(violatedEdits(editmatrix("x<0"),c(x=1))[1])
+    expect_true(violatedEdits(editmatrix("x<0"),c(x=0))[1])
+    expect_true(violatedEdits(editmatrix("x<0"),c(x=0,tol=1e-8))[1])
+    expect_false(violatedEdits(editmatrix("x<0"),c(x=-1))[1])
+    expect_true(all(
+        violatedEdits(
+        editmatrix("x < y"),
+        data.frame(x=c(1,2),y=c(-1,3))==c(TRUE,FALSE))
+    ))
+})
+
+
 test_that("categorical edit violations are detected",{
     E <-  editarray(c(
         "gender %in% c('male','female')",

@@ -41,39 +41,45 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 
 #' Method for editmatrix
 #'
-#' For rules of the form Ax == b or Ax <= b, |Ax - b| <= tol is returned.
-#' For rules of the form Ax < b, |Ax - b| < tol is returned. The editmatrix is normalized before
-#' checks are performed.
+#' \itemize{
+#' \item{For rules of the form Ax == b  |Ax - b| <= tol is returned.}
+#' \item{For rules of the form Ax < b, Ax - b < tol is returned.}
+#' \item{For rules of the form Ax <= b Ax- b <= tol is returned.}
+#'}
+#' For numerical records, the default tolerance is 0. When working with doubles, 
+#' the square root of machina accuracy is a resonable alternative (\code{sqrt(.Machine\$double.eps)}).
+#' The editmatrix is \cite{\link[=normalize]{normalized}} before checks are performed.
 #'
 #' @rdname violatedEdits
 #' @method violatedEdits editmatrix
 #' @param tol tolerance to check rules against.
 #' @export
-violatedEdits.editmatrix <- function(E, dat, tol=sqrt(.Machine$double.eps), ...){
-     if (tol < 0 ) stop("Argument tol must be nonnegative")
-     if ( !isNormalized(E) ) E <- normalize(E)
-     
-     if ( is.vector(dat) ){ 
-         I <- match(getVars(E),names(dat),nomatch=0)
-         X <- t(dat[I]) 
-     } else { 
-         I <- match(getVars(E),colnames(dat),nomatch=0)
-         X <- as.matrix(dat[,I,drop=FALSE]) 
-     }
+violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
+    if (tol < 0 ) stop("Argument tol must be nonnegative")
+    if ( !isNormalized(E) ) E <- normalize(E)
+ 
+    if ( is.vector(dat) ) dat <- t(dat)    
+    I <- match(getVars(E),colnames(dat),nomatch=0)
+    X <- as.matrix(dat[,I,drop=FALSE]) 
 
-     if (nrow(E) == 0){
-       return(matrix(logical(), nrow=NROW(dat)))
-     }
+    if (nrow(E) == 0){
+        return(matrix(logical(), nrow=NROW(dat)))
+    }
      
-     ops <- getOps(E)
-     v <- abs(getA(E) %*% t(X) - getb(E))
-     val <- matrix(logical(length(v)),nrow=nrow(v))
-     I <- ops %in% c("==","<=")
-     val[I,] <- v[I,,drop=FALSE] <= tol
-     val[!I] <- v[!I,,drop=FALSE] < tol
-
-     dimnames(val) <- list(edit=rownames(E),record=rownames(dat))
-     !t(val)
+    ops <- getOps(E)
+    A <- getA(E)
+    b <- getb(E)
+    eq <- ops == "=="
+    leq <- ops == "<="
+    lt <- !(eq | leq)
+    
+    v <- matrix(FALSE,nrow=nrow(E),ncol=nrow(dat))
+    v[eq,] <- abs( A[eq,,drop=FALSE]%*%t(X) - b[eq] ) <= tol
+    v[leq,] <- A[leq,,drop=FALSE]%*%t(X) - b[leq] <= tol
+    v[lt,] <- A[lt,,drop=FALSE]%*%t(X) - v[lt] < tol
+    dimnames(v) <- list(edit=rownames(E),record=rownames(dat))
+ 
+    !t(v)
 }
 
 #' @rdname violatedEdits
@@ -87,7 +93,6 @@ violatedEdits.data.frame <- function(E, dat, ...){
 }
 
 #'
-#' If \code{datamodel=TRUE} the first n edits (n being the number of variables) represent the datamodel.
 #'
 #' @method violatedEdits editarray
 #' @param datamodel Also check against datamodel?
