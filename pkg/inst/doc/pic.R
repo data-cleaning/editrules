@@ -145,13 +145,3 @@ pdf(twodiamondFile)
     text(0.0,2.2,"(0,5/2)", cex=textcex)
     text(1.4,0.0,"(2,0)", cex=textcex)
 dev.off()
-
-
-
-
-
-
-
-
-
-

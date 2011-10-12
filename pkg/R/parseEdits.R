@@ -53,6 +53,8 @@ CATCMP <- c("==", "!=", "%in%")
 #' @keywords internal
 parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
+       # corner case: the always FALSE edit (array must be TRUE at every category)
+       if ( is.na(val) && !x[[1]] ) return(NULL)
        var <- if (useLogical) as.character(x)
               else paste(x,"TRUE",sep=sep)
        edit[var] <- val
@@ -66,11 +68,12 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         edit <- parseCat(x[[2]], val,  edit, sep, useLogical)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]])
+        if ( is.na(val) && op == "==" ) val <- TRUE
         if (is.logical(cat) && useLogical){
-          var <- as.character(x[[2]])
-          if (!cat) val <- !val
-        } else{
-          var <- paste(x[[2]],cat,sep=sep)
+            var <- as.character(x[[2]])
+            if (!cat) val <- !val
+        } else {
+            var <- paste(x[[2]],cat,sep=sep)
         }
         edit[var] <- val
     } else if (op == "!=") {
@@ -88,7 +91,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         if (is.na(val))
            val <- TRUE
         if (val == FALSE){
-            stop("Operator '&&' not allowed in 'if' clause")
+            stop("Operator '&&' not allowed in 'then' clause")
         }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)
@@ -96,7 +99,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         if (is.na(val))
            val <- FALSE
         if (val == TRUE){
-            stop("Operator '||' not allowed in 'then' clause")
+             stop("Operator '||' not allowed in 'if' clause")
         }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)

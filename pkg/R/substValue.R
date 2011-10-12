@@ -56,22 +56,25 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, ...){
 #' @rdname substValue
 #' @export
 substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
-# TODO: make this work for multiple variables and values.
-    ind <- getInd(E)
-    J <- ind[[var]]
-    sep=getSep(E)
-    i <- J[value]
-    if ( is.na(i) ) 
-        stop(paste("Variable ", var,"not present in editarray or cannot take value",value))
 
+    ind <- getInd(E)
+    sep=getSep(E)
     A <- getArr(E)
-    I <- A[,i]
-    if ( reduce ){
-        v <- 
-        A <- A[ ,-setdiff(J,i) ,drop=FALSE]
-        ind <- indFromArray(A, sep)
-    } else {
-        A[,J] <- TRUE
+    for ( i in 1:length(var) ){
+        vr <- var[i]
+        vl <- value[i]
+        J <- ind[[vr]]
+        i <- J[vl]
+        if ( is.na(i) ) 
+            stop(paste("Variable ", vr,"not present in editarray or cannot take value",vl))
+
+        I <- A[,i]
+        if ( reduce ){
+            A <- A[ ,-setdiff(J,i) ,drop=FALSE]
+            ind <- indFromArray(A, sep)
+        } else {
+            A[,J] <- TRUE
+        }
     }
     neweditarray(
         E = A[I,,drop=FALSE], 
