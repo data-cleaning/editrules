@@ -394,8 +394,8 @@ been overloaded to derive a {\sf character} representation from a boolean
 representation. When printed to the screen, both the boolean and textual
 representation are shown.
 
-Univariate edits define a data model. They can be defined with common {\sf R}
-syntax using the ${\sf \%in\%}$ operator. If the data model is defined explicitly,
+Univariate edits define the domain of a variable. The domains form together a data model. A domain can be defined with common {\sf R}
+syntax using the ${\sf \%in\%}$ operator. If a domain is defined explicitly,
 it must follow the following syntax diagram.
 \begin{syntdiag}
     "\""
@@ -413,22 +413,31 @@ enclosed by single quotes while the entire statement is between double quotes.
 That is, the entire statement has to be offered in string format to {\sf
 editarray}. The $\langle identifier\rangle$ is the name of a predefined {\sf
 character} variable storing the unique categories for a variable. In principle,
-$\langle identifier\rangle$ may be replaced by any valid {\sf R} expression
-evaluating to a {\sf character} vector. However, such constructions are not
+$\langle identifier\rangle$ may be replaced by any valid {\sf R} symbol
+evaluating to a {\sf character} or {\sf factor} vector. However, such constructions are not
 recommended, since multivariate edit rules depend on a fixed datamodel.
 
 The multivariate rules can be defined in three ways. The most useful and common
 way to define edits follows the following syntax diagram.
+
 \begin{syntdiag}
-    "\" if("<expression>")"<expression>"\""
+    "\"if ("\begin{rep}
+          <set expression>\\
+          \begin{stack}"\&\&"\\ "\&"\end{stack}
+       \end{rep}
+        ")"
+        \begin{rep}
+          <set expression>\\
+          \begin{stack}"||"\\ "|"\end{stack}
+        \end{rep} "\""
 \end{syntdiag}
-Here, each $\langle expression\rangle$ is a logical statement, following
+
+Where each $\langle$ \textit{set expression}  $\rangle$ is a logical statement, following
+
 \begin{syntdiag}
-\begin{rep}
     \begin{stack}
         \\"!"
     \end{stack}
-
         <name>
         \begin{stack}
             \\
@@ -440,10 +449,9 @@ Here, each $\langle expression\rangle$ is a logical statement, following
                         <identifier>\\
                         \begin{stack} \true\\ \false\end{stack}
                     \end{stack}
-        \end{stack}\\
-        \begin{stack}"\&"\\ "\&\&"\end{stack}
-\end{rep}
+        \end{stack}
 \end{syntdiag}
+
 The reader can check that the examples given in Figure \ref{Reditarray} follow this syntax.
 The example below illustrates the use of separately defined data models and boolean
 categories.
@@ -460,9 +468,13 @@ yval <- c(TRUE,FALSE)
 The second way to define multivariate edits is based on rewriting on the basic classical
 logic law $P\Rightarrow Q = \lnot P\lor Q$. It involves the following syntax diagram.
 \begin{syntdiag}
-"\""   "!"<expression> \begin{stack}"|"\\"||"\end{stack} <expression>"\""
+        "\""
+        \begin{rep}
+          <set expression>\\
+          \begin{stack}"||"\\ "|"\end{stack}
+        \end{rep} "\""
 \end{syntdiag}
-Where each $\langle expression\rangle$ is as in the syntax diagram above.  In
+Where each $\langle setexpression\rangle$ is as in the syntax diagram above.  In
 practice, a user will commonly not use this form since it is less readable.
 However, the {\sf as.character} method for {\sf editarray} can generate such
 statements by passing the argument {\sf useIf=FALSE}, as shown below.
@@ -472,15 +484,6 @@ as.character(M,useIf=FALSE)
 The main advantage of this form is that
 contrary to the  {\sf if()} form, it allows for vectorized checking of edits,
 which is why it is used internally.
-
-The third and final way to define multivariate edits is simply the shortcut for defining
-the null-edit. It follows following syntax diagram:
-\begin{syntdiag}
-"FALSE"
-\end{syntdiag}
-This will not commonly be defined by users, but it may turn up when edit sets
-are manipulated.
-
 %
 
 
@@ -558,7 +561,6 @@ Function        & description \\
 \end{tabular}
 \end{threeparttable}
 \end{table}
-
 
 When manipulating edit sets, redundant edits of the form of Eq.\
 \eqref{eqRedundancy1} may arise. Such redundancies can be detected in the
@@ -640,7 +642,7 @@ be new to the field of data editing.  In subsection \ref{ssequivalence} it is
 shown that the method yields results equivalent to Fellegi and Holt's
 elimination method.  Finally, in subsection \ref{sseliminateexample} we give
 an example of eliminating variables with the {\sf editrules} package. 
-The technical background described in Subsections \ref{sscategoryresolotion}
+The technical background described in Subsections \ref{sscategoryresolution}
 and \ref{ssequivalence} may be skipped on first reading.
 
 
