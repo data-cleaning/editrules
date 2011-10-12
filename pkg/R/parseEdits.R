@@ -91,16 +91,16 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         if (is.na(val))
            val <- TRUE
         if (val == FALSE){
-            stop("Operator '&&' not allowed in 'if' clause")
+            stop("Operator '&&' not allowed in 'then' clause")
         }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)
     } else if (op %in% c("||","|")){
-        if (!is.na(val))stop("Operators || and | are not allowed in 'if' clause.")
-        val <- FALSE
-#        if (val == TRUE){
-#            stop("Operator '||' not allowed in 'then' clause")
-#        }
+        if (is.na(val))
+           val <- FALSE
+        if (val == TRUE){
+             stop("Operator '||' not allowed in 'if' clause")
+        }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)
     } else {

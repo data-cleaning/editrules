@@ -386,7 +386,7 @@ where both variable names and categories are abbreviated for readability, and
 the standard separator is a colon ({\sf :}). The separator may not occur as a
 symbol in either variable or category name, and its value can be determined by
 passing a custom {\sf sep} argument to {\sf editarray}.
-For convinience, the function {\sf datamodel} accepts an {\sf editarray} as
+For convenience, the function {\sf datamodel} accepts an {\sf editarray} as
 input and returns an overview of variables and their categories for easy
 inspection in the form of a {\sf data.frame}.
 
@@ -398,95 +398,117 @@ been overloaded to derive a {\sf character} representation from a boolean
 representation. When printed to the screen, both the boolean and textual
 representation are shown.
 
-The character expressions that can be read by {\sf editarray}, are either ${\sf \%in\%}$ statements
-of the form 
-\begin{quote}
-\verb+<variable> %in% <expression>+
-\end{quote}
-to define the data model or {\sf if}-statements of the form
-\begin{quote}
-\verb+"if ( <condition> ) <expression>"+ 
-\end{quote}
-to define rules relating variables. The expressions follows standard {\sf R}
-syntax, which should be already familliar to the reader. 
-
-Syntax diagram:
+Univariate edits define a data model. They can be defined with common {\sf R}
+syntax using the ${\sf \%in\%}$ operator. If the data model is defined explicitly,
+it must follow the following syntax diagram.
 \begin{syntdiag}
-"\"if("
-\begin{rep}
+    "\""
+    <name> "\%in\%"
     \begin{stack}
-        <variable> == \syncat \\
-        <variable> "\%in\% c("
-        \begin{rep}
-            \syncat\\
-            ","
-        \end{rep}
-        ")"
-    \end{stack}\\
-    \begin{stack}
-        "\&"\\ "\&\&"
+        "c("\begin{rep}\syncat\\","\end{rep}")"\\
+        <identifier>\\
+        "c(TRUE, FALSE)"
     \end{stack}
-\end{rep}
-")"
-\begin{rep}
-    \begin{stack}
-        <variable> ==  \syncat \\
-        <variable> "\%in\% c("
-        \begin{rep}
-            \syncat\\
-            ","
-        \end{rep}
-        ")"
-    \end{stack}\\
-    \begin{stack}
-        "\&"\\ "\&\&"
-    \end{stack}
-\end{rep}
-"\""
+    "\""
 \end{syntdiag}
+Here, $\langle name\rangle$ is the name of a categorical variable, and $\langle
+category\rangle$ is a literal category name. Note that the category name is
+enclosed by single quotes while the entire statement is between double quotes.
+That is, the entire statement has to be offered in string format to {\sf
+editarray}. The $\langle identifier\rangle$ is the name of a predifined {\sf
+character} variable storing the unique categories for a variable. In principle,
+$\langle identifier\rangle$ may be replaced by any valid {\sf R} expression
+evaluating to a {\sf character} vector. However, such constructions are not
+recommended, since multivariate edit rules depend on a fixed datamodel.
 
+The multivariate rules can be defined in three ways. The most useful and common
+way to define edits follows the following syntax diagram.
+\begin{syntdiag}
+    "\" if("<expression>")"<expression>"\""
+\end{syntdiag}
+Here, each $\langle expression\rangle$ is a logical statement, following
+\begin{syntdiag}
+\begin{rep}
+    \begin{stack}
+        \\"!"
+    \end{stack}
 
-
-
-Note (see Figure \ref{Reditarray}) that double quotes are used to enclose the
-whole expression, while single quotes are used for category names. Table
-\ref{tabOperators} shows which operators and functions can be used to specify
-categorical edit rules.
-
-Categories may be {\sf character} or {\sf logical} literals.  It is worth
-noting that expressions on the right hand side of the {\sf \%in\%}  and {\sf
-==} operators are evaluated. One useful application of this is that the
-categories, or data model can be defined seperately from the edits:
-%
+        <name>
+        \begin{stack}
+            \\
+            \begin{stack} "=="\\ "!="\end{stack} 
+                \begin{stack} \syncat \\ \begin{stack}\true\\ \false\end{stack}\end{stack}\\
+                    "\%in\%"
+                    \begin{stack} 
+                        "c(" \begin{rep}\syncat\\ "," \end{rep} ")"\\
+                        <identifier>\\
+                        \begin{stack} \true\\ \false\end{stack}
+                    \end{stack}
+        \end{stack}\\
+        \begin{stack}"\&"\\ "\&\&"\end{stack}
+\end{rep}
+\end{syntdiag}
+The reader can check that the examples given in Figure \ref{Reditarray} follow this syntax.
+The example below illustrates the use of seperately defined data models and boolean
+categories.
 <<keep.source=true>>=
 xval <- letters[1:4]
 yval <- c(TRUE,FALSE)
-editarray(c( "x %in% xval","y %in% yval","if ( x %in% c('a','b') ) !y "))
+( M <- editarray(c( 
+    "x %in% xval",
+    "y %in% yval",
+    "if ( x %in% c('a','b') ) !y "
+    )) )
 @
 %
-The above example also illustrates the use of boolean categories.
+The second way to define multivariate edits is based on rewriting on the basic classical
+logic law $P\Rightarrow Q = \lnot P\lor Q$. It involves the following syntax diagram.
+\begin{syntdiag}
+"\""   "!"<expression> \begin{stack}"|"\\"||"\end{stack} <expression>"\""
+\end{syntdiag}
+Where each $\langle expression\rangle$ is as in the syntax diagram above.  In
+practice, a user will commonly not use this form since it is less readable.
+However, the {\sf as.character} method for {\sf editarray} can generate such
+statements by passing the argument {\sf useIf=FALSE}, as shown below.
+<<>>=
+as.character(M,useIf=FALSE)
+@
+The main advantage of this form is that
+contrary to the  {\sf if()} form, it allows for vecorized checking of edits,
+wich is why it is used internally.
+
+The third and final way to define multivariate edits is simply the shortcut for defining
+the null-edit. It follows following syntax diagram:
+\begin{syntdiag}
+"FALSE"
+\end{syntdiag}
+This will not commonly be defined by users, but it may turn up when edit sets
+are manipulated.
+
+%
 
 
-\begin{table}
-\begin{threeparttable}
-\caption{Functions and operators that may be used to define edits with {\sf editarray} }
-\label{tabOperators}
-\begin{tabular}{ll}
-\hline
-Operator & Description\\
-\hline
-{\sf \%in\%} & Set membership$^*$  \\
-{\sf ==}     & Equality$^*$ \\
-{\sf if( <condition> ) <expression> } & conditional statement\\
-{\sf c(\verb"'"<cat1>\verb"'",\verb"'"<cat2>\verb"'",...)} & categories, {\sf character} or {\sf logical}\\
-{\sf \&\&}, {\sf \&}    & logical {\sc and}\\
-{\sf ||}, {\sf |}      & logical {\sc or}\\
-{\sf !}       & logical {\sc not}\\
-\hline
-\end{tabular}
-$^*${\small Right-hand side is evaluated.}
-\end{threeparttable}
-\end{table}
+%\begin{table}
+%\begin{threeparttable}
+%\caption{Functions and operators that may be used to define edits with {\sf editarray} }
+%\label{tabOperators}
+%\begin{tabular}{ll}
+%\hline
+%Operator & Description\\
+%\hline
+%{\sf \%in\%} & Set membership$^*$  \\
+%{\sf ==}     & Equality$^*$ \\
+%{\sf if( <expression> ) <expression> } & conditional statement\\
+%{\sf c(\verb"'"<cat1>\verb"'",\verb"'"<cat2>\verb"'",...)} & categories, {\sf character} or {\sf logical}\\
+%{\sf \&\&}, {\sf \&}    & logical {\sc and}\\
+%{\sf ||}, {\sf |}      & logical {\sc or}\\
+%{\sf !}       & logical {\sc not}\\
+%{\sf ()}      & brackets\\
+%\hline
+%\end{tabular}
+%$^*${\small Right-hand side is evaluated.}
+%\end{threeparttable}
+%\end{table}
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
