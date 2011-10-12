@@ -125,10 +125,10 @@ element of the Cartesian product space $D$ (for domain):\index{record!value doma
 D = D_1\times D_2\times\cdots\times D_n,
 \label{eqDomain}
 \end{equation}
-where each $D_k$ is a finite set of $d_k$ possible categories for variable $v_k$.
+where each $D_k$ is a finite set of $d_k$ possible categories for variable $k$.
 We label the categories as follows:
 \begin{equation}
-D_k = \{c_k\in D_k\,|\,c_k=1,2,\ldots,d_k\}.
+D_k = \{v_k\in D_k\,|\,v_k=1,2,\ldots,d_k\}.
 \label{eqVariableDomain}
 \end{equation}
 %
@@ -188,7 +188,7 @@ subtraction on boolean vectors (this is also consistent with the way {\sf R}
 handles vectors of class {\sf logical}). 
 
 To represent a record $v=(v_1,v_2,\ldots,v_n)$, we assign to every category
-$c_k$ in $D_k$ a unique standard basis vector $\vec{\delta}_k(c_k)$ of
+$v_k$ in $D_k$ a unique standard basis vector $\vec{\delta}_k(v_k)$ of
 $\mathbb{B}^{d_k}$.  The boolean representation $\rho(v)$ of the full
 record is the direct sum
 %
@@ -211,11 +211,11 @@ called the complete disjunctive table.
 
 \begin{example}
 \label{datamodel}
-Consider the variables {\em marital status}, {\em age}, and {\em position in household} from
+Consider the variables {marital status}, {age}, and {position in household} from
 the domain $D=D_1\times D_2\times D_3$. We define
 \begin{eqnarray}
 D_1 &=& \{{\sf married},{\sf unmarried},{\sf widowed},{\sf divorced}\}\\
-D_2 &=& \{{\sf under-aged},{\sf adult}\}\\
+D_2 &=& \{\textrm{\sf under-aged},{\sf adult}\}\\
 D_3 &=& \{{\sf partner},{\sf child},{\sf other}\}.
 \end{eqnarray}
 The record $r=({\sf married},{\sf adult},{\sf partner})$ has boolean representation
@@ -239,16 +239,16 @@ are also edits. \theend
 \label{editremark}
 \end{remark}
 An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm normal
-form}.  A variable $v_k$ is {\em involved} in an edit if $A_k\subset D_k$.
-Conversely, we say that $e$ {\em involves} $v_k$ if $v_k$ is involved in $e$. A
-variable $v_k$ for which $A_k=D_k$ is not involved in $e$.  Since every
-category $c_k$ is mapped to a unique basis vector $\vec{\delta}_k(c_k)$,
+form}.  A variable $k$ is {\em involved} in an edit if $A_k\subset D_k$.
+Conversely, we say that $e$ {\em involves} $k$ if $k$ is involved in $e$. A
+variable $k$ for which $A_k=D_k$ is not involved in $e$.  Since every
+category $v_k$ is mapped to a unique basis vector $\vec{\delta}_k(v_k)$,
 edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
     e &\xrightarrow{\rho}&
-    \Lor_{c_1\in A_1}\vec{\delta}_1(c_1)\oplus
-    \Lor_{c_2\in A_2}\vec{\delta}_2(c_2)\oplus\ldots
-    \oplus\Lor_{c_n\in A_n}\vec{\delta}_n(c_n),
+    \Lor_{v_1\in A_1}\vec{\delta}_1(v_1)\oplus
+    \Lor_{v_2\in A_2}\vec{\delta}_2(v_2)\oplus\cdots
+    \oplus\Lor_{v_n\in A_n}\vec{\delta}_n(v_n),
 \end{eqnarray}
 which may simply be written as\index{edit!boolean representation}
 \begin{equation}
@@ -272,7 +272,7 @@ calculations. For example, an edit involves variable $k$  if and only if the
 inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a
 $d_k$ vector of ones.
 
-A record ${\bf v}$ violates an edit if all $v_k\in A_k$, $k=1,2,\ldots n$.  In the
+A record ${v}$ violates an edit if every $v_k\in A_k$.  In the
 boolean representation this can be written as a condition on the standard inner
 product between the boolean representation of a record and an edit:
 \begin{equation}
@@ -325,14 +325,14 @@ Each row ${\bf a}$ of ${\bf A}$ contains the boolean representation of one edit,
 $d_k$ denote the number of categories of each variable.  The object {\bf ind}
 is a nested {\sf list} which relates columns of {\bf A} to variable names and
 categories.  Labeling variables with $k\in1,2,\ldots,n$ and category values
-with $c_k\in 1,2,\ldots,d_k$, we use the following notations:
+with $v_k\in 1,2,\ldots,d_k$, we use the following notations:
 \begin{eqnarray}
 \label{eqInd1}
-    {\bf ind}(k,c_k) &=& \sum_{l< k }d_l + c_k\\
-    {\bf ind}(k)   &=& \{{\bf ind}(k,c_k)\,|\, c_k\in D_k\}.
+    {\bf ind}(k,v_k) &=& \sum_{l< k }d_l + v_k\\
+    {\bf ind}(k)   &=& \{{\bf ind}(k,v_k)\,|\, v_k\in D_k\}.
 \label{eqInd2}
 \end{eqnarray}
-So $\ind(k,c_k)$ is the column index in {\bf A} for variable $k$ and category $c_k$
+So $\ind(k,v_k)$ is the column index in {\bf A} for variable $k$ and category $v_k$
 and $\ind(k)$ is the set of column indices corresponding to all categories of
 variable $k$.  The {\sf editarray} is the central object for computing with
 categorical edits, just like the {\sf editmatrix} is the central object for
@@ -1026,7 +1026,7 @@ $e^{(2)}$ & A (marriage) partner has to be married\\
 As an example we treat the following record with the branch-and-bound algorithm to 
 localize the errors:
 \begin{equation}
-v = ({\rm married},{\rm under\:aged},{\rm partner }).
+v = ({\sf married},\textrm{\sf under-aged},{\sf partner }).
 \end{equation}
 At the beginning of the algorithm, only the root node is filled. The situation may be 
 represented as follows:\\
@@ -1051,15 +1051,14 @@ $
 \end{center}
 %
 where ${\bf v}=\rho(v)$, and ${\bf a}_1$ and ${\bf a}_2$ are the boolean
-representations of $e_1$ and $e_2$ respectively. The record and edits are denoted in boolean
-representation as shown in Example \ref{datamodel}. 
-The weight $w$ counts the
-number of variables that are assumed to be incorrect, which at the root node is
-zero. 
+representations of $e_1$ and $e_2$ respectively. The record and edits are
+denoted in boolean representation as shown in Example \ref{datamodel}.  The
+weight $w$ counts the number of variables that are assumed to be incorrect,
+which at the root node is zero. 
 
 
 The tree is traversed in depth-first fashion. In the first step, we substitute
-$v_1$, yielding
+{\sf married} in {\em marital status}, yielding
 %%%%%%%%%%%
 % T0L
 %%%%%%%%%%
@@ -1076,7 +1075,7 @@ $v_1$, yielding
        {\bf a}^{(1)}&1 & & & &1&0&1&1&1\\
     \end{array}
 $
-\end{tabular}\hfill Substitute $v_1$, $w=0$.
+\end{tabular}\hfill Subst. mar. stat., $w=0$.
 \end{center}
 Here, ${\bf a}^{(2)}$ is removed, since it has no meaning for {\bf v} anymore. The
 positions for the categories unmarried, widowed and divorced are left empty
@@ -1100,7 +1099,7 @@ we find
         {\bf a}^{(1)}&1 & & & &1 & &1&1&1\\
     \end{array}
 $
-\end{tabular}\hfill Substitute $v_2$, $w=0$.
+\end{tabular}\hfill Subst. age., $w=0$.
 \end{center}
 At this point we have fixed the value for {\em marital status} and {\em age}.
 It can be seen from the value of ${\bf a}^{(1)}$ for {\em position in
@@ -1119,15 +1118,15 @@ solution.  We therefore prune the tree here, go up one node and turn right.
 \end{picture}
 &$
     \begin{array}{l|cccc|cc|ccc}
-        v &1& & & &\phantom{1}&\phantom{0}&1&0&0\\
+        {\bf v} &1& & & &\phantom{1}&\phantom{0}&1&0&0\\
 \hline
 \phantom{e_1}&&&&&&&&
     \end{array}
 $
-\end{tabular}\hfill Eliminate $v_2$, $w=1$.
+\end{tabular}\hfill Elim. age, $w=1$.
 \end{center}
-Eliminating the {\em age} variables yields an empty edit set. We may continue down
-and substitute the value for {\em position in household}.
+Eliminating the {\em age} variable yields an empty edit set. We may continue down
+and substitute the value {\sf partner} for {\em position in household}.
 \begin{center}
 %%%%%%%%%%%
 % T0LRL
@@ -1145,9 +1144,9 @@ and substitute the value for {\em position in household}.
 \phantom{e_1}&&&&&&&&
     \end{array}
 $
-\end{tabular}\hfill Substitute $v_3$, $w=1$.
+\end{tabular}\hfill Subst. hh. pos., $w=1$.
 \end{center}
-Which yields the first solution: only the {\rm age} variable needs to be
+This yields the first solution: only the {\rm age} variable needs to be
 changed.  In search for more solutions, we move up the tree and try to eliminate
 {\em age}. However, since eliminating age would increase the weight to 2 we will prune
 the tree at this point. Moving up to the root node and eliminating {\em marital status}
@@ -1170,7 +1169,7 @@ gives
         {\bf a}^{(3)} &1&1&1&1&1&0&1&0&0\\
     \end{array}
 $
-\end{tabular}\hfill Eliminate $v_1$, $w=1$.
+\end{tabular}\hfill Elim. mar. stat., $w=1$.
 \end{center}
 Here ${\bf a}^{(3)}={\bf a}^{(1)}\res_1{\bf a}^{(2)}$. It is interpreted as the
 rule that under-aged people cannot be a partner in the household (no matter
@@ -1194,7 +1193,7 @@ substituting {\em age}, we get
         {\bf a}^{(3)} &1&1&1&1& 1 &\phantom{0}&1&0&0\\
     \end{array}
 $
-\end{tabular}\hfill Substitute $v_2$, $w=1$.
+\end{tabular}\hfill Subst. age, $w=1$.
 \end{center}
 Going down the tree and substituting {\em position in household} yields
 \begin{center}
@@ -1216,7 +1215,7 @@ Going down the tree and substituting {\em position in household} yields
         {\bf a}^{(3)} &1&1&1&1&1&\phantom{0}&1&\phantom{0}&\phantom{0}\\
     \end{array}
 $ 
-\end{tabular}\hfill Substitute $v_3$, $w=1$.
+\end{tabular}\hfill Subst. hh. pos., $w=1$.
 \end{center}
 However, whatever value we would choose for {\em marital status}, it would
 always result in an erroneous record since ${\bf a}^{(3)}$ has \true on all
@@ -1392,7 +1391,6 @@ $\oplus$        & Direct vector sum.\\
 ${\bf a}$       & An edit, in boolean representation: ${\bf a}=\rho(e)$, Eq.\ \eqref{EqRhoE}.\\
 ${\bf a}_k$     & Boolean representation of one variable in {$\bf a$}. ${\bf a}=\oplus_{k=1}^n{\bf a}_k$.\\
 ${\bf A}$       & Set of edits, in $m\times d$ boolean representation.\\
-$c_k$             & Label for a single category of $D_k$. \\
 $D$             & Set (domain) of all possible categorical records, Eq.\ \eqref{eqDomain}.\\
 $D_k$           & Set of possible categories for variable $k$. Eq.\ \eqref{eqVariableDomain}.\\
 $d$             & Number of categories (in total), Eq.\ \eqref{eqSumdk}.\\
@@ -1402,11 +1400,13 @@ $E$             & An editarray, Eq.\ \eqref{eqEditarray}, or a set of edits in s
 $\ind$          & Function relating categories $c$ of variable $k$ to columns in {\bf A}, Eqs.\eqref{eqInd1} and \eqref{eqInd2}.\\
 $i$             & row index in {\bf A} (labeling edits).\\
 $j$             & column index in {\bf A} (labeling categories).\\
+$k$             & Labels a categorical variable.\\
 $m$             & Number of edits.\\
 $n$             & Number of variables.\\
 $\res_k$        & Resolution operator Eq.\ \eqref{eqResolutionOperator}.\\
 $\rho$          & Map, sending set representation to boolean representation. \\
 $v$             & Categorical record, in set representation: $v=(v_1,\ldots,v_n)\in D$.\\
+$v_k$           & Label for a single category of $D_k$. \\
 ${\bf v}$       & Categorical record, in boolean representation: ${\bf v} = \rho(v)$.\\
 ${\bf v}_k$     & Boolean representation of a single variable ${\bf v}=\oplus_{k=1}^n{\bf v}_k$.\\
 \hline
