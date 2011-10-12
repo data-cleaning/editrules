@@ -1,4 +1,5 @@
 version 1.7-0
+- several improvements in parsing categorical edit rules in the presence of & and | operators.
 - solved a bug in violatedEdits causing inequality violations to go unnoticed (since version 1.5.0, thanks to Elmar Wein)
 - substValue.editarray now works for multiple variables
 - Introduced the special FALSE edit (indicating that the set of valid records is empty)
