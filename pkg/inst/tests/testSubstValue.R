@@ -1,0 +1,56 @@
+
+context("Value substitution")
+
+test_that("value substitution for numerical data",{
+    E <- editmatrix(c("x+y==z","x-u==1"))
+    expect_true(
+        sum(abs(
+            getAb(substValue(E,c('x','y'),c(1,2)))-
+            matrix(c(
+                0, 0,-1, 0,-3,
+                0, 0, 0,-1, 0),nrow=2,byrow=TRUE)
+        )) == 0
+    )
+    expect_true(
+        sum(abs(
+            getAb(substValue(E,c('x','y'),c(1,2),reduce=TRUE))-
+            matrix(c(
+                -1, 0,-3,
+                 0,-1, 0),nrow=2,byrow=TRUE)
+        )) == 0
+    )
+})
+
+
+test_that("value substitution for categorical data",{
+
+    E <- editarray(c(
+        "v %in% letters[1:3]",
+        "w %in% letters[4:6]",
+        "x %in% letters[7:9]",
+        "if ( v=='a' ) w !='d'",
+        "if ( w %in% c('d','e')) x != 'g'"
+    ))
+    expect_true(
+        all(
+            getArr(substValue(E,c('v','w'),c('a','d')))
+            ==
+            matrix(c(
+                TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE,  TRUE,  TRUE,
+                TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE
+            ),nrow=c(2),byrow=TRUE)
+        )
+    )
+    expect_true(
+        all(
+            getArr(substValue(E,c('v','w'),c('a','d'),reduce=TRUE))
+            ==
+            matrix(c(
+                TRUE, TRUE, TRUE,  TRUE,  TRUE,
+                TRUE, TRUE, TRUE, FALSE, FALSE
+            ),nrow=c(2),byrow=TRUE)
+        )
+    )
+    
+
+})
