@@ -74,14 +74,14 @@ has  beta status} so bugs are likely.
 
 This paper is the second paper describing functionalities of the {\sf R} {\sf
 editrules} package.  The first paper \citep{jonge:2011} describes methods and
-implementation for handeling numerical data while this paper is concerned with
+implementation for handeling numerical data while this paper is concerned with handling
 purely categorical data. The {\sf editrules} package is designed to offer a
 user-friendly interface for edit definition, manipulation, and error
 localization based on the generalized paradigm of Fellegi and Holt for users of
 the {\sf R} language.  By providing  basic manipulations, such as are error
 checking, feasibility tests, variable elimination, value substitution, and
 redundancy checks, this package offers a toolset which may be used to
-invesitgate and maintain large sets of categorical or numerical edit sets.
+investigate and maintain large sets of categorical or numerical edit sets.
 Finally, we note that the variable elimination method described in this paper
 appears to be new in the field of data editing.
 \end{abstract}
@@ -120,10 +120,10 @@ element of the cartesian product space $D$ (for domain):\index{record!value doma
 D = D_1\times D_2\times\ldots\times D_n,
 \label{eqDomain}
 \end{equation}
-where each $D_k$ is a finite set of $d_k$ possible categories for variable $k$ 
+where each $D_k$ is a finite set of $d_k$ possible categories for variable $k$.
 We label the categories as follows:
 \begin{equation}
-D_k = \{c\in D_k\,|\,c=1,2,\ldots,d_k\}.
+D_k = \{c_k\in D_k\,|\,c_k=1,2,\ldots,d_k\}.
 \label{eqVariableDomain}
 \end{equation}
 %
@@ -141,7 +141,6 @@ Large, complex surveys may consist of hundreds of interrelated rules and
 variables, which impedes resolution of edit violations and renders manual
 manipulation infeasible. \citet{winkler:1999} mentions practical cases where
 statistical offices handle 250, 300 or 750 categorical edit rules for surveys.
-
 
 The {\sf R} package {\sf editrules}  offers functionality to define, manipulate
 and maintain sets of edit rules with relative ease. It also implements error
@@ -185,8 +184,8 @@ discussion we will also allow the standard arithmetic operations addition and
 subtraction on boolean vectors (this is also consistent with the way {\sf R}
 handles vectors of class {\sf logical}). 
 
-To represent a record $v=(v_1,v_2,\ldots,v_n)$, assign to every category
-$c$ in $D_k$ a unique standard basisvector $\vec{\delta}_k(c)$ of
+To represent a record $v=(v_1,v_2,\ldots,v_n)$, we assign to every category
+$c_k$ in $D_k$ a unique standard basisvector $\vec{\delta}_k(c_k)$ of
 $\mathbb{B}^{d_k}$.  The boolean representation $\rho(v)$ of the full
 record is the direct sum
 %
@@ -240,13 +239,13 @@ An edit, expressed as in Eq.\ \eqref{eqDefEdit} is said to be in {\rm normal
 form}.  A variable $k$ is {\em involved} in an edit if $A_k\subset D_k$.
 Conversely, we say that $e$ {\em involves} $k$ if $k$ is involved in $e$. A
 variable $k$ for which $A_k=D_k$ is not involved in $e$.  Since every
-category $c$ of $D_k$ is mapped to a unique basis vector $\vec{\delta}_k(c)$,
+category $c_k$ (of $D_k$) is mapped to a unique basis vector $\vec{\delta}_k(c_k)$,
 edits have a boolean representation $\rho(e)$, given by
 \begin{eqnarray}
     e &\xrightarrow{\rho}&
-    \Lor_{c\in A_1}\vec{\delta}_1(c)\oplus
-    \Lor_{c\in A_2}\vec{\delta}_2(c)\oplus\ldots
-    \oplus\Lor_{c\in A_n}\vec{\delta}_n(c),
+    \Lor_{c_1\in A_1}\vec{\delta}_1(c_1)\oplus
+    \Lor_{c_2\in A_2}\vec{\delta}_2(c_2)\oplus\ldots
+    \oplus\Lor_{c_n\in A_n}\vec{\delta}_n(c_n),
 \end{eqnarray}
 which may simply be written as\index{edit!boolean representation}
 \begin{equation}
@@ -255,10 +254,10 @@ which may simply be written as\index{edit!boolean representation}
 \end{equation}
 
 \begin{example}
-Using the data model from Example \ref{datamodel}, the edit that says that under aged people
+Using the data model from Example \ref{datamodel}, the edit that says that under-aged people
 cannot be married has set representation
 \begin{equation}
-e = \{\textrm{\rm married}\}\times\{\textrm{\rm under aged}\}\times\{{\rm partner},{\rm child},{\rm other}\},
+e = \{\textrm{\rm married}\}\times\{\textrm{\rm under-aged}\}\times\{{\rm partner},{\rm child},{\rm other}\},
 \end{equation}
 which translates to the boolean representation
 \begin{equation}
@@ -266,7 +265,7 @@ which translates to the boolean representation
 \end{equation}
 \end{example}
 In the boolean representation some properties can be checked by simple
-calculations. For example, an edit contains variable $k$  if and only if the
+calculations. For example, an edit involves variable $k$  if and only if the
 inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a
 $d_k$ vector of ones.
 
@@ -322,17 +321,17 @@ Each row ${\bf a}$ of ${\bf A}$ contains the boolean representation of one edit,
 $d_k$ denote the number of categories of each variable.  The object {\bf ind}
 is a nested {\sf list} which relates columns of {\bf A} to variable names and
 categories.  Labeling variables with $k\in1,2,\ldots,n$ and category values
-with $c\in 1,2,\ldots,d_k$, we use the following notations:
+with $c_k\in 1,2,\ldots,d_k$, we use the following notations:
 \begin{eqnarray}
 \label{eqInd1}
-    {\bf ind}(k,c) &=& \sum_{l< k }d_l + c\\
-    {\bf ind}(k)   &=& \{{\bf ind}(k,c)\,|\, c\in D_k\}.
+    {\bf ind}(k,c_k) &=& \sum_{l< k }d_l + c_k\\
+    {\bf ind}(k)   &=& \{{\bf ind}(k,c_k)\,|\, c_k\in D_k\}.
 \label{eqInd2}
 \end{eqnarray}
-So $\ind(k,c)$ is the column index in {\bf A} for variable $k$ and category $c$
-and $\ind(k)$ is the set of column indices corresponding to the categories of
+So $\ind(k,c_k)$ is the column index in {\bf A} for variable $k$ and category $c_k$
+and $\ind(k)$ is the set of column indices corresponding to all categories of
 variable $k$.  The {\sf editarray} is the central object for computing with
-catgegorical edits, just like the {\sf editmatrix} is the central object for
+categorical edits, just like the {\sf editmatrix} is the central object for
 computations with linear edits.
 
 It is both tedious and error prone to define and maintain an {\sf editarray} by hand.
@@ -373,7 +372,8 @@ datamodel will be derived as well.
 
 When printed to the screen, the boolean array is shown with column heads of the form
 \begin{quote}
-{\sf <abbreviated var. name><separator><abbreviated cat. label>}, 
+{\sf <abbreviated var. name><separator><abbreviated cat. label>}, e.g.
+{\sf gnr:feml} for gender female
 \end{quote}
 where both variable names and categories are abbreviated for readability, and
 the standard separator is a colon ({\sf :}). The separator may not occur as a
@@ -889,10 +889,10 @@ edits, this amounts to logical resolution. For example, consider the syllogism
 
 \begin{tabular}{lm{0.8\textwidth}}
 \\
-$P_1$ & Under aged people cannot be married\\
+$P_1$ & Under-aged people cannot be married\\
 $P_2$ & People who are not married cannot be a marriage partner\\
 \hline
-$C$ & Under aged people cannot be a marriage partner.\\
+$C$ & Under aged people cannot be a marriage partner.\\   
 \\
 \end{tabular}\\
 Here, the conclusion $C$ is derived from premisses $P_1$ and $P_2$ by eliminating
