@@ -29,6 +29,19 @@ plot(E,vars='t')
 
 ## End(Not run) 
 
+# here's an example with a broken record.
+r <- c(ct = 100, ch = 30, cp = 70, p=30,t=130 ) 
+
+# we color the violated edits and the variables that have to be adapted
+
+## Not run
+set.seed(1) # (for reprodicibility)
+plot(E,
+     adapt=errorLocalizer(E,r)$searchBest()$adapt,   
+     violated=violatedEdits(E,r))
+## End(Not run) 
+
+
 
 # extract total graph (as igraph object)
 as.igraph(E)

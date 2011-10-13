@@ -1,15 +1,30 @@
 #' Graphical representation of editmatrix
 #' 
-#' This function computes the edge graph of an editmatrix and plots
-#' it with some sensible defaults. Each (labeled) vertex corresponds to
-#' an edit, while an edge indicates that its vertices share at least one
-#' variable. The linewidht of the plotted edge relates to the number of
-#' variables connecting the edits. 
-#' 
-#' The boolean vector variables \code{adapt} and \code{violated} can be used to color
-#' variable or edit nodes.
+#' Depending on the chosen \code{nodetype}, this function can plot
+#' three types of graphs based on an edit set.
 #'
-#' For more finetuning, see \code{\link{as.igraph}}, and \code{igraph.plotting}
+#'\itemize{
+#'\item{If \code{nodetype="all"} (default), the full bipartite graph is plotted. Each
+#' variable is represented by a square node while each edit is represented by a circular
+#' node. An edge is drawn when a variable occurs in an edit.}
+#'
+#' \item{If \code{nodetype="vars"} the variable graph is drawn. Each node represents a
+#' variable, and an edge is drawn between two nodes if the variables occur together in at
+#' least one edit. The edge width relates to the number of edits connecting two variables.}
+#'
+#' \item{If \code{nodetype="rules"} the rule graph is drawn. Each node represents an edit
+#' rule and an edge is drawn between two nodes if they share at least one variable. The 
+#' edge width relates to the number of edits connecting the two edit rules.}
+#'}
+#'
+#' The boolean vectors \code{violated} and \code{adapt} can be used to color violated 
+#' edits or variables which have to be adapted.
+#' 
+#' The function works by coercing an editmatrix to an \code{igraph} object, and therefore
+#' relies on the plotting capabilities of the igraph package. For more finetuning,
+#' use \code{\link{as.igraph}} and see \code{?igraph.plotting}.
+#'
+#'
 #'
 #' @method plot editmatrix 
 #'
@@ -24,12 +39,16 @@
 #' @param varcolor Color of variable nodes (ignored when \code{nodetype='rules'})
 #' @param violatedcolor Color of nodes corresponding to violated edits (ignored when \code{nodetype='vars'})
 #' @param adaptcolor Color of nodes corresponding to variables to adapt (ignored when \code{nodetype='rules'})
-#'
-#'
-#'
 #' @param ... further  arguments to be passed to plot. 
 #' 
 #' @example ../examples/graph.R
+#'
+#' @seealso \code{\link{as.igraph}}, \code{\link{adjacency}}, \code{igraph.plotting}
+#'
+#' @references
+#'  Csardi G, Nepusz T: The igraph software package for complex network
+#'  research, InterJournal, Complex Systems 1695. 2006. http://igraph.sf.net
+#'
 #' @export
 plot.editmatrix <- function(x,
     nodetype="all", 
@@ -94,7 +113,18 @@ plot.editarray <- function(
 }
 
 # internal edit set plotter
-plotEditGraph <- function(x,nodetype, rules, vars, violated, adapt, rulecolor, varcolor,edgecolor, violatedcolor, adaptcolor,...){
+plotEditGraph <- function(
+    x,
+    nodetype, 
+    rules, 
+    vars, 
+    violated, 
+    adapt, 
+    rulecolor, 
+    varcolor,
+    edgecolor, 
+    violatedcolor, 
+    adaptcolor,...){
 
     g <- as.igraph(x,nodetype, rules, vars=vars)
     w <- E(g)$weight
