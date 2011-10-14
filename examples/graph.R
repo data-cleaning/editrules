@@ -31,6 +31,8 @@ plot(E,vars='t')
 
 # here's an example with a broken record.
 r <- c(ct = 100, ch = 30, cp = 70, p=30,t=130 ) 
+violatedEdits(E,r)
+errorLocalizer(E,r)$searchBest()$adapt
 
 # we color the violated edits and the variables that have to be adapted
 
@@ -70,6 +72,9 @@ E <- editarray(c(
 ## Not run:
 # plot total edit graph
 plot(E)
+
+# plot with a different layout
+plot(E,layout=layout.circle)
 
 # plot edit graph, just the connections caused by 'salary'
 plot(E,vars='salary')
