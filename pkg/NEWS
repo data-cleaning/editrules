@@ -1,4 +1,5 @@
 version 1.7-1
+- added plot.errorLocation, which plots the frequency of errors in variables and observations.
 - variable and edge nodes can be colored in plot.editmatrix or plot.editarray
 
 version 1.7-0
