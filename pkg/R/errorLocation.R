@@ -1,10 +1,39 @@
+#' The errorLocation object
+#'
+#' Object storing information on error locations in a dataset.
+#' 
+#' The \code{errorlocation} objects consists of the following slots wich can be 
+#' accessed with the dollar operator, just like with lists.
+#' \itemize{
+#'      \item{\code{adapt} a \code{logical} array where each row/column shows which record/variable should be adapted.}
+#'      \item{\code{status} A \code{data.frame} with the same number of rows as \code{adapt}. It contains the following
+#'          columns
+#'          \itemize{
+#'              \item{\code{weight} weight of the found solution}
+#'              \item{\code{degeneracy} number of equivalent solutions found}
+#'              \item{\code{user} user time (as in \code{sys.time})}
+#'              \item{\code{system} system time (as in \code{sys.time})}
+#'              \item{\code{elapsed} elapsed time (as in \code{sys.time})}
+#'              \item{\code{maxDurationExceeded} Was the maximum search time reached?}
+#'          }
+#'      }
+#'      \item{\code{call} The R call to the function generating the object.}
+#'      \item{\code{user} \code{character} user who generated the object.}
+#'      \item{\code{timestamp} \code{character} timestamp.}
+#' }
+#' @rdname errorLocation
+#' @name errorLocation
+{}
+
 
 #' Generate new errorlocation object
+#'
 #' @param adapt Logical array of same dimensions of dataset, indicating which variable have to be changed per record
 #' @param status data.frame 
-#' @call A \code{call} object
-#' @user \code{character} username
-#' @timestamp \code{character} returned by \code{date()}.
+#' @param call A \code{call} object
+#' @param user \code{character} username
+#' @param timestamp \code{character} returned by \code{date()}.
+#'
 #' @keywords internal
 newerrorlocation <- function(adapt, status, call=sys.call(-1), user=Sys.info()["user"], timestamp=date()){
     structure(
@@ -49,22 +78,27 @@ print.errorLocation <- function(x,...){
 
 
 
-#' Combine two objects
-#'
-#' @param x object 1
-#' @param y object 2
-#' @param ... extra parameters
-#' 
+# Combine two objects
+#
+# @param x object 1
+# @param y object 2
+# @param ... extra parameters
+# @keywords internal
+# @name plus
+# @rdname plus
 `%+%` <- function(x,y,...){
     UseMethod("%+%")
 }
 
-#' Combine two objects of class errorLocation
-#' @method `%+%` errorLocation
-#' 
+# Combine two objects of class errorLocation
+# @method `%+%` errorLocation
+# @keywords internal
+# 
+# @rdname plus
 `%+%.errorLocation` <- function(x,y,...){
    stopifnot( class(y) == 'errorLocation' )
-    
+    call <- unique(c(x$call,y$call))
+    if (length(call) == 1) call <- call[[1]]
     newerrorlocation(    
         adapt=x$adapt | y$adapt,
         status=data.frame(
@@ -75,7 +109,7 @@ print.errorLocation <- function(x,...){
             elapsed    = x$status$elapsed + y$status$elapsed,
             maxDurationExceeded = x$status$maxDurationExceeded | y$status$maxDurationExceeded
             ),
-        call = unique(c(x$call,y$call)),
+        call = call,
         user = unique(c(x$user,y$user)),
         timestamp=date()
     )
@@ -83,6 +117,10 @@ print.errorLocation <- function(x,...){
 }
 
 
+# NULL method
+# @method `%+%` NULL
+# @keywords internal
+# @rdname plus
 `%+%.NULL` <- function(x,y,...){
     y
 }

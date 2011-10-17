@@ -14,6 +14,26 @@ dat <- data.frame(
 # localize all errors in the data
 err <- localizeErrors(E,dat)
 
+## Not run
+
+# Demonstration of verbose processing
+# construct 2-block editmatrix
+F <- editmatrix(c(
+    "x + y == z",
+    "x > 0",
+    "y > 0",
+    "z > 0",
+    "w > 10"))
+# User 'dat' as above, generate some extra records
+dd <- dat
+for ( i in 1:5 ) dd <- cbind(dd,dd)
+
+# localize errors verbosely
+err <- localizeErrors(E,dd,verbose=TRUE)
+
+## End(Not run)
+
+
 # what has to be adapted:
 err$adapt
 # weight, number of equivalent solutions, timings,

@@ -18,12 +18,12 @@
 #' @param verbose print progress to screen?
 #' @param ... options to be passed to \code{\link{errorLocalizer}}
 #'
-#' @return an object of class \code{errorLocation}
+#' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
 localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
+    stopifnot(is.data.frame(dat))
     if ( !useBlocks ) return(localize(E,dat,...))
-
     B  <- blocks(E)
     n <- length(B)
     i <- 0
@@ -35,7 +35,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
             i <- i + 1
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
-        err <- err %+% localize(b, dat, verbose, pretext=blockCount, ...)
+        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(), ...)
     }
     if (verbose) cat('\n')
     err
@@ -43,12 +43,18 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
 
 
 
-# workhorse function for localizeErrors
-#
-#
-localize <- function(E, dat, verbose, pretext, ...){
-    stopifnot(is.data.frame(dat))
-    call <- sys.call()
+#' Workhorse function for localizeErrors
+#'
+#' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param dat \code{data.frame}
+#' @param verbose \code{logical} print progress report during run?
+#' @param pretext \code{character} text to print before progress report
+#' @param call call to include in \code{\link{errorLocation}} object
+#' 
+#' @keywords internal
+localize <- function(E, dat, verbose, pretext, call=sys.call(),...){
+## TODO: should we export this function?
+    
 
     n <- nrow(dat)
     m <- ncol(dat)
@@ -70,7 +76,7 @@ localize <- function(E, dat, verbose, pretext, ...){
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
     X <- t(dat)
-    fmt <- paste('\r%s,record %',nchar(n),'d of %d',sep="")
+    fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     for ( i in 1:n ){
         if (verbose) cat(sprintf(fmt,pretext,i,n))  
         # cat('\r',pretext,' record ',format(i,width=nchar(n)),' of ',n)
@@ -92,7 +98,8 @@ localize <- function(E, dat, verbose, pretext, ...){
             degeneracy=degeneracy,
             duration,
             maxDurationExceeded
-            )
+            ),
+        call=call,
         )
 }
 
