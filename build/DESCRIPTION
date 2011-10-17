@@ -6,8 +6,17 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
+Description: Facilitates reading and manipulating (multivariate) data restrictions
+    (edit rules) on numerical and categorical data. Rules can be defined with common R syntax
+    and parsed to an internal (matrix-like format). Rules can be manipulated with
+    variable elimination and value substitution methods, allowing for feasibility checks
+    and more. Data can be tested against the rules and erroneous fields can be found based
+    on Fellegi and Holt's generalized principle.
+Version: 1.5-2
 Description: Facilitates reading and manipulating
+Description: Facilitates reading and manipulating (multivariate) data restrictions
     (multivariate) data restrictions (edit rules) on
+    (edit rules) on numerical and categorical data. Rules can be defined with common R syntax
     numerical and categorical data. Rules can be defined
     with common R syntax and parsed to an internal
     (matrix-like format). Rules can be manipulated with
@@ -17,6 +26,11 @@ Description: Facilitates reading and manipulating
     found based on Fellegi and Holt's generalized principle
     and rules can be visualized with the igraph package.
 Version: 1.7-1
+    and parsed to an internal (matrix-like format). Rules can be manipulated with
+    variable elimination and value substitution methods, allowing for feasibility checks
+    and more. Data can be tested against the rules and erroneous fields can be found based
+    on Fellegi and Holt's generalized principle.
+Version: 1.7
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
 Suggests:
