@@ -15,7 +15,6 @@
 #' @export
 localizeErrors <- function(E, dat, ...){
     stopifnot(is.data.frame(dat))
-    user <- Sys.info()['user']
     call <- sys.call()
 
     n <- nrow(dat)
@@ -105,6 +104,4 @@ print.errorLocation <- function(x,...){
     }
 
 }
-
-
 
