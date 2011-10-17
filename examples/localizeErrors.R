@@ -24,12 +24,12 @@ F <- editmatrix(c(
     "y > 0",
     "z > 0",
     "w > 10"))
-# User 'dat' as above, generate some extra records
+# Using 'dat' as defined above, generate some extra records
 dd <- dat
-for ( i in 1:5 ) dd <- cbind(dd,dd)
+for ( i in 1:5 ) dd <- rbind(dd,dd)
 
 # localize errors verbosely
-err <- localizeErrors(E,dd,verbose=TRUE)
+err <- localizeErrors(F,dd,verbose=TRUE)
 
 ## End(Not run)
 
