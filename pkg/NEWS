@@ -1,6 +1,7 @@
 version 1.7-1
+- localizeErrors gains arguments 'useBlocks' (default: TRUE) and 'verbose' (default: FALSE).
 - added plot.errorLocation, which plots the frequency of errors in variables and observations.
-- variable and edge nodes can be colored in plot.editmatrix or plot.editarray
+- variable and edge nodes can be colored in plot.editmatrix or plot.editarray.
 
 version 1.7-0
 - several improvements in parsing categorical edit rules in the presence of & and | operators.
