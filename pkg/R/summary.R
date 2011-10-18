@@ -3,7 +3,7 @@
 #' 
 #' Summarizes an object
 #'
-#' The return value is objec of class 'editsummary' for which a print method is implemented.
+#' The return value is object of class 'editsummary' for which a print method is implemented.
 #'
 #' @method summary editmatrix
 #' @param object an R object
@@ -40,9 +40,8 @@ summary.editmatrix <- function(object, useBlocks=TRUE, ...){
 
 #' Summary of edit set
 #'
-#' Generates an object of class 'editsummary' for which a print method is implemented
 #'
-#' @method summary editmatrix
+#' @method summary editarray
 #' 
 #' @rdname summary
 #' @export
