@@ -36,7 +36,7 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
         stop(paste("Not all edits can be evaluated, parser returned", e$message, sep="\n"))})
     if ( is.vector(M) )  M <- array(M, dim=c(1,length(M)))
     dimnames(M) <- list(record=rownames(dat),edit=names(E))
-    return(!M)
+    return(newviolatedEdits(!M))
 }
 
 #' Method for editmatrix
@@ -63,7 +63,7 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     X <- as.matrix(dat[,I,drop=FALSE]) 
 
     if (nrow(E) == 0){
-        return(matrix(logical(), nrow=NROW(dat)))
+        return(newviolatedEdits(matrix(logical(), nrow=NROW(dat))))
     }
      
     ops <- getOps(E)
@@ -79,7 +79,7 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     v[lt,] <- A[lt,,drop=FALSE]%*%t(X) - v[lt] < tol
     dimnames(v) <- list(edit=rownames(E),record=rownames(dat))
  
-    !t(v)
+    newviolatedEdits(!t(v))
 }
 
 #' @rdname violatedEdits
@@ -102,7 +102,7 @@ violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
     edits <- as.character(E, useIf=FALSE, datamodel=datamodel)
     v <- violatedEdits.character(edits,dat,...)
 #    dimnames(v) <- list(rownames(dat),names(edits))
-    v
+    newviolatedEdits(v)
 }
 
 
@@ -122,10 +122,74 @@ listViolatedEdits <- function(E, dat){
     return(apply(errors, 1, which))
 }
 
+newviolatedEdits <- function(x){
+  structure(x, class="violatedEdits")
+}
 
+#' Plot summary statistics on violatedEdits
+#' @method plot violatedEdits
+#' @param x \code{violatedEdits} object
+#' @param ... parameters passed to \code{barplot} method.
+#' @export
+plot.violatedEdits <- function(x, ...){
+  N <- nrow(x)
+  editfreq <- margin.table(x, 2) / N
+  oldpar <- par(mfrow=c(2,1))
+  barplot( sort(editfreq, decreasing=TRUE),  
+         , main="Edit violation frequency"
+         , xlab = "Frequency"
+         , ylab= "Edit"
+         , horiz = TRUE
+         , las = 1
+         , ...
+         )
+  
+  errfreq <- table(margin.table(x, 1)) / N 
+  barplot( errfreq
+         , main="Observation violation frequency"
+         , xlab = "Frequency"
+         , ylab = "Number of violations"
+         , horiz = TRUE
+         , las= 1
+         , ...
+         )
+  par(oldpar)
+}
 
+#' Summary statistics on violatedEdits
+#' @method summary violatedEdits
+#' @param x \code{violatedEdits} object
+#' @param E optional \code{editmatrix}, \code{editarray}
+#' @param minperc minimum percentage for edit to be printed
+#' @param ... parameters passed to \code{barplot} method.
+#' @export
+summary.violatedEdits <- function(x, E=NULL, minperc=0.1, ...){
+  N <- nrow(x)
+  editfreq <- sort(margin.table(x, 2), decreasing=TRUE)
+  editperc <- round(100*editfreq/N, 1)
+  
+  editfreq <- editfreq[editperc >= minperc]
+  editperc <- editperc[editperc >= minperc]
+  
+  editdf <- data.frame(editname=names(editfreq), freq=editfreq, rel=paste(editperc,"%", sep=""))
+  if (!is.null(E)){
+     editdf <- transform(editdf, edit=as.character(E)[editname])
+  }
+  
+  cat("Edit violations (",N," observations):\n\n", sep="")
+  print(editdf, row.names=FALSE)
+  
+  errfreq <- unclass(table(margin.table(x, 1)))
+  errperc <- round(100*errfreq/N, 1)
+  errdf <- data.frame(errors=names(errfreq), freq=errfreq, rel=paste(errperc,"%", sep=""))
+  cat("\nEdit violations per record:\n\n")
+  print(errdf, row.names=FALSE)
+}
 
-
-
-
-
+#' Print violatedEdits
+#' @method print violatedEdits
+#' @param x violatedEdits
+#' @export
+print.violatedEdits <- function(x,...){
+  print(unclass(x))
+}
