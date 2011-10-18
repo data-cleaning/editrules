@@ -58,7 +58,13 @@ contains <- function(E,var=NULL){
 #' @keywords internal
 contains.boolmat <- function(A, ind, var){
     ind <- ind[var]
-    vapply(ind, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
+    v <- vapply(ind, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
+    if ( is.vector(v) ){ 
+        v <- array(v,dim=c(1,length(v)), dimnames=list(edit=rownames(A),var=names(v)))
+    } else {
+        dimnames(v) <- list(edit=rownames(A),variable=colnames(v))
+    } 
+  v
 }
 
 #' Summarize data model of an editarray in a data.frame

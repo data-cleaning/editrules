@@ -1,4 +1,6 @@
-version 1.7-1
+version 1.8-0
+- bugfix in edge case of 'contains' (nonuniform output if editarray has only one rule)
+- summary function for arguments of class editmatrix, editarray, errorLocation
 - localizeErrors gains arguments 'useBlocks' (default: TRUE) and 'verbose' (default: FALSE).
 - added plot.errorLocation, which plots the frequency of errors in variables and observations.
 - variable and edge nodes can be colored in plot.editmatrix or plot.editarray.

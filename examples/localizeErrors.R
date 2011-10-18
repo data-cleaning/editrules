@@ -14,6 +14,12 @@ dat <- data.frame(
 # localize all errors in the data
 err <- localizeErrors(E,dat)
 
+summary(err)
+
+# what has to be adapted:
+err$adapt
+# weight, number of equivalent solutions, timings,
+err$status
 ## Not run
 
 # Demonstration of verbose processing
@@ -29,15 +35,17 @@ dd <- dat
 for ( i in 1:5 ) dd <- rbind(dd,dd)
 
 # localize errors verbosely
-err <- localizeErrors(F,dd,verbose=TRUE)
+(err <- localizeErrors(F,dd,verbose=TRUE))
+
+# printing is cut off, use summary for an overview
+summary(err)
+
+# or plot (not very informative in this artificial example)
+plot(err)
 
 ## End(Not run)
 
 
-# what has to be adapted:
-err$adapt
-# weight, number of equivalent solutions, timings,
-err$status
 
 # an example with categorical variables
 E <- editarray(c(
@@ -64,4 +72,7 @@ localizeErrors(E,dat)
 # Increasing the weight of  'positionInHousehold' for example, makes the best solution
 # unique again
 localizeErrors(E,dat,weight=c(1,1,2))
+
+
+
 
