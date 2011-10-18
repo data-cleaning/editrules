@@ -9,8 +9,12 @@ dat <- data.frame( x = c(0,2,1)
                  , z = c(0,1,1)
                  )
 print(dat)
-				 
-violatedEdits(E,dat)
+
+ve <- violatedEdits(E,dat)
+
+print(ve)
+summary(ve, E)
+plot(ve)
 
 # An example with categorical data:
 

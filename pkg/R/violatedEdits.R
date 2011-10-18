@@ -174,7 +174,7 @@ summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
   
   editdf <- data.frame(editname=names(editfreq), freq=editfreq, rel=paste(editperc,"%", sep=""))
   if (!is.null(E)){
-     editdf <- transform(editdf, edit=as.character(E)[editname])
+     editdf$edit <- as.character(E)[editdf$editname]
   }
   
   cat("Edit violations (",N," observations):\n\n", sep="")
