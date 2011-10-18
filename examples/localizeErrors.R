@@ -20,6 +20,7 @@ summary(err)
 err$adapt
 # weight, number of equivalent solutions, timings,
 err$status
+
 ## Not run
 
 # Demonstration of verbose processing
@@ -33,6 +34,7 @@ F <- editmatrix(c(
 # Using 'dat' as defined above, generate some extra records
 dd <- dat
 for ( i in 1:5 ) dd <- rbind(dd,dd)
+dd$w <- sample(12,nrow(dd),replace=TRUE)
 
 # localize errors verbosely
 (err <- localizeErrors(F,dd,verbose=TRUE))

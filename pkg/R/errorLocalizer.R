@@ -78,6 +78,7 @@ errorLocalizer.editmatrix <- function(
     # missings must be adapted, others still have to be treated.
     adapt <- is.na(x)   
     vars <- getVars(E)
+    if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
 
     o <- order(weight[!adapt], decreasing=TRUE)
     totreat <- names(x)[!adapt][o]
@@ -87,14 +88,17 @@ errorLocalizer.editmatrix <- function(
     # if variables do not occur in editmatrix, do not adapt.
     adapt[!(names(adapt) %in% vars)] <- FALSE
     # Eliminate missing variables.
-    for (v in names(x)[is.na(x)]) E <- eliminate.editmatrix(E,v)
+    vs <- names(x)
+    elimvars <- vs[vs %in% vars & is.na(x)]
+    for (v in elimvars) E <- eliminate.editmatrix(E,v)
+    wsol <- min(sum(weight[vars %in% totreat | adapt[vars]]), maxweight)
 
-    wsol <- min(sum(weight[vars %in% totreat]), maxweight)
     cp <- backtracker(
         maxduration=maxduration,
         isSolution = {
 
             w <- sum(weight[adapt])
+
             if ( w > min(wsol,maxweight) 
               || sum(adapt) > maxadapt
               || isObviouslyInfeasible.editmatrix(.E)
@@ -166,13 +170,14 @@ errorLocalizer.editarray <- function(
     stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
     adapt <- is.na(x)
 
+    vars <- getVars.editarray(E)
+    if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
 
     o <- order(weight[!adapt], decreasing=TRUE)
     totreat <- names(x)[!adapt][o]
 
-    vars <- getVars.editarray(E)
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
-    wsol <- min(sum(weight[vars %in% totreat]),maxweight)
+    wsol <- min(sum(weight[vars %in% totreat | adapt[vars]]),maxweight)
     ind <- getInd(E)
     bt <- backtracker(
         isSolution = {
