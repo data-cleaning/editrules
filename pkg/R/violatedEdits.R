@@ -157,15 +157,16 @@ plot.violatedEdits <- function(x, ...){
 }
 
 #' Summary statistics on violatedEdits
+#'
 #' @method summary violatedEdits
-#' @param x \code{violatedEdits} object
-#' @param E optional \code{editmatrix}, \code{editarray}
+#' @param object \code{violatedEdits} object
+#' @param E optional \code{editmatrix} or \code{editarray}
 #' @param minperc minimum percentage for edit to be printed
-#' @param ... parameters passed to \code{barplot} method.
+#' @param ... (not used)
 #' @export
-summary.violatedEdits <- function(x, E=NULL, minperc=0.1, ...){
-  N <- nrow(x)
-  editfreq <- sort(margin.table(x, 2), decreasing=TRUE)
+summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
+  N <- nrow(object)
+  editfreq <- sort(margin.table(object, 2), decreasing=TRUE)
   editperc <- round(100*editfreq/N, 1)
   
   editfreq <- editfreq[editperc >= minperc]
@@ -179,7 +180,7 @@ summary.violatedEdits <- function(x, E=NULL, minperc=0.1, ...){
   cat("Edit violations (",N," observations):\n\n", sep="")
   print(editdf, row.names=FALSE)
   
-  errfreq <- unclass(table(margin.table(x, 1)))
+  errfreq <- unclass(table(margin.table(object, 1)))
   errperc <- round(100*errfreq/N, 1)
   errdf <- data.frame(errors=names(errfreq), freq=errfreq, rel=paste(errperc,"%", sep=""))
   cat("\nEdit violations per record:\n\n")
@@ -189,6 +190,7 @@ summary.violatedEdits <- function(x, E=NULL, minperc=0.1, ...){
 #' Print violatedEdits
 #' @method print violatedEdits
 #' @param x violatedEdits
+#' @param ... not used
 #' @export
 print.violatedEdits <- function(x,...){
   print(unclass(x))
