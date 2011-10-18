@@ -1,5 +1,5 @@
 version 1.8-0
-- summary function for arguments of class editmatrix and editarray
+- summary function for arguments of class editmatrix, editarray, errorLocation
 - localizeErrors gains arguments 'useBlocks' (default: TRUE) and 'verbose' (default: FALSE).
 - added plot.errorLocation, which plots the frequency of errors in variables and observations.
 - variable and edge nodes can be colored in plot.editmatrix or plot.editarray.

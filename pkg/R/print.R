@@ -22,7 +22,7 @@ print.editarray <- function(x, ...){
 
 
 
-#' print edit matrix
+#' print editmatrix
 #'
 #' @export
 #' @method print editmatrix

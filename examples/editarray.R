@@ -1,11 +1,15 @@
 
 # Here is the prototypical categorical edit: men cannot be pregnant.
-editarray(c(
+E <- editarray(c(
     "gender \%in\% c('male','female')",
     "pregnant \%in\% c('yes','no')",
     "if( gender == 'male' ) pregnant == 'no'"
     )
 )
+E
+
+# an editarray has a summary method:
+summary(E)
 
 # A yes/no variable may also be modeled as a logical:
 editarray(c(

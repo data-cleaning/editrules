@@ -1,10 +1,12 @@
 #' plot errorLocation object
 #' 
 #' The errorLocation object can be plotted. The plot shows the error frequency for variables and observations.
+#' These are based on the number of errors located per variable and the number of errors located per obeservation (record).
 #' @method plot errorLocation
 #' @param x errorLocation object
 #' @param digits number of digits shown in percentage of x-axis.
 #' @param ... other arguments that will be transferred to \code{barplot}
+#' @export
 plot.errorLocation <- function(x, digits=1, ...){
   N <- nrow(x$adapt)
   varfreq <- apply(x$adapt, 2, sum) / N

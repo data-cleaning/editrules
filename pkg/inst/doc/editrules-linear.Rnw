@@ -301,6 +301,7 @@ function                      & description\\
 {\sf isObviouslyInfeasible(E)}& Check for contradictions in rows of {\sf E}\\
 {\sf isFeasible(E)}           & Complete feasibility check for {\sf E}\\ 
 {\sf blocks(E)}               & Decompose {\sf E} in independent blocks\\
+{\sf summary(E)}              & Summarize the contents of {\sf E}\\
 \hline
 \end{tabular}
 \end{threeparttable}

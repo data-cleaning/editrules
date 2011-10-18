@@ -557,6 +557,7 @@ Function        & description \\
 {\sf violatedEdits(E,dat)}    & check which edits are violated by {\sf x}\\
 {\sf localizeErrors(E,dat)}   & localize errors (sect.\ \ref{sslocalizeerrors})\\
 {\sf errorLocalizer(E,x)}     & {\sf backtracker} for error localization (sect.\ \ref{sserrorlocalizer})\\
+{\sf summary(E)}              & summarize the content of {\sf E}\\
 \hline
 \end{tabular}
 \end{threeparttable}

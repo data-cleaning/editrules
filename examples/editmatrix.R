@@ -2,6 +2,9 @@
 E <- editmatrix(c("x+3*y==2*z", "x==z"))
 print(E)
 
+# an editmatrix also has a summary method:
+summary(E)
+
 # select rows from an editmatrix:
 E <- editmatrix(c("x+3*y==2*z", "x >= z"))
 E[getOps(E) == "=="]

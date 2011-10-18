@@ -56,6 +56,7 @@ newerrorlocation <- function(adapt, status, call=sys.call(-1), user=Sys.info()["
 #' @param x object of class errorLocation
 #' @param ... arguments to be passed to other methods
 #' @method print errorLocation
+#' @rdname print
 #' @export
 print.errorLocation <- function(x,...){
     cat("Object of class 'errorLocation' generated at",x$timestamp,'\n')
