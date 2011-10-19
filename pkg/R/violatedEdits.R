@@ -129,30 +129,41 @@ newviolatedEdits <- function(x){
 #' Plot summary statistics on violatedEdits
 #' @method plot violatedEdits
 #' @param x \code{violatedEdits} object
+#' @param minfreq minimum frequency to be plotted
 #' @param ... parameters passed to \code{barplot} method.
 #' @export
-plot.violatedEdits <- function(x, ...){
+plot.violatedEdits <- function(x, minfreq=1, ...){
   N <- nrow(x)
   Nna <- sum(apply(is.na(x),1, all))
 
-  editfreq <- sort(colSums(x, na.rm=TRUE), decreasing=TRUE)/(N-Nna)
+  editfreq <- sort(colSums(x, na.rm=TRUE), decreasing=TRUE)
+  editfreq <- editfreq[editfreq >= minfreq]
+  editfreq <- editfreq/N
+
+  x[is.na(x)] <- TRUE
+  errfreq <- tabulate(1+rowSums(x)) / N
+  names(errfreq) <- seq_along(errfreq) - 1
+  
+  xlim <- c(0, max(errfreq, editfreq))
+
   oldpar <- par(mfrow=c(2,1))
-  barplot( sort(editfreq, decreasing=TRUE),  
+  barplot( sort(editfreq, decreasing=TRUE), 
          , main="Edit violation frequency"
          , xlab = "Frequency"
          , ylab= "Edit"
          , horiz = TRUE
          , las = 1
+         , xlim = xlim
          , ...
          )
   
-  errfreq <- table(rowSums(x, na.rm=TRUE)) / (N-Nna)
   barplot( errfreq
          , main="Observation violation frequency"
          , xlab = "Frequency"
          , ylab = "Number of violations"
          , horiz = TRUE
          , las= 1
+         , xlim = xlim
          , ...
          )
   par(oldpar)
@@ -163,18 +174,18 @@ plot.violatedEdits <- function(x, ...){
 #' @method summary violatedEdits
 #' @param object \code{violatedEdits} object
 #' @param E optional \code{editmatrix} or \code{editarray}
-#' @param minperc minimum percentage for edit to be printed
+#' @param minfreq minimum freq for edit to be printed
 #' @param ... (not used)
 #' @export
-summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
+summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
   N <- nrow(object)
   Nna <- sum(apply(is.na(object),1, all))
   
   editfreq <- sort(colSums(object, na.rm=TRUE), decreasing=TRUE)
-  editperc <- round(100*editfreq/(N-Nna), 1)
+  editperc <- round(100*editfreq/N, 1)
   
-  editfreq <- editfreq[editperc >= minperc]
-  editperc <- editperc[editperc >= minperc]
+  editperc <- editperc[editfreq >= minfreq]
+  editfreq <- editfreq[editfreq >= minfreq]
   
   editdf <- data.frame(editname=names(editfreq), freq=editfreq, rel=paste(editperc,"%", sep=""))
   if (!is.null(E)){
@@ -184,8 +195,10 @@ summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
   cat("Edit violations (",N," observations, ",Nna," completely missing):\n\n", sep="")
   print(editdf, row.names=FALSE)
   
-  errfreq <- unclass(table(rowSums(object, na.rm=TRUE)))
-  errperc <- round(100*errfreq/N, 1)
+  object[is.na(object)] <- TRUE
+  errfreq <- table(rowSums(object))/N
+  names(errfreq) <- seq_along(errfreq) - 1
+  errperc <- round(100*errfreq/(N), 1)
   errdf <- data.frame(errors=names(errfreq), freq=errfreq, rel=paste(errperc,"%", sep=""))
   cat("\nEdit violations per record:\n\n")
   print(errdf, row.names=FALSE)
