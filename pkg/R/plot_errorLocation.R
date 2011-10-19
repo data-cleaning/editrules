@@ -11,7 +11,7 @@ plot.errorLocation <- function(x, digits=1, ...){
   N <- nrow(x$adapt)
   varfreq <- apply(x$adapt, 2, sum) / N
   #names(varfreq) <- paste( names(varfreq), " (", round(100*varfreq/N, digits=digits), "%)", sep="")
-  oldpar <- par(mfrow=c(2,1))
+  oldpar <- par(mfcol=c(2,2))
   barplot( sort(varfreq, decreasing=TRUE),  
          , main="Variable errors frequency"
          , xlab = "Frequency"
@@ -30,6 +30,25 @@ plot.errorLocation <- function(x, digits=1, ...){
          , las= 1
          , ...
          )
+    du <- density(log(x$status$user))
+    de <- density(log(x$status$elapsed))
+    du$x  <- exp(du$x)
+    de$x  <- exp(de$x)
+    plot(du,lwd=2,col='black',log='x',
+        xlab='duration [seconds]',
+        ylab='density',
+        main='Duration of error localization')
+    lines(de,lwd=2,col='blue')
+    legend('topright',legend=c('user','elapsed'),
+        col=c('black','blue'),
+        lwd=2    
+    )
+  dg <- density(log(x$status$degeneracy))
+  dg$x <- exp(dg$x)
+  plot(dg,lwd=2,col='black',log='x',
+       xlab='degeneracy',
+       ylab='density',
+       main='number of degenerate solutions')
   par(oldpar)
 }
 
