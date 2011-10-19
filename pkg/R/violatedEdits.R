@@ -192,12 +192,11 @@ summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
      editdf$edit <- as.character(E)[editdf$editname]
   }
   
-  cat("Edit violations (",N," observations, ",Nna," completely missing):\n\n", sep="")
+  cat("Edit violations, ",N," observations, ",Nna," completely missing (",round(100*Nna/N,1),"%):\n\n", sep="")
   print(editdf, row.names=FALSE)
   
   object[is.na(object)] <- TRUE
-  errfreq <- table(rowSums(object))/N
-  names(errfreq) <- seq_along(errfreq) - 1
+  errfreq <- unclass(table(rowSums(object)))
   errperc <- round(100*errfreq/(N), 1)
   errdf <- data.frame(errors=names(errfreq), freq=errfreq, rel=paste(errperc,"%", sep=""))
   cat("\nEdit violations per record:\n\n")
