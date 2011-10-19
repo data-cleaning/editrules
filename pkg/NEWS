@@ -1,8 +1,9 @@
 version 1.8-0
+- plot method for arguments of class errorLocation, violatedEdits
 - errorLocalizer now throws error when edit set contains variables not encountered in record.
 - solved edge case in error localizer. $adapt would be NA if all variables were NA (now TRUE)
 - bugfix in edge case of 'contains' (nonuniform output if editarray has only one rule)
-- summary function for arguments of class editmatrix, editarray, errorLocation
+- summary method for arguments of class editmatrix, editarray, errorLocation
 - localizeErrors gains arguments 'useBlocks' (default: TRUE) and 'verbose' (default: FALSE).
 - added plot.errorLocation, which plots the frequency of errors in variables and observations.
 - variable and edge nodes can be colored in plot.editmatrix or plot.editarray.
