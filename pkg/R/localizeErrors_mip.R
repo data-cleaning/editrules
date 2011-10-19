@@ -107,8 +107,7 @@ localizeErrors_mip_rec <- function( E
    set.type(lps, columns=binidx , "binary")
    set.objfn(lps, objfn)
    
-   #TODO add time.out (maxduration)
-   # move univariate constraints into bounds
+    # move univariate constraints into bounds
    lp.control(lps,presolve="rows", timeout=maxduration)
  
    solve(lps)
