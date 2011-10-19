@@ -133,7 +133,9 @@ newviolatedEdits <- function(x){
 #' @export
 plot.violatedEdits <- function(x, ...){
   N <- nrow(x)
-  editfreq <- margin.table(x, 2) / N
+  Nna <- sum(apply(is.na(x),1, all))
+
+  editfreq <- sort(colSums(x, na.rm=TRUE), decreasing=TRUE)/(N-Nna)
   oldpar <- par(mfrow=c(2,1))
   barplot( sort(editfreq, decreasing=TRUE),  
          , main="Edit violation frequency"
@@ -144,7 +146,7 @@ plot.violatedEdits <- function(x, ...){
          , ...
          )
   
-  errfreq <- table(margin.table(x, 1)) / N 
+  errfreq <- table(rowSums(x, na.rm=TRUE)) / (N-Nna)
   barplot( errfreq
          , main="Observation violation frequency"
          , xlab = "Frequency"
@@ -166,8 +168,10 @@ plot.violatedEdits <- function(x, ...){
 #' @export
 summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
   N <- nrow(object)
-  editfreq <- sort(margin.table(object, 2), decreasing=TRUE)
-  editperc <- round(100*editfreq/N, 1)
+  Nna <- sum(apply(is.na(object),1, all))
+  
+  editfreq <- sort(colSums(object, na.rm=TRUE), decreasing=TRUE)
+  editperc <- round(100*editfreq/(N-Nna), 1)
   
   editfreq <- editfreq[editperc >= minperc]
   editperc <- editperc[editperc >= minperc]
@@ -177,10 +181,10 @@ summary.violatedEdits <- function(object, E=NULL, minperc=0.1, ...){
      editdf$edit <- as.character(E)[editdf$editname]
   }
   
-  cat("Edit violations (",N," observations):\n\n", sep="")
+  cat("Edit violations (",N," observations, ",Nna," completely missing):\n\n", sep="")
   print(editdf, row.names=FALSE)
   
-  errfreq <- unclass(table(margin.table(object, 1)))
+  errfreq <- unclass(table(rowSums(object, na.rm=TRUE)))
   errperc <- round(100*errfreq/N, 1)
   errdf <- data.frame(errors=names(errfreq), freq=errfreq, rel=paste(errperc,"%", sep=""))
   cat("\nEdit violations per record:\n\n")
