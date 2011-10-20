@@ -76,7 +76,7 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     v <- matrix(FALSE,nrow=nrow(E),ncol=nrow(dat))
     v[eq,] <- abs( A[eq,,drop=FALSE]%*%t(X) - b[eq] ) <= tol
     v[leq,] <- A[leq,,drop=FALSE]%*%t(X) - b[leq] <= tol
-    v[lt,] <- A[lt,,drop=FALSE]%*%t(X) - v[lt] < tol
+    v[lt,] <- A[lt,,drop=FALSE]%*%t(X) - b[lt] < tol
     dimnames(v) <- list(edit=rownames(E),record=rownames(dat))
  
     newviolatedEdits(!t(v))
