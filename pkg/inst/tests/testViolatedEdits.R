@@ -49,10 +49,23 @@ test_that("violation of inequalities are detected",{
     expect_true(all(
         violatedEdits(
         editmatrix("x < y"),
-        data.frame(x=c(1,2),y=c(-1,3))==c(TRUE,FALSE))
-    ))
+        data.frame(x=c(1,2),y=c(-1,3)))==c(TRUE,FALSE))
+    )
 })
 
+
+test_that("NA's in data are handled correctly by violatededits.editmatrix",{
+    expect_identical(
+        violatedEdits(editmatrix(c('x==0','y==0')),c(x=NA,y=1))[,],
+        c(e1=NA,e2=TRUE)
+    )
+    expect_identical(
+        violatedEdits(editmatrix(c('x==0','y==0')),data.frame(x=c(NA,1),y=c(1,NA)))[,],
+        array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('e1','e2')))
+    )
+
+
+})
 
 test_that("categorical edit violations are detected",{
     E <-  editarray(c(

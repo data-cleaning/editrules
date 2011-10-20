@@ -56,30 +56,40 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 #' @export
 violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     if (tol < 0 ) stop("Argument tol must be nonnegative")
-    if ( !isNormalized(E) ) E <- normalize(E)
- 
-    if ( is.vector(dat) ) dat <- t(dat)    
-    I <- match(getVars(E),colnames(dat),nomatch=0)
-    X <- as.matrix(dat[,I,drop=FALSE]) 
-
-    if (nrow(E) == 0){
-        return(newviolatedEdits(matrix(logical(), nrow=NROW(dat))))
+    if (nrow(E)==0){
+        v <- matrix(logical(0),nrow=nrow(dat),ncol=0)
+        dimnames(v) <- list(record=rownames(dat),edit=NULL)
+        return(newviolatedEdits(v))
     }
-     
-    ops <- getOps(E)
-    A <- getA(E)
-    b <- getb(E)
-    eq <- ops == "=="
-    leq <- ops == "<="
-    lt <- !(eq | leq)
-    
-    v <- matrix(FALSE,nrow=nrow(E),ncol=nrow(dat))
-    v[eq,] <- abs( A[eq,,drop=FALSE]%*%t(X) - b[eq] ) <= tol
-    v[leq,] <- A[leq,,drop=FALSE]%*%t(X) - b[leq] <= tol
-    v[lt,] <- A[lt,,drop=FALSE]%*%t(X) - b[lt] < tol
-    dimnames(v) <- list(edit=rownames(E),record=rownames(dat))
+    if (tol==0) return(violatedEdits.character(as.character(E),dat))
+    if ( !isNormalized(E) ) E <- normalize(E)
+
+    eq <- getOps(E) == '=='
+    iq <- !eq
+    v <- matrix(FALSE,
+        nrow=ifelse(is.vector(dat),1,nrow(dat)),
+        ncol=nrow(E))
+
+    if ( any(iq) ){
+        E[iq,ncol(E)] <- E[iq,ncol(E)] + tol 
+        v[,iq] <- violatedEdits.character(as.character(E[iq,]),dat)[,,drop=FALSE]
+    }
+    if ( any(eq) ){
+        nc <- ncol(E)    
+
+        Emin <- E[eq,]
+        Emin[,nc] <- Emin[,nc] - tol
+        emin <- gsub('==','>=',as.character(Emin))
+
+        Emax <- E[eq,]
+        Emax[,nc] <- Emax[,nc] + tol    
+        emax <- gsub('==','<=', as.character(Emax))
+        v[,eq] <- violatedEdits.character(emin,dat) | violatedEdits.character(emax,dat)
+    }
+
+    dimnames(v) <- list(record=rownames(dat),edit=rownames(E))
  
-    newviolatedEdits(!t(v))
+    newviolatedEdits(v)
 }
 
 #' @rdname violatedEdits

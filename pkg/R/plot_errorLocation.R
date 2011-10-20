@@ -25,13 +25,11 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
   vf <- colSums(x$adapt)
   # break variable names at 5th char.
   names(vf) <-  gsub('(.{5})','\\1\n',names(vf))
-# wrap long varnames when necessary
 
   varfreq <- sort(vf[vf>0]/N,decreasing=TRUE)
   barplot( varfreq[1:min(nvar,length(varfreq))]
          , main = "Errors per variable"
          , xlab = "Frequency"
-#         , ylab = "Variable"
          , horiz = TRUE
          , las = 1
          , ...
@@ -56,8 +54,11 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
     eps <- sqrt(.Machine$double.eps)
     du <- density(log(x$status$user+eps))
     de <- density(log(x$status$elapsed+eps))
+    du$F <- cumsum(du$y)*(du$x[2]-du$x[1])
+    de$F <- cumsum(de$y)*(de$x[2]-de$x[1])
     du$x  <- exp(du$x)
     de$x  <- exp(de$x)
+    par(mar=c(5,4,4,5)+.1)
     plot(de$x,de$y,
         log='x',
         type='l',
@@ -68,6 +69,22 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
         main='Duration of error localization'
     )
     lines(du,lwd=2,col='blue')
+    par(new=TRUE)
+
+    plot(de$x,de$F,
+        col='black',
+        lwd=2,
+        type='l',
+        lty=2,
+        log='x',
+        xaxt="n",
+        yaxt="n",
+        xlab="",
+        ylab="")
+    axis(4)
+    mtext("cumulative",side=4,line=3)
+    lines(du$x,du$F,lwd=2,lty=2,col='blue')
+    grid()
     # default horiz abline used by plot.density crosses image border.
     lines(c(min(de$x),max(de$x)),c(0,0),col='gray',lwd=0.1)
     legend('topright',
@@ -77,7 +94,8 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
         sub=paste(sum(x$status$maxDurationExceeded),'exeeded max. duration')
         ),
         col=c('black','blue','white'),
-        lwd=2    
+        lwd=2,
+        bg='white'    
     )
 
   # plot solutions degeneracy
@@ -107,4 +125,3 @@ secToHuman <- function(x){
 
 
 
-#plot(err)

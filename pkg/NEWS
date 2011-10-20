@@ -1,4 +1,5 @@
 version 1.8-0
+- violatedEdits.editmatrix more robust against NA's in records
 - plot method for arguments of class errorLocation, violatedEdits
 - errorLocalizer now throws error when edit set contains variables not encountered in record.
 - solved edge case in error localizer. $adapt would be NA if all variables were NA (now TRUE)

@@ -10,20 +10,31 @@
 #' For example, the number of solutions per record (degeneracy) per block is lost. To retain this 
 #' information do someting like \code{err <- list(); for ( b in blocks(E)) err <- c(err,localizeErrors(b,dat))}
 #'
-#' 
+#' By default, all weights are set equal to one (each variable is considered equally reliable). If a vector 
+#' of weights is passed, the weights are assumed to be in the same order as the columns of \code{dat}. By passing
+#' an array of weights (same dimension as \code{dat}) separate weights can be specified for each record.
+#'
 #'
 #' @param E an object of class \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param dat a \code{data.frame} with variables in E.
 #' @param useBlocks process error localization seperatly for independent blocks in E?
 #' @param verbose print progress to screen?
-#' @param ... options to be passed to \code{\link{errorLocalizer}}
+#' @param weight Vector of positive weights for every variable in \code{dat}, or 
+#'      an array of weights with the same dimensions as \code{dat}.
+#' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
-localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
+localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), ...){
     stopifnot(is.data.frame(dat))
-    if ( !useBlocks ) return(localize(E,dat,...))
+    if ( any(is.na(weight)) ) stop('Missing weights detected')    
+
+    if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
+        stop("Weight must be vector or array with dimensions equal to argument 'dat'")
+
+    if ( !useBlocks ) return(localize(E,dat,call=sys.call(), weight=weight,...))
+
     B  <- blocks(E)
     n <- length(B)
     i <- 0
@@ -36,7 +47,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
 
-        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(), ...)
+        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(),weight=weight, ...)
     }
     if (verbose) cat('\n')
     err
@@ -50,21 +61,15 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
 #' @param dat \code{data.frame}
 #' @param verbose \code{logical} print progress report during run?
 #' @param pretext \code{character} text to print before progress report
+#' @param weight vector or array of weights
 #' @param call call to include in \code{\link{errorLocation}} object
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(), weight=rep(1,ncol(dat)), ...){
+localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
 ## TODO: should we export this function?
-    if ( any(is.na(weight)) ) stop('Missing weights detected')    
-    weightperrecord <- FALSE
-    if (is.array(weight)){
-        if ( !all(dim(weight) == dim(dat)) ) stop("Weight must be vector or array with dimensions equal to argument 'dat'")
-        weightperrecord <- TRUE
-        W <- t(weight)
-    } 
-    if (!weightperrecord) wt <- weight
     
-
+    weightperrecord <- is.array(weight)
+    if ( !weightperrecord ) wt <- weight
     n <- nrow(dat)
     m <- ncol(dat)
     err <- array(NA,
@@ -81,21 +86,23 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight=rep(1,nco
             duration = c('user','system','elapsed')
         )
     )
-    weight <- rep(NA,n)
+    wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
     X <- t(dat)
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     for ( i in 1:n ){
-        if (verbose) cat(sprintf(fmt,pretext,i,n))  
-        
+        if (verbose){ 
+            cat(sprintf(fmt,pretext,i,n)) 
+            flush.console() 
+        }
         r <- X[,i]
-        if (weightperrecord) wt <- W[,i]
+        if (weightperrecord) wt <- weight[i,]
         bt <- errorLocalizer(E, r, weight=wt, ...)
         e <- bt$searchBest()
         if (!is.null(e) && !bt$maxdurationExceeded){
             err[i,] <- e$adapt
-            weight[i] <- e$w
+            wgt[i] <- e$w
         }
         degeneracy[i] <- bt$degeneracy
         duration[i,] <- getDuration(bt$duration)
@@ -104,7 +111,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight=rep(1,nco
     newerrorlocation(
         adapt=err,
         status = data.frame(
-            weight  = weight,
+            weight  = wgt,
             degeneracy=degeneracy,
             duration,
             maxDurationExceeded
