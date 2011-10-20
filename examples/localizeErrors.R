@@ -21,6 +21,7 @@ err$adapt
 # weight, number of equivalent solutions, timings,
 err$status
 
+
 ## Not run
 
 # Demonstration of verbose processing
@@ -47,6 +48,23 @@ plot(err)
 
 ## End(Not run)
 
+
+# Example with different weights for each record
+E <- editmatrix('x + y == z')
+dat <- data.frame(
+    x = c(1,1),
+    y = c(1,1),
+    z = c(1,1))
+
+# At equal weights, both records have three solutions (degeneracy): adapt x, y or z:
+localizeErrors(E,dat)$status
+
+# Set different weights per record (lower weight means lower reliability):
+w <- matrix(c(
+    1,2,2,
+    2,2,1),nrow=2,byrow=TRUE)
+
+localizeErrors(E,dat,weight=w)
 
 
 # an example with categorical variables

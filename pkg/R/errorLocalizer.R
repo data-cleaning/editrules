@@ -56,7 +56,7 @@ errorLocalizer <- function(E, x, ...){
 #' Localize errors in numerical data
 #'
 #' @method errorLocalizer editmatrix
-#' @param weight a \code{lengt(x)} positive weight vector
+#' @param weight a \code{lengt(x)} positive weight vector. The weights are assumed to be in the same order as the variables in \code{x}.
 #' @param maxadapt maximum number of variables to adapt
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
 #' maximum number of variables to adapt. 
@@ -72,7 +72,12 @@ errorLocalizer.editmatrix <- function(
             maxweight=sum(weight),
             maxduration=600,
             ...){
-    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
+    stopifnot(
+        is.numeric(weight), 
+        all(!is.na(weight)), 
+        all(weight>=0), 
+        length(weight)==length(x)
+    )
 
     if ( !isNormalized(E) ) E <- normalize(E)
     # missings must be adapted, others still have to be treated.
@@ -167,7 +172,13 @@ errorLocalizer.editarray <- function(
     maxweight=sum(weight),
     maxduration=600,
     ...){
-    stopifnot(is.numeric(weight), all(!is.na(weight)), all(weight>=0))
+    
+    stopifnot(
+        is.numeric(weight), 
+        all(!is.na(weight)), 
+        all(weight>=0), 
+        length(weight)==length(x)
+    )
     adapt <- is.na(x)
 
     vars <- getVars.editarray(E)

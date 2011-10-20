@@ -35,6 +35,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
             i <- i + 1
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
+
         err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(), ...)
     }
     if (verbose) cat('\n')
@@ -52,8 +53,16 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, ...){
 #' @param call call to include in \code{\link{errorLocation}} object
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(),...){
+localize <- function(E, dat, verbose, pretext, call=sys.call(), weight=rep(1,ncol(dat)), ...){
 ## TODO: should we export this function?
+    if ( any(is.na(weight)) ) stop('Missing weights detected')    
+    weightperrecord <- FALSE
+    if (is.array(weight)){
+        if ( !all(dim(weight) == dim(dat)) ) stop("Weight must be vector or array with dimensions equal to argument 'dat'")
+        weightperrecord <- TRUE
+        W <- t(weight)
+    } 
+    if (!weightperrecord) wt <- weight
     
 
     n <- nrow(dat)
@@ -79,9 +88,10 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(),...){
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     for ( i in 1:n ){
         if (verbose) cat(sprintf(fmt,pretext,i,n))  
-        # cat('\r',pretext,' record ',format(i,width=nchar(n)),' of ',n)
+        
         r <- X[,i]
-        bt <- errorLocalizer(E,r,...)
+        if (weightperrecord) wt <- W[,i]
+        bt <- errorLocalizer(E, r, weight=wt, ...)
         e <- bt$searchBest()
         if (!is.null(e) && !bt$maxdurationExceeded){
             err[i,] <- e$adapt

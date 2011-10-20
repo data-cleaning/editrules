@@ -24,7 +24,7 @@ test_that("Showing data errors works",{
    expect_equal(colnames(errors), rownames(edt))
    
    dimnames(errors) <- NULL
-   expect_equal(errors, matrix( c( FALSE, TRUE
+   expect_equal(errors[,,drop=FALSE], matrix( c( FALSE, TRUE
                                  , TRUE , FALSE
                                  )
                               , nrow=2
