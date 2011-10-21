@@ -138,27 +138,23 @@ newviolatedEdits <- function(x){
 
 #' Plot summary statistics on violatedEdits
 #' @method plot violatedEdits
-#' @param x \code{violatedEdits} object
-#' @param minfreq minimum frequency to be plotted
+#' @param x \code{violatedEdits} object.
+#' @param topn Top \code{n} edits to be plotted.
 #' @param ... parameters passed to \code{barplot} method.
 #' @export
-plot.violatedEdits <- function(x, minfreq=1, ...){
+plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
   N <- nrow(x)
   Nna <- sum(apply(is.na(x),1, all))
 
   editfreq <- sort(colSums(x, na.rm=TRUE), decreasing=TRUE)
-  editfreq <- editfreq[editfreq >= minfreq]
+  editfreq <- editfreq[1:topn]
   editfreq <- editfreq/N
 
-  x[is.na(x)] <- TRUE
-  errfreq <- tabulate(1+rowSums(x)) / N
-  names(errfreq) <- seq_along(errfreq) - 1
-  
-  xlim <- c(0, max(errfreq, editfreq))
+  xlim <- c(0, max(editfreq))
 
   oldpar <- par(mfrow=c(2,1))
   barplot( sort(editfreq, decreasing=TRUE), 
-         , main="Edit violation frequency"
+         , main=paste("Edit violation frequency of top",topn,"edits")
          , xlab = "Frequency"
          , ylab= "Edit"
          , horiz = TRUE
@@ -167,15 +163,27 @@ plot.violatedEdits <- function(x, minfreq=1, ...){
          , ...
          )
   
-  barplot( errfreq
-         , main="Observation violation frequency"
-         , xlab = "Frequency"
-         , ylab = "Number of violations"
-         , horiz = TRUE
-         , las= 1
-         , xlim = xlim
+  x[is.na(x)] <- TRUE
+  cnt <- table(rowSums(x))
+  ner <- as.integer(names(cnt))
+  cnt <- as.integer(cnt)
+  
+  noerr <- ner==0
+  nnoer <- sum(cnt[noerr],0)
+  ner <- ner[!noerr]
+  cnt <- cnt[!noerr]
+  lgcrit <- 50
+  lg <- ''
+  if ( max(ner) > lgcrit ) lg <- paste(lg,'x',sep='')
+  if ( max(cnt) > lgcrit ) lg <- paste(lg,'y',sep='')
+  plot( ner,cnt,
+         , main=  "Edit violations per record"
+         , xlab = "Number of violations"
+         , ylab = "Count"
+         , log=lg
          , ...
          )
+  mtext(paste(nnoer,'records with no violations'),side=3,line=0)
   par(oldpar)
 }
 
