@@ -60,6 +60,14 @@ test_that("NA's in data are handled correctly by violatededits.editmatrix",{
         c(e1=NA,e2=TRUE)
     )
     expect_identical(
+        violatedEdits(editmatrix(c('x>0','y==0')),c(x=NA,y=1))[,],
+        c(e1=NA,e2=TRUE)
+    )
+    expect_identical(
+        violatedEdits(editmatrix(c('x>0','y==0','x+y>=1')),c(x=NA,y=1))[,],
+        c(e1=NA,e2=TRUE,e3=NA)
+    )
+    expect_identical(
         violatedEdits(editmatrix(c('x==0','y==0')),data.frame(x=c(NA,1),y=c(1,NA)))[,],
         array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('e1','e2')))
     )

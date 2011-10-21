@@ -21,7 +21,10 @@
 plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
   oldpar <- par(mfcol=c(2,2))
   N <- nrow(x$adapt)
-  # plot errors per variable
+  if ( N <= 1 ) stop('Nothing to plot (single datapoint)')
+  #########################################################################
+  # PLOT ERRORS PER VARIABLE (1,1)
+  #########################################################################
   vf <- colSums(x$adapt)
   # break variable names at 5th char.
   names(vf) <-  gsub('(.{5})','\\1\n',names(vf))
@@ -35,14 +38,16 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
          , ...
          )
 
-   # plot errors per observation  
+  #########################################################################
+  # PLOT ERRORS PER OBSERVATION (2,1)
+  #########################################################################
    cnt <- table(rowSums(x$adapt))
    ns <- as.numeric(names(cnt))
    br <- integer(max(ns)+1)
    br[ns+1] <- cnt/N
    names(br) <- 0:max(ns) 
   barplot( br
-         , main = "Errors per observation"
+         , main = "Errors per record"
          , xlab = "Frequency"
          , ylab = "Number of errors"
          , horiz = TRUE
@@ -50,7 +55,10 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
          , ...
          )
 
-    # plot duration density
+  #########################################################################
+  # PLOT DURATION DENSITY AND CUMULATIVE DENSITY (1,2)
+  #########################################################################
+    # compute densisty in log-space
     eps <- sqrt(.Machine$double.eps)
     du <- density(log(x$status$user+eps))
     de <- density(log(x$status$elapsed+eps))
@@ -59,6 +67,7 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
     du$x  <- exp(du$x)
     de$x  <- exp(de$x)
     par(mar=c(5,4,4,5)+.1)
+    
     plot(de$x,de$y,
         log='x',
         type='l',
@@ -66,11 +75,10 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
         col='black',
         xlab='duration [seconds]',
         ylab='density',
-        main='Duration of error localization'
     )
     lines(du,lwd=2,col='blue')
     par(new=TRUE)
-
+    
     plot(de$x,de$F,
         col='black',
         lwd=2,
@@ -87,29 +95,28 @@ plot.errorLocation <- function(x, nvar=min(20,ncol(x$adapt)), ...){
     grid()
     # default horiz abline used by plot.density crosses image border.
     lines(c(min(de$x),max(de$x)),c(0,0),col='gray',lwd=0.1)
-    legend('topright',
-        legend= c(
-            paste('elapsed (total: ',secToHuman(sum(x$status$elapsed)),')', sep=''),
-            paste('user (total: ',secToHuman(sum(x$status$user))   ,')', sep=''),
-        sub=paste(sum(x$status$maxDurationExceeded),'exeeded max. duration')
-        ),
-        col=c('black','blue','white'),
-        lwd=2,
-        bg='white'    
-    )
 
-  # plot solutions degeneracy
-  tb <- table(x$status$degeneracy)
-  br <- integer(max(x$status$degeneracy))
-  br[as.numeric(names(tb))] <- tb
+    # 'legend': text colour corresponds to line colors
+    mtext(paste('Elapsed time (',secToHuman(sum(x$status$elapsed)),')', sep=''),side=3,line=2,adj=0,font=2)
+    mtext(paste('User time (',secToHuman(sum(x$status$user)),')', sep=''),side=3,line=1,col='blue',adj=0,font=2)
+    mtext(paste(sum(x$status$maxDurationExceeded),'exceeded max. duration'),side=3,line=0)
+
+  #########################################################################
+  # PLOT DURATION DENSITY AND CUMULATIVE DENSITY (1,2)
+  #########################################################################
+    tb <- table(x$status$degeneracy)
+    br <- integer(max(x$status$degeneracy))
+    br[as.numeric(names(tb))] <- tb
   
-  barplot(br,
-    log=ifelse(length(br)>30,'x',''),
-    names.arg=1:max(x$status$degeneracy),
-    main='Number of degenerate solutions',
-    xlab='degeneracy',
-    ylab='count')
-  par(oldpar)
+    barplot(br,
+        log=ifelse(length(br)>30,'x',''),
+        names.arg=1:max(x$status$degeneracy),
+        main='Number of degenerate solutions',
+        xlab='degeneracy',
+        ylab='count'
+    )
+    # reset plot parameters
+    par(oldpar)
 }
 
 
