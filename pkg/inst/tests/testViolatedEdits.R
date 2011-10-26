@@ -39,6 +39,13 @@ test_that("An empty editmatrix is always valid",{
         )[,,drop=FALSE],
         matrix(nrow=3, ncol=0)
     )
+    expect_equivalent(
+        violatedEdits(
+            editmatrix("x==1")[0],
+                c(x = 0,y = 0,z = 0)
+        )[,,drop=FALSE],
+        matrix(nrow=1, ncol=0)
+    )
 })
 
 test_that("violation of inequalities are detected",{

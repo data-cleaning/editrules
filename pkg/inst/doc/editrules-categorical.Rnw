@@ -117,7 +117,7 @@ analyses are often hindered by occurrences of incomplete or inconsistent raw
 data records. The process of locating and solving such errors is referred to as
 {\em data editing}, and it has been estimated that that National Statistics
 Institutes spend up to 40\% of their recourses on this process
-\citep{Waal:2011}. For this reason a lot of attention is paid to the
+\citep{waal:2011}. For this reason a lot of attention is paid to the
 development of data editing methods which can be automated so that the costs of
 statistics production may be reduced. The {\sf R} statistical environment
 already has numerous facilities for analyzing categorical data [see

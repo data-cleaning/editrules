@@ -1,3 +1,6 @@
+version 1.8-1
+- fixed a corner case bug for deducorrect
+
 version 1.8-0
 - violatedEdits.editmatrix more robust against NA's in records
 - plot method for arguments of class errorLocation, violatedEdits

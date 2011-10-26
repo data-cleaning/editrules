@@ -57,7 +57,10 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     if (tol < 0 ) stop("Argument tol must be nonnegative")
     if (nrow(E)==0){
-        v <- matrix(logical(0),nrow=nrow(dat),ncol=0)
+        v <- matrix( logical(0)
+                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
+                   , ncol=0
+                   )
         dimnames(v) <- list(record=rownames(dat),edit=NULL)
         return(newviolatedEdits(v))
     }
@@ -228,4 +231,13 @@ summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
 #' @export
 print.violatedEdits <- function(x,...){
   print(unclass(x))
+}
+
+#' as.data.frame violatedEdits
+#' @method as.data.frame violatedEdits
+#' @param x violatedEdits
+#' @param ... not used
+#' @export
+as.data.frame.violatedEdits <- function(x, ...){
+  as.data.frame(unclass(x),...)
 }
