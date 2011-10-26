@@ -66,7 +66,8 @@
 library(editrules)
 @
 
-\title{Manipulation of categorical data edits and error localization with the {\sf editrules} package\\
+\title{Manipulation of categorical data edits and error localization with the
+    {\sf editrules} package\\
 {\small package version \Sexpr{packageVersion("editrules")}}}
 \author{Mark van der Loo and Edwin de Jonge}
 \begin{document}
@@ -120,29 +121,32 @@ Institutes spend up to 40\% of their recourses on this process
 development of data editing methods which can be automated so that the costs of
 statistics production may be reduced. The {\sf R} statistical environment
 already has numerous facilities for analyzing categorical data [see
-\cite{husson:2010} for an overview]. Howeverm, the options for error
+\cite{husson:2010} for an overview]. However, the options for error
 localization and record correction are currently limited.
 
-This paper presents the functionality of the {\sf editrules} package which was
-developed to help closing the gap between raw data retrieval and data analyses
-with {\sf R}. The paper complements our previous paper \cite{jonge:2011} which
-discusses the treatment of numerical data. The algorithms underlying {\sf
-editrules}' functionality and the internal representation of categorical data
-are discussed as well. The main purpose of the {\sf editrules} package is to
-provide a user-friendly environment for handling data restriction rules
-(so-called {\em edit rules}), to apply those rules to data, and to localize
-erroneous fields in data based on the generalized principle of
-\cite{fellegi:1976}. The package does not offer functionality for data
-correction although it does facilitate the identification of possible values
-for erroneous fields.
+This paper presents the {\sf editrules} package which was developed to help
+closing the gap between raw data retrieval and data analyses with {\sf R}. The
+paper complements our previous paper \cite{jonge:2011} which discusses the
+treatment of numerical data. The algorithms underlying {\sf editrules}'
+functionality and the internal representation of categorical data are discussed
+as well. The main purpose of the {\sf editrules} package is to provide a
+user-friendly environment for handling data restriction rules, to apply those
+rules to data, and to localize erroneous fields in data based on the
+generalized principle of \cite{fellegi:1976}.  The package does not offer
+functionality for data correction although it does facilitate the
+identification of the set of possible values for erroneous fields.
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Categorical data and edit rules}
+%In the this section we describe the representation of edits and records as
+%implemented in the {\sf editrules} package. Subsection \ref{ssboolrep} describes
+%the background while subsection \ref{sseditarray} describes implementation
+%and gives coded examples.
 
-
-as well as some of
-the algorithms behind the functionality.
-
-
+%\subsection{Categorical data and edit rules}
 The value domain of categorical data records is usually limited by rules
 interrelating these variables.  The simplest examples are cases where the value
 of one variable excludes values of another variable. For example: if the age
@@ -179,30 +183,6 @@ variables, which impedes resolution of edit violations and renders manual
 manipulation infeasible. \citet{winkler:1999} mentions practical cases where
 statistical offices handle 250, 300 or 750 categorical edit rules for surveys.
 
-The {\sf R} package {\sf editrules}  offers functionality to define, manipulate
-and maintain sets of edit rules with relative ease. It also implements error
-localization functionality based on the generalized principle of
-\cite{fellegi:1976}, which states that one should find the smallest (weighted)
-number of variables whose values can be adapted such that all edits can be
-satisfied. Fellegi and Holt's principle should be considered as the last resort
-of data editing. It is useful in situations where a record violates one or more
-edits and there is no information about the cause of the error. In certain
-cases, the cause of error can be estimated with near certainty, for example in
-the case of typing errors in numerical data.  We refer the reader to
-\cite{scholtus:2008,scholtus:2009} and \cite{loo:2011} for such cases.
-
-The purpose of this paper is to give a technical overview of the representation
-and manipulation of edits in the {\sf editrules} package, as well as some coded
-examples to get new users started.  
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% SECTION 1
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Defining and checking categorical constraints}
-In the this section we describe the representation of edits and records as
-implemented in the {\sf editrules} package. Subsection \ref{ssboolrep} describes
-the background while subsection \ref{sseditarray} describes implementation
-and gives coded examples.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Boolean representation of records and edits}
