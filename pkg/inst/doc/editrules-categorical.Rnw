@@ -111,6 +111,38 @@ to get started without going through the theory can read subsections
 
 \section{Introduction}
 \label{sIntroduction}
+Many applications in statistics involve the analyses of categorical data. These
+analyses are often hindered by occurrences of incomplete or inconsistent raw
+data records. The process of locating and solving such errors is referred to as
+{\em data editing}, and it has been estimated that that National Statistics
+Institutes spend up to 40\% of their recourses on this process
+\citep{Waal:2011}. For this reason a lot of attention is paid to the
+development of data editing methods which can be automated so that the costs of
+statistics production may be reduced. The {\sf R} statistical environment
+already has numerous facilities for analyzing categorical data [see
+\cite{husson:2010} for an overview]. Howeverm, the options for error
+localization and record correction are currently limited.
+
+This paper presents the functionality of the {\sf editrules} package which was
+developed to help closing the gap between raw data retrieval and data analyses
+with {\sf R}. The paper complements our previous paper \cite{jonge:2011} which
+discusses the treatment of numerical data. The algorithms underlying {\sf
+editrules}' functionality and the internal representation of categorical data
+are discussed as well. The main purpose of the {\sf editrules} package is to
+provide a user-friendly environment for handling data restriction rules
+(so-called {\em edit rules}), to apply those rules to data, and to localize
+erroneous fields in data based on the generalized principle of
+\cite{fellegi:1976}. The package does not offer functionality for data
+correction although it does facilitate the identification of possible values
+for erroneous fields.
+
+
+
+
+as well as some of
+the algorithms behind the functionality.
+
+
 The value domain of categorical data records is usually limited by rules
 interrelating these variables.  The simplest examples are cases where the value
 of one variable excludes values of another variable. For example: if the age
