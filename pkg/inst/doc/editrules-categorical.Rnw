@@ -80,9 +80,9 @@ has  beta status} so bugs are likely.
 
 This paper is the second paper describing functionalities of the {\sf R} {\sf
 editrules} package.  The first paper \citep{jonge:2011} describes methods and
-implementation for handling numerical data while this paper is concerned with handling
-purely categorical data. The {\sf editrules} package is designed to offer a
-user-friendly interface for edit definition, manipulation, and error
+implementation for handling numerical data while this paper is concerned with
+handling purely categorical data. The {\sf editrules} package is designed to
+offer a user-friendly interface for edit definition, manipulation, and error
 localization based on the generalized paradigm of Fellegi and Holt for users of
 the {\sf R} language.  By providing  basic manipulations, such as are error
 checking, feasibility tests, variable elimination, value substitution, and
@@ -118,33 +118,36 @@ data records. The process of locating and solving such errors is referred to as
 {\em data editing}, and it has been estimated that that National Statistics
 Institutes spend up to 40\% of their recourses on this process
 \citep{waal:2011}. For this reason a lot of attention is paid to the
-development of data editing methods which can be automated so that the costs of
-statistics production may be reduced. The {\sf R} statistical environment
-already has numerous facilities for analyzing categorical data [see
-\cite{husson:2010} for an overview]. However, the options for error
-localization and record correction are currently limited.
+development of data editing methods which can be automated. Also, since data is
+often required to obey many interrelated rules, effective data editing is often
+too complex to perform manually. \citet{winkler:1999} mentions practical cases
+from statistical offices where each records have to obey 250, 300 or 750
+internal consistency checks. Although the {\sf R} statistical environment has
+numerous facilities for analyzing categorical data [See {\em e.g.}
+\citep{husson:2010}], the options for error localization and record correction
+are currently limited.
 
-This paper presents the {\sf editrules} package which was developed to help
-closing the gap between raw data retrieval and data analyses with {\sf R}. The
-paper complements our previous paper \cite{jonge:2011} which discusses the
-treatment of numerical data. The algorithms underlying {\sf editrules}'
-functionality and the internal representation of categorical data are discussed
-as well. The main purpose of the {\sf editrules} package is to provide a
-user-friendly environment for handling data restriction rules, to apply those
-rules to data, and to localize erroneous fields in data based on the
-generalized principle of \cite{fellegi:1976}.  The package does not offer
-functionality for data correction although it does facilitate the
-identification of the set of possible values for erroneous fields.
+This paper presents the {\sf editrules} package which is developed to help
+closing the gap between raw data retrieval and data analyses with {\sf R}.  The
+main purpose of the {\sf editrules} package is to provide a user-friendly
+environment for handling data restriction rules, to apply those rules to data,
+and to localize erroneous fields in data based on the generalized principle of
+\cite{fellegi:1976}.  The package does not offer functionality for data but it
+facilitates the identification of the set of possible values for erroneous
+fields.
+
+This paper complements our previous paper \citep{jonge:2011} which discusses
+the treatment of numerical data. We describe the algorithms underlying {\sf
+editrules}' functionality and the internal representation of categorical data.
+Examples in {\sf R} code are given throughout the text to help new users to
+getting started with the package.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Categorical data and edit rules}
-%In the this section we describe the representation of edits and records as
-%implemented in the {\sf editrules} package. Subsection \ref{ssboolrep} describes
-%the background while subsection \ref{sseditarray} describes implementation
-%and gives coded examples.
 
 %\subsection{Categorical data and edit rules}
 The value domain of categorical data records is usually limited by rules
@@ -152,9 +155,20 @@ interrelating these variables.  The simplest examples are cases where the value
 of one variable excludes values of another variable. For example: if the age
 class of a person is ``child'', then (by law) the marital status cannot be
 ``married''. In survey or administrative data, violations of such rules are
-frequently encountered. Resolving such violations is an important step prior to 
+frequently encountered. Resolving such violations is an important step prior to
 data analysis and estimation.
 
+In the this section we describe the representation of edits and records as
+implemented in the {\sf editrules} package. Subsection \ref{ssboolrep}
+describes the background while subsection \ref{sseditarray} describes
+implementation and gives coded examples.
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Boolean representation of records and edits}
+\label{ssboolrep}
 A categorical data record $v$ with $n$ variables may be defined as an
 element of the Cartesian product space $D$ (for domain):\index{record!value domain}
 \begin{equation}
@@ -178,15 +192,6 @@ zeros} since each rule implies that one or more cells in the $d_1\times
 d_2\times\cdots \times d_n$ contingency table must be zero. A record is {\em
 valid} if it satisfies every edit imposed on $D$.
 
-Large, complex surveys may consist of hundreds of interrelated rules and
-variables, which impedes resolution of edit violations and renders manual
-manipulation infeasible. \citet{winkler:1999} mentions practical cases where
-statistical offices handle 250, 300 or 750 categorical edit rules for surveys.
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Boolean representation of records and edits}
-\label{ssboolrep}
 Categorical records may be represented as  a vector of boolean values. A
 boolean vector of dimension $d$ is an element of the boolean algebra 
 \index{boolean algebra}
@@ -234,6 +239,7 @@ The record $r=({\sf married},{\sf adult},{\sf partner})$ has boolean representat
 \begin{equation}
 \rho(r) = (1,0,0,0)_1\oplus(0,1)_2\oplus(1,0,0)_3 = (1,0,0,0,0,1,1,0,0).
 \end{equation}
+\hfill$\Box$
 \end{example}
 
 An edit $e$ is a subset of $D$ which can be written as the Cartesian product \index{edit}
