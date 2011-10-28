@@ -112,35 +112,45 @@ to get started without going through the theory can read subsections
 
 \section{Introduction}
 \label{sIntroduction}
-Many applications in statistics involve the analyses of categorical data. These
-analyses are often hindered by occurrences of incomplete or inconsistent raw
+Many applications in statistics involve the analysis of categorical data. These
+analysis are often hindered by occurrences of incomplete or inconsistent raw
 data records. The process of locating and solving such errors is referred to as
 {\em data editing}, and it has been estimated that that National Statistics
-Institutes spend up to 40\% of their recourses on this process
+Institutes spend up to 40\% of their resources on this process
 \citep{waal:2011}. For this reason a lot of attention is paid to the
-development of data editing methods which can be automated. Also, since data is
-often required to obey many interrelated rules, effective data editing is often
-too complex to perform manually. \citet{winkler:1999} mentions practical cases
-from statistical offices where each records have to obey 250, 300 or 750
-internal consistency checks. Although the {\sf R} statistical environment has
-numerous facilities for analyzing categorical data [See {\em e.g.}
-\citep{husson:2010}], the options for error localization and record correction
-are currently limited.
+development of data editing methods which can be automated. Also, since data
+are often required to obey many interrelated rules, effective data editing can
+be too complex to perform manually. \citet{winkler:1999} mentions practical
+cases where records have to obey 250, 300 or even 750 internal consistency
+rules.  Although the {\sf R} statistical environment has numerous facilities
+for analyzing categorical data [See {\em e.g.} \citet{husson:2010}], the
+options for error localization and record correction are currently limited.
 
-This paper presents the {\sf editrules} package which is developed to help
-closing the gap between raw data retrieval and data analyses with {\sf R}.  The
+This paper presents the {\sf editrules} package which was developed to help
+closing the gap between raw data retrieval and data analysis with {\sf R}.  The
 main purpose of the {\sf editrules} package is to provide a user-friendly
 environment for handling data restriction rules, to apply those rules to data,
 and to localize erroneous fields in data based on the generalized principle of
-\cite{fellegi:1976}.  The package does not offer functionality for data but it
-facilitates the identification of the set of possible values for erroneous
-fields.
+\cite{fellegi:1976}.  The package does not offer functionality for data
+correction but it facilitates the identification of the set of possible values
+for erroneous fields.
 
-This paper complements our previous paper \citep{jonge:2011} which discusses
-the treatment of numerical data. We describe the algorithms underlying {\sf
-editrules}' functionality and the internal representation of categorical data.
-Examples in {\sf R} code are given throughout the text to help new users to
-getting started with the package.
+Under the hood, the package has several innovations with respect to the
+branch-and-bound algorithm for error localization in categorical data described
+in \cite{waal:2011}. The most important innovation is a variable elimination
+algorithm which allows for on-the-fly redundant rule removal. This algorithm
+appears to be new to the field of data editing. To facilitate the description
+of algorithms and their properties, a formulation of categorical edit
+manipulations in terms of the so-called resolution operator is introduced in
+this paper as well. This formulation allows for elegant algebraic proofs of
+properties of the algorithms and rule manipulations applied in the {\sf
+editrules} package. 
+
+The current paper complements our previous paper on the treatment of numerical
+data \citep{jonge:2011}. We describe the algorithms underlying
+{\sf editrules}' functionality and the internal representation of categorical
+data.  Examples in {\sf R} code are given throughout the text to help new users
+to get started with the package.
 
 
 
@@ -158,10 +168,10 @@ class of a person is ``child'', then (by law) the marital status cannot be
 frequently encountered. Resolving such violations is an important step prior to
 data analysis and estimation.
 
-In the this section we describe the representation of edits and records as
-implemented in the {\sf editrules} package. Subsection \ref{ssboolrep}
-describes the background while subsection \ref{sseditarray} describes
-implementation and gives coded examples.
+%In the this section we describe the representation of edits and records as
+%implemented in the {\sf editrules} package. Subsection \ref{ssboolrep}
+%describes the background while subsection \ref{sseditarray} describes
+%implementation and gives coded examples.
 
 
 
