@@ -55,6 +55,13 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
     if ( length(x) == 1 ) {
        # corner case: the always FALSE edit (array must be TRUE at every category)
        if ( is.na(val) && !x[[1]] ) return(NULL)
+       if (is.logical(x)){
+         if (val == x) { return(edit)
+         }else { 
+           # if this happens the statements is always true, so delete it...
+           return (logical())
+         }
+       }
        var <- if (useLogical) as.character(x)
               else paste(x,"TRUE",sep=sep)
        edit[var] <- val
