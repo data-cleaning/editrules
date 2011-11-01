@@ -82,20 +82,26 @@ library(editrules)
 the full vignette. At the moment, {\bf functionality for treating categorical data
 has  beta status} so bugs are likely.
 }
+Analyses of categorical data is often hindered by the occurrence of
+inconsistent or incomplete raw data. Although {\sf R} has many features for
+analyzing categorical data, the functionality for error localization and
+correction are currently limited.  The {\sf editrules} package is designed to
+offer a user-friendly interface for edit definition, manipulation, and error
+localization based on the generalized paradigm of Fellegi and Holt.  The
+package is a toolbox, providing basic functionality such as rule definition,
+error checking, rule consistency tests and more. On top of that, the package
+includes algorithms which localize errors based on the generalized paradigm of
+Fellegi and Holt. 
+
+Under the hood, the package has several innovations of which the most important
+one is a variable elimination method which -as far as the authors know- is new
+to the field of data editing. The paper also introduces an elegant description
+of edit rule manipulation in terms of the resolution so-called operator.
 
 This paper is the second paper describing functionalities of the {\sf R} {\sf
 editrules} package.  The first paper \citep{jonge:2011} describes methods and
 implementation for handling numerical data while this paper is concerned with
-handling purely categorical data. The {\sf editrules} package is designed to
-offer a user-friendly interface for edit definition, manipulation, and error
-localization based on the generalized paradigm of Fellegi and Holt for users of
-the {\sf R} language.  By providing  basic manipulations, such as error
-checking, feasibility tests, variable elimination, value substitution, and
-redundancy checks, this package offers a tool set which may be used to
-investigate and maintain large sets of categorical or numerical edit sets.  The
-variable elimination method seems new to the authors and a novel formulation of
-rule manipulation operations in terms of the resolution operator is introduced.
-Examples in {\sf R} code are given to assist new users in getting started.
+handling categorical data. 
 \end{abstract}
 
 \newpage
@@ -524,29 +530,6 @@ contrary to the  {\sf if()} form, it allows for vectorized checking of edits,
 which is why it is used internally.
 %
 
-
-%\begin{table}
-%\begin{threeparttable}
-%\caption{Functions and operators that may be used to define edits with {\sf editarray} }
-%\label{tabOperators}
-%\begin{tabular}{ll}
-%\hline
-%Operator & Description\\
-%\hline
-%{\sf \%in\%} & Set membership$^*$  \\
-%{\sf ==}     & Equality$^*$ \\
-%{\sf if( <expression> ) <expression> } & conditional statement\\
-%{\sf c(\verb"'"<cat1>\verb"'",\verb"'"<cat2>\verb"'",...)} & categories, {\sf character} or {\sf logical}\\
-%{\sf \&\&}, {\sf \&}    & logical {\sc and}\\
-%{\sf ||}, {\sf |}      & logical {\sc or}\\
-%{\sf !}       & logical {\sc not}\\
-%{\sf ()}      & brackets\\
-%\hline
-%\end{tabular}
-%$^*${\small Right-hand side is evaluated.}
-%\end{threeparttable}
-%\end{table}
-%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Coercion, checking, redundancy and feasibility}
