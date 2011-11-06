@@ -43,24 +43,21 @@
 editmatrix <- function( editrules
                       , normalize = TRUE
 					       ){   
-   if (is.character(editrules)){
+   if (is.character(editrules) || is.expression(editrules)){
       edit <- editrules
       name <- NULL
       description <- NULL
       editrules <- NULL
-    }
-    else if (is.data.frame(editrules)){
+    } else if (is.data.frame(editrules)){
       if (is.null(editrules$edit)){
          stop("The supplied data.frame misses the column 'edit'.\nSee ?editmatrix for a valid input specification")
       }            
       name <- editrules$name
       edit <- as.character(editrules$edit)
       description <- editrules$description
-     }            
-    
-   else {
+    } else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
-   }
+    }
 
     edts <- parseEdits(edit, type="num")   
   	if (is.null(name)){
@@ -243,7 +240,7 @@ as.character.editmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 as.expression.editmatrix <- function(x, ...){
   return(
-     tryCatch(parse(text=as.character(x)), 
+     tryCatch(parse(text=as.character(x, ...)), 
          error=function(e){
              stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
          }

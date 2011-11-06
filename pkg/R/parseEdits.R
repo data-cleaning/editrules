@@ -11,11 +11,15 @@
 #'
 #' @export
 parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
+     if (is.expression(E)){
+       edits <- E
+     } else {
      edits <- 
         tryCatch(parse(text=E), 
             error=function(e){
                 stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
             })
+     }
      type <- match.arg(type)
      if (type=="all"){
        return(edits)

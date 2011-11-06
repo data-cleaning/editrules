@@ -212,8 +212,26 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 #'
 #' @export 
 as.data.frame.editarray <- function(x, ...){
-    edts <- as.character(x)
+    edts <- as.character(x, ...)
     data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
+}
+
+#' Coerce an editarray to R expressions
+#'
+#' Generates an R \code{expression} vector that can be used to check data using \code{\link{eval}}.
+#' @export
+#' @method as.expression editarray
+#'
+#' @param x editarray object to be parsed
+#' @param ... further arguments passed to or from other methods.
+as.expression.editarray <- function(x, ...){
+  return(
+    tryCatch(parse(text=as.character(x, ...)), 
+             error=function(e){
+               stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
+             }
+             )
+    )
 }
 
 

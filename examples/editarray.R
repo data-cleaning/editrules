@@ -12,10 +12,10 @@ E
 summary(E)
 
 # A yes/no variable may also be modeled as a logical:
-editarray(c(
-    "gender \%in\% c('male','female')",
-    "pregnant \%in\% c(TRUE, FALSE)",
-    "if( gender == 'male' ) pregnant == FALSE"
+editarray(expression(
+    gender \%in\% c('male','female'),
+    pregnant \%in\% c(TRUE, FALSE),
+    if( gender == 'male' ) pregnant == FALSE
     )
 )
 

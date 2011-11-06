@@ -2,6 +2,10 @@
 E <- editmatrix(c("x+3*y==2*z", "x==z"))
 print(E)
 
+# Using a expression vector to define contraints
+E <- editmatrix(expression(x+3*y==2*z, x==z))
+print(E)
+
 # an editmatrix also has a summary method:
 summary(E)
 
