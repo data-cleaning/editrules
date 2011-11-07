@@ -11,8 +11,9 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
     and parsed to an internal (matrix-like format). Rules can be manipulated with
     variable elimination and value substitution methods, allowing for feasibility checks
     and more. Data can be tested against the rules and erroneous fields can be found based
-    on Fellegi and Holt's generalized principle.
-Version: 1.10-0
+    on Fellegi and Holt's generalized principle and rules can be visualized with the igraph
+    package.
+Version: 1.7-1
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
-Suggests: lpSolveAPI, iterators, igraph
+Suggests: lpSolveAPI,iterators, igraph
