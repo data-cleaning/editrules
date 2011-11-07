@@ -54,3 +54,14 @@ test_that("value substitution for categorical data",{
     
 
 })
+
+test_that("value substitution works for boolean data",{
+    E <- editarray(c(
+    "g %in% c('m','f')",
+    "p %in% c(TRUE, FALSE)"))
+   expect_true(nrow(getArr(substValue(E,'p',TRUE)))==0)
+})
+
+
+
+
