@@ -16,4 +16,4 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
 Version: 1.9-0
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
-Suggests: lpSolveAPI,iterators, igraph
+Suggests: lpSolveAPI, iterators, igraph

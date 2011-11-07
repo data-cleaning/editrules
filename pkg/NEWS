@@ -1,3 +1,8 @@
+version 1.9-0
+- Parser for categorical edits accepts edits in the form "if ( <set expression> ) FALSE"
+- Parser for categorical edits accepts '&' as well as '&&'
+- corner case in reduce.editmatrix: now handles empty inputmatrices.
+
 version 1.8-1
 - fixed a corner case bug for deducorrect
 

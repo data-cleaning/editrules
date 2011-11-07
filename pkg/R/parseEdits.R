@@ -94,11 +94,11 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         edit[var] <- !val
     } else if (op == "!") {
         edit <- parseCat(x[[2]],!val,  edit, sep, useLogical)
-    } else if (op == "&&"){
+    } else if (op %in% c("&", "&&")){
         if (is.na(val))
            val <- TRUE
         if (val == FALSE){
-            stop("Operator '&&' not allowed in 'then' clause")
+            stop("Operators '&' and '&&' not allowed in 'then' clause")
         }
         edit <- parseCat(x[[2]],val, edit, sep, useLogical)
         edit <- parseCat(x[[3]],val, edit, sep, useLogical)
