@@ -23,7 +23,7 @@ reduce <- function(E,...){
 #' @rdname reduce
 #' @export
 reduce.editmatrix  <- function(E, tol=sqrt(.Machine$double.eps),...){
- 
+  if ( nrow(E) == 0 ) return(neweditmatrix(matrix(numeric(0)),character(0)))
   m <- as.matrix(E)
   if ( tol > 0 ) m[abs(m) < tol] <- 0
   B <- m != 0
