@@ -15,6 +15,19 @@ test_that("editmatrix works correcly with character",{
    expect_equivalent(mat[3,], c(1,-1,-2,1))
 })
 
+test_that("editmatrix works correcly with expression",{
+  cond <- expression( x == y
+             , z + w == y + x
+             , x + z == y + 2*w
+             )
+  
+  mat <- editmatrix(cond)
+  mat <- getA(mat)
+  expect_equivalent(mat[1,], c(1,-1,0,0))
+  expect_equivalent(mat[2,], c(-1,-1,1,1))
+  expect_equivalent(mat[3,], c(1,-1,-2,1))
+})
+
 test_that("editmatrix can simplify",{
    cond <- c( "2*x == x + y"
             , "z + 2 == y + 3"
