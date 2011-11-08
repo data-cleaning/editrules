@@ -106,7 +106,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
         }
         degeneracy[i] <- bt$degeneracy
         duration[i,] <- getDuration(bt$duration)
-        maxDurationExceeded <- bt$maxdurationExceeded
+        maxDurationExceeded[i] <- bt$maxdurationExceeded
     }
     newerrorlocation(
         adapt=err,

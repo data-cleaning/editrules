@@ -8,6 +8,9 @@
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
 #' @keywords internal
 cateditmatrix <- function(x, sep=":"){
+    if (is.editarray(x)) {
+      x <- as.character(x,datamodel=FALSE)
+    }
     edts <- parseEdits(x)
     
     catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE)
@@ -59,10 +62,11 @@ parseCatEdit <- function(el){
   }
   val
 }
-# ### examples....
+
+ ### examples....
 
 # #civilStatusLevels <- c("married","unmarried","widowed","divorced")
-# 
+# # 
 # x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
 #       , "if (age == '< 16') civilStatus=='unmarried'"
 # #      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated

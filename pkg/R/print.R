@@ -42,4 +42,24 @@ print.editmatrix <- function(x, ...){
       )
 }
 
+#' print cateditmatrix
+#'
+#' @export
+#' @method print cateditmatrix
+#'
+#' @param x cateditmatrix object to be printed
+#' @param ... further arguments passed to or from other methods.
+#' @keywords internal
+print.cateditmatrix <- function(x, ...){
+  cat("Edit matrix:\n")
+  print(as.data.frame(x), ...)
+  cat("\nEdit rules:\n")
+  info <- editrules(x)
+  desc <- paste("[",info$description,"]")
+  desc <- ifelse(info$description=="","", desc)
+  info$edit <- sub("<=", "=>", info$edit)
+  cat( paste( info$name,":", info$edit, desc, collapse="\n")
+     , "\n"
+     )
+}
 

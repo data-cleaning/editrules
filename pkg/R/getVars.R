@@ -20,6 +20,15 @@ getVars.editmatrix <- function(E){
   colnames(E)[-ncol(E)]
 }
 
+#' Returns the variable names of an (in)equality \code{editmatrix} E
+#'
+#' @export
+#' @method getVars editmatrix
+#' @keywords internal
+getVars.cateditmatrix <- function(E){
+  unique(sub(":.+", "", colnames(E)[-ncol(E)]))
+}
+
 #' get variable names in editarray
 #'
 #' @export
