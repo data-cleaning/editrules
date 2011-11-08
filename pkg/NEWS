@@ -3,6 +3,7 @@ version 1.9-0
 - Parser for categorical edits accepts '&' as well as '&&'
 - corner case in reduce.editmatrix: now handles empty inputmatrices.
 - substValue.editarray now works for boolean values
+- Parser for all edits accepts expression vector
 
 version 1.8-1
 - fixed a corner case bug for deducorrect

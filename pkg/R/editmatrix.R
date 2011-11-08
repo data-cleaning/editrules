@@ -6,9 +6,10 @@
 #' Each row in the resulting editmatrix represents an linear (in) equality.
 #' Each column in the resulting editmatrix represents a variable.
 #'
-#' There are two forms of creating an editmatrix:
+#' There are three forms of creating an editmatrix:
 #' \enumerate{ 
 #'    \item a \code{character} vector with (in)equalities written in R syntax
+#'    \item a \code{expression} vector with (in)equalities written in R syntax
 #'    \item a \code{data.frame} with three columns:
 #'       \itemize{
 #'            \item name = a \code{character} with the name of each rule
@@ -18,10 +19,11 @@
 #'      Typically these rules are stored in a external csv file (or database). 
 #' }
 #'
-#' The second form is the prefered form, because it allows the documentation of constraints. This
+#' The third form is the prefered form, because it allows the documentation of constraints. This
 #' may be very useful when the incorrect observations are analyzed.
-#' The function \code{\link{editrules}} creates/extracts the second form, which can be used to store edit rules
-#' externally or to recreate an editmatrix later on.
+#' The function \code{\link{editrules}} creates/extracts the third form, which can be used to store edit rules
+#' externally or to recreate an editmatrix later on. Functions \code{\link{as.character}} and \code{\link{as.expression}} extract
+#' the first and second form.
 #'
 #' The matrix is created by retrieving the coefficients of the variables in the equalities.
 #' i.e. \code{x == y}   results in  \code{c(x=1, y=-1)}
@@ -36,7 +38,7 @@
 #' @example ../examples/editmatrix.R
 #'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
-#'        a \code{character} with (in)equalities written in R syntax
+#'        a \code{character} or \code{expression} with (in)equalities written in R syntax
 #' @param normalize \code{logical} specifying if all edits should be transformed (see description)
 #'
 #' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
