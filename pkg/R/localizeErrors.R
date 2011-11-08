@@ -21,19 +21,20 @@
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an array of weights with the same dimensions as \code{dat}.
+#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
-localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), ...){
+localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), method=c("localizer", "mip"), ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
 
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
         stop("Weight must be vector or array with dimensions equal to argument 'dat'")
 
-    if ( !useBlocks ) return(localize(E,dat,call=sys.call(), weight=weight,...))
+    if ( !useBlocks ) return(localize(E,dat,call=sys.call(), weight=weight, method, ...))
 
     B  <- blocks(E)
     n <- length(B)
@@ -47,7 +48,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
 
-        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(),weight=weight, ...)
+        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(),weight=weight, method, ...)
     }
     if (verbose) cat('\n')
     err
@@ -62,10 +63,11 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @param verbose \code{logical} print progress report during run?
 #' @param pretext \code{character} text to print before progress report
 #' @param weight vector or array of weights
+#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
 #' @param call call to include in \code{\link{errorLocation}} object
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
+localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, method=c("localizer", "mip"), ...){
 ## TODO: should we export this function?
     
     weightperrecord <- is.array(weight)
@@ -91,22 +93,43 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
     maxDurationExceeded <- logical(n)
     X <- t(dat)
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
-    for ( i in 1:n ){
+    method <- match.arg(method)
+    if (method == "localizer"){
+      for ( i in 1:n ){
+          if (verbose){ 
+              cat(sprintf(fmt,pretext,i,n)) 
+              flush.console() 
+          }
+          r <- X[,i]
+          if (weightperrecord) wt <- weight[i,]
+          bt <- errorLocalizer(E, r, weight=wt, ...)
+          e <- bt$searchBest()
+          if (!is.null(e) && !bt$maxdurationExceeded){
+              err[i,] <- e$adapt
+              wgt[i] <- e$w
+          }
+          degeneracy[i] <- bt$degeneracy
+          duration[i,] <- getDuration(bt$duration)
+          maxDurationExceeded[i] <- bt$maxdurationExceeded
+      }
+    } else if (method == "mip"){
+      for ( i in 1:n ){
         if (verbose){ 
-            cat(sprintf(fmt,pretext,i,n)) 
-            flush.console() 
+          cat(sprintf(fmt,pretext,i,n)) 
+          flush.console() 
         }
         r <- X[,i]
         if (weightperrecord) wt <- weight[i,]
-        bt <- errorLocalizer(E, r, weight=wt, ...)
-        e <- bt$searchBest()
-        if (!is.null(e) && !bt$maxdurationExceeded){
-            err[i,] <- e$adapt
-            wgt[i] <- e$w
+        le <- localize_mip_rec(E, r, weight=wt, ...)
+        print(le)
+        if (!le$maxdurationExceeded){
+          err[i,] <- le$adapt
+          wgt[i] <- le$w
         }
-        degeneracy[i] <- bt$degeneracy
-        duration[i,] <- getDuration(bt$duration)
-        maxDurationExceeded[i] <- bt$maxdurationExceeded
+        degeneracy[i] <- NA
+        duration[i,] <- getDuration(le$duration)
+        maxDurationExceeded[i] <- le$maxdurationExceeded
+      }      
     }
     newerrorlocation(
         adapt=err,
@@ -117,6 +140,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
             maxDurationExceeded
             ),
         call=call,
+        method=method,
         )
 }
 

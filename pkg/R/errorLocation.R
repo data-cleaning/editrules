@@ -38,12 +38,13 @@
 #' @param timestamp \code{character} returned by \code{date()}.
 #'
 #' @keywords internal
-newerrorlocation <- function(adapt, status, call=sys.call(-1), user=Sys.info()["user"], timestamp=date()){
+newerrorlocation <- function(adapt, status, call=sys.call(-1), method, user=Sys.info()["user"], timestamp=date()){
     structure(
         list(
             adapt  = adapt,
             status = status,
             call = call,
+            method = method,
             user = user,
             timestamp = timestamp
         ),
@@ -61,6 +62,7 @@ newerrorlocation <- function(adapt, status, call=sys.call(-1), user=Sys.info()["
 print.errorLocation <- function(x,...){
     cat("Object of class 'errorLocation' generated at",x$timestamp,'\n')
     cat("call :", as.character(as.expression(x$call)),'\n')
+    cat("method :", x$method,'\n')
     cat("slots:",paste("$",names(x),sep=''),'\n\n')
     
     if ( nrow(x$adapt) <= 10 ){ 
@@ -114,6 +116,7 @@ print.errorLocation <- function(x,...){
             maxDurationExceeded = x$status$maxDurationExceeded | y$status$maxDurationExceeded
             ),
         call = call,
+        method=unique(c(x$method, y$method)),
         user = unique(c(x$user,y$user)),
         timestamp=date()
     )
