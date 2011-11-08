@@ -7,10 +7,12 @@
 #' @param x \code{character} with categorical edits
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
 #' @keywords internal
-cateditmatrix <- function(x){
+cateditmatrix <- function(x, sep=":"){
     edts <- parseEdits(x)
     
-    catedits <- lapply(edts, parseCatEdit)
+    catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE)
+    catedits <- lapply(catedits, parseCatEdit)
+    
     categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
 
@@ -42,8 +44,8 @@ cateditmatrix <- function(x){
 #' @param e \code{expression} with a single edit
 #' @return named \code{numeric} with coefficients
 #' @keywords internal
-parseCatEdit <- function(e){
-  el <- parseCat(e, useLogical=TRUE)
+parseCatEdit <- function(el){
+  #el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
     val <- rep(1, length(el)+1)
     names(val) <- c(names(el), "b")
@@ -59,7 +61,7 @@ parseCatEdit <- function(e){
 }
 # ### examples....
 
-# civilStatusLevels <- c("married","unmarried","widowed","divorced")
+# #civilStatusLevels <- c("married","unmarried","widowed","divorced")
 # 
 # x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
 #       , "if (age == '< 16') civilStatus=='unmarried'"
