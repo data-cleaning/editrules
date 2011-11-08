@@ -235,7 +235,7 @@ as.lp.editmatrix <- function(E){
    lps
 }
 
-ascat <- function(x){
+asCat <- function(x){
   nms <- paste(names(x),x, sep=":")
   l <- rep(TRUE,length(nms))
   names(l) <- l
@@ -279,6 +279,6 @@ ascat <- function(x){
 #   ))
 # Ec
 # r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
-# ascat(r)
+# asCat(r)
 # localize_mip_rec(Ec, r)
 # 

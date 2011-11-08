@@ -42,6 +42,19 @@ cateditmatrix <- function(x, sep=":"){
     E
 }
 
+#' Coerce an cateditmatrix to a \code{character} vector
+#'
+#' Derives readable editrules from an editmatrix.
+#' @export
+#' @method as.character cateditmatrix
+#'
+#' @param x cateditmatrix object to be printed
+#' @param ... further arguments passed to or from other methods.
+as.character.cateditmatrix <- function(x, ...){
+  class(x) <- "editmatrix"
+  as.character(x)
+}
+
 #' parse categorial edit
 
 #' @param e \code{expression} with a single edit
