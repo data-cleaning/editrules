@@ -60,6 +60,7 @@ substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
     ind <- getInd(E)
     sep=getSep(E)
     A <- getArr(E)
+    value <- as.character(value)
     for ( i in 1:length(var) ){
         vr <- var[i]
         vl <- value[i]
