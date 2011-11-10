@@ -24,7 +24,7 @@ buildELMatrix <- function(E,x,weight,...){
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
 #' @keywords internal
-buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x))){
+buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x)), xlim=1000*cbind(-abs(x), abs(x))){
   vars <- getVars(E)
   x <- x[vars]
   weight <- weight[match(vars, names(x))]
@@ -34,13 +34,14 @@ buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x))){
   adaptvars <- paste("adapt", vars, sep=".")
   adaptidx <- seq_along(vars) + nvars
   
+  ub <- xlim[,2]
+  lb <- xlim[,1]
   # TODO get upperbounds and lowerbounds present in E and put them in the bounds
   # assume that boundary for each variable is at most 1000 times higher than given value 
-    ub = 1000 * abs(x) #heuristic
-    ub[is.na(ub)] <- .Machine$integer.max - 1
-    ub[ub < 1000] <- 1000 # to cope with very small (or 0) values
-    lb <- -ub
-    x[is.na(x)] <- ub[is.na(x)] + 1 # put value out of bound
+  ub[is.na(ub)] <- .Machine$integer.max - 1
+  ub[ub < 1000] <- 1000 # to cope with very small (or 0) values
+  lb <- -ub
+  x[is.na(x)] <- ub[is.na(x)] + 1 # put value out of bound
   
   A <- getA(E)
   
@@ -87,11 +88,15 @@ buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x))){
   
   names(lb) <- names(ub) <- vars
   names(objfn) <- getVars(Eel)
+  binvars <- which(objfn > 0)
+  xlim <- cbind(lower=lb, upper=ub)
   
   list( E = Eel
       , objfn = objfn
       , lb=lb
       , ub=ub
+      , binvars=binvars
+      , xlim=xlim
       )
 }
 
@@ -167,12 +172,17 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   lb[] <- 0
   ub[] <- 1
   objfn[] <- 0
+  xlim <- cbind(lower=objfn, upper=objfn+1)
   objfn[adaptidx] <- weight
+  
+  binvars <- seq_along(objfn)
     
   list( E = Eel
       , objfn = objfn
       , lb = lb
       , ub = ub
+      , xlim = xlim
+      , binvars=binvars
       )
 }
 
@@ -185,12 +195,12 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 #' @return list with w, adapt and x_c
 #' @keywords internal
 localize_mip_rec <- function( E
-                                  , x
-                                  , weight=rep(1, length(x))
-                                  , maxduration=600
-                                  , verbose="neutral"
-                                  , ...
-                                  ){
+                            , x
+                            , weight=rep(1, length(x))
+                            , maxduration=600
+                            , verbose="neutral"
+                            , ...
+                            ){
    checklpSolveAPI()
    
    if (is.editarray(E)){
@@ -210,8 +220,8 @@ localize_mip_rec <- function( E
    ops <- getOps(E)
    lps <- as.lp.editmatrix(E)
    
-   set.bounds(lps, lower=elm$lb, upper=elm$ub, columns=1:length(elm$lb))
-   set.type(lps, columns=adaptidx , "binary")
+   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:length(elm$lb))
+   set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
    
     # move univariate constraints into bounds
@@ -273,21 +283,21 @@ asCat <- function(x){
 #                )
 # 
 # x <- c(p=755,c=125,t=200)
-# 
-# localize_mip_rec(Et, x)
-# 
-# x <- c(p=75,c=125,t=NA)
-# localize_mip_rec(Et, x)
-# 
-# 
-# 
-# Es <- c(
-#   "age %in% c('under aged','adult')",
-#   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
-#   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
-#   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-#   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
-#   )
+# # 
+# # localize_mip_rec(Et, x)
+# # 
+# # x <- c(p=75,c=125,t=NA)
+# # localize_mip_rec(Et, x)
+# # 
+# # 
+# # 
+# # Es <- c(
+# #   "age %in% c('under aged','adult')",
+# #   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+# #   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+# #   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+# #   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+# #   )
 # Ec <- cateditmatrix(c(
 #   "age %in% c('under aged','adult')",
 #   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
@@ -297,7 +307,9 @@ asCat <- function(x){
 #   ))
 # Ec
 # r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
-# #buildELMatrix(Ec,r)
-#  localize_mip_rec(Ec, r)
-# # asCat(r)
-#  
+# # buildELMatrix(Et,x)
+# # buildELMatrix(Ec,r)
+#   localize_mip_rec(Et, x)
+#   localize_mip_rec(Ec, r)
+# # # asCat(r)
+# #  
