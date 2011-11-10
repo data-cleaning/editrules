@@ -188,9 +188,9 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
             #if (all(involved) ) inv <- !inv
             ch <- ind2char(ivd, ind, invert=inv)
             if ( useIf ){
-                edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" && "), ")",ch[n])
+                edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" & "), ")",ch[n])
             } else {
-                edts[i] <- paste("!(", paste(ch[1:(n-1)],collapse=" && "), ") |",ch[n])
+                edts[i] <- paste("!(", paste(ch[1:(n-1)],collapse=" & "), ") |",ch[n])
             }
         }
     }

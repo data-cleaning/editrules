@@ -78,11 +78,11 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is nearly finished. Version 2.0 fo the package will have
+{\em This vignette is nearly finished. Version 2.0 of the package will have
 the full vignette. At the moment, {\bf functionality for treating categorical data
 has  beta status} so bugs are likely.
 }
-Analyses of categorical data is often hindered by the occurrence of
+Analyses of categorical data are often hindered by the occurrence of
 inconsistent or incomplete raw data. Although {\sf R} has many features for
 analyzing categorical data, the functionality for error localization and
 correction are currently limited.  The {\sf editrules} package is designed to
@@ -96,7 +96,7 @@ Fellegi and Holt.
 Under the hood, the package has several innovations of which the most important
 one is a variable elimination method which -as far as the authors know- is new
 to the field of data editing. The paper also introduces an elegant description
-of edit rule manipulation in terms of the resolution so-called operator.
+of edit rule manipulation in terms of the so-called resolution operator.
 
 This paper is the second paper describing functionalities of the {\sf R} {\sf
 editrules} package.  The first paper \citep{jonge:2011} describes methods and
@@ -181,7 +181,7 @@ class of a person is ``child'', then (by law) the marital status cannot be
 frequently encountered. Resolving such violations is an important step prior to
 data analysis and estimation.
 
-In the this section we describe the representation of edits and records as
+In this section we describe the representation of edits and records as
 implemented in the {\sf editrules} package. Subsection \ref{ssboolrep}
 describes the background while subsection \ref{sseditarray} describes
 implementation and gives coded examples.
@@ -207,7 +207,7 @@ D_k = \{v_k\in D_k\,|\,v_k=1,2,\ldots,d_k\}.
 %
 
 A restriction $e$ is a subset of $D$ and we say that {\em if $v\in e$
-then $v$ violates $e$}. \index{edit!violation} Conversely, when $r\not\in e$ we say
+then $v$ violates $e$}. \index{edit!violation} Conversely, when $v\not\in e$ we say
 that $v$ {\em satisfies} $e$.\index{edit!satisfying} In data editing literature, such
 rules are referred to as {\em edit rules} or {\em edits},\index{edit} in short.
 In the context of contingency tables they are referred to as {\em structural
@@ -265,7 +265,8 @@ The record $r=({\sf married},{\sf adult},{\sf partner})$ has boolean representat
 \theend
 \end{example}
 
-An edit $e$ is a subset of $D$ which can be written as the Cartesian product \index{edit}
+An edit $e$ is a subset of records in $D$ which can be written as the Cartesian
+product \index{edit}
 \begin{equation}
     e = A_1\times A_2\cdots\times A_n\textrm{, where } A_{k}\subseteq D_k,\: k=1,2,\cdots n. 
     \label{eqDefEdit}
@@ -314,23 +315,49 @@ calculations. For example, an edit involves variable $k$  if and only if the
 inner product ${\bf 1}_{d_k}\cdot{\bf a}_k<d_k$, where ${\bf 1}_{d_k}$ is a
 $d_k$ vector of ones.
 
-A record ${v}$ violates an edit if every $v_k\in A_k$.  In the
-boolean representation this can be written as a condition on the standard inner
-product between the boolean representation of a record and an edit:
+A record ${v}$ violates an edit if every $v_k\in A_k$.  In the boolean
+representation this can be written as a condition on the standard inner product
+between the boolean representation of a record and an edit:
 \begin{equation}
 \sum_{k=1}^n \vec{\delta}_k(v_k)\cdot{\bf a}_k ={\bf v}\cdot{\bf a} =  n.
 \label{eqViolatedEdits}
 \end{equation}
+Each edit may be written as the union of every record it contains. We therefore introduce the
+following definition.
+\begin{definition}[domination]
+Given two edits $e$ and $e'$.  If each record $v\in e$ is also in $e'$, we say
+that $e'$ dominates $e$. We use the notation $e\prec e'$ if $e'$ contains at
+least one record more than $e$ and $e\preceq e'$ otherwise. Similarly, if $E$
+and $E'$ are sets of edits, and every $v\in E$ is also in $E'$, we write
+$E\prec E'$ or $E\preceq E'$.
+\end{definition}
+We introduce the symbols $\prec$ and $\preceq$ to indicate a difference with
+$\subset$ and $\subseteq$. The first symbols are used to in connection with the
+space of records covered by a set of edits. The latter are used to indicate
+subsets of explicitly defined edits. The symbols $\prec$ and $\preceq$ are
+independent of the explicit definition of edits while $\subset$ and $\subseteq$
+are dependent.
+\begin{example}
+Consider a 2-variable domain $D=D_1\times D_2$ with $D_1=\{{\rm a},{\rm b},{\rm
+c}\}$ and $D_2=\{{\rm d},{\rm e}\}$.  Furthermore, we have the edits
+$e_1=\{\rm{a},\rm{b}\}\times\{\rm{d}\}$, $e_2=\{{\rm a}\}\times\{{\rm d}\}$ and
+$e_3=\{{\rm b}\}\times\{{\rm d}\}$. Then $e_2\prec e_1$ and $e_3\prec e_1$.
+Also, if $E=\{e_2,e_3\}$ then $\{e_2\}\subset E$ and $e_1\preceq E$. In
+contrast, $\{e_1\}\not\subseteq E$.
+\end{example}
+%
+%
 \begin{remark}[edit redundancy]
-Suppose that $E$ is a set of edits of the form described in Eq.\ \eqref{eqDefEdit}. It is not difficult to verify that an 
-edit $e\in E$ is redundant if \index{edit!redundancy}
+Suppose that $E$ is a set of edits of the form described in Eq.\
+\eqref{eqDefEdit}. It is not difficult to verify that an edit $e\in E$ is
+redundant if \index{edit!redundancy}
 %
 \begin{eqnarray}
     \label{eqRedundancy1}
     A_k &=&\varnothing,\textrm{ for any } k\in1,2,\ldots,n\\
     \lefteqn{\textrm{or}}\nonumber\\
     \label{eqRedundancy2}
-    e   &\subseteq& e'\textrm{ with  } e'\in E.
+    e   &\preceq& e'\textrm{ with  } e'\in E.
 \end{eqnarray}
 In \eqref{eqRedundancy1}, $e$ is redundant since it cannot contain any records.
 It can be tested by checking if any ${\bf 1}_{d_k}\cdot{\bf a}_k=0$.  In the case
@@ -342,8 +369,8 @@ a}\lor {\bf a}'={\bf a}'$. \theend
 %
 %
 \begin{remark}
-The boolean representation of records and edits is invertible. For convenience we
-use the symbols $\in$, $\subset$ and $\subseteq$ for edits and record in set as wel as in 
+The boolean representation of records and edits a bijection. For convenience we
+use the symbols $\in$, $\prec$ and $\preceq$ for edits and record in set as wel as in 
 boolean representation. For example, in stead of writing ${\bf v}\cdot {\bf a}=n$ we write 
 ${\bf v}\in {\bf a}$ (which is equivalent to $v\in e$) when convenient.
 \label{remboolnotation}
@@ -461,7 +488,7 @@ $\langle identifier\rangle$ may be replaced by any valid {\sf R} symbol
 evaluating to a {\sf character} or {\sf factor} vector. However, such constructions are not
 recommended, since multivariate edit rules depend on a fixed datamodel.
 
-The multivariate rules can be defined in three ways. The most useful and common
+The multivariate rules can be defined in two ways. The most useful and common
 way to define edits follows the following syntax diagram.
 
 \begin{syntdiag}
@@ -470,10 +497,14 @@ way to define edits follows the following syntax diagram.
           \begin{stack}"\&\&"\\ "\&"\end{stack}
        \end{rep}
         ")"
-        \begin{rep}
-          <set expression>\\
-          \begin{stack}"||"\\ "|"\end{stack}
-        \end{rep} "\""
+        \begin{stack}
+            \begin{rep}
+                <set expression>\\
+                \begin{stack}"||"\\ "|"\end{stack}
+            \end{rep} \\
+        {\sc false}
+        \end{stack}
+    "\""
 \end{syntdiag}
 
 Where each $\langle$ \textit{set expression}  $\rangle$ is a logical statement, following
@@ -581,6 +612,7 @@ Function        & description \\
 {\sf localizeErrors(E,dat)}   & localize errors (sect.\ \ref{sslocalizeerrors})\\
 {\sf errorLocalizer(E,x)}     & {\sf backtracker} for error localization (sect.\ \ref{sserrorlocalizer})\\
 {\sf summary(E)}              & summarize the content of {\sf E}\\
+{\sf plot(E)}                 & plot a graph of {\sf E} (requires {\sf igraph} package)\\
 \hline
 \end{tabular}
 \end{threeparttable}
@@ -879,7 +911,7 @@ discovered these properties.
 %
 The following property shows that the resolution operator leaves redundancy relations untouched.
 \begin{lemma}
-If ${\bf b}\subseteq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\subseteq {\bf a}\res_k {\bf c}$.
+If ${\bf b}\preceq {\bf c}$\textrm{, then }${\bf a}\res_k {\bf b}\preceq {\bf a}\res_k {\bf c}$.
 \label{keepRedundancy}
 \end{lemma}
 \begin{proof}
@@ -888,7 +920,7 @@ We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {
 {\bf a}\res_k {\bf b} &=& {\bf a}\res_k ({\bf b}\land {\bf c}) \\
 &=& {\bf a}_k\lor ({\bf b}_k\land {\bf c}_k) \oplus {\bf a}'\land ({\bf b}'\land{\bf c}')\\
 &=& ({\bf a}_k\lor{\bf b}_k)\land ({\bf a}_k\lor{\bf c}_k) \oplus ({\bf a}'\land {\bf b}')\land ({\bf a}'\land{\bf c}')\\
-&=& {\bf a}\res_k{\bf b}_k \land {\bf a}\res_k{\bf c} \subseteq {\bf a}\res_j{\bf c},
+&=& {\bf a}\res_k{\bf b} \land {\bf a}\res_k{\bf c} \preceq {\bf a}\res_k{\bf c},
 \end{eqnarray*}
 and we are done.
 \end{proof}
@@ -924,19 +956,18 @@ iterations. We have
 {\bf A}(1) = {\bf A}^+(0)\cup {\bf A}^+(0)\res_k{\bf A}^-(0).
 \end{equation}
 Here ${\bf A}(1)$ contains every nonredundant derived edit with column ${\bf
-ind}(k,1)$ equal to \true.  For, if there is another derived edit, by corollary
-\ref{corResolution} it must be in ${\bf A}^+(0)\res_k {\bf A}^+(0)$, since
-${\bf A}^-(0)\res_k {\bf A}^-(0)$ only generates edits where column number
-$\ind(k,1)$ is \false.  Now, consider two edits ${\bf a}^{+}$ and ${\bf
-a}^{\prime +}\in{\bf A}^+(0)$.  We have ${\bf a}^+\res_l{\bf
-a}^{\prime+}\subseteq {{\bf a}^+\cup {\bf a}^{\prime+}}\subseteq{\bf
-A}^+(0)\subseteq{\bf A}(1)$ so each element of ${\bf A}^+\res_k{\bf A}^+$ is
-redundant (remember Remarks \ref{editremark} and \ref{remboolnotation}). It
-follows from the definition of $\res_k$ that if ${\bf A}(j-1)$ contains every
-nonredundant edit with columns \mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to
-\true then ${\bf A}(j)$ contains all nonredundant edits where columns
-$\ind(k,1),\ldots,\ind(k,j)$ equal \true. Since the algorithm iterates over all
-$j\in\ind(k)$ the result follows.
+ind}(k,1)$ equal to \true.  For, if there is another derived edit, it must be
+in ${\bf A}^+(0)\res_k {\bf A}^+(0)$, since ${\bf A}^-(0)\res_k {\bf A}^-(0)$
+only generates edits where column number $\ind(k,1)$ is \false.  Now, consider
+two edits ${\bf a}^{+}$ and ${\bf a}^{\prime +}\in{\bf A}^+(0)$.  We have ${\bf
+a}^+\res_k{\bf a}^{\prime+}\preceq {{\bf a}^+\cup {\bf a}^{\prime+}}\preceq{\bf
+A}^+(0)\preceq{\bf A}(1)$ so each element of ${\bf A}^+(0)\res_k{\bf A}^+(0)$
+is redundant (remember Remarks \ref{editremark} and \ref{remboolnotation}).
+Now consider${\bf A}(j)$. It follows from the above that if ${\bf A}(j-1)$
+contains every nonredundant edit with columns
+\mbox{$\ind(k,1),\ldots,\ind(k,j-1)$} equal to \true then ${\bf A}(j)$ contains
+all nonredundant derived edits where columns $\ind(k,1),\ldots,\ind(k,j)$ equal
+\true. Since the algorithm iterates over all $j\in\ind(k)$ the result follows.
 \end{proof}
 
 It is interesting to compare the procedure in Algorithm \ref{eliminate} with 
@@ -950,7 +981,7 @@ which is also described by \cite{waal:2011} may be summarized as follows.
 \State Find every $E_j\subseteq E$, with $j\in1,2,\ldots,s$ such that 
 \begin{itemize}
 \item $F_k(E_j)$ eliminates $k$.
-\item $E_j$ has a minimal number of elements $|E_j|$.
+\item $E_j$ is minimal in the sense that there is no $E'_j\subset E$ such that $F_j(E_j')$ eliminates $k$.
 \item The $E_j$ are mutually non-redundant in the sense $F_k(E_j)\not\subseteq F_k(E_l)$.
 \end{itemize}
 \State $E\leftarrow\cup_{j=1}^sF_k(E_j)$
@@ -1078,8 +1109,8 @@ $
 \end{tabular}\hfill  Root node, $w=0$,
 \end{center}
 %
-where ${\bf v}=\rho(v)$, and ${\bf a}_1$ and ${\bf a}_2$ are the boolean
-representations of $e_1$ and $e_2$ respectively. The record and edits are
+where ${\bf v}=\rho(v)$, and ${\bf a}^{(1)}$ and ${\bf a}^{(2)}$ are the boolean
+representations of $e^{(1)}$ and $e^{(2)}$ respectively. The record and edits are
 denoted in boolean representation as shown in Example \ref{datamodel}.  The
 weight $w$ counts the number of variables that are assumed to be incorrect,
 which at the root node is zero. 
@@ -1175,10 +1206,10 @@ $
 \end{tabular}\hfill Subst. hh. pos., $w=1$.
 \end{center}
 This yields the first solution: only the {\rm age} variable needs to be
-changed.  In search for more solutions, we move up the tree and try to eliminate
-{\em age}. However, since eliminating age would increase the weight to 2 we will prune
-the tree at this point. Moving up to the root node and eliminating {\em marital status}
-gives
+changed.  In search for more solutions, we move up the tree and try to
+eliminate {\em position in household}. However, since eliminating {\em position
+in household} would increase the weight to 2 we will prune the tree at this
+point. Moving up to the root node and eliminating {\em marital status} gives
 %%%%%%%%%%%
 % T0R
 %%%%%%%%%%
@@ -1248,10 +1279,10 @@ $
 However, whatever value we would choose for {\em marital status}, it would
 always result in an erroneous record since ${\bf a}^{(3)}$ has \true on all
 categories of that variable. Therefore, we go up one step in the tree.
-Eliminating {\em age} would increase the weight to 2, but since we already
-found a solution with weight equal to 1, this path need not be followed. We go
-up another node and bound on the fact that eliminating {\em position in
-household} would yield the same problem. The final tree may be represented as
+Eliminating {\em position in household} would increase the weight to 2, but
+since we already found a solution with weight equal to 1, this path need not be
+followed. We go up another node and bound on the fact that eliminating {\em
+age} would yield the same problem. The final tree may be represented as
 follows:
 \begin{center}
 \begin{picture}(1400,1000)
@@ -1291,7 +1322,7 @@ E <- editarray(c(
 (dat <- data.frame(
     maritalStatus=c('married','unmarried','widowed' ), 
     age = c('under-aged','adult','adult' ),
-    positionInHousehold=c('child','other','marriage partner')
+    positionInHousehold=c('marriage partner','other','marriage partner')
 ))
 
 set.seed(1)
@@ -1337,10 +1368,10 @@ are given by
 (dat <- data.frame(
     maritalStatus=c('married','unmarried','widowed' ), 
     age = c('under-aged','adult','adult' ),
-    positionInHousehold=c('child','other','marriage partner')
+    positionInHousehold=c('marriage partner','other','marriage partner')
 ))
 @
-The edits state that under-aged cannot be married and that one cannot be a
+The edits state that under-aged persons cannot be married and that one cannot be a
 marriage partner if one is unmarried. Clearly, the first and third record
 disobey some of these rules while the second record is valid. The first
 record can be repaired by adapting age and the second record can be made
@@ -1367,9 +1398,9 @@ vector. A call to {\sf errorLocalizer} generates a {\sf backtracker} object
 which contains all information necessary to start searching the binary tree.
 After calling {\sf \$searchNext()} the weight and first found solution are
 returned, while the backtracker object stores some meta-information about the
-process, most significantly the duration of the search.  A second call yields a
-better solution and the third call returns {\sf NULL}, indicating that all
-minimal weight solutions have been found.
+process, most significantly the duration of the search.  A second call yields
+an equivalent solution and the third call returns {\sf NULL}, indicating that
+all minimal weight solutions have been found.
 %
 \begin{Rcode}
 <<keep.source=TRUE>>=
@@ -1389,7 +1420,7 @@ Figure \ref{RlocalizeErrors}.}
 \end{Rcode}
 
 
-%\clearpage
+\clearpage
 \section{Conclusions}
 This paper describes the theory and implementation of categorical edit
 manipulation of the {\sf editrules} package. Categorical restrictions may be
