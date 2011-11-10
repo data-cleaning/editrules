@@ -122,64 +122,58 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   Aa <- matrix(0L, ncol=nvars, nrow=nrow(A))
   Ael <- cbind(A,Aa,getb(E))
   colnames(Ael)[adaptidx] <- adaptvars
+  ops <- getOps(E)
   
   A <- matrix( 0L
              , ncol = nvars+nlvls
              , nrow = nvars
              , dimnames = list(NULL, c(lvls, adaptvars))
              )
+  
   for (i in seq_along(vx)){
-    A[,vx[i]] <- 1
-    A[,paste("adapt",names(vx), sep=".")] <- 1
+    A[i,vx[i]] <- 1
+    A[i,paste("adapt",names(vx[i]), sep=".")] <- 1
   }
-  A[seq_along(vx),vx] <- 1
-  A[,paste("adapt",names(vx), sep=".")] <- 1
-  print(A)
-  r_x <- diag(-1, nvars)
-  r_lower <- diag(lb-x)
-  r <- cbind(r_x, r_lower, -x)
-  Ael <- rbind(Ael, r)
+  A <- cbind(A, 1)
+
+  Ael <- rbind(Ael, A)
+  ops <- c(ops, rep("==", nrow(A)))
   
-  r_x <- diag(1, nvars)
-  r_upper <- diag(x-ub)
-  r <- cbind(r_x, r_upper, x)
-  Ael <- rbind(Ael, r)
+  # domain constraints, (in case of open domains)
+  A <- matrix( 0L
+               , ncol = nvars+nlvls
+               , nrow = nvars
+               , dimnames = list(NULL, c(lvls, adaptvars))
+               )
   
-  ops <- c(getOps(E), rep("<=", 2*nvars))
+  nlvls <- sub(":.+","", lvls)
+  print(nlvls)
+  for (i in seq_along(vars)){
+    A[i,which(nlvls==vars[i])] <- 1
+  }
+  A <- cbind(A, 1)
+  
+  Ael <- rbind(Ael, A)
+  ops <- c(ops, rep("<=", nrow(A)))
   
   nb <- ncol(Ael)
   
-  # remove NA columns
-  Ena <- !is.na(Ael[,nb])
-  Ael <- Ael[Ena,,drop=FALSE]
-  ops <- ops[Ena]
-  
-  #   print(Ael)
-  #   
-  #   # and add extra weigths contraints for NA's
-  #   xna <- adaptidx[is.na(x)]
-  #   Ana <- matrix(0, nrow=length(xna), ncol=ncol(Ael))
-  #   Ana[, nb] <- 1
-  #   Ana[, xna] <- 1
-  #   Ael <- rbind(Ael, Ana)
-  #   ops <- c(ops, rep("==", nrow(Ana)))
-  
   Eel <- as.editmatrix( Ael[,-nb,drop=FALSE]
-                        , Ael[,nb]
-                        , ops
-                        )
+                      , Ael[,nb]
+                      , ops
+                      )
   
-  objfn <- numeric(2*nvars)
+  objfn <- lb <- ub <- Ael[1,-nb]
+  lb[] <- 0
+  ub[] <- 1
+  objfn[] <- 0
   objfn[adaptidx] <- weight
-  
-  names(lb) <- names(ub) <- vars
-  names(objfn) <- getVars(Eel)
-  
+    
   list( E = Eel
-        , objfn = objfn
-        , lb=lb
-        , ub=ub
-        )
+      , objfn = objfn
+      , lb = lb
+      , ub = ub
+      )
 }
 
 #' Localize an error using lpSolveApi
@@ -229,8 +223,7 @@ localize_mip_rec <- function( E
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
    
-   print(sol)
-   names(sol) <- c(vars,vars)
+   names(sol) <- sub("^adapt.","", names(sol))
    
    adapt <- sapply(x, function(i) FALSE)
    adapt[idx] <- (sol > 0)[adaptidx]
@@ -295,16 +288,16 @@ asCat <- function(x){
 #   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
 #   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
 #   )
-Ec <- cateditmatrix(c(
-  "age %in% c('under aged','adult')",
-  "maritalStatus %in% c('unmarried','married','widowed','divorced')",
-  "positionInHousehold %in% c('marriage partner', 'child', 'other')",
-  "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-  "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
-  ))
-Ec
-r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
-buildELMatrix(Ec,r)
-# localize_mip_rec(Ec, r)
-# asCat(r)
- 
+# Ec <- cateditmatrix(c(
+#   "age %in% c('under aged','adult')",
+#   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+#   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+#   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+#   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+#   ))
+# Ec
+# r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
+# #buildELMatrix(Ec,r)
+#  localize_mip_rec(Ec, r)
+# # asCat(r)
+#  
