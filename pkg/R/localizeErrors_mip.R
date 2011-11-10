@@ -7,14 +7,24 @@ checklpSolveAPI <- function(){
     require(lpSolveAPI) || stop(nolpSolveAPI)
 }
 
-
 #' Extends an editmatrix with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
 #' @keywords internal
-buildELMatrix <- function(E,x, weight=rep(1, length(x))){
+buildELMatrix <- function(E,x,weight,...){
+  UseMethod("buildELMatrix")
+}
+
+#' Extends an editmatrix with extra constraints needed for error
+#' localization
+#' @method buildELMatrix editmatrix
+#' @param E editmatrix 
+#' @param x named numeric with data
+#' @return list with extended E, objfn and lower and upper bound
+#' @keywords internal
+buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x))){
   vars <- getVars(E)
   x <- x[vars]
   weight <- weight[match(vars, names(x))]
@@ -85,30 +95,46 @@ buildELMatrix <- function(E,x, weight=rep(1, length(x))){
       )
 }
 
-buildCELMatrix <- function(E,x, weight=rep(1, length(x))){
+buildELMatrix.editarray <- function(E,x, weight=rep(1, length(x)), ...){
+  buildELMatrix.cateditmatrix(cateditmatrix(E), x, weight, ...)
+}
+
+buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   vars <- getVars(E)
+  nvars <- length(vars)
+  lvls <- colnames(E)[-ncol(E)]
+  nlvls <- length(lvls)
+  
+  v <- integer(nlvls)
+  names(v) <- lvls
+  
+  vx <- asCat(x)
+  v[vx] <- 1
+  
+  print(v)
   x <- x[vars]
   weight <- weight[match(vars, names(x))]
-  nvars <- length(vars)
   
-  #TODO cope with NA's in x (choose upper en lower bound and  don't generate error localization constraints for na's')
   adaptvars <- paste("adapt", vars, sep=".")
-  adaptidx <- seq_along(vars) + nvars
-  
-  # TODO get upperbounds and lowerbounds present in E and put them in the bounds
-  # assume that boundary for each variable is at most 1000 times higher than given value 
-  ub = 1000 * abs(x) #heuristic
-  ub[is.na(ub)] <- .Machine$integer.max - 1
-  ub[ub < 1000] <- 1000 # to cope with very small (or 0) values
-  lb <- -ub
-  x[is.na(x)] <- ub[is.na(x)] + 1 # put value out of bound
-  
+  adaptidx <- seq_along(vars) + nlvls
+    
   A <- getA(E)
-  
-  Ael <- cbind(A,A,getb(E))
+  Aa <- matrix(0L, ncol=nvars, nrow=nrow(A))
+  Ael <- cbind(A,Aa,getb(E))
   colnames(Ael)[adaptidx] <- adaptvars
-  Ael[,adaptidx] <- 0
   
+  A <- matrix( 0L
+             , ncol = nvars+nlvls
+             , nrow = nvars
+             , dimnames = list(NULL, c(lvls, adaptvars))
+             )
+  for (i in seq_along(vx)){
+    A[,vx[i]] <- 1
+    A[,paste("adapt",names(vx), sep=".")] <- 1
+  }
+  A[seq_along(vx),vx] <- 1
+  A[,paste("adapt",names(vx), sep=".")] <- 1
+  print(A)
   r_x <- diag(-1, nvars)
   r_lower <- diag(lb-x)
   r <- cbind(r_x, r_lower, -x)
@@ -237,9 +263,8 @@ as.lp.editmatrix <- function(E){
 
 asCat <- function(x){
   nms <- paste(names(x),x, sep=":")
-  l <- rep(TRUE,length(nms))
-  names(l) <- l
-  #TODO logicals...
+  is.na(nms) <- is.na(x)
+  names(nms) <- names(x)
   nms
 }
 
@@ -258,7 +283,7 @@ asCat <- function(x){
 # 
 # localize_mip_rec(Et, x)
 # 
-# x <- c(p=755,c=125,t=NA)
+# x <- c(p=75,c=125,t=NA)
 # localize_mip_rec(Et, x)
 # 
 # 
@@ -270,15 +295,16 @@ asCat <- function(x){
 #   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
 #   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
 #   )
-# Ec <- cateditmatrix(c(
-#   "age %in% c('under aged','adult')",
-#   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
-#   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
-#   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-#   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
-#   ))
-# Ec
-# r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
-# asCat(r)
+Ec <- cateditmatrix(c(
+  "age %in% c('under aged','adult')",
+  "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+  "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+  "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+  "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+  ))
+Ec
+r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
+buildELMatrix(Ec,r)
 # localize_mip_rec(Ec, r)
-# 
+# asCat(r)
+ 
