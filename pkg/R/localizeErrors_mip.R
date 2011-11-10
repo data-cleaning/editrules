@@ -251,6 +251,7 @@ localize_mip_rec <- function( E
 }
 
 as.lp.editmatrix <- function(E){
+   require(lpSolveAPI)
    A <- getA(E)
    ops <- getOps(E)
    ops[ops=="=="] <- "="
