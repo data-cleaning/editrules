@@ -28,11 +28,11 @@ buildELMatrix <- function(E,x,weight,...){
 #' @keywords internal
 buildELMatrix.editmatrix <- function( E
                                     , x
-                                    , weight=rep(1, length(x))
-                                    , xlim=1000*cbind(-abs(x), abs(x))
+                                    , weight = rep(1, length(x))
+                                    , xlim = 1000 * cbind(-abs(x), abs(x))
                                     ){
   #TODO sample order of variables
-  #E <- E[, c(sample(length(getVars(E))), ncol(E))]
+  E <- E[, c(sample(length(getVars(E))), ncol(E))]
   vars <- getVars(E)
   idx <- match(vars, names(x))
   
@@ -206,7 +206,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @param weight  numeric with weights
-#' @param duration number of seconds that is spent on finding a solution
+#' @param maxduration number of seconds that is spent on finding a solution
 #' @return list with w, adapt and x_c
 #' @keywords internal
 localize_mip_rec <- function( E
@@ -237,17 +237,19 @@ localize_mip_rec <- function( E
    set.objfn(lps, objfn)
    
     # move univariate constraints into bounds
-   lp.control(lps,presolve="rows", timeout=maxduration)
+   lp.control(lps,presolve="rows", timeout=maxduration, pivoting=c("devex", "randomize","adaptive"))
  
-   solve(lps)
+   statuscode <- solve(lps)
+   degeneracy <- get.solutioncount(lps)
    
    sol <- get.variables(lps)#[adaptidx]
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
    
-   vars <- getVars(E)
-   idx <- match(vars, names(x))
+   vars <- getVars(Ee)
+   idx <- match(vars[-adaptidx], names(x), nomatch=0)
    names(sol) <- vars
+   #print(list(idx=idx, sol=sol))
    
    adapt <- sapply(x, function(i) FALSE)
    adapt[idx] <- (sol[adaptidx] > 0)
@@ -265,6 +267,8 @@ localize_mip_rec <- function( E
        , x_feasible = x_feasible
        , duration = duration
        , maxdurationExceeded = unname(duration[3] >= maxduration)
+       , statuscode = statuscode
+       , degeneracy = degeneracy
        )
 }
 
@@ -301,24 +305,24 @@ asLevels <- function(x){
    
 #testing...
 
-Et <- editmatrix(expression(
-        p + c == t,
-        c - 0.6*t >= 0,
-        c>=0,
-        p >=0
-        )
-               )
-
-x <- c(p=755,c=125,t=200)
-
-localize_mip_rec(Et, x)
-
-Et2 <- editmatrix(expression(
-  p + c == t    
-  ))
-x <- c(p=75,c=125,t=300)
-localize_mip_rec(Et2, x)  # random?
-localize_mip_rec(Et2, x, weight=c(2,2,1))  # random?
+# Et <- editmatrix(expression(
+#         p + c == t,
+#         c - 0.6*t >= 0,
+#         c>=0,
+#         p >=0
+#         )
+#                )
+# 
+# x <- c(p=755,c=125,t=200)
+# 
+# localize_mip_rec(Et, x)
+# 
+# Et2 <- editmatrix(expression(
+#   p + c == t    
+#   ))
+# x <- c(p=75,c=125,t=300)
+# localize_mip_rec(Et2, x)  # random?
+# localize_mip_rec(Et2, x, weight=c(1,1,1))  # random?
 # 
 # 
 # 
