@@ -32,14 +32,13 @@ buildELMatrix.editmatrix <- function( E
                                     , xlim=1000*cbind(-abs(x), abs(x))
                                     ){
   #TODO sample order of variables
-  # e.g. E <- E[, c(sample(length(getVars(E))), ncol(E))]
+  #E <- E[, c(sample(length(getVars(E))), ncol(E))]
   vars <- getVars(E)
   idx <- match(vars, names(x))
   
   weight <- weight[idx]
   xlim <- xlim[idx,]
   x <- x[idx]
-  
   nvars <- length(vars)
   
   #TODO cope with NA's in x (choose upper en lower bound and  don't generate error localization constraints for na's')
@@ -224,10 +223,6 @@ localize_mip_rec <- function( E
    }   
    
    t <- proc.time()
-   vars <- getVars(E)
-   # vars <- sample(vars)
-   # E <- E[, vars]
-   idx <- match(vars, names(x))
    elm <- buildELMatrix(E, x, weight)
    
    Ee <- elm$E
@@ -250,7 +245,9 @@ localize_mip_rec <- function( E
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
    
-   names(sol) <- getVars(Ee)
+   vars <- getVars(E)
+   idx <- match(vars, names(x))
+   names(sol) <- vars
    
    adapt <- sapply(x, function(i) FALSE)
    adapt[idx] <- (sol[adaptidx] > 0)
@@ -302,22 +299,26 @@ asLevels <- function(x){
   lvls[x > 0]
 }
    
-# #testing...
-# 
-# Et <- editmatrix(expression(
-#         p + c == t,
-#         c - 0.6*t >= 0,
-#         c>=0,
-#         p >=0
-#         )
-#                )
-# 
-# x <- c(p=755,c=125,t=200)
-# 
-# localize_mip_rec(Et, x)
-# 
-# x <- c(p=75,c=125,t=NA)
-# localize_mip_rec(Et, x)
+#testing...
+
+Et <- editmatrix(expression(
+        p + c == t,
+        c - 0.6*t >= 0,
+        c>=0,
+        p >=0
+        )
+               )
+
+x <- c(p=755,c=125,t=200)
+
+localize_mip_rec(Et, x)
+
+Et2 <- editmatrix(expression(
+  p + c == t    
+  ))
+x <- c(p=75,c=125,t=300)
+localize_mip_rec(Et2, x)  # random?
+localize_mip_rec(Et2, x, weight=c(2,2,1))  # random?
 # 
 # 
 # 
