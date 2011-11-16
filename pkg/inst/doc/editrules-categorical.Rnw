@@ -95,7 +95,7 @@ to the field of data editing. The paper also introduces an elegant description
 of edit rule manipulation in terms of the so-called resolution operator.
 
 This is the second paper describing functionalities of the {\sf R} {\sf
-editrules} package and marks the completion of version {\sf editrules} $2.0$.
+editrules} package and marks the completion of {\sf editrules} version $2.0$.
 The first paper \citep{jonge:2011} describes methods and implementation for
 handling numerical data while this paper is concerned with handling categorical
 data. 
@@ -502,7 +502,7 @@ way to define edits follows the following syntax diagram.
     "\""
 \end{syntdiag}
 
-Where each $\langle$ \textit{set expression}  $\rangle$ is a logical statement, following
+Where each $\langle$\textit{set expression}$\rangle$ is a logical statement, following
 
 \begin{syntdiag}
     \begin{stack}
@@ -544,7 +544,7 @@ logic law $P\Rightarrow Q = \lnot P\lor Q$. It involves the following syntax dia
           \begin{stack}"||"\\ "|"\end{stack}
         \end{rep} "\""
 \end{syntdiag}
-Where each $\langle setexpression\rangle$ is as in the syntax diagram above.  In
+Where each $\langle set expression\rangle$ is as in the syntax diagram above.  In
 practice, a user will commonly not use this form since it is less readable.
 However, the {\sf as.character} method for {\sf editarray} can generate such
 statements by passing the argument {\sf useIf=FALSE}, as shown below.
