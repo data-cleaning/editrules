@@ -7,7 +7,7 @@ checklpSolveAPI <- function(){
     require(lpSolveAPI) || stop(nolpSolveAPI)
 }
 
-#' Extends an editmatrix with extra constraints needed for error
+#' Extend an editmatrix or editarray with extra constraints needed for error
 #' localization
 #' @param E editmatrix 
 #' @param x named numeric with data
@@ -17,17 +17,29 @@ buildELMatrix <- function(E,x,weight,...){
   UseMethod("buildELMatrix")
 }
 
-#' Extends an editmatrix with extra constraints needed for error
+#' Extend an editmatrix with extra constraints needed for error
 #' localization
 #' @method buildELMatrix editmatrix
 #' @param E editmatrix 
 #' @param x named numeric with data
+#' @param weight vector with weights of the variable in the same order as x
+#' @param xlim upper and lower boundaries of \code{x}
 #' @return list with extended E, objfn and lower and upper bound
 #' @keywords internal
-buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x)), xlim=1000*cbind(-abs(x), abs(x))){
+buildELMatrix.editmatrix <- function( E
+                                    , x
+                                    , weight=rep(1, length(x))
+                                    , xlim=1000*cbind(-abs(x), abs(x))
+                                    ){
+  #TODO sample order of variables
+  # e.g. E <- E[, c(sample(length(getVars(E))), ncol(E))]
   vars <- getVars(E)
-  x <- x[vars]
-  weight <- weight[match(vars, names(x))]
+  idx <- match(vars, names(x))
+  
+  weight <- weight[idx]
+  xlim <- xlim[idx,]
+  x <- x[idx]
+  
   nvars <- length(vars)
   
   #TODO cope with NA's in x (choose upper en lower bound and  don't generate error localization constraints for na's')
@@ -36,8 +48,6 @@ buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x)), xlim=1000*cb
   
   ub <- xlim[,2]
   lb <- xlim[,1]
-  # TODO get upperbounds and lowerbounds present in E and put them in the bounds
-  # assume that boundary for each variable is at most 1000 times higher than given value 
   ub[is.na(ub)] <- .Machine$integer.max - 1
   ub[ub < 1000] <- 1000 # to cope with very small (or 0) values
   lb <- -ub
@@ -100,10 +110,12 @@ buildELMatrix.editmatrix <- function(E,x, weight=rep(1, length(x)), xlim=1000*cb
       )
 }
 
+#' @method buildELMatrix editarray
 buildELMatrix.editarray <- function(E,x, weight=rep(1, length(x)), ...){
   buildELMatrix.cateditmatrix(cateditmatrix(E), x, weight, ...)
 }
 
+#' @method buildELMatrix cateditmatrix
 buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   vars <- getVars(E)
   nvars <- length(vars)
@@ -116,7 +128,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   vx <- asCat(x)
   v[vx] <- 1
   
-  print(v)
+  #print(v)
   x <- x[vars]
   weight <- weight[match(vars, names(x))]
   
@@ -152,7 +164,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
                )
   
   nlvls <- sub(":.+","", lvls)
-  print(nlvls)
+  #print(nlvls)
   for (i in seq_along(vars)){
     A[i,which(nlvls==vars[i])] <- 1
   }
@@ -186,8 +198,12 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
       )
 }
 
-#' Localize an error using lpSolveApi
-#' localization
+#' Localize errors by using lpSolveApi
+#' 
+#' \code{localize_mip_rec} uses \code{E} and \code{x} to define a mixed integer problem
+#' and solves this problem using \code{lpSolveApi}. 
+#' This function can be much faster then \code{errorLocalizer} but does not return the degeneracy
+#' of a solution. However it does return an bonus: \code{x_feasible}, a feasible solution
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @param weight  numeric with weights
@@ -213,12 +229,13 @@ localize_mip_rec <- function( E
    # E <- E[, vars]
    idx <- match(vars, names(x))
    elm <- buildELMatrix(E, x, weight)
-   E <- elm$E
+   
+   Ee <- elm$E
    objfn <- elm$objfn
    adaptidx <- which(objfn > 0)
    
-   ops <- getOps(E)
-   lps <- as.lp.editmatrix(E)
+   ops <- getOps(Ee)
+   lps <- as.lp.editmatrix(Ee)
    
    set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:length(elm$lb))
    set.type(lps, columns=elm$binvars , "binary")
@@ -233,13 +250,17 @@ localize_mip_rec <- function( E
    w <- get.objective(lps)
    #write.lp(lps, "test.lp")
    
-   names(sol) <- sub("^adapt.","", names(sol))
+   names(sol) <- getVars(Ee)
    
    adapt <- sapply(x, function(i) FALSE)
-   adapt[idx] <- (sol > 0)[adaptidx]
+   adapt[idx] <- (sol[adaptidx] > 0)
    
    x_feasible <- x
-   x_feasible[idx] <- sol[-adaptidx]
+   if (is.cateditmatrix(E)){
+     x_feasible[idx] <- asLevels(sol[-adaptidx])
+   } else {
+     x_feasible[idx] <- sol[-adaptidx]
+   }
    
    duration <- getDuration(t - proc.time())
    list( w=w
@@ -272,9 +293,17 @@ asCat <- function(x){
   nms
 }
 
+#' Transform a found solution into a categorical record
+#' @keywords internal
+asLevels <- function(x){
+  vars <- sub(":.+", "", names(x))
+  lvls <- sub(".+:", "", names(x))
+  names(lvls) <- vars
+  lvls[x > 0]
+}
    
-#testing...
-
+# #testing...
+# 
 # Et <- editmatrix(expression(
 #         p + c == t,
 #         c - 0.6*t >= 0,
@@ -284,21 +313,21 @@ asCat <- function(x){
 #                )
 # 
 # x <- c(p=755,c=125,t=200)
-# # 
-# # localize_mip_rec(Et, x)
-# # 
-# # x <- c(p=75,c=125,t=NA)
-# # localize_mip_rec(Et, x)
-# # 
-# # 
-# # 
-# # Es <- c(
-# #   "age %in% c('under aged','adult')",
-# #   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
-# #   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
-# #   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-# #   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
-# #   )
+# 
+# localize_mip_rec(Et, x)
+# 
+# x <- c(p=75,c=125,t=NA)
+# localize_mip_rec(Et, x)
+# 
+# 
+# 
+# Es <- c(
+#   "age %in% c('under aged','adult')",
+#   "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+#   "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+#   "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+#   "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+#   )
 # Ec <- cateditmatrix(c(
 #   "age %in% c('under aged','adult')",
 #   "maritalStatus %in% c('unmarried','married','widowed','divorced')",

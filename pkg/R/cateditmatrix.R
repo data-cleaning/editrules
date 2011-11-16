@@ -1,7 +1,7 @@
 #' Create an editmatrix with categorical variables
 #'
-#' \code{cateditmatrix} is an alternate representation of a categorial edit. 
-#' The prefered representation is \code{editarray}, but cateditmatrix is useful for
+#' \code{cateditmatrix} is an alternative representation of a categorial edit. 
+#' The default representation in editrules is \code{editarray}, but cateditmatrix is useful for
 #' transforming solving categorical edit into a mixed integer programming problem
 #'
 #' @param x \code{character} with categorical edits
