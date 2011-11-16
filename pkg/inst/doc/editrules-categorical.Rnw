@@ -78,10 +78,6 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-{\em This vignette is nearly finished. Version 2.0 of the package will have
-the full vignette. At the moment, {\bf functionality for treating categorical data
-has  beta status} so bugs are likely.
-}
 Analyses of categorical data are often hindered by the occurrence of
 inconsistent or incomplete raw data. Although {\sf R} has many features for
 analyzing categorical data, the functionality for error localization and
@@ -98,10 +94,11 @@ one is a variable elimination method which -as far as the authors know- is new
 to the field of data editing. The paper also introduces an elegant description
 of edit rule manipulation in terms of the so-called resolution operator.
 
-This paper is the second paper describing functionalities of the {\sf R} {\sf
-editrules} package.  The first paper \citep{jonge:2011} describes methods and
-implementation for handling numerical data while this paper is concerned with
-handling categorical data. 
+This is the second paper describing functionalities of the {\sf R} {\sf
+editrules} package and marks the completion of version {\sf editrules} $2.0$.
+The first paper \citep{jonge:2011} describes methods and implementation for
+handling numerical data while this paper is concerned with handling categorical
+data. 
 \end{abstract}
 
 \newpage
@@ -132,7 +129,7 @@ errors is referred to as {\em data editing}, and it has been estimated that
 National Statistics Institutes spend up to 40\% of their resources on this
 process \citep{waal:2011}. For this reason, considerable attention is paid to
 the development of data editing methods that can be automated. Since data are
-often required to obey many interrelated consistency rules, effective data
+often required to obey many interrelated consistency rules, data
 editing can be too complex to perform manually. \citet{winkler:1999} mentions
 practical cases where records have to obey 250, 300 or even 750 internal
 consistency rules.  Although the {\sf R} statistical environment has numerous
@@ -199,7 +196,8 @@ D = D_1\times D_2\times\cdots\times D_n,
 \label{eqDomain}
 \end{equation}
 where each $D_k$ is a finite set of $d_k$ possible categories for variable $k$.
-We label the categories as follows:
+The value domain defined above is also referred to as the {\em data model} of
+a dataset.  We label the categories as follows:
 \begin{equation}
 D_k = \{v_k\in D_k\,|\,v_k=1,2,\ldots,d_k\}.
 \label{eqVariableDomain}
@@ -244,10 +242,6 @@ The dimension $d$ of $\rho(v)$ is given by the total number of categories of all
 d = \sum_{k=1}^n d_k.
 \label{eqSumdk}
 \end{equation}
-When each record in a dataset is represented this way, summing the vectors
-yields the $d$-dimensional vectorized representation of the $d_1\times
-d_2\times\cdots\times d_n$ contingency table of the dataset. This is sometimes
-called the complete disjunctive table. 
 
 \begin{example}
 \label{datamodel}
@@ -299,14 +293,14 @@ which may simply be written as\index{edit!boolean representation}
 \end{equation}
 
 \begin{example}
-Using the data model from Example \ref{datamodel}, the edit that says that under-aged people
+Using the domain from Example \ref{datamodel}, the edit that says that under-aged people
 cannot be married has set representation
 \begin{equation}
-e = \{\textrm{\rm married}\}_1\times\{\textrm{\rm under-aged}\}_2\times\{{\rm partner},{\rm child},{\rm other}\}_3
+e = \{\textrm{\rm married}\}\times\{\textrm{\rm under-aged}\}\times\{{\rm partner},{\rm child},{\rm other}\}
 \end{equation}
 which translates to the boolean representation
 \begin{equation}
-\rho(e) = (1,0,0,0)_1\oplus(0,1)_2\oplus(1,1,1)_3 = (1,0,0,0,0,1,1,1,1).
+\rho(e) = (1,0,0,0)\oplus(1,0)\oplus(1,1,1) = (1,0,0,0,0,1,1,1,1).
 \end{equation}
 \theend
 \end{example}
@@ -370,7 +364,7 @@ a}\lor {\bf a}'={\bf a}'$. \theend
 %
 \begin{remark}
 The boolean representation of records and edits a bijection. For convenience we
-use the symbols $\in$, $\prec$ and $\preceq$ for edits and record in set as wel as in 
+use the symbols $\in$, $\prec$ and $\preceq$ for edits and record in set as well as in 
 boolean representation. For example, in stead of writing ${\bf v}\cdot {\bf a}=n$ we write 
 ${\bf v}\in {\bf a}$ (which is equivalent to $v\in e$) when convenient.
 \label{remboolnotation}
@@ -441,7 +435,7 @@ Figure \ref{Reditarray} shows a simple example of defining an {\sf editarray} wi
 the editrules package.  The first two edits in Figure \ref{Reditarray} define
 the data model. The {\sf editarray} function derives the datamodel based on the
 variable names and categories it finds in the edits, whether they are
-univariate (defining domains) of multivariate. This means that if all possible
+univariate (defining domains) or multivariate. This means that if all possible
 variables and categories are mentioned in the multivariate edits, the correct
 datamodel will be derived as well. 
 
@@ -465,9 +459,10 @@ been overloaded to derive a {\sf character} representation from a boolean
 representation. When printed to the screen, both the boolean and textual
 representation are shown.
 
-Univariate edits define the domain of a variable. The domains form together a data model. A domain can be defined with common {\sf R}
-syntax using the ${\sf \%in\%}$ operator. If a domain is defined explicitly,
-it must follow the following syntax diagram.
+Univariate edits define the domain of a variable. The domains form together a
+data model. A domain can be defined with common {\sf R} syntax using the ${\sf
+\%in\%}$ operator. If a domain is defined explicitly, it must follow the
+following syntax diagram.
 \begin{syntdiag}
     "\""
     <variable> "\%in\%"
@@ -766,7 +761,6 @@ For two edit sets ${\bf A}$ and ${\bf A'}$, we also introduce the notation
 {\bf A}\res_k{\bf A}' = \{{\bf a}\res_k{\bf a}'\,|\, ({\bf a},{\bf a}')\in\rows({\bf A})\times\rows({\bf A}')\}.
 \end{equation}
 %
-
 \begin{remark}
 The resolution operator has the following properties relevant for record checking.
 \begin{eqnarray}
@@ -777,11 +771,12 @@ The resolution operator has the following properties relevant for record checkin
 where we used notation as defined in remark \ref{remboolnotation}.
 That is, if a record violates ${\bf a}\res_k{\bf a}'$, it does so because it
 violates ${\bf a}$ and/or ${\bf a}'$. Therefore, ${\bf a}\res_k{\bf a}'$ is
-also an edit in the sense that a record is invalid if it is falls in the
+also an edit in the sense that a record is invalid if it falls in the
 derived edit. When ${\bf a}_k={\bf a}'_k$, the resulting edit is
 the intersection of the original edits, in which case the resulting edit is
 redundant.  \theend
 \end{remark}
+
 
 The operator is called resolution operator since in certain cases its action is
 equivalent to a resolution operation from formal (automated) logic derivation
@@ -794,6 +789,28 @@ resolution operation happens to eliminate one of the variables, it is called an
 {\em essentially new implied edit}.\index{edit!essentially new} These terms
 were introduced by \citet{fellegi:1976} who first solved the problem of error	
 localization for categorical data. 
+
+\begin{example}
+\label{exResolution}
+Consider again the variable domain of Example \ref{datamodel}. We define the edits
+
+\begin{tabular}{ll}
+\\
+$e^{(1)}$: & Under aged people cannot be married.\\
+$e^{(2)}$: & A marriage partner must be married.\\
+\\
+\end{tabular}\\
+In the boolean representation we get:
+\begin{eqnarray*}
+\rho(e^{(1)}) &=&(1,0,0,0)\oplus(1,0)\oplus(1,1,1)\\
+\rho(e^{(2)}) &=&(0,1,1,1)\oplus(1,1)\oplus(0,1,1).
+\end{eqnarray*}
+A new edit can be derived, using $\res_1$
+\begin{equation*}
+\rho(e^{(1)})\res_1 \rho(e^{(2)}) = (1,1,1,1)\oplus(1,0)\oplus(0,1,1).
+\end{equation*}
+Which can be translated to the rule that under-aged people cannot be a marriage partner.
+\end{example}
 
 
 \index{editarray@{\sf editarray}!variable elimination}
@@ -849,7 +866,7 @@ Given a set of $m$ edits:
     i\in 1,2,\ldots,m\},
 \label{eqEditSet}
 \end{equation}
-where $\mathcal{P}(D)$ is the powerset of $D$.  \citet{fellegi:1976}, but also
+where $\mathcal{P}(D)$ is the power set of $D$.  \citet{fellegi:1976}, but also
 \cite{waal:2011} define a way to derive new edits, which may be written as a
 function $F_k$,
 \begin{eqnarray}
@@ -905,7 +922,7 @@ idempotent. As a reminder, these properties are defined as follows.
 \textrm{idempotency:} &{\bf a}\res_k {\bf a} = {\bf a}.
 \end{array}
 \end{equation}
-The resolution operator (although not called as such) was found earlyer and
+The resolution operator (although not called as such) was found earlier and
 independently of the current authors by \cite{willenborg:1988}, who also
 discovered these properties.
 %
@@ -925,33 +942,33 @@ We may write ${\bf a} = {\bf a}_k\oplus{\bf a}'$ and similarly for {\bf b} and {
 and we are done.
 \end{proof}
 %
-This lemma is important because it shows that removing redundant edits (as shown in Algorithm \ref{eliminate}) 
-does not affect the outcome of {\sc eliminate} in the sense that the resulting edit set covers the same subset
-of $D$ with or without the redundancy removal step.
+This lemma is important because it shows that removing redundant edits (as
+shown in Algorithm \ref{eliminate}) does not affect the outcome of {\sc
+eliminate} in the sense that the resulting edit set covers the same subset of
+$D$ with or without the redundancy removal step.
 
 We now define more formally the notion of variable elimination.
 \begin{definition}
-    Given a a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and a set of edits $E\subset
+    Given a function $f:\mathcal{P}(D)\to\mathcal{P}(D)$, and a set of edits $E\subset
     \mathcal{P}(D)$. If none of the edits in $f(E)$ contain variable $k$, we say
     that $f$ eliminates that variable from $E$.
 \end{definition}
-Remember that in the boolean representation, this means that ${\bf a}_k=(\true)^{d_k}$.
-The following theorem shows that every essentially new implied edit, generated by $k$ is found
-by Algorithm \ref{eliminate}.
+Remember that in the boolean representation, this means that ${\bf
+a}_k=(\true)^{d_k}$.  The following theorem shows that every essentially new
+implied edit, generated by $k$ is found by Algorithm \ref{eliminate}.
 \begin{theorem}
 If $E$ is a set of edits, the function $\textrm{\sc eliminate}(E,k)$ generates
-every edit derived from $E$ from which variable $k$ has been eliminated. Moreover, these
-edits are mutually non-redundant.
+every edit derived from $E$ from which variable $k$ has been eliminated.
+Moreover, these edits are mutually non-redundant.
 \label{eliminates}
 \end{theorem}
 \begin{proof}
-The rows are mutually non-redundant since redundant rows are removed explicitly in
-line 8 of the algorithm. The fact that the removing these rows does not alter the
-result (in the sense that the resulting edits will cover the same subdomain of $D$) 
-is a consequence of Lemma \ref{keepRedundancy}. 
+The rows are mutually non-redundant since redundant rows are removed explicitly
+in line 8 of the algorithm. The fact that the removing these rows does not
+alter the result (in the sense that the resulting edits will cover the same
+subdomain of $D$) is a consequence of Lemma \ref{keepRedundancy}. 
 
-Denote by ${\bf A}(j)$ the state of {\bf A} after $j$
-iterations. We have
+Denote by ${\bf A}(j)$ the state of {\bf A} after $j$ iterations. We have
 \begin{equation}
 {\bf A}(1) = {\bf A}^+(0)\cup {\bf A}^+(0)\res_k{\bf A}^-(0).
 \end{equation}
@@ -971,7 +988,7 @@ all nonredundant derived edits where columns $\ind(k,1),\ldots,\ind(k,j)$ equal
 \end{proof}
 
 It is interesting to compare the procedure in Algorithm \ref{eliminate} with 
-the procedure of \citet{fellegi:1976} for generating implicied edits. This procedure,
+the procedure of \citet{fellegi:1976} for generating implied edits. This procedure,
 which is also described by \cite{waal:2011} may be summarized as follows.
 
 \vspace{1ex}
@@ -1010,10 +1027,11 @@ kept to a minimum which reduces the complexity encountered in practice.
 The purpose of the {\sf eliminate} function is to derive all possible non-redundant
 edits from an edit set that do not contain a certain variable. For categorical data
 edits, this amounts to logical resolution. For example, consider the syllogism
+which was also discussed in Example \ref{exResolution}:
 
 \begin{tabular}{lm{0.8\textwidth}}
 \\
-$P_1$ & An under-aged subject cannot be married\\
+$P_1$ & Under-aged people cannot be married\\
 $P_2$ & A marriage partner has to be married\\
 \hline
 $C$ & An under-aged subject cannot be a marriage partner.\\   
