@@ -1,5 +1,6 @@
 %\VignetteIndexEntry{Categorical edit manipulation and error localization with the editrules package}
 \documentclass[11pt, fleqn, a4paper]{article}
+\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{array}
