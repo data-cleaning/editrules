@@ -160,7 +160,6 @@ meaning that $c_i$ should be adapted.
 
 \subsection{Open vs close domains}
 
-
 \section{Boundary heuristics}
 \subsection{From data set}
 Minimum and maximum value of each variable in the data set to be checked gives reasonable boundaries for the dataset. 
