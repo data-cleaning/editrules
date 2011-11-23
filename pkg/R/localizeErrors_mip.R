@@ -37,7 +37,7 @@ buildELMatrix.editmatrix <- function( E
   idx <- match(vars, names(x))
   
   weight <- weight[idx]
-  xlim <- xlim[idx,]
+  xlim <- xlim[idx,,drop=FALSE]
   x <- x[idx]
   nvars <- length(vars)
   
@@ -59,12 +59,20 @@ buildELMatrix.editmatrix <- function( E
   Ael[,adaptidx] <- 0
        
   r_x <- diag(-1, nvars)
-  r_lower <- diag(lb-x)
+  if ( nvars == 1 ){
+    r_lower = matrix(lb-x,ncol=1,nrow=1)
+  } else {
+    r_lower <- diag(lb-x)
+  }
   r <- cbind(r_x, r_lower, -x)
   Ael <- rbind(Ael, r)
    
   r_x <- diag(1, nvars)
-  r_upper <- diag(x-ub)
+  if ( nvars == 1 ){
+    r_upper <- matrix(x-ub,ncol=1,nrow=1)
+  } else {
+    r_upper <- diag(x-ub)
+  }
   r <- cbind(r_x, r_upper, x)
   Ael <- rbind(Ael, r)
     
