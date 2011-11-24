@@ -41,16 +41,15 @@ buildELMatrix.editmatrix <- function( E
   x <- x[idx]
   nvars <- length(vars)
   
-  #TODO cope with NA's in x (choose upper en lower bound and  don't generate error localization constraints for na's')
   adaptvars <- paste("adapt", vars, sep=".")
   adaptidx <- seq_along(vars) + nvars
   
   ub <- xlim[,2]
   lb <- xlim[,1]
   ub[is.na(ub)] <- .Machine$integer.max - 1
-  ub[ub < 1000] <- 1000 # to cope with very small (or 0) values
+  ub[round(x) == 0] <- 1000 # to cope with very small (or 0) values
   lb <- -ub
-  x[is.na(x)] <- ub[is.na(x)] + 1 # put value out of bound
+  x[is.na(x)] <- 2 * (ub[is.na(x)] + 1) # put value for NA's out of bound
   
   A <- getA(E)
   
@@ -84,17 +83,7 @@ buildELMatrix.editmatrix <- function( E
   Ena <- !is.na(Ael[,nb])
   Ael <- Ael[Ena,,drop=FALSE]
   ops <- ops[Ena]
-  
-#   print(Ael)
-#   
-#   # and add extra weigths contraints for NA's
-#   xna <- adaptidx[is.na(x)]
-#   Ana <- matrix(0, nrow=length(xna), ncol=ncol(Ael))
-#   Ana[, nb] <- 1
-#   Ana[, xna] <- 1
-#   Ael <- rbind(Ael, Ana)
-#   ops <- c(ops, rep("==", nrow(Ana)))
-  
+    
   Eel <- as.editmatrix( Ael[,-nb,drop=FALSE]
                       , Ael[,nb]
                       , ops
@@ -165,10 +154,10 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   
   # domain constraints, (in case of open domains)
   A <- matrix( 0L
-               , ncol = nvars+nlvls
-               , nrow = nvars
-               , dimnames = list(NULL, c(lvls, adaptvars))
-               )
+             , ncol = nvars+nlvls
+             , nrow = nvars
+             , dimnames = list(NULL, c(lvls, adaptvars))
+             )
   
   nlvls <- sub(":.+","", lvls)
   #print(nlvls)
@@ -232,7 +221,7 @@ localize_mip_rec <- function( E
    
    t <- proc.time()
    elm <- buildELMatrix(E, x, weight)
-   
+   #print(elm)
    Ee <- elm$E
    objfn <- elm$objfn
    adaptidx <- which(objfn > 0)
