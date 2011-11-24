@@ -79,7 +79,7 @@ buildELMatrix.editmatrix <- function( E
   
   nb <- ncol(Ael)
   
-  # remove NA columns
+  # remove NA rows
   Ena <- !is.na(Ael[,nb])
   Ael <- Ael[Ena,,drop=FALSE]
   ops <- ops[Ena]
