@@ -241,6 +241,9 @@ MIXOPS <- c("if", "||", "|", "&&", "&")
 #' @return list with categorical expression (\code{cat}) and a numerical expression (code{nums})
 #' @keywords internal
 parseMix <- function(e, editname="", numid=0){
+  
+  # should the expressions be returned or should parseCat and parseNum be called on cat and nums?
+  
   if (length(e) < 3) return(NULL)
   op <- as.character(e[[1]])
   if (!op %in% MIXOPS) stop("invalid mix")
@@ -267,7 +270,19 @@ parseMix <- function(e, editname="", numid=0){
   }
   pm(2)
   pm(3)
-  list(cat=cat, nums=nums, numid=numid)
+  
+  # orNums is the or for for numerical edits, some will be negated.
+  
+  orNums <- nums
+  numDummies <- names(orNums)
+  neg <- which(parseCat(cat, useLogical=TRUE)[numDummies])
+  orNums[neg] <- sapply(orNums[neg], negateEdit)
+  
+  list( cat  = cat # parseCat(cat)
+      , nums = nums # lapply(nums, parseNum)
+      , orNums = orNums # lapply(orNums, parseNum)
+      , numid=numid 
+      )
 }
 
 # e has to be an edit
@@ -316,11 +331,8 @@ rewriteEq <- function(e){
 # a <- negateEdit(quote(A %in% "a"))
 # a
 # negateEdit(a)
-
-# pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y == 2), editname="e1")
+# 
+# pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y > 2), editname="e1")
 # pm
 # 
-# parseCat(pm$cat)
-# lapply(pm$nums, parseNum)
-
 
