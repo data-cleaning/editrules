@@ -153,6 +153,11 @@ isNum <- function(e){
   return(cmp %in% NUMCMP)
 }
 
+isCat <- function(e){
+  cmp <- deparse(e[[1]])
+  return(cmp %in% CATCMP)  
+}
+
 #' basic test for type of edit
 #' @param edts \code{expression}
 #  @keywords internal
@@ -220,3 +225,54 @@ retrieveCoef <- function(e, co=1){
    }
    stop("Invalid expression:", e)
 }
+
+MIXOPS <- c("if", "||", "|", "&&", "&")
+
+#' Parse a mixed edit
+#'
+#' parseMix replaces all numerical edits with a generated dummy boolean variable and returns the resulting categorical
+#' edit plus the list of found of numerical edits. These exppression should be handled further by \code{parseCat} and 
+#' \code{parseNum}.
+#' @param e expression to be parsed
+#' @param numid starting number for dummy name generation
+#' @return list with categorical expression (\code{cat}) and a numerical expression (code{nums})
+#' @keywords internal
+parseMix <- function(e, editname="", numid=0){
+  if (length(e) < 3) return(NULL)
+  op <- as.character(e[[1]])
+  if (!op %in% MIXOPS) stop("invalid mix")
+  
+  cat <- e
+  nums <- expression()
+  numid <- numid
+  
+  pm <- function(i){
+    if (isNum(e[[i]])){
+      numid <<- numid + 1
+      numvar <- paste(editname, ".num.",numid,sep="")
+      #replace numeric edit with generated dummy boolean edit name
+      cat[[i]] <<- parse(text=numvar)[[1]]
+      nums[numvar] <<- as.expression(e[[i]])
+    } else if (!isCat(e[[i]])){
+      l <- parseMix(e[[i]], numid=numid, editname=editname)
+      cat[[i]] <<- l$cat
+      nums[names(l$nums)] <<- l$nums
+      numid <<- l$numid
+    }  
+  }
+  pm(2)
+  pm(3)
+  list(cat=cat, nums=nums, numid=numid)
+}
+
+# TODO 
+# * generate the negation of a numerical edit.
+# * rewrite a '==' numerical edit as two inequalities (needed for negation)
+
+
+## quick test
+# pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y > 2), editname="e1")
+# pm
+# 
+# parseCat(pm$cat, useLogical=TRUE)
+# lapply(pm$nums, parseNum)
