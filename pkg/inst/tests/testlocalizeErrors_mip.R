@@ -117,3 +117,14 @@ test_that('localizeErrors works with different weights per record',{
               )
 })
 
+
+
+test_that('localizeErrors handles single edits with mip method',{
+    expect_true(localizeErrors(editmatrix("x>0"),data.frame(x=-1),method='mip')$adapt[1,1])
+## NA's are still on TODO-list.
+#    expect_true(localizeErrors(editmatrix("x>0"),data.frame(x=NA),method='mip')$adapt[1,1])
+})
+
+
+
+
