@@ -3,7 +3,7 @@ MIXOPS <- c("if", "||", "|", "&&", "&")
 #' Parse a mixed edit
 #'
 #' parseMix replaces all numerical edits with a generated dummy boolean variable and returns the resulting categorical
-#' edit plus the list of found of numerical edits. These exppression should be handled further by \code{parseCat} and 
+#' edit plus the list of found of numerical edits. These expressions should be handled further by \code{parseCat} and 
 #' \code{parseNum}.
 #' @param e expression to be parsed
 #' @param numid starting number for dummy name generation
