@@ -312,7 +312,7 @@ negateEdit <- function(e){
 rewriteEq <- function(e){
   op <- as.character(e[[1]])
   if (!isNum(e) || op != "==") return(e)
-  eAnd <- quote(a && b)
+  eAnd <- quote(a & b)
   eAnd[[2]] <- e
   eAnd[[2]][[1]] <- as.symbol("<=")
   eAnd[[3]] <- e
@@ -335,4 +335,4 @@ rewriteEq <- function(e){
 # pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y > 2), editname="e1")
 # pm
 # 
-
+# 
