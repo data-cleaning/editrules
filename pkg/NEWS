@@ -2,6 +2,7 @@ version 2.0-0
 - Final version of vignette.
 - Function 'contains' now S3 generic and overloaded for editmatrix object.
 - BREAKING CHANGE. as.data.frame.editmatrix is now symmetrical with as.data.frame.editarray. Use toDataFrame for old behaviour.
+- str overloaded for objects of class editarray (gives output similar to str.editmatrix)
 
 version 1.9-0
 - Parser for categorical edits accepts edits in the form "if ( <set expression> ) FALSE"
