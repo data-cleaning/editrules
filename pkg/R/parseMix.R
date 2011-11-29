@@ -7,49 +7,55 @@ MIXOPS <- c("if", "||", "|", "&&", "&")
 #' \code{parseNum}.
 #' @param e expression to be parsed
 #' @param numid starting number for dummy name generation
-#' @return list with categorical expression (\code{cat}) and a numerical expression (code{nums})
+#' @return list with categorical expression (\code{cat}), which is normalized,  a numerical expression (code{nums}) 
+#' and a negated version of this  expression (code{negNums})
 #' @keywords internal
-parseMix <- function(e, editname="", numid=0){
+parseMix <- function(e, editname="", numid=0, negate=TRUE){
   
   # should the expressions be returned or should parseCat and parseNum be called on cat and nums?
   
   if (length(e) < 3) return(NULL)
   op <- as.character(e[[1]])
   if (!op %in% MIXOPS) stop("invalid mix")
-  
+    
   cat <- e
   nums <- expression()
   numid <- numid
   
-  pm <- function(i){
+  pm <- function(i, neg=negate){
     # rewrite equality as inequalities
     #e[[i]] <- rewriteEq(e[[i]])
-    if (isNum(e[[i]])){
+    edit <- e[[i]]
+    if (isNum(edit)){
       numid <<- numid + 1
       numvar <- paste(editname, ".num.",numid,sep="")
-      #replace numeric edit with generated dummy boolean edit name
-      cat[[i]] <<- as.name(numvar)
-      nums[numvar] <<- as.expression(e[[i]])
-    } else if (!isCat(e[[i]])){
-      l <- parseMix(e[[i]], numid=numid, editname=editname)
+      #replace numeric edit with generated dummy boolean edit name and handle normal form
+      dum <- as.name(numvar)
+      if (neg){ 
+        dum <- quote(!a)
+        dum[[2]] <- as.name(numvar)
+        edit <- negateEdit(edit)
+      } 
+      cat[[i]] <<- dum
+      nums[numvar] <<- as.expression(edit)
+    } else if (!isCat(edit)){
+      l <- parseMix(edit, numid=numid, editname=editname, negate=neg)
       cat[[i]] <<- l$cat
       nums[names(l$nums)] <<- l$nums
       numid <<- l$numid
     }  
   }
-  pm(2)
-  pm(3)
   
-  # orNums is the or for for numerical edits, some will be negated.
+  pm(2, neg=ifelse(op == "if", !negate, negate))
+  pm(3, neg=negate)
   
-  orNums <- nums
-  numDummies <- names(orNums)
-  neg <- which(!parseCat(cat, useLogical=TRUE)[numDummies])
-  orNums[neg] <- sapply(orNums[neg], negateEdit)
+  negNums <- nums
+  negNums[] <- sapply(nums, negateEdit)
+  names(negNums) <- paste("!",names(negNums), sep="")
   
   list( cat  = cat # parseCat(cat)
       , nums = nums # lapply(nums, parseNum)
-      , orNums = orNums # lapply(orNums, parseNum)
+      , negNums = negNums # lapply(orNums, parseNum)
       , numid=numid 
       )
 }
@@ -89,7 +95,7 @@ rewriteInEq <- function(e){
   eAnd
 }
 
-## quick test
+# quick test
 # rewriteInEq(quote(x != y + 1))
 # 
 # a <- negateEdit(quote(x>2))
@@ -103,4 +109,4 @@ rewriteInEq <- function(e){
 # pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y > 2), editname="e1")
 # pm
 # 
-# 
+
