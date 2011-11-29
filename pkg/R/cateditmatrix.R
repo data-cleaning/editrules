@@ -6,10 +6,16 @@
 #'
 #' @param x \code{character} with categorical edits
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
-cateditmatrix <- function(x){
+#' @keywords internal
+cateditmatrix <- function(x, sep=":"){
+    if (is.editarray(x)) {
+      x <- as.character(x,datamodel=FALSE)
+    }
     edts <- parseEdits(x)
     
-    catedits <- lapply(edts, parseCatEdit)
+    catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE)
+    catedits <- lapply(catedits, parseCatEdit)
+    
     categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
 
@@ -36,26 +42,26 @@ cateditmatrix <- function(x){
     E
 }
 
-substValue.cateditmatrix <- function(E, val, var=NULL){
-  if (missing(var)) var <- names(val)
-  if (is.null(var)) stop("No Variable name found.")
-  
-  variables <- getVars(E)
-  vars <- sub(":.+", "", variables)
-  variables <- variables[vars %in% var]
-  
-  cats <- sub(".+:", "", variables)
-  values <- as.integer(cats %in% val)
-  names(values) <- variables
-  substValue(E, variables, values)
+#' Coerce an cateditmatrix to a \code{character} vector
+#'
+#' Derives readable editrules from an editmatrix.
+#' @export
+#' @method as.character cateditmatrix
+#'
+#' @param x cateditmatrix object to be printed
+#' @param ... further arguments passed to or from other methods.
+as.character.cateditmatrix <- function(x, ...){
+  class(x) <- "editmatrix"
+  as.character(x)
 }
 
 #' parse categorial edit
 
 #' @param e \code{expression} with a single edit
 #' @return named \code{numeric} with coefficients
-parseCatEdit <- function(e){
-  el <- parseCat(e, useLogical=TRUE)
+#' @keywords internal
+parseCatEdit <- function(el){
+  #el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
     val <- rep(1, length(el)+1)
     names(val) <- c(names(el), "b")
@@ -69,17 +75,17 @@ parseCatEdit <- function(e){
   }
   val
 }
-# ### examples....
 
-civilStatusLevels <- c("married","unmarried","widowed","divorced")
+ ### examples....
 
-x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
-      , "if (age == '< 16') civilStatus=='unmarried'"
-#      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
-      , "if (pregnant) gender == 'female'"
-      , "if (nace %in% c('A','B')) valid==TRUE"
-      , "gender %in% c('male','female')"
-      )
-
-(E <- cateditmatrix(x))
-substValue.cateditmatrix(E, val=c(gender="male"))
+# #civilStatusLevels <- c("married","unmarried","widowed","divorced")
+# # 
+# x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
+#       , "if (age == '< 16') civilStatus=='unmarried'"
+# #      , "civilStatus %in% civilStatusLevels" #that looks magical, but civilstatusLevels is evaluated
+#       , "if (pregnant) gender == 'female'"
+#       , "if (nace %in% c('A','B')) valid==TRUE"
+#       , "gender %in% c('male','female')"
+#       )
+# 
+# (E <- cateditmatrix(x))

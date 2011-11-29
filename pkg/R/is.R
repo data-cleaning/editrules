@@ -10,6 +10,16 @@ is.editmatrix <- function(x){
    return(inherits(x, "editmatrix"))
 }
 
+#' Check if object is a cateditmatrix
+#' 
+#' Please note that a cateditmatrix is also an editmatrix
+#' @seealso \code{\link{cateditmatrix}}
+#' @export
+#' @param x object to be checked
+#' @return TRUE if \code{x} is an \code{cateditmatrix}
+is.cateditmatrix <- function(x){
+  return(inherits(x, "cateditmatrix"))
+}
 
 #' check if an object is an editarray
 #'
