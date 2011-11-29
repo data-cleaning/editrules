@@ -160,18 +160,19 @@ meaning that $c_i$ should be adapted.
 
 \subsection{Open vs close domains}
 
-\subsection{Mixed edits}
-
-* Each mixed edit can be written as a categorical edit plus numerical edits for all enclosed numerical edits
-
-$$\argmin$$
-
 \section{Boundary heuristics}
 \subsection{From data set}
 Minimum and maximum value of each variable in the data set to be checked gives reasonable boundaries for the dataset. 
 \subsection{From observation, per record}
 Assume that maximum values for each observation differ at most a factor $f$ (e.g. 1000) of the reported value.
 
+\section{Mixed edits}
+
+* Each mixed edit can be written as a categorical edit plus numerical edits for all enclosed numerical edits
+
+* $$ \lnot $$
+
+$$\argmin$$
 
 \section{Discussion}
 

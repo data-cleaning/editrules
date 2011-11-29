@@ -121,6 +121,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, method=c
         r <- X[,i]
         if (weightperrecord) wt <- weight[i,]
         le <- localize_mip_rec(E, r, weight=wt, ...)
+#        print(le)
         if (!le$maxdurationExceeded){
           err[i,] <- le$adapt
           wgt[i] <- le$w
