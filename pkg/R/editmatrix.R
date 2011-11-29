@@ -166,14 +166,33 @@ as.editmatrix <- function( A
 
 #' Coerce an editmatrix to a \code{data.frame}
 #'
-#' Coerces an editmatrix to a \code{data.frame}. Useful for storing/viewing the matrix representation of editrules.
+#' Coerces an editmatrix to a \code{data.frame}. Useful for storing manipulated edits.
+#' NOTE: since version 2.0-0, the behaviour of this function changed to be more symmetrical 
+#' with \code{editmatrix.data.frame} and \code{as.data.frame.editarray}. 
+#' Use \code{\link{toDataFrame}} for the old behaviour.
+#'
 #' @export 
 #' @method as.data.frame editmatrix
 #' @param x editmatrix object
 #' @param ... further arguments passed to or from other methods.
 #'
+#' @return data.frame which can be converted to an editmatrix with \code{\link{editmatrix}}
+as.data.frame.editmatrix <- function(x,...){
+    edts <- as.character(x,...)
+    data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
+}
+
+
+#' Coerce an editmatrix to a \code{data.frame}
+#'
+#' Coerces an editmatrix to a \code{data.frame}. Useful for viewing the matrix representation of editrules.
+#' @export 
+#' 
+#' @param x \code{\link{editmatrix}} object
+#'
 #' @return data.frame with the coefficient matrix representation of \code{x}, an operator column and CONSTANT column.
-as.data.frame.editmatrix <- function(x, ...){
+toDataFrame <- function(x){
+   if (!is.editmatrix(x)) stop('x must be an editmatrix')
    dat <- as.data.frame(getA(x))
    nms <- make.names( c(names(dat), "Ops", "CONSTANT")
                     , unique=TRUE
@@ -183,6 +202,7 @@ as.data.frame.editmatrix <- function(x, ...){
    dat[[nms[n]]] <- getb(x)
    dat
 }
+
 
 
 #' Coerce an editmatrix to a \code{character} vector
@@ -250,14 +270,3 @@ as.expression.editmatrix <- function(x, ...){
  )
 }
 
-#' \code{\link{str}} method for editmatrix object
-#'
-#' @method str editmatrix
-#' @param object \code{\link{editmatrix}} object
-#' @param ... arguments to pass to other methods
-#' @export
-str.editmatrix <- function(object,...){
-    vars <- paste(getVars(object),collapse=", ")
-    if (nchar(vars) > 20 ) vars <-  paste(strtrim(vars,16),"...") 
-    cat(paste("editmatrix with", nrow(object), "edits containing variables",vars,"\n"))
-}
