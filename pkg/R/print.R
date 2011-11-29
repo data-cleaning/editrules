@@ -32,7 +32,7 @@ print.editarray <- function(x, ...){
 #' @keywords internal
 print.editmatrix <- function(x, ...){
    cat("Edit matrix:\n")
-   print(as.data.frame(x), ...)
+   print(toDataFrame(x), ...)
    cat("\nEdit rules:\n")
    info <- editrules(x)
    desc <- paste("[",info$description,"]")
