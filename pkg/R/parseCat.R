@@ -50,23 +50,26 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE){
         }
         edit[var] <- !val
     } else if (op == "!") {
+        if (is.na(val)){
+          val <- FALSE
+        }
         edit <- parseCat(x[[2]],!val,  edit, sep, useLogical)
     } else if (op %in% c("&", "&&")){
-        if (is.na(val))
-           val <- TRUE
-        if (val == FALSE){
-            stop("Operators '&' and '&&' not allowed in 'then' clause")
+        if (!isTRUE(val)){
+            stop( "Operator '",op,"' is not allowed in 'then' clause.\n Edit '"
+                , deparse(x)
+                ,"' can be split into multiple edits")
         }
-        edit <- parseCat(x[[2]],val, edit, sep, useLogical)
-        edit <- parseCat(x[[3]],val, edit, sep, useLogical)
+        edit <- parseCat(x[[2]],TRUE, edit, sep, useLogical)
+        edit <- parseCat(x[[3]],TRUE, edit, sep, useLogical)
     } else if (op %in% c("||","|")){
-        if (is.na(val))
-           val <- FALSE
-        if (val == TRUE){
-             stop("Operator '||' not allowed in 'if' clause")
+        if (isTRUE(val)){
+          stop( "Operator '",op,"' is not allowed in 'if' clause.\n Edit '"
+                , deparse(x)
+                ,"' can be split into multiple edits")
         }
-        edit <- parseCat(x[[2]],val, edit, sep, useLogical)
-        edit <- parseCat(x[[3]],val, edit, sep, useLogical)
+        edit <- parseCat(x[[2]],FALSE, edit, sep, useLogical)
+        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical)
     } else {
         stop("Operator '",op,"' not implemented")
     }
