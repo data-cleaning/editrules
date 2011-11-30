@@ -21,11 +21,11 @@ c.editmatrix <- function(...){
   as.editmatrix(A=A, ops=ops, b=b)
 }
 
-#' concatenate editmatrix
-#' @method c editmatrix
+#' concatenate editarray
+#' @method c editarray
 #' @export
-#' @param ... \code{editmatrix} objects to be concatenated.
-#' @return \code{editmatrix}
+#' @param ... \code{editarray} objects to be concatenated.
+#' @return \code{editarray}
 c.editarray <- function(...){
   ems <- list(...)
   
@@ -53,6 +53,7 @@ c.editarray <- function(...){
 # E2 <- editmatrix(expression(x <2, y > 2))
 # c(E1,E2)
 
-E1 <- editarray(expression(A %in% c("a1", "a2"), B %in% c("b1", "b2"), if (A=='a1') B == 'b1'))
-E2 <- editarray(expression(B %in% c("b1", "b3"), C %in% c("c1", "c2"), if (B=='b1') C == 'c1'))
-c(E1,E2)
+#E1 <- editarray(expression(A %in% c("a1", "a2"), B %in% c("b1", "b2"), if (A=='a1') B == 'b1'))
+#E2 <- editarray(expression(B %in% c("b1", "b3"), C %in% c("c1", "c2"), if (B=='b1') C == 'c1'))
+#c(E1,E2)
+
