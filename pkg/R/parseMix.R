@@ -106,7 +106,10 @@ rewriteInEq <- function(e){
 # a
 # negateEdit(a)
 # 
-# pm <- parseMix(quote(if(x>1 && x < 10 && A %in% c('a1')) y > 2), editname="e1")
+# pm <- parseMix( quote( if(x>1 && 
+#                        x < 10 && 
+#                        A %in% c('a1'))  y > 2                     )
+#               , editname="e1")
 # pm
 # 
 
