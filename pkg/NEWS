@@ -1,3 +1,8 @@
+version 2.0-1
+- bugfix in isSubset.editarray
+- buxfix in localizeErrors: maxduration was previously ignored (thanks to Francesca Pogelli and Teresa Buglielli of ISTAT)
+- buxfix in parseEdits: non constant parsing was not detected. It is now also possible to use x*100 (thanks to Francesca Pogelli and Teresa Buglielli of ISTAT)
+
 version 2.0-0
 - Final version of vignette.
 - Function 'contains' now S3 generic and overloaded for editmatrix object.

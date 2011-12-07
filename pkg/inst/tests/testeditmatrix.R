@@ -98,10 +98,18 @@ test_that("editmatrix works with negative coefficients",{
    expect_equivalent(mat[1,], c(2,-1,-2))
 })
 
+test_that("editmatrix works with coefficient after variable",{
+  cond <- c( "x*-2 + y > 2"
+             )
+  E <- editmatrix(cond)
+  mat <- getAb(E)
+  expect_equivalent(mat[1,], c(2,-1,-2))
+})
+
 test_that("editmatrix fails with nonconstant coefficient",{
    cond <- c( "a*x == 2"
             )
-   E <- editmatrix(cond)
+   expect_error(editmatrix(cond))
 })
 
 
