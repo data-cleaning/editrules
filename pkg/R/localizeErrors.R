@@ -21,12 +21,13 @@
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an array of weights with the same dimensions as \code{dat}.
+#' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
-localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), ...){
+localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)),maxduration=600, ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
 
@@ -47,7 +48,14 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
 
-        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(),weight=weight, ...)
+        err <- err %+% localize(
+            b, 
+            dat, 
+            verbose, 
+            pretext=blockCount, 
+            call=sys.call(),
+            weight=weight, 
+            maxduration=maxduration, ...)
     }
     if (verbose) cat('\n')
     err
@@ -63,9 +71,10 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @param pretext \code{character} text to print before progress report
 #' @param weight vector or array of weights
 #' @param call call to include in \code{\link{errorLocation}} object
+#' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
+localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxduration, ...){
 ## TODO: should we export this function?
     
     weightperrecord <- is.array(weight)
@@ -99,7 +108,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, ...){
         r <- X[,i]
         if (weightperrecord) wt <- weight[i,]
         bt <- errorLocalizer(E, r, weight=wt, ...)
-        e <- bt$searchBest()
+        e <- bt$searchBest(maxduration=maxduration)
         if (!is.null(e) && !bt$maxdurationExceeded){
             err[i,] <- e$adapt
             wgt[i] <- e$w

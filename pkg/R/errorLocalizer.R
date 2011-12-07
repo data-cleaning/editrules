@@ -60,7 +60,8 @@ errorLocalizer <- function(E, x, ...){
 #' @param maxadapt maximum number of variables to adapt
 #' @param maxweight maximum weight of solution, if weights are not given, this is equal to the 
 #' maximum number of variables to adapt. 
-#' @param maxduration maximum time (in seconds), for \code{$searchNext()}, \code{$searchAll()} and \code{$searchBest()} 
+#' @param maxduration maximum time (in seconds), for \code{$searchNext()}, \code{$searchAll()} (not for \code{$searchBest}, use 
+#'  \code{$searchBest(maxdration=<duration>)} in stead) 
 #'
 #' @rdname errorLocalizer
 #' @export
