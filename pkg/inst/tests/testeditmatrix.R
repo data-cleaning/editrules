@@ -101,7 +101,7 @@ test_that("editmatrix works with negative coefficients",{
 test_that("editmatrix fails with nonconstant coefficient",{
    cond <- c( "a*x == 2"
             )
-   E <- editmatrix(cond)
+   expect_error(editmatrix(cond))
 })
 
 

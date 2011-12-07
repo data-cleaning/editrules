@@ -204,11 +204,15 @@ retrieveCoef <- function(e, co=1){
 	    else if (op == "+"){
 	    }
 	    else if (op == "*"){
-       co <- retrieveCoef(lhs, co)
-       if (!is.numeric(co)){
-                stop(paste("Expression contains nonconstant coefficient", paste(lhs,collapse="")))
+       if (length(lhs) == 2 || is.numeric(lhs)){
+          co <- retrieveCoef(lhs, co)
+          return(retrieveCoef(rhs, co))          
+       } else if (length(rhs) == 2 || is.numeric(rhs)){
+         co <- retrieveCoef(rhs, co)
+         return(retrieveCoef(lhs, co))         
+       } else{
+         stop("Expression '", deparse(e), "' contains nonconstant coefficient")
        }
-       return(retrieveCoef(rhs, co))
 	  }
 	  else { 
 		   stop("Operator ", op, " not implemented", "Invalid expression:", e)
