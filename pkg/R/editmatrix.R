@@ -47,7 +47,7 @@ editmatrix <- function( editrules
 					       ){   
    if (is.character(editrules) || is.expression(editrules)){
       edit <- editrules
-      name <- NULL
+      name <- names(editrules)
       description <- NULL
       editrules <- NULL
     } else if (is.data.frame(editrules)){
@@ -65,7 +65,6 @@ editmatrix <- function( editrules
   	if (is.null(name)){
   	   name <- paste("e", seq_along(edts),sep="")
   	}
-   
     rowedts <- lapply(edts, function(edt){parseNum(edt)})
     ops <- sapply(edts, function(e){deparse(e[[1]])})
    
