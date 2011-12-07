@@ -118,6 +118,21 @@ violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
     newviolatedEdits(v)
 }
 
+#'
+#'
+#' @method violatedEdits editarray
+#' @param datamodel Also check against datamodel?
+#' @rdname violatedEdits
+#' @export
+violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
+  Ea <- c(E$cat, E$mixcat)
+  print(Ea)
+  vCat <- violatedEdits(Ea, adddummies(E, dat), ...)
+  vNum <- violatedEdits(E$num, dat, ...)
+  #    dimnames(v) <- list(rownames(dat),names(edits))
+  newviolatedEdits(cbind(vCat, vNum))
+}
+
 
 
 #' Lists which rows of \code{data.frame dat} violate which constraints

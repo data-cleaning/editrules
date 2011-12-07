@@ -63,3 +63,15 @@ print.cateditmatrix <- function(x, ...){
      )
 }
 
+#' print editset
+#'
+#' @export
+#' @method print editset
+#'
+#' @param x editset object to be printed
+#' @param ... further arguments passed to or from other methods.
+#' @keywords internal
+print.editset <- function(x, ...){
+  attr(x, "parseMix") <- NULL
+  print(unclass(x))
+}

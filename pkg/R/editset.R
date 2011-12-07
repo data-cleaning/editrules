@@ -1,4 +1,8 @@
-
+#' Create an editset which can contain a mix of categorical, numerical and mixededits
+#' 
+#' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
+#'        a \code{character} or \code{expression} with (in)equalities written in R syntax
+#' @export
 editset <- function(editrules){
   #if (is.null(names(editrules)))
   #  names(editrules) <- paste("me", seq_along(editrules), sep="")
@@ -59,13 +63,18 @@ editset <- function(editrules){
   )
 }
 
-print.editset <- function(x, ...){
-  attr(x, "parseMix") <- NULL
-  print(unclass(x))
+#' Add dummy variable to the data.frames, these are needed for errorlocations etc.
+#' @param E editset
+#' @param dat data.frame
+#' @return data.frame with dummy variables added
+#' @keywords internal
+adddummies <- function(E, dat){
+  dummies <- !violatedEdits(E$mixnum, dat)
+  cbind(dat, dummies)
 }
 
 ## quick test
-# es <- editset(expression(if (x > 0) y + 1 < 2
+# es <- editset(expression(if (x > 0) y + 1 < 20
 #                         , x <= 100
 #                         , if (x < 10) y >= 2
 #                         , A %in% c("a1", "a2")
@@ -74,4 +83,9 @@ print.editset <- function(x, ...){
 #                         , if (y > 0) A == "a2"
 #                         )
 #              )
-# es
+# #es
+# 
+# dat <- data.frame(x=1:2, y=10:9, A="a1", B="b2")
+# #adddummies(es,dat)
+# 
+# violatedEdits(es, dat)
