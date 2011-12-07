@@ -65,13 +65,13 @@ print.editset <- function(x, ...){
 }
 
 ## quick test
-es <- editset(expression(if (x > 0) y + 1 < 2
-                        , x <= 100
-                        , if (x < 10) y >= 2
-                        , A %in% c("a1", "a2")
-                        , B %in% c("b1", "b2")
-                        , if (A == "a1") B == "b2"
-                        , if (y > 0) A == "a2"
-                        )
-             )
-es
+# es <- editset(expression(if (x > 0) y + 1 < 2
+#                         , x <= 100
+#                         , if (x < 10) y >= 2
+#                         , A %in% c("a1", "a2")
+#                         , B %in% c("b1", "b2")
+#                         , if (A == "a1") B == "b2"
+#                         , if (y > 0) A == "a2"
+#                         )
+#              )
+# es
