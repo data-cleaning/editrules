@@ -22,12 +22,13 @@
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an array of weights with the same dimensions as \code{dat}.
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
+#' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
-localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), method=c("localizer", "mip"), ...){
+localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("localizer", "mip"), ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
 
@@ -48,7 +49,15 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
             blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
         }
 
-        err <- err %+% localize(b, dat, verbose, pretext=blockCount, call=sys.call(),weight=weight, method, ...)
+        err <- err %+% localize(
+            b, 
+            dat, 
+            verbose, 
+            pretext=blockCount, 
+            call=sys.call(),
+            weight=weight, 
+            maxduration=maxduration,
+            method, ...)
     }
     if (verbose) cat('\n')
     err
@@ -65,9 +74,10 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @param weight vector or array of weights
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
 #' @param call call to include in \code{\link{errorLocation}} object
+#' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, method=c("localizer", "mip"), ...){
+localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
 ## TODO: should we export this function?
     
     weightperrecord <- is.array(weight)
@@ -103,7 +113,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, method=c
           r <- X[,i]
           if (weightperrecord) wt <- weight[i,]
           bt <- errorLocalizer(E, r, weight=wt, ...)
-          e <- bt$searchBest()
+          e <- bt$searchBest(maxduration=maxduration)
           if (!is.null(e) && !bt$maxdurationExceeded){
               err[i,] <- e$adapt
               wgt[i] <- e$w
@@ -155,5 +165,3 @@ getDuration <- function(x){
     names(y) <- c(gettext("user"), gettext("system"), gettext("elapsed"))
     y
 }
-
-
