@@ -109,13 +109,13 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
         if (weightperrecord) wt <- weight[i,]
         bt <- errorLocalizer(E, r, weight=wt, ...)
         e <- bt$searchBest(maxduration=maxduration)
-        if (!is.null(e) && !bt$maxdurationExceeded){
+        if ( !is.null(e) ){
             err[i,] <- e$adapt
             wgt[i] <- e$w
         }
         degeneracy[i] <- bt$degeneracy
         duration[i,] <- getDuration(bt$duration)
-        maxDurationExceeded <- bt$maxdurationExceeded
+        maxDurationExceeded[i] <- bt$maxdurationExceeded
     }
     newerrorlocation(
         adapt=err,

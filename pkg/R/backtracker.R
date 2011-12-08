@@ -65,7 +65,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
             solutions[[length(solutions)+1]] <- sol
             duration <- proc.time() - start
          }
-         e$duration <- duration
+         e$duration <- proc.time() - start
          return(solutions)
       }
             
