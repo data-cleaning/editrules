@@ -219,7 +219,7 @@ localize_mip_rec <- function( E
      E <- cateditmatrix(as.character(E))
    }   
    
-   t <- proc.time()
+   t.start <- proc.time()
    elm <- buildELMatrix(E, x, weight)
    #print(elm)
    Ee <- elm$E
@@ -257,10 +257,10 @@ localize_mip_rec <- function( E
    } else {
      x_feasible[idx] <- sol[-adaptidx]
    }
-   
-   duration <- getDuration(t - proc.time())
+   t.stop <- proc.time()
+   duration <- t.stop - t.start
    list( w=w
-       , adapt=adapt
+       , adapt = adapt
        , x_feasible = x_feasible
        , duration = duration
        , maxdurationExceeded = unname(duration[3] >= maxduration)
