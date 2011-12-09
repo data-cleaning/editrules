@@ -95,17 +95,19 @@ print.editsummary <- function(x,...){
 summary.errorLocation <- function(object,...){
     prb <- c(0,0.5,1)
      
-    err.per.var <- c(quantile(colSums(object$adapt),probs=prb,names=FALSE))
-    err.per.rec <- c(quantile(rowSums(object$adapt),probs=prb,names=FALSE))
+    err.per.var <- c(quantile(colSums(object$adapt,na.rm=TRUE),probs=prb,names=FALSE))
+    err.per.rec <- c(quantile(rowSums(object$adapt,na.rm=TRUE),probs=prb,names=FALSE))
 
-    A <- sapply(object$status[,1:5], function(x) quantile(x,probs=prb,names=FALSE))
+    A <- sapply(object$status[,1:5], function(x) quantile(x,probs=prb,names=FALSE,na.rm=TRUE))
     dimnames(A) <- list(c('min','median','max'), status=names(object$status)[1:5])
     A <- cbind(err.per.var,err.per.rec,A)
-    tt <- sum(object$adapt)
-    total <- c(tt,tt,colSums(object$status[,1:5]))
+    tt <- sum(object$adapt,na.rm=TRUE)
+    total <- c(tt,tt,colSums(object$status[,1:5],na.rm=TRUE))
     te <- sum(object$status$maxDurationExceeded)
+    tf <- sum(is.na(object$status$weight))
     structure(rbind(A,total),
         nexceeded = c(te,te/nrow(object$adapt)),
+        nnotfound = c(tf,tf/nrow(object$adapt)),
         user = object$user,
         timestamp = object$timestamp,
         call = as.character(as.expression(object$call)),
@@ -125,6 +127,9 @@ print.locationsummary <- function(x,...){
     cat(attr(x,'nexceeded')[1],
         ' records exceeded maximum search time (',
         round(attr(x,'nexceeded')[2]*100,2), '%)\n',sep='')
+    cat(attr(x,'nnotfound')[1],
+        ' records did not yield a solution (',
+        round(attr(x,'nnotfound')[2]*100,2), '%)\n',sep='')
 
 }
 

@@ -2,6 +2,8 @@ version 2.0-1
 - bugfix in isSubset.editarray
 - buxfix in localizeErrors: maxduration was previously ignored (thanks to Francesca Pogelli and Teresa Buglielli of ISTAT)
 - buxfix in parseEdits: non constant parsing was not detected. It is now also possible to use x*100 (thanks to Francesca Pogelli and Teresa Buglielli of ISTAT)
+- bugfix in errorLocalizer: no solution was returned if maxdurationExceeded==TRUE (even if at least 1 solution was found)
+- bugfix in summary.errorLocation: could not handle NA in status fields
 
 version 2.0-0
 - Final version of vignette.

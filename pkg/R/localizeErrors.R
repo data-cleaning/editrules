@@ -165,3 +165,4 @@ getDuration <- function(x){
     names(y) <- c(gettext("user"), gettext("system"), gettext("elapsed"))
     y
 }
+
