@@ -36,8 +36,8 @@ expand <- function(s, prefix="_", useSum=FALSE, ...){
 }
 
 # quick test
-expand("x_i < y_j", i=1:3,j=2:3)
-expand("sum_i(x_i) == y", i=1:3, useSum=TRUE)
+#expand("x_i < y_j", i=1:3,j=2:3)
+#expand("sum_i(x_i) == y", i=1:3, useSum=TRUE)
 
 # sumvar <- sub("sum_i\\((.+?)\\).+", "\\1", "sum_i(x_i) == y")
 # sumvar <- paste(expand(sumvar, i=1:10), collapse=" + ")
