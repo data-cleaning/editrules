@@ -7,4 +7,4 @@ expandEdits("x_i < y_j", i=1:3,j=2:3)
 
 expandEdits("sum_i(x_i) == y", i=1:3)
 
-expandEdits("sum_month(x_year__month) == y_year", month=1:12, year=2010:2011)
+expandEdits("sum_month(x__year._month) == x__year", month=month.abb, year=2009:2011)

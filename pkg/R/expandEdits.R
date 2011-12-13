@@ -20,7 +20,7 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){
   l <- list(...)
 
   if (useSum) {
-    sumnms <- paste("sum", names(l), sep=prefix)
+    sumnms <- paste("\\bsum", names(l), sep=prefix)
     sumregex1 <- paste(sumnms, "\\((.+?)\\)", sep="")
     sumregex2 <- paste(sumnms, "\\((.+?)\\).+", sep="")
     vars <- names(l)
