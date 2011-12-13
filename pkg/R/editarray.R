@@ -37,15 +37,18 @@
 #'
 #' @param editrules \code{character} vector 
 #' @param sep textual separator, to be used internally for separating variable from category names. 
+#' @param env environment to evaluate the rhs of '==' or '\%in\%' in. 
 #' @return editarray
 #'
 #' @example ../examples/editarray.R
 #'
-#'
+#' @seealso \code{\link{editfile}}
 #' @export
-editarray <- function(editrules, sep=":"){
+editarray <- function(editrules, sep=":", env=parent.frame()){
+    if (length(editrules) == 0 ) return(neweditarray(array(numeric(0),dim=c(0,0)),ind=list(),sep=sep))
+
     e <- parseEdits(editrules)
-    v <- lapply(e,parseCat,sep=sep)
+    v <- lapply(e,parseCat,sep=sep,env=env)
     
     # find always FALSE edits:
     iNull <- sapply(v,is.null)  

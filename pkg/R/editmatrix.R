@@ -60,7 +60,7 @@ editmatrix <- function( editrules
     } else {
       stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
     }
-
+    if ( length(edit) == 0 ) return(neweditmatrix(matrix(numeric(0)),ops=character(0),normalized=TRUE))
     edts <- parseEdits(edit, type="num")   
   	if (is.null(name)){
   	   name <- paste("e", seq_along(edts),sep="")

@@ -1,3 +1,8 @@
+version 2.0-2
+- New function editfile reads edits and domain definitions from text file
+- editarray gains env (environment) argument
+- editarray and editmatrix now handle zero-length arguments
+
 version 2.0-1
 - bugfix in isSubset.editarray
 - buxfix in localizeErrors: maxduration was previously ignored (thanks to Francesca Pogelli and Teresa Buglielli of ISTAT)
