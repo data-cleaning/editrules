@@ -26,10 +26,10 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
     }
     op <- as.character(x[[1]])
     if ( op == "if" ){
-        edit <- parseCat(x[[2]],TRUE,  edit, sep, useLogical)
-        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical)
+        edit <- parseCat(x[[2]],TRUE,  edit, sep, useLogical, env=env)
+        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical, env=env)
     } else if ( op %in% c("(","{") ){
-        edit <- parseCat(x[[2]], val,  edit, sep, useLogical)
+        edit <- parseCat(x[[2]], val,  edit, sep, useLogical, env=env)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]], envir=env)
         if ( is.na(val) && op == "==" ) val <- TRUE
@@ -53,23 +53,23 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
         if (is.na(val)){
           val <- FALSE
         }
-        edit <- parseCat(x[[2]],!val,  edit, sep, useLogical)
+        edit <- parseCat(x[[2]],!val,  edit, sep, useLogical, env=env)
     } else if (op %in% c("&", "&&")){
         if (!isTRUE(val)){
             stop( "Operator '",op,"' is not allowed in 'then' clause.\n Edit '"
                 , deparse(x)
                 ,"' can be split into multiple edits")
         }
-        edit <- parseCat(x[[2]],TRUE, edit, sep, useLogical)
-        edit <- parseCat(x[[3]],TRUE, edit, sep, useLogical)
+        edit <- parseCat(x[[2]],TRUE, edit, sep, useLogical, env=env)
+        edit <- parseCat(x[[3]],TRUE, edit, sep, useLogical, env=env)
     } else if (op %in% c("||","|")){
         if (isTRUE(val)){
           stop( "Operator '",op,"' is not allowed in 'if' clause.\n Edit '"
                 , deparse(x)
                 ,"' can be split into multiple edits")
         }
-        edit <- parseCat(x[[2]],FALSE, edit, sep, useLogical)
-        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical)
+        edit <- parseCat(x[[2]],FALSE, edit, sep, useLogical, env=env)
+        edit <- parseCat(x[[3]],FALSE, edit, sep, useLogical, env=env)
     } else {
         stop("Operator '",op,"' not implemented")
     }
