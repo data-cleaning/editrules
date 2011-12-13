@@ -1,12 +1,17 @@
 #' Expand an edit expression
+#'
+#' Often many numeric variables have the same constraints. \code{expandEdits} is
+#' a utility function to define edits for multiple variables. See the examples for the syntax.
 #' @param s edit expression
 #' @param prefix prefix for variables to be expanded
 #' @param useSum if \code{TRUE} sum expression will be expanded
+#' @param asExpression if \code{TRUE} an \code{\link{expression}} will be returned in stead of a \code{character}
 #' @param ... variables used in the expansion
-#' @return \code{character} vector with expanded expressions
+#' @return \code{character} or \code{expression} vector with expanded expressions
 #' @export
 #' @example ../examples/expandEdits.R
-expandEdits <- function(s, prefix="_", useSum=TRUE, ...){  
+expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){  
+  #TODO replace special regex character in prefix with escaped character.
   
   if (length(s) > 1){
     return(lapply(s, expand, prefix=prefix, useSum=useSum, ...))
@@ -22,7 +27,7 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, ...){
     for (i in seq_along(vars)){      
       if (length(grep(sumregex2[i], s))){
         sumvars <- sub(sumregex2[i], "\\1", s)
-        sumvars <- do.call(expandEdits, append(list(s=sumvars), l))
+        sumvars <- do.call(expandEdits, append(list(s=sumvars), l[vars[i]]))
         sumvars <- paste(sumvars, collapse=" + ")
         s <- sub(sumregex1[i], sumvars, s)
         l[[vars[i]]] <- NULL
@@ -40,7 +45,11 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, ...){
   } else if (is.vector(s) && length(l)){
     names(s) <- l[[1]]
   }
-  s
+  if (asExpression){
+    parse(text=s)
+  } else {
+    s
+  }
 }
 
 ## quick test
