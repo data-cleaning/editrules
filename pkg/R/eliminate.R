@@ -183,7 +183,6 @@ eliminate.editarray <- function(E, var, ...){
         At <- rbind(At,A[el,,drop=FALSE])     
         A <- A[!el,,drop=FALSE]
     }
-    # drop edits where var could not be eliminated
 
     neweditarray(At,ind=ind,sep=getSep(E),levels=getlevels(E))
 }

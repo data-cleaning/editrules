@@ -1,4 +1,5 @@
 version 2.0-2
+- eliminate.editarray gained speed in certain cases
 - fixed cornercase in editarray: empty category value gave new variable 
 - New function editfile reads edits and domain definitions from text file
 - editarray gains env (environment) argument
