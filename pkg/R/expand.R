@@ -1,5 +1,12 @@
-#' Expand a character
-expand <- function(s, prefix="_", useSum=TRUE, ...){  
+#' Expand an edit expression
+#' @param s edit expression
+#' @param prefix prefix for variables to be expanded
+#' @param useSum if \code{TRUE} sum expression will be expanded
+#' @param ... variables used in the expansion
+#' @return \code{character} vector with expanded expressions
+#' @keywords internal
+#' @example ../examples/expandEdits.R
+expandEdits <- function(s, prefix="_", useSum=TRUE, ...){  
   
   if (length(s) > 1){
     return(lapply(s, expand, prefix=prefix, useSum=useSum, ...))
@@ -15,7 +22,7 @@ expand <- function(s, prefix="_", useSum=TRUE, ...){
     for (i in seq_along(vars)){      
       if (length(grep(sumregex2[i], s))){
         sumvars <- sub(sumregex2[i], "\\1", s)
-        sumvars <- do.call(expand, append(list(s=sumvars), l))
+        sumvars <- do.call(expandEdits, append(list(s=sumvars), l))
         sumvars <- paste(sumvars, collapse=" + ")
         s <- sub(sumregex1[i], sumvars, s)
         l[[vars[i]]] <- NULL

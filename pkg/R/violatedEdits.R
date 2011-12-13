@@ -121,7 +121,6 @@ violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
 #'
 #'
 #' @method violatedEdits editarray
-#' @param datamodel Also check against datamodel?
 #' @rdname violatedEdits
 #' @export
 violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
