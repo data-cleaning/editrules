@@ -9,12 +9,14 @@
 #'
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
+#' @param forceCat force mixed edits (e.g. \code{if (a == 1) y \%in\% c('a','b')}) to be processed as fully categorical 
+#'      (i.e. the \code{1} will become \code{'1'}). Will crash if edits contain arithmetic operations.
 #'
 #' @return \code{\link{editarray}} if \code{type='cat'}, \code{\link{editmatrix}} if \code{type='num'}, \code{list} if \code{type=all}.
 #'   If the return value is a \code{list}, the elements are named \code{numedits} and \code{catedits}.
 #'
 #' @export
-editfile <- function(file,type=c("all","num","cat","mix")){
+editfile <- function(file,type=c("all","num","cat","mix"), forceCat=FALSE){
     type <- match.arg(type)
     if (!type %in% c('num','cat','all')) stop(paste("type",type,"invalid or not implemented yet"))
     p <- parse(file=file)
@@ -23,7 +25,8 @@ editfile <- function(file,type=c("all","num","cat","mix")){
     lapply(p[ass],eval,envir=e)
     edits <- p[!ass]
     numedits <- edits[editTypes(edits) == 'num']
-    catedits <- edits[editTypes(edits) == 'cat']
+    cats <- ifelse(forceCat,c('cat','mix'),'cat')
+    catedits <- edits[editTypes(edits) %in% cats]
     
     switch(type,
         num = editmatrix(numedits),

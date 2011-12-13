@@ -168,9 +168,10 @@ eliminate.editarray <- function(E, var, ...){
         if (nrow(A) <= 1) break
         aPlus <- A[ A[,j],,drop=FALSE]
         aMin  <- A[!A[,j],,drop=FALSE]  
-        n <- nrow(aPlus)
         m <- nrow(aMin)
+        n <- nrow(aPlus)
         if ( m == 0 ) next
+        if ( n == 0 ) break
         B <- array(FALSE,dim=c(n*m,ncol(A)))
         I1 <- rep(1:n,times=m)
         I2 <- rep(1:m,each=n)
