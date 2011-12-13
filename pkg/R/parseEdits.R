@@ -141,6 +141,7 @@ hasNum <- function(e){
     return (op %in% NUMOPS || hasNum(e[[2]]))
   }
   if (length(e) == 3){
+    if (op == "%in%") return(FALSE)
     return(op %in% NUMOPS || hasNum(e[[2]]) || hasNum(e[[3]]))
   }
 }
