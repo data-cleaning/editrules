@@ -4,7 +4,7 @@
 #' @param useSum if \code{TRUE} sum expression will be expanded
 #' @param ... variables used in the expansion
 #' @return \code{character} vector with expanded expressions
-#' @keywords internal
+#' @export
 #' @example ../examples/expandEdits.R
 expandEdits <- function(s, prefix="_", useSum=TRUE, ...){  
   
