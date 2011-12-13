@@ -9,14 +9,14 @@ test_that("getVars.editmatrix works",{
                 c("x","y","z")
         )
 })
-E <- editarray(c(
-    "gender %in% c('male','female')",
-    "pregnant %in% c(TRUE, FALSE)",
-    "if( gender == 'male' ) pregnant == FALSE"
-    )
-)
-
-getVars(E)
+# E <- editarray(c(
+#     "gender %in% c('male','female')",
+#     "pregnant %in% c(TRUE, FALSE)",
+#     "if( gender == 'male' ) pregnant == FALSE"
+#     )
+# )
+# 
+# getVars(E)
 
 
 
