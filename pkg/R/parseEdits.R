@@ -53,3 +53,6 @@ editTypes <- function(edts){
   type[iff] <- ifelse(mix, "mix", "cat")
   as.factor(type)
 }
+
+
+

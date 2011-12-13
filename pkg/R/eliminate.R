@@ -153,10 +153,15 @@ eliminate.editarray <- function(E, var, ...){
     if ( sum(I) == 0 ) return(E) 
 
     ind <- getInd(E)
+    J <- ind[[var]]
+
+    # if elimination is not possible... (at least one category cannot be resolved)
+    if ( any(colSums(E[I,J,drop=FALSE])==0) ) return(E[!I,])
+
     A <- getArr(E)
     At <- A[!I,,drop=FALSE]
     A <- A[I,,drop=FALSE]
-    J <- ind[[var]]
+
 
     k <- integer(0)
     for ( j in J ){
@@ -165,10 +170,6 @@ eliminate.editarray <- function(E, var, ...){
         aMin  <- A[!A[,j],,drop=FALSE]  
         n <- nrow(aPlus)
         m <- nrow(aMin)
-        if ( n == 0 ){
-            A <- A[logical(0),,drop=FALSE]
-            break
-        }
         if ( m == 0 ) next
         B <- array(FALSE,dim=c(n*m,ncol(A)))
         I1 <- rep(1:n,times=m)
@@ -177,11 +178,14 @@ eliminate.editarray <- function(E, var, ...){
         B[I1,-J] <- aPlus[I1,-J,drop=FALSE] & aMin[I2,-J,drop=FALSE]
         B <- rbind(B,aPlus)
         A <- B[!isRedundant.boolmat(B,ind),,drop=FALSE]
-        A <- A[!isSubset.boolmat(A),,drop=FALSE]      
+        A <- A[!isSubset.boolmat(A),,drop=FALSE]
+        el <- apply(A[,J,drop=FALSE],1,all)
+        At <- rbind(At,A[el,,drop=FALSE])     
+        A <- A[!el,,drop=FALSE]
     }
     # drop edits where var could not be eliminated
-    A <- A[!contains.boolmat(A,ind,var),,drop=FALSE]
-    neweditarray(rbind(At,A),ind=ind,sep=getSep(E),levels=getlevels(E))
+
+    neweditarray(At,ind=ind,sep=getSep(E),levels=getlevels(E))
 }
 
 
