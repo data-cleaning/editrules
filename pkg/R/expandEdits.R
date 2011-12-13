@@ -14,7 +14,7 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){
   #TODO replace special regex character in prefix with escaped character.
   
   if (length(s) > 1){
-    return(lapply(s, expand, prefix=prefix, useSum=useSum, ...))
+    return(lapply(s, expandEdits, prefix=prefix, useSum=useSum, ...))
   }
     
   l <- list(...)
@@ -51,10 +51,3 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){
     s
   }
 }
-
-## quick test
-# expand("x_i < y_j", i=1:3,j=2:3)
-# expand("sum_i(x_i) == y", i=1:3)
-# expand("sum_i(x_i) + y_j==z_j", i=1:2, j=3:4)
-# 
-# expand(c("a_i","b_j"), i=2:3, j=5:6)
