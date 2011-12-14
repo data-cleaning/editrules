@@ -2,7 +2,7 @@
 #'
 #' Often many numeric variables have the same constraints. \code{expandEdits} is
 #' a utility function to define edits for multiple variables. See the examples for the syntax.
-#' @param s edit expression
+#' @param s edit expression, can be a \code{character} or \code{expression} vector
 #' @param prefix prefix for variables to be expanded
 #' @param useSum if \code{TRUE} sum expression will be expanded
 #' @param asExpression if \code{TRUE} an \code{\link{expression}} will be returned in stead of a \code{character}
@@ -10,8 +10,18 @@
 #' @return \code{character} or \code{expression} vector with expanded expressions
 #' @export
 #' @example ../examples/expandEdits.R
-expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){  
+expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=is.language(s), ...){  
   #TODO replace special regex character in prefix with escaped character.
+  
+  force(asExpression)
+
+  if (is.expression(s)){
+    s <- as.character(s)
+  }
+  
+  if (is.language(s)){
+    s <- deparse(s)
+  }
   
   if (length(s) > 1){
     return(lapply(s, expandEdits, prefix=prefix, useSum=useSum, ...))
@@ -37,7 +47,9 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){
   
   varnms <- paste(prefix,names(l), sep="")
   for (i in seq_along(l)){
-    s <- sapply(l[[i]], function(j) gsub(varnms[i],j,s))    
+    if (length(grep(varnms[i], s))) {
+      s <- sapply(l[[i]], function(j) gsub(varnms[i],j,s))
+    }
   }
   
   if (is.array(s)) {
@@ -51,3 +63,4 @@ expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=FALSE, ...){
     s
   }
 }
+

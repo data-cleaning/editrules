@@ -9,12 +9,14 @@
 #'
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
+#' @param expandEdits should edits be expanded with \code{\link{expandEdits}}?
+#' @param ... extra parameters that will be passed to \code{expandEdits}
 #'
 #' @return \code{\link{editarray}} if \code{type='cat'}, \code{\link{editmatrix}} if \code{type='num'}, \code{list} if \code{type=all}.
 #'   If the return value is a \code{list}, the elements are named \code{numedits} and \code{catedits}.
 #'
 #' @export
-editfile <- function(file,type=c("all","num","cat","mix")){
+editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ...){
     type <- match.arg(type)
     if (!type %in% c('num','cat','all')) stop(paste("type",type,"invalid or not implemented yet"))
     p <- parse(file=file)
@@ -22,6 +24,10 @@ editfile <- function(file,type=c("all","num","cat","mix")){
     e <- new.env()
     lapply(p[ass],eval,envir=e)
     edits <- p[!ass]
+    if (expandEdits){
+      l <- c(list(s=edits), as.list(e), list(...))
+      edits <- do.call("expandEdits", l)
+    }
     numedits <- edits[editTypes(edits) == 'num']
     catedits <- edits[editTypes(edits) == 'cat']
     
@@ -36,5 +42,4 @@ editfile <- function(file,type=c("all","num","cat","mix")){
         
 }
 
-
-
+editfile("d:/testeditfile.R", expandEdits=TRUE)

@@ -9,7 +9,7 @@ editset <- function(editrules){
   
   num <- parseEdits(editrules, type="num")
   cat <- parseEdits(editrules, type="cat")
-  mix <- parseEdits(editrules, type="mix") 
+  mix <- parseEdits(editrules, type="mix")
   
   nmix <- length(mix)
   if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix), sep="")
