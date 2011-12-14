@@ -11,14 +11,13 @@
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
 #' @param expandEdits should edits be expanded with \code{\link{expandEdits}}?
-#' @param forceCat force mixed edits (e.g. \code{if (a == 1) y \%in\% c('a','b')}) to be processed as fully categorical 
 #' @param ... extra parameters that will be passed to \code{expandEdits}
 #'
 #' @return \code{\link{editarray}} if \code{type='cat'}, \code{\link{editmatrix}} if \code{type='num'}, \code{list} if \code{type=all}.
 #'   If the return value is a \code{list}, the elements are named \code{numedits} and \code{catedits}.
 #'
 #' @export
-editfile <- function(file,type=c("all","num","cat","mix"), forceCat=FALSE, expandEdits=FALSE, ...){
+editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ...){
     type <- match.arg(type)
     if (!type %in% c('num','cat','all')) stop(paste("type",type,"invalid or not implemented yet"))
     p <- parse(file=file)
@@ -32,9 +31,9 @@ editfile <- function(file,type=c("all","num","cat","mix"), forceCat=FALSE, expan
       edits <- do.call("expandEdits", l)
     }
     
-    numedits <- edits[editTypes(edits) == 'num']
-    cats <- ifelse(forceCat,c('cat','mix'),'cat')
-    catedits <- edits[editTypes(edits) %in% cats]
+    et <- editTypes(edits)
+    numedits <- edits[et == 'num']
+    catedits <- edits[et %in% 'cat']
     
     switch(type,
         num = editmatrix(numedits),
