@@ -256,7 +256,7 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
 
 #' return vector with number of categories for each variable in editarray
 #' 
-#' @param E object of class \codel{\link{editarray}}
+#' @param E object of class \code{\link{editarray}}
 #' @return a vector of \code{length(getVar(E))} with the number of categories for every variable in E.
 #' @export
 numcat <- function(E){
