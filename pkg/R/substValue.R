@@ -96,7 +96,8 @@ indFromArray <- function(A,sep){
     cn <- colnames(A)
     l <- strsplit(cn,sep)
     V <- sapply(l,`[`,1)
-    C <- sapply(l,`[`,-1)
+#    C <- sapply(l,`[`,-1)
+    C <- sapply(l,function(g) ifelse(length(g[-1])==1,g[-1],""))
     vars <- unique(V)
     ind <- lapply(vars, function(v) which(v==V))
     names(ind) <- vars

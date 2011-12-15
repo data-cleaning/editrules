@@ -1,4 +1,5 @@
 version 2.0-3
+- cornercase in `[.editarray`. Now correctly handles empty character ("") as category name.
 - added numcat function, returns number of categories for each variable in an editarray
 
 version 2.0-2
