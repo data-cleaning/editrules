@@ -103,29 +103,31 @@ plot.errorLocation <- function(x, topn=min(10,ncol(x$adapt)), ...){
     mtext(paste('User time (',secToHuman(sum(x$status$user)),')', sep=''),side=3,line=1,col='blue',adj=0,font=2)
     mtext(paste(sum(x$status$maxDurationExceeded),'exceeded max. duration'),side=3,line=0)
 
-  #########################################################################
-  # PLOT DEGENERACY
-  #########################################################################
-    tb <- table(x$status$degeneracy)
-#    br <- integer(max(x$status$degeneracy))
-#    br[as.numeric(names(tb))] <- tb
-    lg <- ''
-    dg <- as.integer(names(tb))
-    ct <- as.integer(tb)
-    if ( max(dg) > lgcrit ) lg <- paste(lg,'x',sep='')
-    if ( max(ct) > lgcrit ) lg <- paste(lg,'y',sep='')
-
-    plot(dg, ct,
-        log=lg,
-        main='Number of degenerate solutions',
-        xlab='Degeneracy',
-        ylab='Count',
-        pch='.',
-        cex=5,
-    )
-    grid()
+  if(x$method != "mip"){
+      #########################################################################
+      # PLOT DEGENERACY
+      #########################################################################
+        tb <- table(x$status$degeneracy)
+    #    br <- integer(max(x$status$degeneracy))
+    #    br[as.numeric(names(tb))] <- tb
+        lg <- ''
+        dg <- as.integer(names(tb))
+        ct <- as.integer(tb)
+        if ( max(dg) > lgcrit ) lg <- paste(lg,'x',sep='')
+        if ( max(ct) > lgcrit ) lg <- paste(lg,'y',sep='')
+    
+        plot(dg, ct,
+            log=lg,
+            main='Number of degenerate solutions',
+            xlab='Degeneracy',
+            ylab='Count',
+            pch='.',
+            cex=5,
+        )
+      grid()
+  }
     # reset plot parameters
-    par(oldpar)
+  par(oldpar)
 }
 
 

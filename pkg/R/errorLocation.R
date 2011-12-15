@@ -19,6 +19,7 @@
 #'              \item{\code{maxDurationExceeded} Was the maximum search time reached?}
 #'          }
 #'      }
+#'      \item{\code{method} The error localization method used, can be "mip" or "localizer".}
 #'      \item{\code{call} The R call to the function generating the object.}
 #'      \item{\code{user} \code{character} user who generated the object.}
 #'      \item{\code{timestamp} \code{character} timestamp.}
