@@ -30,6 +30,7 @@ buildELMatrix.editmatrix <- function( E
                                     , x
                                     , weight = rep(1, length(x))
                                     , xlim = 1000 * cbind(-abs(x), abs(x))
+                                    , maxvalue = 1e8
                                     ){
   #TODO sample order of variables
   E <- E[, c(sample(length(getVars(E))), ncol(E))]
@@ -46,8 +47,8 @@ buildELMatrix.editmatrix <- function( E
   
   ub <- xlim[,2]
   lb <- xlim[,1]
-  ub[is.na(ub)] <- .Machine$integer.max - 1
-  ub[round(x) == 0] <- 1000 # to cope with very small (or 0) values
+  ub[is.na(ub)] <- maxvalue
+  ub[round(x) == 0] <- maxvalue # to cope with very small (or 0) values
   lb <- -ub
   x[is.na(x)] <- 2 * (ub[is.na(x)] + 1) # put value for NA's out of bound
   
@@ -220,7 +221,7 @@ localize_mip_rec <- function( E
    }   
    
    t.start <- proc.time()
-   elm <- buildELMatrix(E, x, weight)
+   elm <- buildELMatrix(E, x, weight, ...)
    #print(elm)
    Ee <- elm$E
    objfn <- elm$objfn
@@ -233,8 +234,11 @@ localize_mip_rec <- function( E
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
    
-    # move univariate constraints into bounds
-   lp.control(lps,presolve="rows", timeout=maxduration, pivoting=c("devex", "randomize","adaptive"))
+   lp.control( lps
+             , presolve = "rows"    # move univariate constraints into bounds
+             , timeout = maxduration
+             , epsint = 1e-8
+             )
  
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
