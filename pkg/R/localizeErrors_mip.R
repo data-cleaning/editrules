@@ -29,7 +29,7 @@ buildELMatrix <- function(E,x,weight,...){
 buildELMatrix.editmatrix <- function( E
                                     , x
                                     , weight = rep(1, length(x))
-                                    , xlim = 1000 * cbind(-abs(x), abs(x))
+                                    , xlim = 1000 * cbind(l=-abs(x), u=abs(x))
                                     , maxvalue = 1e8
                                     ){
   #TODO sample order of variables

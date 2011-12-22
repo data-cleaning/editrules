@@ -7,13 +7,13 @@
 #' @param x \code{character} with categorical edits
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
 #' @keywords internal
-cateditmatrix <- function(x, sep=":"){
+cateditmatrix <- function(x, sep=":", env=parent.frame()){
     if (is.editarray(x)) {
       x <- as.character(x,datamodel=FALSE)
     }
     edts <- parseEdits(x)
     
-    catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE)
+    catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE, env=env)
     catedits <- lapply(catedits, parseCatEdit)
     
     categories <- sort(unique(names(unlist(catedits))))
