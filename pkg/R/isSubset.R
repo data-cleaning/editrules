@@ -31,5 +31,19 @@ isSubset.boolmat <- function(A){
     s | d
 }
 
+# check if edits in A are subset of edits in B: (returns boolean vector)
+isSubsetWrt.boolmat <- function(A,B){
+    m <- nrow(A)
+    n <- nrow(B)
+    if ( m == 0 ) return(logical(0))
+    if ( n == 0 ) return(rep(FALSE,n))
+
+    vapply(1:m,function(i){
+        any(rowSums(abs({A[rep(i,n),,drop=FALSE] | B} - B)) == 0)
+    },FUN.VALUE=FALSE)
+}
+
+
+
 
 
