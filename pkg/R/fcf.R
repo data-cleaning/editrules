@@ -8,7 +8,7 @@
 #'
 #' @seealso \code{\link{fcf}}
 #' @keywords internal
-fcf.env <- function(E, vars, env){
+fcf.env <- function(E, vars, env=new.env()){
     if ( nrow(E) == 0 ) return(env)
     assign(paste(vars,collapse='.'),E,envir=env)
     n <- length(vars)
