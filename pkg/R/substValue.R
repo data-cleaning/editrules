@@ -66,8 +66,8 @@ substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
         vl <- value[i]
         J <- ind[[vr]]
         i <- J[vl]
-        if ( is.na(i) ) 
-            stop(paste("Variable ", vr,"not present in editarray or cannot take value",vl))
+        if ( is.null(i) || is.na(i) ) 
+            stop("Variable '", vr,"' not present in editarray or cannot take value '",vl,"'")
 
         I <- A[,i]
         if ( reduce ){
