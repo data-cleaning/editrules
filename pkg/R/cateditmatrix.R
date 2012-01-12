@@ -2,7 +2,7 @@
 #'
 #' \code{cateditmatrix} is an alternative representation of a categorial edit. 
 #' The default representation in editrules is \code{editarray}, but cateditmatrix is useful for
-#' transforming solving categorical edit into a mixed integer programming problem
+#' transforming and solving categorical edit into a mixed integer programming problem
 #'
 #' @param x \code{character} with categorical edits
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}

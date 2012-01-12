@@ -7,8 +7,7 @@
 #' @param env an environment where all editmatrices will be stored
 #'
 #' @seealso \code{\link{fcf}}
-#' keywords internal
-# field code forest algorithm
+#' @keywords internal
 fcf.env <- function(E, vars, env=new.env()){
     if ( nrow(E) == 0 ) return(env)
     assign(paste('E',vars,collapse='.'),E,envir=env)
@@ -24,6 +23,8 @@ fcf.env <- function(E, vars, env=new.env()){
 #' Implements the Field Code Forest algorithm of Garfinkel et al (1986) to 
 #' derive all essentially new implicit edits from an editarray. At the moment
 #' this algorithm has very little optimization and can be very slow.
+#'
+#' @param E An \code{\link{editarray}}
 #'
 #' @references
 #' R.S. Garfinkel, A.S. Kunnathur and G.E. Liepins (1986). 
