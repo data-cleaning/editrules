@@ -42,5 +42,24 @@ test_that("errorLocalizer for categorical data",{
     expect_that(errorLocalizer(E,r,weight=c(1,NA,1)),throws_error())
 })
 
+test_that("errorlocalizer.editarray runs when blocks reduces the datamodel",{
+# Thanks to Bikram Maharjan for reporting a bug in version 2.0-1
+    ageGrps=rep(1,5)
+    genderIndex=rep(1,5)
+    icdIndex=rep(103,5)
+    diagnosisIndex=c('TOT', 'A00', 'A02', 'C53','C54')
+     
+     
+    e.diag=editarray(c(
+      "ageGrps %in% c(1,2,3,4)",
+      "genderIndex %in% c(0,1,2)",
+      "icdIndex %in% c(103)",
+      "diagnosisIndex %in% c('TOT', 'A00', 'A02', 'C53','C54')", 
+      "if(genderIndex=='1' & icdIndex=='103') diagnosisIndex %in% c('C53','C54')"
+    ))
+    dat.diag=data.frame(ageGrps,genderIndex,icdIndex,diagnosisIndex)
+    err=localizeErrors(e.diag,dat.diag)
+})
+
 
 

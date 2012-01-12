@@ -8,17 +8,22 @@
 #'
 #' @seealso \code{\link{fcf}}
 #' keywords internal
-fcf.env <- function(E, vars, env){
-    assign(paste(vars,collapse='.'),E,envir=env)
+# field code forest algorithm
+fcf.env <- function(E, vars, env=new.env()){
+    if ( nrow(E) == 0 ) return(env)
+    assign(paste('E',vars,collapse='.'),E,envir=env)
+    vars <- vars[resolves(E,vars)]
     n <- length(vars)
-    if ( n > 0 ) for ( i in 1:n ) fcf(eliminate(E,v[i]),vars[-i],env=env)
+    if ( n > 0 ) for ( i in 1:n ) FCF.env(eliminate(E,vars[i]),vars[-i],env=env)
     env
 }
+
 
 #' Derive all essentially new implicit edits
 #'
 #' Implements the Field Code Forest algorithm of Garfinkel et al (1986) to 
-#' derive all essentially new implicit edits from an editarray.
+#' derive all essentially new implicit edits from an editarray. At the moment
+#' this algorithm has very little optimization and can be very slow.
 #'
 #' @references
 #' R.S. Garfinkel, A.S. Kunnathur and G.E. Liepins (1986). 
@@ -27,9 +32,16 @@ fcf.env <- function(E, vars, env){
 #'
 fcf <- function(E){
     if ( !is.editarray(E) ) stop('Only for arguments of class editarray')
-    as.list(fcf.env(E,getVars(E)))
+    as.list(FCF.env(E=E,vars=getVars(E)))
 }
 
+
+resolves <- function(E,vars){
+    if ( length(vars)==0) return(logical(0))
+    ind <- editrules:::getInd(E)[vars]
+    Ic <- contains(E,vars)
+    sapply(vars, function(v) all(colSums(E[Ic[,v],ind[[v]],drop=FALSE])>0))
+}
 
 
 
