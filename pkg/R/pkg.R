@@ -16,6 +16,7 @@
 #' related to their resolution. The reader is referred to the package \code{deducorrect}
 #' package for treating such errors. 
 #'
+#'
 #' Typical usage is:
 #' @example ../examples/editrules.R
 #' @name editrules-package 
