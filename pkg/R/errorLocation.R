@@ -134,3 +134,20 @@ print.errorLocation <- function(x,...){
 }
 
 
+# create an empty Status data.frame with n rows
+emptyStatus <- function(n, weight=0, degeneracy=1, user=0, system=0, elapsed=0, maxDurationExceeded=FALSE){
+    data.frame(
+        weight=rep(weight,n),
+        degeneracy=rep(degeneracy,n),
+        user=rep(user,n),
+        system=rep(system,n),
+        elapsed=rep(elapsed,n),
+        maxDurationExceeded=rep(maxDurationExceeded,n)
+    )
+}
+
+
+
+
+
+

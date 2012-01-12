@@ -21,7 +21,7 @@
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an array of weights with the same dimensions as \code{dat}.
-#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
+#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used? NOTE: option "mip" is currently experimental. 
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'
@@ -41,7 +41,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     n <- length(B)
     i <- 0
     blockCount <- NULL
-    err <- NULL
+    err <- checkDatamodel(E,dat,weight)
 
     for ( b in B ){
         if ( verbose ){

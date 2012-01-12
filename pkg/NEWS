@@ -1,4 +1,6 @@
 version 2.0-3
+- new generic function checkDatamodel: checks data agains datamodel implied by editarray
+- bugfix in localizeErrors: crashed when reduce() (used in blocks) removes variables in editarray (thanks to Bikram Maharjan)
 - internally, eliminate.editarray performs extra edit redundancy checks
 - fixed cornercase in `[.editarray`. Now correctly handles empty character ("") as category name.
 - added numcat function, returns number of categories for each variable in an editarray

@@ -182,10 +182,12 @@ errorLocalizer.editarray <- function(
     )
     adapt <- is.na(x)
 
+
     vars <- getVars.editarray(E)
+    cont <- names(x)[!adapt] %in% vars    
     if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
 
-    o <- order(weight[!adapt], decreasing=TRUE)
+    o <- order(weight[!adapt], decreasing=TRUE)[cont]
     totreat <- names(x)[!adapt][o]
 
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editarray(E,v)
