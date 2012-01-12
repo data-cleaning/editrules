@@ -1,11 +1,10 @@
-# parse categorical edits from file
-# parse categorical edits from file
 
-#' Read categorical edits from textfile
+#' Read edits edits from free-form textfile
 #'
-#' This utility function allows for a more free format for editrule definition in a file.
-#' The function first parses all assignments. Every other statement is considered to
-#' be a categorical edit. 
+#' This utility function allows for free editrule definition in a file. One can extract
+#' only the numerical (\code{type='num'}), only the categorical (\code{type='cat'}) or all
+#' editas (default) in which case a list is returned. 
+#' The function first parses all assignments in the file. Every other statement is considered to be an edit. 
 #'
 #'
 #' @param file name of text file to read in
