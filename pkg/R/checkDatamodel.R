@@ -9,7 +9,7 @@
 #' @param weight vector of weigths for every variable of \code{dat} or an array of weight of the same dimensions as \code{dat}.
 #' @param ... arguments to be passed to or from other methods
 #'  
-#' @value An object of class \code{\link{errorLocation}}
+#' @return An object of class \code{\link{errorLocation}}
 #' @export
 checkDatamodel <- function(E, dat,weight=rep(1,ncol(dat)), ...){
     UseMethod('checkDatamodel')

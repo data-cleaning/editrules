@@ -9,8 +9,7 @@
 #' @param env enviroment that will be used to find variables to be expanded
 #' @param ... variables used in the expansion
 #' @return \code{character} or \code{expression} vector with expanded expressions
-#' @export
-#' @example ../examples/expandEdits.R
+#' @keywords internal
 expandEdits <- function(s, prefix="_", useSum=TRUE, asExpression=is.language(s), env=parent.frame(), ...){  
   #TODO replace special regex character in prefix with escaped character.
   
