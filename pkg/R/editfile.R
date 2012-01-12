@@ -10,7 +10,7 @@
 #'
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
-#' @param expandEdits should edits be expanded with \code{\link{expandEdits}}?
+#' @param expandEdits should edits be expanded with \code{\link{expandEdits}}? (currently ignored)
 #' @param ... extra parameters that will be passed to \code{expandEdits}
 #'
 #' @return \code{\link{editarray}} if \code{type='cat'}, \code{\link{editmatrix}} if \code{type='num'}, \code{list} if \code{type=all}.
@@ -27,8 +27,9 @@ editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ..
     edits <- p[!ass]
     
     if (expandEdits){
-      l <- c(list(s=edits), as.list(e), list(...))
-      edits <- do.call("expandEdits", l)
+        warning('expandEdits is ignored')
+ #      l <- c(list(s=edits), as.list(e), list(...))
+ #     edits <- do.call("expandEdits", l)
     }
     
     et <- editTypes(edits)
