@@ -13,7 +13,7 @@ fcf.env <- function(E, vars, env=new.env()){
     assign(paste('E',vars,collapse='.'),E,envir=env)
     vars <- vars[resolves(E,vars)]
     n <- length(vars)
-    if ( n > 0 ) for ( i in 1:n ) FCF.env(eliminate(E,vars[i]),vars[-i],env=env)
+    if ( n > 0 ) for ( i in 1:n ) fcf.env(eliminate(E,vars[i]),vars[-i],env=env)
     env
 }
 
@@ -33,7 +33,7 @@ fcf.env <- function(E, vars, env=new.env()){
 #'
 fcf <- function(E){
     if ( !is.editarray(E) ) stop('Only for arguments of class editarray')
-    as.list(FCF.env(E=E,vars=getVars(E)))
+    as.list(fcf.env(E=E,vars=getVars(E)))
 }
 
 
