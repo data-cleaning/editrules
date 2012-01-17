@@ -43,6 +43,7 @@ reduce.editarray <- function(E,...){
     E <- E[!isObviouslyRedundant.editarray(E),,drop=FALSE]
     m <- as.matrix(E)
     ind <- getInd(E)
+    H <- getH(E)
     b <- sapply(ind,function(ind) all(m[,ind])) 
     if ( any(b) ){
         J <- logical(0)   
@@ -52,7 +53,8 @@ reduce.editarray <- function(E,...){
         ind <- indFromArray(m,sep=sep)
         i <- apply(!m,1,all)
         m <- m[!i,,drop=FALSE]
-        E <- neweditarray(E=m, ind=ind, sep=sep, names=rownames(m))
+        if (!is.null(H))  H <- H[!i,,drop=FALSE]
+        E <- neweditarray(E=m, ind=ind, sep=sep, names=rownames(m), H=H)
     }
     E
 }

@@ -30,7 +30,9 @@
     A <- getArr(x)[i,j,drop=FALSE]
     sep <- getSep(x)
     ind <- indFromArray(A,sep)
-    neweditarray(E=A, ind=ind, sep=sep, names=getnames(x)[i],levels=getlevels(x)[j])
+    H <- getH(x)
+    if (!is.null(H)) H <- H[i,j,drop=FALSE]
+    neweditarray(E=A, ind=ind, sep=sep, names=getnames(x)[i],levels=getlevels(x)[j],H=H)
 }
 
 

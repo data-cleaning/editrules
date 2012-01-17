@@ -8,14 +8,30 @@
 #'
 #' @seealso \code{\link{fcf}}
 #' @keywords internal
-fcf.env <- function(E, vars, env=new.env()){
+fcf.env <- function(E, env=new.env()){
+    # if there are no edits left, we are done
     if ( nrow(E) == 0 ) return(env)
-    assign(paste('E',vars,collapse='.'),E,envir=env)
-    vars <- vars[resolves(E,vars)]
-    n <- length(vars)
-    if ( n > 0 ) for ( i in 1:n ) fcf.env(eliminate(E,vars[i]),vars[-i],env=env)
+
+    # add edits to current set and remove redundant ones
+    U <- c(env$E,E)
+    env$E <- U[!isSubset(U),,drop=FALSE]
+
+    # divide and conquer    
+    B <- blocks(E)
+    for (b in B){
+        vars <- getVars(b)
+        # eliminate most connected variables first
+        vars <- vars[order(colSums(contains(b)), decreasing=TRUE)]
+        # only loop over variables which can be eliminated by combining edits
+        vars <- vars[resolves(b,vars)]
+        # eliminate each variable one by one
+        n <- length(vars)
+        if ( n > 0 ) for ( i in 1:n ) FCF.env(reduce(eliminate(b,vars[i])),env=env)
+    }
     env
 }
+
+
 
 
 #' Derive all essentially new implicit edits
@@ -33,8 +49,11 @@ fcf.env <- function(E, vars, env=new.env()){
 #'
 fcf <- function(E){
     if ( !is.editarray(E) ) stop('Only for arguments of class editarray')
-    as.list(fcf.env(E=E,vars=getVars(E)))
+    e <- new.env()
+    e$E <- E[integer(0),]
+    fcf.env(E=E,env=e)$E
 }
+
 
 
 resolves <- function(E,vars){
