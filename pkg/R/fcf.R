@@ -1,61 +1,93 @@
 #' Field code forest algorithm
 #'
-#' Workhorse function for \code{\link{fcf}}
+#' Workhorse function for \code{\link{generateEdits}}
 #'
 #' @param E an editarray
 #' @param vars variable names still to be eliminated from E
 #' @param env an environment where all editmatrices will be stored
 #'
-#' @seealso \code{\link{fcf}}
+#' @seealso \code{\link{generateEdits}}, \code{\link{editarray}}
 #' @keywords internal
-fcf.env <- function(E, env=new.env()){
-    # if there are no edits left, we are done
-    if ( nrow(E) == 0 ) return(env)
-
-    # add edits to current set and remove redundant ones
-    U <- c(env$E,E)
-    env$E <- U[!isSubset(U),,drop=FALSE]
-
-    # divide and conquer    
-    B <- blocks(E)
-    for (b in B){
-        vars <- getVars(b)
-        # eliminate most connected variables first
-        vars <- vars[order(colSums(contains(b)), decreasing=TRUE)]
-        # only loop over variables which can be eliminated by combining edits
-        vars <- vars[resolves(b,vars)]
-        # eliminate each variable one by one
-        n <- length(vars)
-        if ( n > 0 ) for ( i in 1:n ) FCF.env(reduce(eliminate(b,vars[i])),env=env)
+fcf.env <- function(E,totreat,env){
+    # add current edits to collection
+    if (nrow(E)>0){
+        U <- c(env$E,E)
+        env$E <- U[!isSubset(U),]
+    } else {
+        # return if there are no more edits
+        return()
     }
-    env
+    # divide and conquer
+    B <- blocks(E)
+    for ( b in B){
+        # variables to be treated in the block
+        totreatb <- totreat[names(totreat) %in% getVars(b)]
+        vrs <- names(totreatb)[totreatb]
+        # variables which cannot be resolved need not be treated (prune the tree)
+        totreatb[!resolves(b,vrs)] <- FALSE
+        vrs <- names(totreatb)[totreatb]
+        # order variables so the most connected variables are eliminated first,
+        # eliminate variables and recurse.
+        vrs <- vrs[order(colSums(contains(b,vrs)),decreasing=TRUE)]
+        for ( k in vrs ){
+            totreatb[k] <- FALSE
+            fcf.env(reduce(eliminate(E,k)),totreatb[-which(names(totreatb)==k)],env)
+        }
+    }
 }
-
 
 
 
 #' Derive all essentially new implicit edits
 #'
-#' Implements the Field Code Forest algorithm of Garfinkel et al (1986) to 
-#' derive all essentially new implicit edits from an editarray. At the moment
-#' this algorithm has very little optimization and can be very slow.
+#' Implements the Field Code Forest (FCF) algorithm of Garfinkel et al (1986) to 
+#' derive all essentially new implicit edits from an editarray. The FCF is really
+#' a single, highly unbalanced tree. This algorithm traverses the tree, pruning many 
+#' unnecessary branches, using \code{\link{blocks}} to divide and conquer, and 
+#' optimizing the order of traversing.
 #'
 #' @param E An \code{\link{editarray}}
+#' @return A 3-element named list \code{list}, where element \code{E} is an \code{\link{editarray}} containing all 
+#' generated edits. \code{nodes} contains information on the number of nodes in the tree and vs the number of nodes
+#' traversed and \code{duration} contains user, system and elapsed time inseconds.
+#' The \code{\link{summary.editarray}} method prints this information.
+#'
 #'
 #' @references
 #' R.S. Garfinkel, A.S. Kunnathur and G.E. Liepins (1986). 
 #'    Optimal imputation of erroneous data: categorical data, general edits.
 #'    Operations Research 34, 744-751.
-#'
-fcf <- function(E){
-    if ( !is.editarray(E) ) stop('Only for arguments of class editarray')
+#' M.P.J. Van der Loo Variable elimination and edit generation with a flavour of 
+#' semigroup algebra (in preparation)
+#' @export
+generateEdits <- function(E){
+    if ( !is.editarray(E) ) stop("Argument must be of class 'editarray' ")
+    t0 <- proc.time()
+    # initialize variables to treat
+    vars <- getVars(E)
+    totreat <- rep(TRUE,length(vars))
+    names(totreat) <- vars
+    # set up environment to collect generated edits
     e <- new.env()
-    e$E <- E[integer(0),]
-    fcf.env(E=E,env=e)$E
+    # node counter
+    e$i <- 0
+    e$E <- E[logical(0),]
+    # call the workhorse
+    fcf.env(E,totreat,e)
+    duration <- getDuration(proc.time()-t0)
+    # return edits
+    return(
+        list(
+            e$E, 
+            nodes=c(nodesInTree = 2^length(vars), nodesTraversed = e$i), 
+            duration=duration
+        )
+    )
 }
 
 
 
+# Check which variables of 'vars' can be resolved
 resolves <- function(E,vars){
     if ( length(vars)==0) return(logical(0))
     ind <- editrules:::getInd(E)[vars]

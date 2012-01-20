@@ -1,3 +1,6 @@
+version 2.0-4
+- added function which derives complete set of nonredundant edits: fcftree
+
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray
 - bugfix in localizeErrors: crashed when reduce() (used in blocks) removes variables in editarray (thanks to Bikram Maharjan)
