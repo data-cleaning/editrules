@@ -7,10 +7,13 @@
 #' @param env an environment where all editmatrices will be stored
 #'
 #' @seealso \code{\link{generateEdits}}, \code{\link{editarray}}
+#' 
+#' @example ../examples/generateEdits.R
 #' @keywords internal
 fcf.env <- function(E,totreat,env){
     # add current edits to collection
     if (nrow(E)>0){
+        env$i <- env$i  + 1
         U <- c(env$E,E)
         env$E <- U[!isSubset(U),]
     } else {
@@ -78,7 +81,7 @@ generateEdits <- function(E){
     # return edits
     return(
         list(
-            e$E, 
+            edits=e$E, 
             nodes=c(nodesInTree = 2^length(vars), nodesTraversed = e$i), 
             duration=duration
         )
