@@ -119,17 +119,17 @@ violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
 }
 
 #'
-#'
-#' @method violatedEdits editarray
+#' 
+#' @method violatedEdits editset
 #' @rdname violatedEdits
 #' @export
 violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
-  Ea <- c(E$cat, E$mixcat)
-  print(Ea)
-  vCat <- violatedEdits(Ea, adddummies(E, dat), ...)
-  vNum <- violatedEdits(E$num, dat, ...)
-  #    dimnames(v) <- list(rownames(dat),names(edits))
-  newviolatedEdits(cbind(vCat, vNum))
+    v1 <- violatedEdits(E$num,dat,...)
+    E$num <- NULL
+    u <- as.character(E,datamodel=datamodel,useIf=FALSE)
+    v2 <- violatedEdits(u,dat)
+
+   newviolatedEdits(cbind(v1,v2))
 }
 
 

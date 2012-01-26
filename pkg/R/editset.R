@@ -18,7 +18,11 @@ editset <- function(editrules, env=new.env()){
   if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix), sep="")
   
   num <- if (length(num) > 0) editmatrix(num)
-  cat <- if (length(cat) > 0) editarray(cat,env=env)
+  if (length(cat) > 0){ 
+    cat <- editarray(cat,env=env)
+    rownames(cat) <- paste("e",(nrow(num)+1):(nrow(num)+nrow(cat)),sep="")
+  }
+
   
   mixl <- vector(mode="list", nmix)
   mixcat <- vector(mode="expression", nmix)
@@ -75,6 +79,59 @@ adddummies <- function(E, dat){
   dummies <- !violatedEdits(E$mixnum, dat)
   cbind(dat, dummies)
 }
+
+
+
+#' Convert an editset to character
+#' @method as.character editset
+#'
+#' @param x an \code{\link{editset}}
+#' @param datamodel include datamodel?
+#' @param useIf return vectorized version?
+#' @param ... arguments to be passed to or from other methods
+#' @export
+as.character.editset <- function(x, datamodel=TRUE,useIf=TRUE,...){
+    num <-  as.character(x$num)
+    cat <-  as.character(x$cat,datamodel=datamodel,useIf=useIf)
+    numc <- as.character(x$mixnum)
+    catc <- as.character(x$mixcat,datamodel=FALSE,useIf=useIf)
+    for ( n in names(numc) ){
+        catc <- gsub(paste(n,'== FALSE'), invert(numc[n]),catc)
+        catc <- gsub(paste(n,'== TRUE'), numc[n],catc)
+    }
+    # remove datamodel which are a consequence of conditional edits
+    
+    c(num,cat,catc)
+}
+
+
+# invert a textual numerical edit
+invert <- function(e){
+    gte   <- grep(">=",e)
+    gt    <- grep(">",e) & !gte
+    lte   <- grep("<=",e)
+    lt    <- grep("<",e) & !lte
+    eq    <- grep("==",e)
+    ineq  <- grep("!=",e)
+    e[gte]  <- gsub(">=","<",e[gte])
+    e[gt]   <- gsub(">","<=",e[gt])
+    e[lte]  <- gsub("<=",">",e[lte])
+    e[lt]   <- gsub("<",">=",e[lt])
+    e[ineq] <- gsub("!=","==",e[ineq])
+    e[eq]   <- gsub("==","!=",e[ineq])
+    e
+}
+
+
+
+
+
+
+
+
+
+
+
 
 ## quick test
 # es <- editset(expression(if (x > 0) y + 1 < 20
