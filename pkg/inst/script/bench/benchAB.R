@@ -7,7 +7,7 @@ cat('This benchmark requires packages editrules and Hmisc\n')
 require(editrules)
 if (!require(Hmisc)) stop('install Hmisc')
 
-fdir <- system.file('script/editgeneration',package='editrules')
+fdir <- system.file('script/bench',package='editrules')
 edits <- file.path(fdir,'edits.R')
 files <- file.path(fdir,c('eliminator.R','generateEdits.R'))
 
@@ -34,8 +34,8 @@ for ( i in 1:99 ){
 tA <- tB <- numeric(length(vars))
 names(tA) <- names(tB) <- vars
 for ( v in vars ){ 
-    tA[v] <- system.time({for ( i in 1:50 ) u <- algorithmA.follow(E,v)})['user.self']/50*1000
-    tB[v] <- system.time({for ( i in 1:50 ) u <- algorithmB.follow(E,v)})['user.self']/50*1000
+    tA[v] <- system.time({for ( i in 1:50 ) u <- algorithmA(E,v)})['user.self']/50*1000
+    tB[v] <- system.time({for ( i in 1:50 ) u <- algorithmB(E,v)})['user.self']/50*1000
 }
 times <- cbind(tA,tB,diff=tB-tA,ratio=tB/tA)
 o <- order(times[,3],decreasing=TRUE)
@@ -91,7 +91,7 @@ cat('-------------------------------------------------------------------\n')
 
 cat('-------------------------------------------------------------------\n')
 cat('Determine complexity as function of number of edits.\n')
-M <- c(seq(10,100,10))#,150,200,250,500)
+M <- c(seq(10,100,10),150,200,250,500)
 timing <- array(0,dim=c(length(M),2))
 colnames(timing) <- c('A','B') 
 i <- 0
