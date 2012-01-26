@@ -4,8 +4,9 @@
 #'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
 #'        a \code{character} or \code{expression} with (in)equalities written in R syntax
+#' @param env environment to parse categorical edits in
 #' @export
-editset <- function(editrules){
+editset <- function(editrules, env=new.env()){
   #if (is.null(names(editrules)))
   #  names(editrules) <- paste("me", seq_along(editrules), sep="")
   
@@ -17,7 +18,7 @@ editset <- function(editrules){
   if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix), sep="")
   
   num <- if (length(num) > 0) editmatrix(num)
-  cat <- if (length(cat) > 0) editarray(cat)
+  cat <- if (length(cat) > 0) editarray(cat,env=env)
   
   mixl <- vector(mode="list", nmix)
   mixcat <- vector(mode="expression", nmix)
@@ -39,7 +40,7 @@ editset <- function(editrules){
                    , as.character(mixcat)
                    )
   
-  mixcat <- editarray(mixdatamodel)
+  mixcat <- editarray(mixdatamodel, env=env)
   rownames(mixcat) <- names(mix)
   #mixnum <- editmatrix(mixnum)
   

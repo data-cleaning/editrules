@@ -12,7 +12,8 @@
 #' @param expandEdits should edits be expanded with \code{\link{expandEdits}}? (currently ignored)
 #' @param ... extra parameters that will be passed to \code{expandEdits}
 #'
-#' @return \code{\link{editarray}} if \code{type='cat'}, \code{\link{editmatrix}} if \code{type='num'}, \code{list} if \code{type=all}.
+#' @return \code{editset} with all edits if \code{type=all}, \code{\link{editarray}} if \code{type='cat'}, 
+#'      \code{\link{editmatrix}} if \code{type='num'}, \code{\link{editset}} with conditional edits if \code{type='mix'}. 
 #'   If the return value is a \code{list}, the elements are named \code{numedits} and \code{catedits}.
 #'
 #' @export
@@ -26,22 +27,20 @@ editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ..
     edits <- p[!ass]
     
     if (expandEdits){
-        warning('expandEdits is ignored')
+        warning('expandEdits is currently ignored')
  #      l <- c(list(s=edits), as.list(e), list(...))
  #     edits <- do.call("expandEdits", l)
     }
     
     et <- editTypes(edits)
     numedits <- edits[et == 'num']
-    catedits <- edits[et %in% 'cat']
-    
+    catedits <- edits[et == 'cat']
+    mixedits <- edits[et == 'mix']  
     switch(type,
         num = editmatrix(numedits),
         cat = editarray(catedits,env=e),
-        all = list(
-            catedits=editarray(catedits,env=e),
-            numedits=editmatrix(numedits)
-        )
+        mix = editset(mixedits,env=e),
+        all = editset(edits,env=e)
     )
-        
 }
+
