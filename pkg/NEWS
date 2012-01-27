@@ -5,6 +5,7 @@ version 2.1-0
 - BREAKING CHANGE: function 'editrules' is obsolete. Use as.data.frame or as.editmatrix.
 - added as.character, print method for editset.
 - as.data.frame.editmatrix and .editarray now only return 'description' column if input has description attribute.
+- edits in editmatrix and editarray are now printed with prefix 'num' and 'cat', in stead of 'e'
 
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray
