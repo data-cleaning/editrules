@@ -64,36 +64,36 @@ test_that("violation of inequalities are detected",{
 test_that("NA's in data are handled correctly by violatededits.editmatrix",{
     expect_identical(
         violatedEdits(editmatrix(c('x==0','y==0')),c(x=NA,y=1))[,],
-        c(e1=NA,e2=TRUE)
+        c(num1=NA,num2=TRUE)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x>0','y==0')),c(x=NA,y=1))[,],
-        c(e1=NA,e2=TRUE)
+        c(num1=NA,num2=TRUE)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x>0','y==0','x+y>=1')),c(x=NA,y=1))[,],
-        c(e1=NA,e2=TRUE,e3=NA)
+        c(num1=NA,num2=TRUE,num3=NA)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x==0','y==0')),data.frame(x=c(NA,1),y=c(1,NA)))[,],
-        array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('e1','e2')))
+        array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('num1','num2')))
     )
 
     expect_identical(
         violatedEdits(editmatrix(c('x==0','y==0')),c(x=NA,y=1),tol=0.1)[,],
-        c(e1=NA,e2=TRUE)
+        c(num1=NA,num2=TRUE)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x>0','y==0')),c(x=NA,y=1),tol=0.1)[,],
-        c(e1=NA,e2=TRUE)
+        c(num1=NA,num2=TRUE)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x>0','y==0','x+y>=1')),c(x=NA,y=1),tol=0.1)[,],
-        c(e1=NA,e2=TRUE,e3=NA)
+        c(num1=NA,num2=TRUE,num3=NA)
     )
     expect_identical(
         violatedEdits(editmatrix(c('x==0','y==0')),data.frame(x=c(NA,1),y=c(1,NA)),tol=0.1)[,],
-        array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('e1','e2')))
+        array(c(NA,TRUE,TRUE,NA),dim=c(2,2),dimnames=list(record=1:2,edit=c('num1','num2')))
     )
 
 })

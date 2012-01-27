@@ -83,7 +83,7 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
     }
     E <- array(NA, dim=c(m,n), 
             dimnames = list(
-                edits = paste("e",1:m,sep=""),
+                edits = paste("cat",1:m,sep=""),
                 variables = cols
             )
         )
@@ -250,7 +250,7 @@ as.expression.editarray <- function(x, ...){
 #' a *forbidden* combination.
 #' @keywords internal
 neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
-    if ( is.null(names) & nrow(E)>0 ) names <- paste("e",1:nrow(E),sep="")
+    if ( is.null(names) & nrow(E)>0 ) names <- paste("cat",1:nrow(E),sep="")
     dimnames(E) <- list(edits=names,levels=levels)
     structure(E,
         class  = "editarray",

@@ -39,10 +39,10 @@ test_that("editmatrix can simplify",{
    C <- getb(E)
    expect_equal(as.integer(mat[1,]), c(1,-1,0,0))
    expect_equal(as.integer(mat[2,]), c(0,-1,1,0))
-   expect_equal(C[2], c(e2=1))
+   expect_equal(C[2], c(num2=1))
    
    expect_equal(mat[3,], c(x=0,y=0,z=0,w=1))
-   expect_equal(C[3], c(e3=3))
+   expect_equal(C[3], c(num3=3))
 })
 
 

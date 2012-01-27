@@ -20,7 +20,7 @@ editset <- function(editrules, env=new.env()){
   num <- if (length(num) > 0) editmatrix(num)
   if (length(cat) > 0){ 
     cat <- editarray(cat,env=env)
-    rownames(cat) <- paste("e",(nrow(num)+1):(nrow(num)+nrow(cat)),sep="")
+    rownames(cat) <- paste("cat",(nrow(num)+1):(nrow(num)+nrow(cat)),sep="")
   }
 
   

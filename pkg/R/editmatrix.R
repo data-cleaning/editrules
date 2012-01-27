@@ -63,7 +63,7 @@ editmatrix <- function( editrules
     if ( length(edit) == 0 ) return(neweditmatrix(matrix(numeric(0)),ops=character(0),normalized=TRUE))
     edts <- parseEdits(edit, type="num")   
   	if (is.null(name)){
-  	   name <- paste("e", seq_along(edts),sep="")
+  	   name <- paste("num", seq_along(edts),sep="")
   	}
     rowedts <- lapply(edts, function(edt){parseNum(edt)})
     ops <- sapply(edts, function(e){deparse(e[[1]])})
@@ -154,7 +154,7 @@ as.editmatrix <- function( A
     }
     rn <- rownames(A)
     if ( is.null(rn) || length(unique(rn)) != length(rn) ){
-       rn <- paste("e", 1:nrow(A), sep="")
+       rn <- paste("num", 1:nrow(A), sep="")
     }
     A <- cbind(as.matrix(A), b)
     dimnames(A) <- list(rules=rn,var=c(cn,"CONSTANT"))

@@ -32,7 +32,7 @@ test_that("getb works",{
    E <- editmatrix(cond, FALSE)
    b <- getb(E)
   
-   expect_equal(b, c(e1=2,e2=10))
+   expect_equal(b, c(num1=2,num2=10))
 })
 
 test_that("getOps works",{
