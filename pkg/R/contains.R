@@ -81,11 +81,11 @@ contains.editset <- function(E,var=NULL,...){
             variables=var
         )
     )
-    # containts for numerical variables
+    # contains for numerical variables
     numvar <- getVars(E$num)
     nnum <- nrow(E$num)
     T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
-    # containts for categorical variables
+    # contains for categorical variables
     catvar <- getVars(E$cat)
     ncat <- nrow(E$cat)
     T[(nnum+1):(nnum+ncat),catvar] <- contains(E$cat, var[var %in% catvar])
