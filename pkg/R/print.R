@@ -16,8 +16,18 @@ print.editarray <- function(x, ...){
     cat("Edit array:\n")
     print(A)
     cat("\nEdit rules:\n")
-    d <- as.data.frame(x)
-    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
+#    d <- as.data.frame(x)
+#    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
+    desc <- attr(x,'description')
+    if ( is.null(desc) ){ 
+        desc <- rep("",nrow(x))
+    } else {
+        desc <- paste('[',desc,']')
+    }
+    u <- as.character(x)
+    nm <- names(u)
+    pr <- paste(format(nm,width=max(nchar(nm))),':',paste(u,desc),collapse='\n')
+    cat(pr,'\n')
 }
 
 
@@ -84,7 +94,6 @@ print.editset <- function(x, ...){
   u <- as.character(x)
   nm <- names(u)
   cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
-  
 }
 
 

@@ -13,7 +13,7 @@ x <- editmatrix(c( "x ==2"
                  )
                 )
 
-editrules(x)
+
 x
 # dat <- data.frame(x=1:2, y=3:2)
 
