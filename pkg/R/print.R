@@ -72,8 +72,10 @@ print.cateditmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editset <- function(x, ...){
-  attr(x, "parseMix") <- NULL
-  print(unclass(x))
+  cat("Edit set:\n")
+  u <- as.character(x)
+  cat(paste(format(names(u),width=max(nchar(names(u)))),':',u,collapse='\n'),'\n')
+  
 }
 
 

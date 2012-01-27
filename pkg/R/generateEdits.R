@@ -34,7 +34,7 @@ fcf.env <- function(E,totreat,env){
         vrs <- vrs[order(colSums(contains(b,vrs)),decreasing=TRUE)]
         for ( k in vrs ){
             totreatb[k] <- FALSE
-            fcf.env(reduce(eliminate(E,k)),totreatb[-which(names(totreatb)==k)],env)
+            fcf.env(reduce(eliminate(b,k)),totreatb[-which(names(totreatb)==k)],env)
         }
     }
 }
@@ -93,7 +93,7 @@ generateEdits <- function(E){
 # Check which variables of 'vars' can be resolved
 resolves <- function(E,vars){
     if ( length(vars)==0) return(logical(0))
-    ind <- editrules:::getInd(E)[vars]
+    ind <- getInd(E)[vars]
     Ic <- contains(E,vars)
     sapply(vars, function(v) all(colSums(E[Ic[,v],ind[[v]],drop=FALSE])>0))
 }
