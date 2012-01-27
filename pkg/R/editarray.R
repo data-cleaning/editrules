@@ -165,7 +165,7 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     dm <- c()
     if ( datamodel ){
         dm <- ind2char(ind,useEqual=FALSE)
-        names(dm) <- paste("d",1:length(dm),sep="")
+        names(dm) <- paste("dat",1:length(dm),sep="")
     }
     # edits
     if ( nrow(A) == 0 ) return(dm)

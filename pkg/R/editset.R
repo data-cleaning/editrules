@@ -15,7 +15,7 @@ editset <- function(editrules, env=new.env()){
   mix <- parseEdits(editrules, type="mix")
   
   nmix <- length(mix)
-  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix), sep="")
+  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix)+length(num)+length(cat), sep="")
   
   num <- if (length(num) > 0) editmatrix(num)
   if (length(cat) > 0){ 
