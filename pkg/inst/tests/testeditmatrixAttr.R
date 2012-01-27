@@ -10,7 +10,7 @@ test_that("editrules can derive the correct info from a matrix",{
 				, byrow=TRUE 
 	#			, dimnames=list(c("a", "b"), c("x","y", "z"))
 				)
-   ei <- editrules(mat)
+   ei <- as.data.frame(as.editmatrix(mat))
    expect_equal(ei$edit, c("x1 == 2*x2", "2*x1 + x3 == 0"))
    
    mat <- matrix( c( 1,-2
@@ -20,7 +20,7 @@ test_that("editrules can derive the correct info from a matrix",{
 				    , byrow=TRUE
                 , dimnames=list(c("A", "B"), c("x","y"))
 				)
-   ei <- editrules(mat)
+   ei <- as.data.frame(as.editmatrix(mat))
    #expect_equal(ei$name, c("A","B"))
    expect_equal(ei$edit, c("x == 2*y", "2*x == 0"))
 })

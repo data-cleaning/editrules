@@ -31,15 +31,19 @@ print.editarray <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editmatrix <- function(x, ...){
-   cat("Edit matrix:\n")
-   print(toDataFrame(x), ...)
-   cat("\nEdit rules:\n")
-   info <- editrules(x)
-   desc <- paste("[",info$description,"]")
-   desc <- ifelse(info$description=="","", desc)
-   cat( paste( info$name,":", info$edit, desc, collapse="\n")
-      , "\n"
-      )
+    cat("Edit matrix:\n")
+    print(toDataFrame(x), ...)
+    cat("\nEdit rules:\n")
+    desc <- attr(x,'description')
+    if ( is.null(desc) ){ 
+        desc <- rep("",nrow(x))
+    } else {
+        desc <- paste('[',desc,']')
+    }
+    u <- as.character(x)
+    nm <- names(u)
+    pr <- paste(format(nm,width=max(nchar(nm))),':',paste(u,desc),collapse='\n')
+    cat(pr,'\n')
 }
 
 #' print cateditmatrix
@@ -51,16 +55,20 @@ print.editmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.cateditmatrix <- function(x, ...){
-  cat("Edit matrix:\n")
-  print(as.data.frame(x), ...)
-  cat("\nEdit rules:\n")
-  info <- editrules(x)
-  desc <- paste("[",info$description,"]")
-  desc <- ifelse(info$description=="","", desc)
-  info$edit <- sub("<=", "=>", info$edit)
-  cat( paste( info$name,":", info$edit, desc, collapse="\n")
-     , "\n"
-     )
+    cat("Edit matrix:\n")
+    print(as.data.frame(x), ...)
+    cat("\nEdit rules:\n")
+    desc <- attr(x,'description')
+    if ( is.null(desc) ){ 
+        desc <- rep("",nrow(x))
+    } else {
+        desc <- paste('[',desc,']')
+    }
+    u <- as.character(x)
+    u <- sub('<=','=>',u)
+    nm <- names(u)
+    pr <- paste(format(nm,width=max(nchar(nm))),':',paste(u,desc),collapse='\n')
+    cat(pr,'\n')
 }
 
 #' print editset
@@ -74,7 +82,8 @@ print.cateditmatrix <- function(x, ...){
 print.editset <- function(x, ...){
   cat("Edit set:\n")
   u <- as.character(x)
-  cat(paste(format(names(u),width=max(nchar(names(u)))),':',u,collapse='\n'),'\n')
+  nm <- names(u)
+  cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
   
 }
 

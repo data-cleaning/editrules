@@ -216,7 +216,14 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x, ...)
-    data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
+    d <- data.frame(
+        name=names(edts),
+        edit=edts,
+        row.names=NULL,
+        stringsAsFactors=FALSE
+    )
+    if (!is.null(attr(x,'description'))) d$description <- attr(x,'description')
+    d
 }
 
 #' Coerce an editarray to R expressions

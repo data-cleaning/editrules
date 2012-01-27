@@ -5,7 +5,7 @@ E <- editmatrix(c( "x+3*y == 2*z"
 print(E)
                  
 # get editrules, useful for storing and maintaining the rules external from your script
-editrules(E)
+as.data.frame(E)
                  
 # get coeficient matrix of inequalities
 getA(E)

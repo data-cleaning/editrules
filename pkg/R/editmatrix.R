@@ -178,7 +178,14 @@ as.editmatrix <- function( A
 #' @return data.frame which can be converted to an editmatrix with \code{\link{editmatrix}}
 as.data.frame.editmatrix <- function(x,...){
     edts <- as.character(x,...)
-    data.frame(name=names(edts),edit=edts,description=character(length(edts)),row.names=NULL)
+    d <- data.frame(
+        name=names(edts),
+        edit=edts,
+        row.names=NULL,
+        stringsAsFactors=FALSE
+    )
+    if (!is.null(attr(x,'description'))) d$description <- attr(x,'description')
+    d
 }
 
 

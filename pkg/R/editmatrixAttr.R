@@ -1,5 +1,6 @@
 #' Retrieve readables editrules from an editmatrix
 #'
+#' THIS FUNCTION IS OBSOLETE AND WILL BE REMOVED. Use \link{as.data.frame} or \code{as.editmatrix} instead.
 #' \code{editrules} returns a data.frame describing the editrules in editmatrix \code{x}. This data.frame can be used to store the
 #' editrules in a readable format, so that the editrules can be maintained and documented.
 #'
@@ -14,6 +15,7 @@
 #' @param x \code{\link{editmatrix}}  or \code{matrix} object
 #' @return \code{data.frame} with information on all edit rules / constraints
 editrules <- function(x){
+   warning("Function 'editrules' is obsolete and will be removed in the next release. Use as.data.frame instead")
    x <- as.editmatrix(x)
    edit <- as.character(x)
    er <- data.frame(name=names(edit), edit=edit, stringsAsFactors=FALSE)

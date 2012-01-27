@@ -1,7 +1,10 @@
 version 2.1-0
-- added function generateEdits: derive all nonredundant essentialy new categorical edits
-- editfile reads categorical, numerical and mixed edits
-- violatedEdits works for objects of class editset
+- added function generateEdits: derive all nonredundant essentialy new categorical edits.
+- editfile reads categorical, numerical and mixed edits.
+- violatedEdits works for objects of class editset.
+- BREAKING CHANGE: function 'editrules' is obsolete. Use as.data.frame or as.editmatrix.
+- added as.character, print method for editset.
+- as.data.frame.editmatrix and .editarray now only return 'description' column if input has description attribute.
 
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray
