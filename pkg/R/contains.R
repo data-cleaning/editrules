@@ -22,14 +22,16 @@ contains <- function(E,var=NULL,...){
 contains.editmatrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps), ...){
     A <- getA(E)
     if (is.null(var)) var <- getVars(E)
-    abs(A)[,var] > tol 
+    u <- abs(A)[,var,drop=FALSE] > tol
+    dimnames(u) <- list(edit=rownames(E),variable=colnames(A)) 
 }
 
-#' editarray method for contains
+#' contains method for editarray
 #'
 #' @method contains editarray
 #' @rdname contains
 #' @export
+#' @keywords internal
 contains.editarray <- function(E,var=NULL,...){
     if ( !is.editarray(E) ) stop("Argument not of class editarray")
     ind <- getInd(E)
@@ -54,4 +56,17 @@ contains.boolmat <- function(A, ind, var){
     } 
   v
 }
+
+
+#' contains method for editset
+#'
+#' @method contains editset
+#' @rdname contains 
+#' @export
+#' @keywords internal
+contains.editset <- function(E,var=NULL,...){
+   cat('not implemented yet\n')
+   NULL
+}
+
 

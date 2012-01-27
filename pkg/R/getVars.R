@@ -36,3 +36,19 @@ getVars.cateditmatrix <- function(E){
 #' @keywords internal
 getVars.editarray <- function(E) names(attr(E,"ind"))
 
+#' get variable names in editset
+#'
+#' @export
+#' @method getVars editset
+#' @keywords internal
+getVars.editset <- function(E){
+    unique(
+        c(
+            getVars(E$num), 
+            getVars(E$mixnum),
+            getVars(E$cat)
+        )
+    )
+}
+
+
