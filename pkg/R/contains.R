@@ -22,8 +22,9 @@ contains <- function(E,var=NULL,...){
 contains.editmatrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps), ...){
     A <- getA(E)
     if (is.null(var)) var <- getVars(E)
-    u <- abs(A)[,var,drop=FALSE] > tol
-    dimnames(u) <- list(edit=rownames(E),variable=colnames(A)) 
+    u <- abs(A[,var,drop=FALSE]) > tol
+    dimnames(u) <- list(edit=rownames(E),variable=var) 
+    u
 }
 
 #' contains method for editarray
@@ -65,8 +66,41 @@ contains.boolmat <- function(A, ind, var){
 #' @export
 #' @keywords internal
 contains.editset <- function(E,var=NULL,...){
-   cat('not implemented yet\n')
-   NULL
+
+    if ( is.null(var) ) var <- getVars(E)
+    nedits <- nrow(E$num) + nrow(E$cat) + nrow(E$mixcat)
+    # create a boolean array holding the answer
+    T <- array(FALSE,
+        dim=c(nedits,length(var)),
+        dimnames=list(
+            edits=c(
+                rownames(E$num),
+                rownames(E$cat),
+                rownames(E$mixcat)
+            ),
+            variables=var
+        )
+    )
+    # containts for numerical variables
+    numvar <- getVars(E$num)
+    nnum <- nrow(E$num)
+    T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
+    # containts for categorical variables
+    catvar <- getVars(E$cat)
+    ncat <- nrow(E$cat)
+    T[(nnum+1):(nnum+ncat),catvar] <- contains(E$cat, var[var %in% catvar])
+    # contains for categorical variables in conditional edits (mix)
+    nmix <- nrow(E$mixcat)
+    imix <- (nnum+ncat+1):(nnum+ncat+nmix) 
+    T[imix,catvar] <- contains(E$mixcat,var[var %in% catvar]) 
+
+    # contains for numerical variables in mixed edits
+    vmc <- getVars(E$mixcat)
+    emn <- rownames(E$mixnum)
+    X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
+    Y <- contains(E$mixnum)
+    T[imix,getVars(E$mixnum)] <- X%*%Y >0
+
 }
 
 
