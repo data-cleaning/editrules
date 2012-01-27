@@ -1,9 +1,13 @@
-#' Check consistency of edit set
+#' Check consistency of editmatrix or editarray
 #'
-#' Applies Fourier-Motzkin elimination untill either all
+#' For linear edits, Fourier-Motzkin elimination is applied untill either all
 #' variables are eliminated or the editmatrix becomes obviously
-#' infeasible. The check rests on the theorem that a set of linear
+#' infeasible. The check rests on the property (Farka's lemma) that a set of linear
 #' inequalities is infeasible if and only if  0 < -1 can be derived from it. 
+#'
+#' For categorical edits in an editarray, variables are eliminated by 
+#' category resolution untill all variables are eliminated or an obvious
+#' infeasibility is encountered.
 #'
 #' @param E an \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param warn logical: should a warning be raised when system is infeasible?
