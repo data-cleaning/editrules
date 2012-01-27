@@ -100,7 +100,7 @@ contains.editset <- function(E,var=NULL,...){
     X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
     Y <- contains(E$mixnum)
     T[imix,getVars(E$mixnum)] <- X%*%Y >0
-
+    T
 }
 
 
