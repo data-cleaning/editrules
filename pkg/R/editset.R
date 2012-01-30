@@ -54,7 +54,9 @@ editset <- function(editrules, env=new.env()){
   mixnum <- editmatrix(as.character(mixnum))
   rownames(mixnum) <- nms
   
-  # the numeric matrix might miss numeric variables used in mixed edits, so add empty columns for these variables
+  # the numeric matrix might miss numeric variables used in mixed edits, so add
+  # empty columns for these variables
+  ### TODO: can we remove this? [mvdl]
   missvars <- setdiff(getVars(mixnum), getVars(num))
   missvars <- matrix(0, ncol=length(missvars), nrow(num), dimnames=list(NULL, missvars))
   A <- cbind(getA(num), missvars)
@@ -147,8 +149,10 @@ invert <- function(e){
 nedits <- function(E){
     if (any(class(E) %in% c('editmatrix','editarray'))){ 
         n <- nrow(E)
-    } else {
+    } else if ( inherits(E,'editset') ) {
         n <- nrow(E$num) + nrow(E$cat) + nrow(E$mixcat)
+    } else {
+        stop('Argument must be editset, editarray or editmatrix')
     }
     n
 }

@@ -49,7 +49,7 @@
     mixnum <- x$mixnum[rownames(x$mixnum) %in% v,]
     neweditset(
         num = x$num[i[i<=nnum]],
-        cat = x$cat[i[i>nnum & i < (nnum+1):(nnum+1+ncat)]-nnum],
+        cat = x$cat[i[i>nnum & i < (nnum+1+ncat)]-nnum],
         mixnum = mixnum,
         mixcat = mixcat
     )

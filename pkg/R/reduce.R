@@ -60,7 +60,35 @@ reduce.editarray <- function(E,...){
 }
 
 
+#'
+#' @method reduce editset
+#' @export
+#' @rdname reduce
+#'
+function(E,...){
+    cat <- reduce(E$cat)
+    num <- reduce(E$num)
+    mixcat <- reduce(E$mixcat)
+    mixnum <- reduce(E$mixnum[rownames(E$mixnum) %in% getVars(mixcat),])
+    
+    # derive categorical datamodel
+    ct1 <- as.character(cat,datamodel=TRUE)
+    ct2 <- as.character(cat,datamodel=FALSE)
+    dm <- ct1[!ct1 %in% ct2]
+    
+    mixcat <- editarray(c(dm,as.character(mixcat)))
+    rownames(mixcat) <- paste("mix",1:nrow(mixcat),sep="")
+    # TODO: reduce mixcats.
+    #   - if ( TRUE ) nunmedit <-- remove and place numedit in E$num
+    #   - if (numedit) TRUE <-- remove completely
+    neweditset(
+        num = num,
+        cat = cat,
+        mixnum = editmatrix(mixnum),
+        mixcat = mixcat
+    )
 
+}
 
 
 

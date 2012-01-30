@@ -128,11 +128,10 @@ blocks.editarray <- function(M,...){
 #' @method blocks editset
 #' @export
 #' @rdname blocks
-#'
+#' 
 blocks.editset <- function(M,...){
     blocks <- blockIndex(contains(M))
-    lapply(blocks,function(b) M[b,,drop=FALSE])
-    
+    lapply(blocks,function(b) reduce.editset(M[b,,drop=FALSE]))
 }
 
 
