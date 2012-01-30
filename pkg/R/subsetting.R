@@ -35,4 +35,27 @@
     neweditarray(E=A, ind=ind, sep=sep, names=getnames(x)[i],levels=getlevels(x)[j],H=H)
 }
 
+#' Row index operator for \code{editset}
+#' Note: the datamodel is not changed
+#' @method [ editset
+#' @rdname subsetting
+#' @export
+`[.editset` <- function(x,i,j, ...){
+    
+    nnum <- nrow(x$num)
+    ncat <- nrow(x$cat)
+    mixcat <- x$mixcat[i[i>nnum+ncat]-(nnum+ncat)]
+    v <- getVars(reduce(mixcat))
+    mixnum <- x$mixnum[rownames(x$mixnum) %in% v,]
+    neweditset(
+        num = x$num[i[i<=nnum]],
+        cat = x$cat[i[i>nnum & i < (nnum+1):(nnum+1+ncat)]-nnum],
+        mixnum = mixnum,
+        mixcat = mixcat
+    )
+
+}
+
+
+
 

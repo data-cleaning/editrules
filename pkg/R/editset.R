@@ -15,9 +15,9 @@ editset <- function(editrules, env=new.env()){
   mix <- parseEdits(editrules, type="mix")
   
   
-  num <- if (length(num) > 0) editmatrix(num)
-  if (length(cat) > 0){ 
-    cat <- editarray(cat,env=env)
+  num <- editmatrix(num)
+  cat <- editarray(cat,env=env)
+  if (nrow(cat) > 0){ 
     rownames(cat) <- paste("cat",(1:nrow(cat))+nrow(num),sep="")
   }
 
@@ -45,7 +45,8 @@ editset <- function(editrules, env=new.env()){
                    )
   
   mixcat <- editarray(mixdatamodel, env=env)
-  rownames(mixcat) <- names(mix)
+  nx <- nrow(mixcat)
+  if ( nx > 0)  rownames(mixcat)[(nx-length(mix)+1):nx] <- names(mix)
   #mixnum <- editmatrix(mixnum)
   
   # create editmatrix for mixed edits and name them with dummy variable names
@@ -59,6 +60,19 @@ editset <- function(editrules, env=new.env()){
   A <- cbind(getA(num), missvars)
   num <- as.editmatrix(A, getb(num), ops=getOps(num))
   
+    neweditset(
+        num=num,
+        cat=cat,
+        mixnum=mixnum,
+        mixcat=mixcat
+    )
+}
+
+#
+#
+#
+neweditset <- function(num, cat, mixnum, mixcat,...){
+
   structure(
       list( num = num
           , cat = cat
@@ -66,9 +80,12 @@ editset <- function(editrules, env=new.env()){
           , mixcat = mixcat
           )
     , class="editset" # maybe mixEdits?
-    , parseMix = mixl
+    , ...
   )
+
 }
+
+
 
 #' Add dummy variable to the data.frames, these are needed for errorlocations etc.
 #' @param E editset
@@ -118,13 +135,23 @@ invert <- function(e){
     e[lte]  <- gsub("<=",">",e[lte])
     e[lt]   <- gsub("<",">=",e[lt])
     e[ineq] <- gsub("!=","==",e[ineq])
-    e[eq]   <- gsub("==","!=",e[ineq])
+    e[eq]   <- gsub("==","!=",e[eq])
     e
 }
 
 
-
-
+#' Number of edits
+#' Count the number of edits in a collection of edits.
+#' @param E \code{\link{editset}}, \code{\link{editarray}} or \code{\link{editmatrix}}
+#' @export
+nedits <- function(E){
+    if (any(class(E) %in% c('editmatrix','editarray'))){ 
+        n <- nrow(E)
+    } else {
+        n <- nrow(E$num) + nrow(E$cat) + nrow(E$mixcat)
+    }
+    n
+}
 
 
 
