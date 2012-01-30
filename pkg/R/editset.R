@@ -14,15 +14,15 @@ editset <- function(editrules, env=new.env()){
   cat <- parseEdits(editrules, type="cat")
   mix <- parseEdits(editrules, type="mix")
   
-  nmix <- length(mix)
-  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix)+length(num)+length(cat), sep="")
   
   num <- if (length(num) > 0) editmatrix(num)
   if (length(cat) > 0){ 
     cat <- editarray(cat,env=env)
-    rownames(cat) <- paste("cat",(nrow(num)+1):(nrow(num)+nrow(cat)),sep="")
+    rownames(cat) <- paste("cat",(1:nrow(cat))+nrow(num),sep="")
   }
 
+  nmix <- length(mix)
+  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix)+nrow(num)+nrow(cat), sep="")
   
   mixl <- vector(mode="list", nmix)
   mixcat <- vector(mode="expression", nmix)
