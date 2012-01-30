@@ -10,37 +10,39 @@ editset <- function(editrules, env=new.env()){
   #if (is.null(names(editrules)))
   #  names(editrules) <- paste("me", seq_along(editrules), sep="")
   
-  num <- parseEdits(editrules, type="num")
-  cat <- parseEdits(editrules, type="cat")
-  mix <- parseEdits(editrules, type="mix")
+    num <- parseEdits(editrules, type="num")
+    cat <- parseEdits(editrules, type="cat")
+    mix <- parseEdits(editrules, type="mix")
   
   
-  num <- editmatrix(num)
-  cat <- editarray(cat,env=env)
-  if (nrow(cat) > 0){ 
-    rownames(cat) <- paste("cat",(1:nrow(cat))+nrow(num),sep="")
-  }
+    num <- editmatrix(num)
+    cat <- editarray(cat,env=env)
+    if (nrow(cat) > 0){ 
+        rownames(cat) <- paste("cat",(1:nrow(cat))+nrow(num),sep="")
+    }
 
-  nmix <- length(mix)
-  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix)+nrow(num)+nrow(cat), sep="")
+
+    nmix <- length(mix)
+    if (nmix>0 && is.null(names(mix))) 
+        names(mix) <- paste("mix", seq_along(mix)+nrow(num)+nrow(cat), sep="")
   
-  mixl <- vector(mode="list", nmix)
-  mixcat <- vector(mode="expression", nmix)
-  mixnum <- expression()
-  nms <- names(mix)
-  numid <- 0
+    mixl <- vector(mode="list", nmix)
+    mixcat <- vector(mode="expression", nmix)
+    mixnum <- expression()
+    nms <- names(mix)
+    numid <- 0
   
-  for (i in seq_along(mix)){
-    m <- parseMix(mix[[i]], nms[i], numid=numid)
-    numid <- m$numid
-    mixl[[i]] <- m
-    mixcat[[i]] <- m$cat
-    mixnum <- c(mixnum, m$nums)
-  }
+    for (i in seq_along(mix)){
+        m <- parseMix(mix[[i]], nms[i], numid=numid)
+        numid <- m$numid
+        mixl[[i]] <- m
+        mixcat[[i]] <- m$cat
+        mixnum <- c(mixnum, m$nums)
+    }
   
   # add datamodel for categorical edits, add datamodel for dummy variables and add mixed categorical edits
-  mixdatamodel <- c( if (!is.null(cat)) ind2char(getInd(cat))
-                   , paste(names(mixnum), "%in% c(FALSE,TRUE)")
+  mixdatamodel <- c( ind2char(getInd(cat))
+                   , if( length(mixnum)>0 ) paste(names(mixnum), "%in% c(FALSE,TRUE)")
                    , as.character(mixcat)
                    )
   
@@ -51,16 +53,18 @@ editset <- function(editrules, env=new.env()){
   
   # create editmatrix for mixed edits and name them with dummy variable names
   nms <- names(mixnum)
+
   mixnum <- editmatrix(as.character(mixnum))
+
   rownames(mixnum) <- nms
   
   # the numeric matrix might miss numeric variables used in mixed edits, so add
   # empty columns for these variables
   ### TODO: can we remove this? [mvdl]
-  missvars <- setdiff(getVars(mixnum), getVars(num))
-  missvars <- matrix(0, ncol=length(missvars), nrow(num), dimnames=list(NULL, missvars))
-  A <- cbind(getA(num), missvars)
-  num <- as.editmatrix(A, getb(num), ops=getOps(num))
+#  missvars <- setdiff(getVars(mixnum), getVars(num))
+#  missvars <- matrix(0, ncol=length(missvars), nrow(num), dimnames=list(NULL, missvars))
+#  A <- cbind(getA(num), missvars)
+#  num <- as.editmatrix(A, getb(num), ops=getOps(num))
   
     neweditset(
         num=num,
