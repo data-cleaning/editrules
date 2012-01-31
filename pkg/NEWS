@@ -1,4 +1,5 @@
 version 2.1-0
+- NOTE: BETA VERSION NOT A CRAN RELEASE
 - added function generateEdits: derive all nonredundant essentialy new categorical edits.
 - editfile reads categorical, numerical and mixed edits.
 - violatedEdits works for objects of class editset.

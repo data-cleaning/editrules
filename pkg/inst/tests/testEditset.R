@@ -36,7 +36,7 @@ test_that("editset parses conditional numeric edits",{
     expect_equivalent(getArr(E$mixcat),array(c(F,T,F,T),dim=c(1,4)))
 
     # test 2: with equalities in if-statement
-    v <- expression( if ( x == 0 ) y == 0)
+#    v <- expression( if ( x == 0 ) y == 0)
 
 })
 
