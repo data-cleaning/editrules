@@ -38,7 +38,7 @@ summary.editmatrix <- function(object, useBlocks=TRUE, ...){
 }
 
 
-#' Summary of edit set
+#' Summary of editarray
 #'
 #'
 #' @method summary editarray
@@ -65,6 +65,37 @@ summary.editarray <- function(object, useBlocks=TRUE, ...){
     structure(A,
         class='editsummary',
         type ='editarray')
+}
+
+#' Summary of editset
+#'
+#'
+#' @method summary editset
+#' 
+#' @rdname summary
+#' @export
+#' @example ../examples/editset.R
+summary.editset <- function(object, useBlocks=TRUE, ...){
+    if ( useBlocks ){
+        B <- blocks(object)
+    } else {
+        B <- list(object)
+    }
+    A <- array(c(
+        sapply(B,nedits),
+        sapply(B, function(b) nrow(b$num)),
+        sapply(B, function(b) nrow(b$mixcat)),
+        sapply(B, function(b) length(getVars(b)))
+        ),
+        dim=c(length(B),4),
+        dimnames=list(
+            block=1:length(B),
+            count=c('edits','num.edits','mix.edits','variables')
+        )
+    )
+    structure(A,
+        class='editsummary',
+        type ='editset')
 }
 
 

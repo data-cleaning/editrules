@@ -16,8 +16,6 @@ print.editarray <- function(x, ...){
     cat("Edit array:\n")
     print(A)
     cat("\nEdit rules:\n")
-#    d <- as.data.frame(x)
-#    cat(paste(d$name," : ",d$edit,collapse="\n"),"\n")
     desc <- attr(x,'description')
     if ( is.null(desc) ){ 
         desc <- rep("",nrow(x))
@@ -90,16 +88,17 @@ print.cateditmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editset <- function(x, ...){
-  u <- as.character(x,datamodel=FALSE)
-  v <- as.character(x,datamodel=TRUE)
-  cat("Data model:\n")
-  v <- v[! v%in% u]
-  nm <- names(v)
-  cat(paste(format(nm,width=max(nchar(nm))),':',v,collapse='\n'),'\n')
-
-  cat("\nEdit set:\n")
-  nm <- names(u)
-  cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
+    u <- as.character(x,datamodel=FALSE)
+    v <- as.character(x,datamodel=TRUE)
+    cat("Data model:\n")
+    v <- v[! v%in% u]
+    if ( length(v)>0 ){
+        nm <- names(v)
+        cat(paste(format(nm,width=max(nchar(nm))),':',v,collapse='\n'),'\n')
+    }
+    cat("\nEdit set:\n")
+    nm <- names(u)
+    cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
 }
 
 
