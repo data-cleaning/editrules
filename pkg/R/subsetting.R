@@ -41,15 +41,13 @@
 #' @rdname subsetting
 #' @export
 `[.editset` <- function(x,i,j, ...){
-    
+    if ( is.logical(i) ) i <- which(i)
     nnum <- nrow(x$num)
-    ncat <- nrow(x$cat)
-    mixcat <- x$mixcat[i[i>nnum+ncat]-(nnum+ncat)]
+    mixcat <- x$mixcat[i[i>nnum]-nnum]
     v <- getVars(reduce(mixcat))
     mixnum <- x$mixnum[rownames(x$mixnum) %in% v,]
     neweditset(
         num = x$num[i[i<=nnum]],
-        cat = x$cat[i[i>nnum & i < (nnum+1+ncat)]-nnum],
         mixnum = mixnum,
         mixcat = mixcat
     )
