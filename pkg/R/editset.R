@@ -142,6 +142,28 @@ invert <- function(e){
 
 
 
+#' Coerce an editarset to a \code{data.frame}
+#'
+#' Coerces an editset to a \code{data.frame}. 
+#'
+#' @method as.data.frame editset
+#' @param x \code{\link{editset}} object
+#' @param ... further arguments passed to or from other methods.
+#' @seealso \code{\link{as.character.editarray}}
+#' @return data.frame with columns 'name', 'edit' and 'description'.
+#'
+#' @export 
+as.data.frame.editset <- function(x, ...){
+    edts <- as.character(x, datamodel=TRUE,...)
+    d <- data.frame(
+        name=names(edts),
+        edit=edts,
+        row.names=NULL,
+        stringsAsFactors=FALSE
+    )
+    if (!is.null(attr(x,'description'))) d$description <- attr(x,'description')
+    d
+}
 
 
 

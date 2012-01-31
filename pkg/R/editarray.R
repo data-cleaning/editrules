@@ -209,7 +209,7 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 #' Coerces an editarray to a \code{data.frame}. 
 #'
 #' @method as.data.frame editarray
-#' @param x editmatrix object
+#' @param x \code{\link{editarray}} object
 #' @param ... further arguments passed to or from other methods.
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.
