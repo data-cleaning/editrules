@@ -46,7 +46,6 @@
 #' @export
 editarray <- function(editrules, sep=":", env=parent.frame()){
     if (length(editrules) == 0 ) return(neweditarray(array(numeric(0),dim=c(0,0)),ind=list(),sep=sep))
-    editnames <- names(editrules)
 
     e <- parseEdits(editrules)
     v <- lapply(e,parseCat,sep=sep,env=env)
@@ -83,7 +82,7 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
 
     }
 
-    if ( is.null(editnames ) ) editnames <- paste("cat",1:m,sep="")
+    editnames <- paste("cat",1:m,sep="")
     E <- array(NA, dim=c(m,n), 
             dimnames = list(
                 edits = editnames,

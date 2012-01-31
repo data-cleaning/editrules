@@ -17,15 +17,17 @@ editset <- function(editrules, env=new.env()){
     # pure numerical edits    
     num <- editmatrix(num)
     nnum <- nrow(num)
-    
+    # pure categorical edits    
     cat <- editarray(cat)
     ncat <- nrow(cat)
-    rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
+    if ( ncat > 0 ) rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
+
+
     nmix <- length(mix)
+    mixnum <- expression()
+    mixcat <- vector(mode="expression", nmix)
     if ( nmix > 0 ){ 
         mixl <- vector(mode="list", nmix)
-        mixcat <- vector(mode="expression", nmix)
-        mixnum <- expression()
         nms <- names(mix)
         numid <- 0
   
@@ -44,6 +46,8 @@ editset <- function(editrules, env=new.env()){
             as.character(mixcat)
         )
     }
+
+    # stick categorical and mixed edits in one editarray
     mixcat <- editarray(mix, env=env)
     nmix <- nrow(mixcat)
     if ( nmix>0 ){
