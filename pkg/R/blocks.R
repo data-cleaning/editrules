@@ -4,8 +4,8 @@
 #' 
 #' @param M \code{matrix} or \code{editmatrix} that will be broken in blocks
 #' @return list with seperate matrix blocks
-#' @export
-blocks.old <- function(M){
+#'
+old.blocks<- function(M){
    
    block <- function(B){
      x1 <- FALSE
@@ -75,8 +75,8 @@ blocks.old <- function(M){
 #' @param M Object to be decomposed into 
 #' @param ... Arguments to be passed to or from other functions/
 #' @return list of independent subobjects of \code{M}.
-#' @example ../examples/blocks
-#' 
+#' @example ../examples/blocks.R
+#' @export
 blocks <- function(M,...){
     UseMethod("blocks")
 }

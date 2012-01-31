@@ -65,7 +65,7 @@ reduce.editarray <- function(E,...){
 #' @export
 #' @rdname reduce
 #'
-function(E,...){
+reduce.editset <- function(E,...){
     cat <- reduce(E$cat)
     num <- reduce(E$num)
     mixcat <- reduce(E$mixcat)
