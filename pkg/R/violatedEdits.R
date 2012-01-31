@@ -19,6 +19,7 @@
 #' @param ... further arguments that can be used by methods implementing this generic function
 #' @return a logical matrix where each row indicates which contraints are violated
 violatedEdits <- function(E, dat, ...){
+    if (any(!getVars(E) %in% colnames(dat))) stop("E contains variables not in dat")
     UseMethod("violatedEdits")
 }
 
@@ -124,12 +125,11 @@ violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
 #' @rdname violatedEdits
 #' @export
 violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
-    v1 <- violatedEdits(E$num,dat,...)
-    E$num <- NULL
+    v1 <- violatedEdits.editarray(E$num,dat,...)
+    E$num <- editmatrix(expression())
     u <- as.character(E,datamodel=datamodel,useIf=FALSE)
-    v2 <- violatedEdits(u,dat)
-
-   newviolatedEdits(cbind(v1,v2))
+    v2 <- violatedEdits.character(u,dat)
+    newviolatedEdits(cbind(v1,v2))
 }
 
 
@@ -150,6 +150,7 @@ listViolatedEdits <- function(E, dat){
 }
 
 newviolatedEdits <- function(x){
+  dimnames(x) <- list(record=rownames(x),edit=colnames(x))
   structure(x, class="violatedEdits")
 }
 
