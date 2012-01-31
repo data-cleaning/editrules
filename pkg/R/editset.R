@@ -105,13 +105,15 @@ adddummies <- function(E, dat){
 #' @param x an \code{\link{editset}}
 #' @param datamodel include datamodel?
 #' @param useIf return vectorized version?
+#' @param dummies: return datamodel for dummy variables?
 #' @param ... arguments to be passed to or from other methods
 #' @export
-as.character.editset <- function(x, datamodel=TRUE,useIf=TRUE,...){
+as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, ...){
     num <-  as.character(x$num)
     numc <- as.character(x$mixnum)
-    catc <- as.character(x$mixcat,datamodel=FALSE,useIf=useIf)
+    catc <- as.character(x$mixcat, datamodel=datamodel, useIf=useIf)
     for ( n in names(numc) ){
+        catc <- catc[!grepl(paste(n,'%in%'),catc)]
         catc <- gsub(paste(n,'== FALSE'), invert(numc[n]),catc)
         catc <- gsub(paste(n,'== TRUE'), numc[n],catc)
     }

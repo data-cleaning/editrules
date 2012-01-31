@@ -90,8 +90,14 @@ print.cateditmatrix <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editset <- function(x, ...){
-  cat("Edit set:\n")
-  u <- as.character(x)
+  u <- as.character(x,datamodel=FALSE)
+  v <- as.character(x,datamodel=TRUE)
+  cat("Data model:\n")
+  v <- v[! v%in% u]
+  nm <- names(v)
+  cat(paste(format(nm,width=max(nchar(nm))),':',v,collapse='\n'),'\n')
+
+  cat("\nEdit set:\n")
   nm <- names(u)
   cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
 }
