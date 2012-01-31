@@ -68,14 +68,13 @@ contains.boolmat <- function(A, ind, var){
 contains.editset <- function(E,var=NULL,...){
 
     if ( is.null(var) ) var <- getVars(E)
-    nedits <- nrow(E$num) + nrow(E$cat) + nrow(E$mixcat)
+    nedits <- nrow(E$num) + nrow(E$mixcat)
     # create a boolean array holding the answer
     T <- array(FALSE,
         dim=c(nedits,length(var)),
         dimnames=list(
             edits=c(
                 rownames(E$num),
-                rownames(E$cat),
                 rownames(E$mixcat)
             ),
             variables=var
@@ -85,14 +84,12 @@ contains.editset <- function(E,var=NULL,...){
     numvar <- getVars(E$num)
     nnum <- nrow(E$num)
     T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
-    # contains for categorical variables
-    catvar <- getVars(E$cat)
-    ncat <- nrow(E$cat)
-    T[(nnum+1):(nnum+ncat),catvar] <- contains(E$cat, var[var %in% catvar])
+
     # contains for categorical variables in conditional edits (mix)
     nmix <- nrow(E$mixcat)
-    imix <- (nnum+ncat+1):(nnum+ncat+nmix) 
-    T[imix,catvar] <- contains(E$mixcat,var[var %in% catvar]) 
+    imix <- (nnum+1):(nnum+nmix) 
+    catvar <- getVars(E,type='cat')
+    T[imix,catvar] <- contains(E$mixcat, catvar) 
 
     # contains for numerical variables in mixed edits
     vmc <- getVars(E$mixcat)
