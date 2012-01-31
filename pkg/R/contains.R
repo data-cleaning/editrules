@@ -3,7 +3,7 @@
 #' For an \code{\link{editmatrix}}, variables with coefficients smaller than
 #' \code{tol} are considered not to be contained in an edit.
 #'
-#' @param E \code{\link{editarray}} or \code{\link{editmatrix}}
+#' @param E \code{\link{editarray}}, \code{\link{editmatrix}}, \code{\link{editset}}, or \code{matrix}
 #' @param var \code{character}, names of a categorical variables in \code{E}. If var=NULL, all variables are treated.
 #' @param ... arguments to be passed to other methods
 #' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
@@ -11,6 +11,21 @@
 contains <- function(E,var=NULL,...){
     UseMethod('contains')
 }
+
+
+#' matrix method for contains
+#' 
+#' @method contains matrix
+#' @export
+#' @keywords internal
+contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine.double.eps),...){
+    if ( is.null(var) && !is.null(colnames(M)) ) var <- colnames(M)
+    if ( is.null(var) ) var <- 1:ncol(M)
+    u <- abs(M[,var,drop=FALSE]) > tol
+    dimnames(u) <- dimnames(M[,var,drop=FALSE])
+    u
+}
+
 
 #' editmatrix method for contains
 #' 
