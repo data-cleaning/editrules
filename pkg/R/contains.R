@@ -16,13 +16,14 @@ contains <- function(E,var=NULL,...){
 #' matrix method for contains
 #' 
 #' @method contains matrix
+#' @rdname contains
 #' @export
 #' @keywords internal
-contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine.double.eps),...){
-    if ( is.null(var) && !is.null(colnames(M)) ) var <- colnames(M)
-    if ( is.null(var) ) var <- 1:ncol(M)
-    u <- abs(M[,var,drop=FALSE]) > tol
-    dimnames(u) <- dimnames(M[,var,drop=FALSE])
+contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps),...){
+    if ( is.null(var) && !is.null(colnames(E)) ) var <- colnames(E)
+    if ( is.null(var) ) var <- 1:ncol(E)
+    u <- abs(E[,var,drop=FALSE]) > tol
+    dimnames(u) <- dimnames(E[,var,drop=FALSE])
     u
 }
 

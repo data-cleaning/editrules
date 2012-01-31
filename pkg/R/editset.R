@@ -105,7 +105,7 @@ adddummies <- function(E, dat){
 #' @param x an \code{\link{editset}}
 #' @param datamodel include datamodel?
 #' @param useIf return vectorized version?
-#' @param dummies: return datamodel for dummy variables?
+#' @param dummies return datamodel for dummy variables?
 #' @param ... arguments to be passed to or from other methods
 #' @export
 as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, ...){

@@ -19,7 +19,7 @@
 #' @param ... further arguments that can be used by methods implementing this generic function
 #' @return a logical matrix where each row indicates which contraints are violated
 violatedEdits <- function(E, dat, ...){
-    if (any(!getVars(E) %in% colnames(dat))) stop("E contains variables not in dat")
+    if (any(!getVars(E) %in% names(dat))) stop("E contains variables not in dat")
     UseMethod("violatedEdits")
 }
 
