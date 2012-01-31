@@ -56,3 +56,14 @@ echelon.matrix <- function(E, tol=sqrt(.Machine$double.eps), ...){
     rbind(E[!I0,,drop=FALSE],E[I0,,drop=FALSE])
 }
 
+#' @method echelon editset
+#' @rdname echelon
+#' @export
+#'
+echelon.editset <- function(E,...){
+    E$num <- echelon(E$num)
+    E
+}
+
+
+
