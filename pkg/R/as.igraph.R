@@ -18,7 +18,7 @@ checkigraph <- function(){
 #'
 #' @rdname adjacency
 #' @export
-as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE,...){
+as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE,...){
     stopifnot(all(vars %in% getVars(E)))
     UseMethod('as.igraph')
 }
@@ -28,7 +28,7 @@ as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), v
 #' @rdname adjacency
 #' @method as.igraph editmatrix
 #' @export
-as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE, ...){
+as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
     a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
@@ -42,12 +42,12 @@ as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=row
     g
 }
 
-#' method for converting editmatrix to igraph object
+#' method for converting editarray to igraph object
 #'
 #' @rdname adjacency
 #' @method as.igraph editarray
 #' @export
-as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),weighted=TRUE, ...){
+as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
     a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
@@ -59,3 +59,26 @@ as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rown
     V(g)$type <- V(g)$vars <- attr(a, "vars")
     g
 }
+
+
+#' method for converting editset to igraph object
+#'
+#' @rdname adjacency
+#' @method as.igraph editset
+#' @export
+as.igraph.editset <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
+    checkigraph()
+    nodetype <- match.arg(nodetype)
+    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    g <- graph.adjacency(
+          a, 
+          weighted=weighted,
+          mode = 'undirected'
+        )
+    V(g)$type <- V(g)$vars <- attr(a, "vars")
+    g
+}
+
+
+
+

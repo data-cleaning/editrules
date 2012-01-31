@@ -59,9 +59,9 @@
 #' @export
 plot.editmatrix <- function(x,
     nodetype="all", 
-    rules=rownames(x), 
+    rules=editnames(x), 
     vars=getVars(x), 
-    violated=logical(nrow(x)), 
+    violated=logical(nedits(x)), 
     adapt=logical(length(getVars(x))),
     nabbreviate=5,
     layout=layout.fruchterman.reingold,
@@ -97,9 +97,9 @@ plot.editmatrix <- function(x,
 plot.editarray <- function(
     x,
     nodetype="all", 
-    rules=rownames(x), 
+    rules=editnames(x), 
     vars=getVars(x), 
-    violated=logical(nrow(x)), 
+    violated=logical(nedits(x)), 
     adapt=logical(length(getVars(x))),
     nabbreviate=5,
     layout=layout.fruchterman.reingold,
@@ -126,6 +126,45 @@ plot.editarray <- function(
         adaptcolor=adaptcolor,
         ...)
 }
+
+#' plot method for editset
+#'
+#' @rdname plot.editmatrix
+#' @method plot editarray
+#' @export
+plot.editset <- function(
+    x,
+    nodetype="all", 
+    rules=editnames(x), 
+    vars=getVars(x), 
+    violated=logical(nedits(x)), 
+    adapt=logical(length(getVars(x))),
+    nabbreviate=5,
+    layout=layout.fruchterman.reingold,
+    edgecolor='steelblue',
+    rulecolor='khaki1',
+    varcolor='lightblue1',
+    violatedcolor='sienna1',
+    adaptcolor='sienna1',
+    ...){
+    checkigraph()
+    plotEditGraph(
+        x, 
+        nodetype=nodetype, 
+        rules=rules, 
+        vars=vars,
+        violated=violated,
+        adapt=adapt,
+        nabbreviate=nabbreviate,
+        layout=layout,
+        edgecolor=edgecolor,
+        rulecolor=rulecolor,
+        varcolor=varcolor,
+        violatedcolor=violatedcolor,
+        adaptcolor=adaptcolor,
+        ...)
+}
+
 
 # internal edit set plotter
 plotEditGraph <- function(

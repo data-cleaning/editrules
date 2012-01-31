@@ -45,7 +45,7 @@ adjacency.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=row
 }
 
 
-#' editmatrix method for calculating adjacency matrix
+#' editarray method for calculating adjacency matrix
 #'
 #'
 #' @rdname adjacency
@@ -56,6 +56,22 @@ adjacency.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rown
     nodetype <- match.arg(nodetype)
     adjec(A,nodetype=nodetype, rules=rules, vars=vars)
 }
+
+
+#' editset method for calculating adjacency matrix
+#'
+#'
+#' @rdname adjacency
+#' @method adjacency editset
+#' @export
+adjacency.editset <- function(E, nodetype=c("all", "rules","vars"), rules=c(rownames(E$num),rownames(E$mixcat)), vars=getVars(E),...){
+    A <- contains(E)
+    nodetype <- match.arg(nodetype)
+    adjec(A,nodetype=nodetype, rules=rules, vars=vars)
+}
+
+
+
 
 
 # derive adjacency from 1/0 or boolean matrix.

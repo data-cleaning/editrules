@@ -141,21 +141,6 @@ invert <- function(e){
 }
 
 
-#' Number of edits
-#' Count the number of edits in a collection of edits.
-#' @param E \code{\link{editset}}, \code{\link{editarray}} or \code{\link{editmatrix}}
-#' @export
-nedits <- function(E){
-    if (any(class(E) %in% c('editmatrix','editarray'))){ 
-        n <- nrow(E)
-    } else if ( inherits(E,'editset') ) {
-        n <- nrow(E$num) + nrow(E$cat) + nrow(E$mixcat)
-    } else {
-        stop('Argument must be editset, editarray or editmatrix')
-    }
-    n
-}
-
 
 
 
