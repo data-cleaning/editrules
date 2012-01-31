@@ -9,8 +9,10 @@ version 2.1-0
 - edits in editmatrix and editarray are now printed with prefix 'num' and 'cat', in stead of 'e', datamodel gets prefix 'dat'
 - added nedits function counting the number of edits in an editmatrix -array or -set
 - added blockIndex function
-- getVars, blocks, reduce and row indexing ([) for editset objects
+- is.editset, getVars, blocks, reduce and row indexing ([) for editset objects
+- violatedEdits, summary, echelon, as.data.frame, plot, as.igraph, adjacency for editset objects
 - simpler internal representation for editset
+
 
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray
