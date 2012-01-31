@@ -7,85 +7,75 @@
 #' @param env environment to parse categorical edits in
 #' @export
 editset <- function(editrules, env=new.env()){
-  #if (is.null(names(editrules)))
-  #  names(editrules) <- paste("me", seq_along(editrules), sep="")
-  
+    
+    # detect edit types
     num <- parseEdits(editrules, type="num")
     cat <- parseEdits(editrules, type="cat")
     mix <- parseEdits(editrules, type="mix")
   
-  
+
+    # pure numerical edits    
     num <- editmatrix(num)
-    cat <- editarray(cat,env=env)
-    if (nrow(cat) > 0){ 
-        rownames(cat) <- paste("cat",(1:nrow(cat))+nrow(num),sep="")
-    }
-
-
+    nnum <- nrow(num)
+    
+    cat <- editarray(cat)
+    ncat <- nrow(cat)
+    rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
     nmix <- length(mix)
-    if (nmix>0 && is.null(names(mix))) 
-        names(mix) <- paste("mix", seq_along(mix)+nrow(num)+nrow(cat), sep="")
+    if ( nmix > 0 ){ 
+        mixl <- vector(mode="list", nmix)
+        mixcat <- vector(mode="expression", nmix)
+        mixnum <- expression()
+        nms <- names(mix)
+        numid <- 0
   
-    mixl <- vector(mode="list", nmix)
-    mixcat <- vector(mode="expression", nmix)
-    mixnum <- expression()
-    nms <- names(mix)
-    numid <- 0
-  
-    for (i in seq_along(mix)){
-        m <- parseMix(mix[[i]], nms[i], numid=numid)
-        numid <- m$numid
-        mixl[[i]] <- m
-        mixcat[[i]] <- m$cat
-        mixnum <- c(mixnum, m$nums)
+        for (i in seq_along(mix)){
+            m <- parseMix(mix[[i]], nms[i], numid=numid)
+            numid <- m$numid
+            mixl[[i]] <- m
+            mixcat[[i]] <- m$cat
+            mixnum <- c(mixnum, m$nums)
+        }
+
+        # combine categorical edits, datamodel with dummies for mixed edits and mixed edits
+        mix <- c(
+            ind2char(getInd(cat)),
+            if ( length(mixnum) > 0 ) paste(names(mixnum), "%in% c(TRUE,FALSE)"),
+            as.character(mixcat)
+        )
     }
-  
-  # add datamodel for categorical edits, add datamodel for dummy variables and add mixed categorical edits
-  mixdatamodel <- c( ind2char(getInd(cat))
-                   , if( length(mixnum)>0 ) paste(names(mixnum), "%in% c(FALSE,TRUE)")
-                   , as.character(mixcat)
-                   )
-  
-  mixcat <- editarray(mixdatamodel, env=env)
-  nx <- nrow(mixcat)
-  if ( nx > 0)  rownames(mixcat)[(nx-length(mix)+1):nx] <- names(mix)
-  #mixnum <- editmatrix(mixnum)
-  
-  # create editmatrix for mixed edits and name them with dummy variable names
-  nms <- names(mixnum)
+    mixcat <- editarray(mix, env=env)
+    nmix <- nrow(mixcat)
+    if ( nmix>0 ){
+        rownames(mixcat) <- paste("mix",(nnum+ncat+1):(nnum+ncat+nmix),sep="")
+        mixcat <- c(cat, mixcat)
+    } else {
+        mixcat <- cat
+    }
 
-  mixnum <- editmatrix(as.character(mixnum))
-
-  rownames(mixnum) <- nms
-  
-  # the numeric matrix might miss numeric variables used in mixed edits, so add
-  # empty columns for these variables
-  ### TODO: can we remove this? [mvdl]
-#  missvars <- setdiff(getVars(mixnum), getVars(num))
-#  missvars <- matrix(0, ncol=length(missvars), nrow(num), dimnames=list(NULL, missvars))
-#  A <- cbind(getA(num), missvars)
-#  num <- as.editmatrix(A, getb(num), ops=getOps(num))
+    # create editmatrix for mixed edits and name them with dummy variable names
+    nms <- names(mixnum)
+    mixnum <- editmatrix(as.character(mixnum))
+    rownames(mixnum) <- nms
   
     neweditset(
         num=num,
-        cat=cat,
-        mixnum=mixnum,
-        mixcat=mixcat
+        mixcat=mixcat,
+        mixnum=mixnum
     )
 }
 
 #
 #
 #
-neweditset <- function(num, cat, mixnum, mixcat,...){
+neweditset <- function(num, mixcat, mixnum,...){
 
   structure(
       list( num = num
-          , cat = cat
           , mixnum = mixnum
           , mixcat = mixcat
           )
-    , class="editset" # maybe mixEdits?
+    , class="editset" 
     , ...
   )
 
@@ -115,7 +105,6 @@ adddummies <- function(E, dat){
 #' @export
 as.character.editset <- function(x, datamodel=TRUE,useIf=TRUE,...){
     num <-  as.character(x$num)
-    cat <-  as.character(x$cat,datamodel=datamodel,useIf=useIf)
     numc <- as.character(x$mixnum)
     catc <- as.character(x$mixcat,datamodel=FALSE,useIf=useIf)
     for ( n in names(numc) ){
@@ -124,7 +113,7 @@ as.character.editset <- function(x, datamodel=TRUE,useIf=TRUE,...){
     }
     # remove datamodel which are a consequence of conditional edits
     
-    c(num,cat,catc)
+    c(num,catc)
 }
 
 

@@ -35,7 +35,7 @@ c.editarray <- function(...){
   stopifnot(all(seps==":"))
   
   B <- lapply(ems, function(E){
-    a <- matrix(TRUE, nrow=nrow(E), ncol=length(lvls), dimnames=list(NULL, lvls))
+    a <- matrix(TRUE, nrow=nrow(E), ncol=length(lvls), dimnames=list(rownames(E), lvls))
     a[, getlevels(E)] <- getArr(E)
     a
   })
@@ -46,5 +46,7 @@ c.editarray <- function(...){
   ind <- seq_along(lvls)
   names(ind) <- cats
   ind <- split(ind, vars)
-  neweditarray(B, ind, sep=":")
+  neweditarray(B, ind, names=rownames(B), sep=":")
 }
+
+

@@ -46,6 +46,7 @@
 #' @export
 editarray <- function(editrules, sep=":", env=parent.frame()){
     if (length(editrules) == 0 ) return(neweditarray(array(numeric(0),dim=c(0,0)),ind=list(),sep=sep))
+    editnames <- names(editrules)
 
     e <- parseEdits(editrules)
     v <- lapply(e,parseCat,sep=sep,env=env)
@@ -81,9 +82,11 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
         )
 
     }
+
+    if ( is.null(editnames ) ) editnames <- paste("cat",1:m,sep="")
     E <- array(NA, dim=c(m,n), 
             dimnames = list(
-                edits = paste("cat",1:m,sep=""),
+                edits = editnames,
                 variables = cols
             )
         )
@@ -118,7 +121,6 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
 #'
 #' @seealso as.character.editarray
 #'
-#' not for export
 #' @keywords internal
 ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
     v <- names(ivd)
