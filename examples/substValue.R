@@ -3,8 +3,10 @@
 E <- editmatrix(expression(
     x + y == z,
     2*y < 10,
-    3*x + 1.5*u < 7
-    z >= 0))
+    3*x + 1.5*u < 7,
+    z >= 0
+    )
+)
 
 # single value
 substValue(E,'z',10)

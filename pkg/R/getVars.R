@@ -39,12 +39,14 @@ getVars.editarray <- function(E,...) names(attr(E,"ind"))
 
 #' get variable names in editset
 #'
-#' @param type which variables?
+#' @param type which variables? \code{all} means all (except dummies), \code{num} means 
+#'      all numericals, \code{cat} means all categoricals, \code{mix} means those numericals appearing in a logical 
+#'      constraint and \code{dummy} means dummy variables connecting the logical with numerical constraints.
 #' @param dummies Also return dummy variables used in \code{E$mixcat} (only if \code{type} is \code{all} or \code{cat})
 #' @export
 #' @method getVars editset
 #' @keywords internal
-getVars.editset <- function(E, type=c('all','num','cat'), dummies=FALSE,...){
+getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
     type <- match.arg(type)
     numvars <- c()
     catvars <- c()
@@ -52,9 +54,13 @@ getVars.editset <- function(E, type=c('all','num','cat'), dummies=FALSE,...){
     if (type %in% c('all','num')){
         numvars <- unique(c(getVars(E$num), getVars(E$mixnum)))
     }
+    if ( type == 'mix' ) numvars <- getVars(E$mixnum)
     if ( type %in% c('all','cat')){
         catvars <- getVars(E$mixcat)
-        if ( !dummies ) catvars <- catvars[!catvars %in% rownames(E$mixnum)]
+        catvars <- catvars[!catvars %in% rownames(E$mixnum)]
+    }
+    if ( type == 'dummy'){
+        catvars <- rownames(E$mixnum)
     }
     c(numvars, catvars)
 }

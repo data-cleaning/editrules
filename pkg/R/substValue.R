@@ -5,6 +5,7 @@
 #' @param value vector with value(s) of variable(s)
 #' @param ... arguments to be passed to or from other methods
 #' @return \code{E}, with variables replaced by values
+#' @example ../examples/substValue.R
 #' @seealso \code{\link{eliminate}}
 #' @export
 substValue <- function(E, var, value, ...){ 
@@ -118,11 +119,20 @@ indFromArray <- function(A,sep){
 
 #' Substitute values in an \code{\link{editset}}
 #'
+#' For an \code{\link{editset}}, purely numerical variables are
+#' substitutes as in an \code{\link{editmatrix}} and categorical
+#' as in an \code{\link{editarray}}. Numerical variables appearing
+#' logical constraints are substituted and if truth values can
+#' be derived these are substituted in the logical constraint.
+#' 
+#' @param simplify Simplify editset by moving logical edits containing a simple 
+#'      numerical statement to the pure numerical part?
+#'
 #' @method substValue editset
 #'
 #' @rdname substValue 
 #' @export
-substValue.editset <- function(E, var, value, ...){
+substValue.editset <- function(E, var, value, simplify=TRUE, ...){
     # the nonnumeric case is simple
     if ( !is.numeric(value) ){
         E$mixcat <- substValue(E$mixcat,var,value,...)
@@ -163,6 +173,7 @@ substValue.editset <- function(E, var, value, ...){
             E$mixcat <- substValue(E$mixcat, dvar[isub],dval[isub])
         }
     }
+    if ( simplify ) E <- simplify(E)
     E
 }
 

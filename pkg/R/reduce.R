@@ -74,14 +74,11 @@ reduce.editset <- function(E,...){
     # TODO better naming (not all should be 'mix')
     if (nrow(mixcat) > 0 ) rownames(mixcat) <- paste("mix",1:nrow(mixcat),sep="")
 
-    # TODO: reduce mixcats.
-    #   - if ( TRUE ) nunmedit <-- remove and place numedit in E$num
-    #   - if (numedit) TRUE <-- remove completely
-    neweditset(
+    simplify(neweditset(
         num = num,
         mixnum = mixnum,
         mixcat = mixcat
-    )
+    ))
 
 }
 

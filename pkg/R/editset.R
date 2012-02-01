@@ -170,6 +170,71 @@ as.data.frame.editset <- function(x, ...){
 
 
 
+#' Determine edittypes in editset based on 'contains(E)'
+#'
+#' Determines edittypes based on the variables they contain (not on names of edits).
+#'
+#' @param E: editset
+#' @param m: if you happen to have contains(E) handy, it needs not be recalculated.
+#' @keywords internal
+editType <- function(E, m=NULL){
+    # NOTE: might be interesting for @export
+    if ( !is.editset(E) ) stop('Argument is not of class editset')
+    type <- vector(length=nedits(E),mode='character')
+    nnum <- nrow(E$num)
+    if ( is.null(m) ) m <- contains(E)
+    if ( nnum > 0 ){
+        type[1:nnum] <- 'num'
+        m <- m[-(1:nnum),,drop=FALSE]
+    }
+
+    catvar <- getVars(E,'cat')
+    mixvar <- getVars(E,'mix')
+
+    icat <- rowSums(m[,catvar,drop=FALSE])>0
+    imix <- rowSums(m[,mixvar,drop=FALSE])>0
+    type[which(imix) + nnum] <- 'mix'
+    type[which(icat&!imix) + nnum] <- 'cat'
+    type
+}
+
+
+#' Simplify logical mixed edits in an editset
+#'
+#' Logical edits consisting of a single numerical statement are
+#' inverted and added to the \code{editmatrix} (\code{\$num}) of the editset.
+#'
+#' @param E an editset
+#' @param m \code{contains(E)}. Speeds up calculation if you have one handy.
+#'
+#' @keywords internal
+simplify <- function(E, m=NULL){
+    # NOTE: might be interesting for @export
+    if (!is.editset(E)) stop("Argument not of class 'editset'")
+    mixvar <- getVars(E,type='mix')
+    catvar <- getVars(E,type='cat')
+    dummies <- getVars(E,type='dummy')
+    if ( is.null(m) ) m <- contains(E) 
+    et <- editType(E, m)
+    
+    g <- contains(E$mixcat)
+    r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
+    
+    if ( any(r) ){ 
+        v <- invert(as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE))
+        E$mixcat <- E$mixcat[!r,,drop=FALSE]
+        E$num <- c(E$num,editmatrix(v))
+    }
+    E
+}
+
+
+
+
+
+
+
+
 
 
 ## quick test

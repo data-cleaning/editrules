@@ -39,7 +39,7 @@ is.editarray <- function(x) inherits(x,"editarray")
 #' @return \code{TRUE} if \code{x} is an \code{\link{editset}}
 #' @seealso \code{\link{editarray}}, \code{\link{is.editmatrix}}
 #'
-is.editset <- function(x) inherits(x,"editarray")
+is.editset <- function(x) inherits(x,"editset")
 
 
 

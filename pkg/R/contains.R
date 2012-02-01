@@ -98,22 +98,23 @@ contains.editset <- function(E,var=NULL,...){
         )
     )
     # contains for numerical variables
-    numvar <- getVars(E$num)
+    numvar <- var[var %in% getVars(E$num)]
     nnum <- nrow(E$num)
-    T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
+    if ( length(numvar) > 0 )  T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
 
     # contains for categorical variables in conditional edits (mix)
     nmix <- nrow(E$mixcat)
     imix <- (nnum+1):(nnum+nmix) 
-    catvar <- getVars(E,type='cat')
+    catvar <- var[var %in% getVars(E,type='cat')]
     T[imix,catvar] <- contains(E$mixcat, catvar) 
 
     # contains for numerical variables in mixed edits
+    vnm <- var[var %in% getVars(E$mixnum)]
     vmc <- getVars(E$mixcat)
     emn <- rownames(E$mixnum)
     X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
-    Y <- contains(E$mixnum)
-    T[imix,getVars(E$mixnum)] <- X%*%Y >0
+    Y <- contains(E$mixnum,vnm)
+    T[imix,vnm] <- X%*%Y >0
     T
 }
 
