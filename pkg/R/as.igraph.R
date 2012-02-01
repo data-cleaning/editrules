@@ -9,7 +9,7 @@ checkigraph <- function(){
 
 
 
-#' Convert an editmatrix to an igraph object
+#' Convert a collection of edits to an igraph object
 #' 
 #' graph.editmatrix derives adjacency matrix of \code{E} and converts it to an undirected igraph object.
 #'
@@ -23,8 +23,6 @@ as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), 
     UseMethod('as.igraph')
 }
 
-#' method for converting editmatrix to igraph object
-#'
 #' @rdname adjacency
 #' @method as.igraph editmatrix
 #' @export
@@ -42,8 +40,6 @@ as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=edi
     g
 }
 
-#' method for converting editarray to igraph object
-#'
 #' @rdname adjacency
 #' @method as.igraph editarray
 #' @export
@@ -61,8 +57,6 @@ as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=edit
 }
 
 
-#' method for converting editset to igraph object
-#'
 #' @rdname adjacency
 #' @method as.igraph editset
 #' @export

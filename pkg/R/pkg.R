@@ -1,3 +1,7 @@
+# TODO: give better example
+
+#' Package editrules
+#'
 #' Facilitates reading and manipulation of linear
 #' (in)equalities, converting them into matrix format (and vice versa)
 #' and checking if data are valid according to these rules. Sets of

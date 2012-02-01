@@ -15,9 +15,10 @@ is.editmatrix <- function(x){
 #' 
 #' Please note that a cateditmatrix is also an editmatrix
 #' @seealso \code{\link{cateditmatrix}}
-#' @export
+#' 
 #' @param x object to be checked
 #' @return TRUE if \code{x} is an \code{cateditmatrix}
+#' @keywords internal
 is.cateditmatrix <- function(x){
   return(inherits(x, "cateditmatrix"))
 }
