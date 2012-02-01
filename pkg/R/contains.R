@@ -38,6 +38,7 @@ contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps),...){
 contains.editmatrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps), ...){
     A <- getA(E)
     if (is.null(var)) var <- getVars(E)
+    
     u <- abs(A[,var,drop=FALSE]) > tol
     dimnames(u) <- list(edit=rownames(E),variable=var) 
     u

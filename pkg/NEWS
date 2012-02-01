@@ -12,7 +12,8 @@ version 2.1-0
 - is.editset, getVars, blocks, reduce and row indexing ([) for editset objects
 - violatedEdits, summary, echelon, as.data.frame, plot, as.igraph, adjacency for editset objects
 - simpler internal representation for editset
-
+- substValue.editmatrix gains argument removeredundant (default:TRUE) indicating wether or not to remove redundant rows.
+- added substValue.editset
 
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray
