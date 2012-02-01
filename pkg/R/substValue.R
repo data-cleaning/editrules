@@ -5,6 +5,7 @@
 #' @param value vector with value(s) of variable(s)
 #' @param ... arguments to be passed to or from other methods
 #' @return \code{E}, with variables replaced by values
+#' @seealso \code{\link{eliminate}}
 #' @export
 substValue <- function(E, var, value, ...){ 
     UseMethod("substValue")
@@ -47,13 +48,17 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, ...){
 
 #' Substitute a value in an editarray
 #'
-#' Only rows with \code{<var>:<value>==TRUE} are kept. In the kept rows, categories not equal to <value> are set to \code{FALSE}
-#' Multiple replacements is not yet implemented. 
+#' For editarrays, only rows with \code{<var>:<value>==TRUE} are kept.
+#' In the kept rows, categories not equal to <value> are set to \code{FALSE}
+#' If \code{reduce=TRUE}, columns corresponding to categories which are set
+#' to \code{FALSE} will be removed. Note that the function \code{\link{reduce}}
+#' has a different effect (it removes complete variables).
 #'
 #' @method substValue editarray
 #'
 #'
 #' @rdname substValue
+#'
 #' @export
 substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
 
