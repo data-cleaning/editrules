@@ -66,5 +66,31 @@ test_that("editset parses conditional categorical/numerical edits",{
 
 
 
+## various editset functionalities
+test_that("contains finds the right variables in an editset",{
+    E <- editset(expression(
+        x + y == z,
+        if ( s + t == 6 ) x < 10,
+        A %in% letters[1:2],
+        if ( A == 'a' )  x > 3
+    ))
+    expect_equivalent(
+        contains(E),
+        matrix(c(
+            T,T,T,F,F,F,
+            T,F,F,T,T,F,
+            T,F,F,F,F,T),
+            byrow=TRUE,
+            nrow=3)
+    )
+
+})
+
+
+
+
+
+
+
 
 
