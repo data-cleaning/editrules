@@ -19,13 +19,13 @@ getVars(E,type='num')
 
 
 ## see also editfile
-#E <- editfile(system.file('script/edits/mixedits.R',package='editrules'))
-#E
-#summary(E)
-#as.data.frame(E)
-#getVars(E)
-#getVars(E,type='cat')
-#getVars(E,type='num')
+E <- editfile(system.file('script/edits/mixedits.R',package='editrules'))
+E
+summary(E)
+as.data.frame(E)
+getVars(E)
+getVars(E,type='cat')
+getVars(E,type='num')
 
 
 
