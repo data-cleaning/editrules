@@ -215,11 +215,9 @@ simplify <- function(E, m=NULL){
     catvar <- getVars(E,type='cat')
     dummies <- getVars(E,type='dummy')
     if ( is.null(m) ) m <- contains(E) 
-    et <- editType(E, m)
     
     g <- contains(E$mixcat)
     r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
-    
     if ( any(r) ){ 
         v <- invert(as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE))
         E$mixcat <- E$mixcat[!r,,drop=FALSE]

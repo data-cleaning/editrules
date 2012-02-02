@@ -44,14 +44,22 @@
     if ( is.logical(i) ) i <- which(i)
     nnum <- nrow(x$num)
     mixcat <- x$mixcat[i[i>nnum]-nnum]
+    # remove edits from mixnum not occuring in mixcat
     v <- getVars(reduce(mixcat))
     mixnum <- x$mixnum[rownames(x$mixnum) %in% v,]
+    # remove dummy variables from mixcat not referring to numerical edits anymore
+    v <- getVars(x,type='dummy')
+    delvars <- v[ !v %in% rownames(mixnum)]
+    ind <- getInd(mixcat)
+    delcols <- do.call('c',ind[delvars])
+    Amixcat <- getArr(mixcat)[,-delcols,drop=FALSE]
+    sep <- getSep(mixcat)
+    ind <- indFromArray(Amixcat,sep=sep)
     neweditset(
         num = x$num[i[i<=nnum]],
         mixnum = mixnum,
-        mixcat = mixcat
+        mixcat = neweditarray(Amixcat,ind,sep)
     )
-
 }
 
 
