@@ -100,7 +100,7 @@ contains.editset <- function(E,var=NULL,...){
     # contains for numerical variables
     numvar <- var[var %in% getVars(E$num)]
     nnum <- nrow(E$num)
-    if ( length(numvar) > 0 )  T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
+    if ( length(numvar) > 0 && nnum > 0 )  T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
 
     # contains for categorical variables in conditional edits (mix)
     nmix <- nrow(E$mixcat)

@@ -50,15 +50,18 @@
     # remove dummy variables from mixcat not referring to numerical edits anymore
     v <- getVars(x,type='dummy')
     delvars <- v[ !v %in% rownames(mixnum)]
-    ind <- getInd(mixcat)
-    delcols <- do.call('c',ind[delvars])
-    Amixcat <- getArr(mixcat)[,-delcols,drop=FALSE]
-    sep <- getSep(mixcat)
-    ind <- indFromArray(Amixcat,sep=sep)
+    if ( length(delvars) > 0 ){
+        ind <- getInd(mixcat)
+        delcols <- do.call('c',ind[delvars])
+        Amixcat <- getArr(mixcat)[,-delcols,drop=FALSE]
+        sep <- getSep(mixcat)
+        ind <- indFromArray(Amixcat,sep=sep)
+        mixcat <- neweditarray(Amixcat,ind,sep) 
+    }
     neweditset(
         num = x$num[i[i<=nnum]],
         mixnum = mixnum,
-        mixcat = neweditarray(Amixcat,ind,sep)
+        mixcat = mixcat
     )
 }
 
