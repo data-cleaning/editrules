@@ -57,6 +57,10 @@ with lp solvers is experimental.}
 \tableofcontents
 \newpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Introduction}
 Analyses of real data are often hindered by occurrences of incomplete or
 inconsistent raw data records.  The process of locating and correcting such
@@ -86,66 +90,53 @@ It contains a flexible object for localizing errors, which can be adapted by the
 algorithm (ref Waal).
 However, for the time to solve the error localization problem with a branch and bound algorithm grows exponentially with the number of (incorrect) variables. Many surveys have hundreds of variables, which results in (very) long processing times for records with many errors. 
 
-This paper describes the error localization problem for numerical and categorical edits as a mixed integer problem and its implementation in {\sf editrules}.
+This paper describes the error localization problem for numerical and categorical edits as a mixed integer problem and its implementation in {\sf editrules}. Mixed integer programming is a special case of linear programming. Linear programming maximizes a linear objective function, which is subject to linear equality and linear inequality constraints. 
+More formally: 
+\begin{eqnarray}
+\label{eq:mip}
+   \max {\bf w}^T {\bf x} \\
+   A {\bf x} \leq {\bf b} \\
+   \textrm{with } {\bf x} \geq 0
+\end{eqnarray}
+where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf w}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
+
+The implementation results in a fast error localization procedure, which is typically much faster than the branch and bound method in {\sf editrules}.
+
+In section ref we describe the mip formuliation for numerical records. Section ref describes the mip formulation for categorical records. We end with a discussion on the implementation in {\sf editrules}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% SECTION 1
+%% SECTION 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Mixed integer programming}
-Definition of a mixed integer program.
-
-description of lpSolveAPI.
-
 \section{Numerical data errors}
-
-Any such restriction can be written in the form
+Numerical record $\bf x$  with reported values ${\rm(c_1,\dots,c_m)}$ has to comply to 
 \begin{equation}
-\label{edit}
-{\bf \a\cdot{\bf x} \odot b\textrm{ with }\odot\in\{<,\leq,=\},
+\label{eq:edit}
+A {\bf x \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 \end{equation}
-where $\bf x$ is a numerical data record, ${\bf a}$, ${\bf x}\in \mathbb{R}^n$
-and $b\in \mathbb{R}$. In data editing literature, data restriction rules are
-referred to as {\em edits}, or {\em edit rules}\index{edit rules}\index{edit}.
-In this paper we will call edits, written in the form of Eq.\ \eqref{edit}
-(specifically, without using $\geq$ or $>$),
-edits in {\em normal form}\index{edit rules!normal form}. 
+
+In practice variables are always bounded: No person is older than 200 years old or taller than 30 feet. Each variable $x_i$  has a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$. \begin{equation}
+{\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
+\end{equation}
+Please note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. For our formulation as a mip we will use the boundaries explicitly and remove them from \ref{eq:edit}.
 
 
-Numerical variables are always bounded in practice, e.g. age, income, height.
-In our formulation of the error localization problem as a mixed integer 
-problem we use the boundaries explicitly: first of all it allows for easy 
-to understand and to implement equations. Secondly our formulation improves 
-numerical stability of the MIP for suitable choosen boundaries. 
-
-The record ${\bf x} = (x_1,\dots,x_m)$ to be validated 
-has the following reported (numerical) values, that may be incorrect:
+For each variable $x_i$ the following value is reported:
 \begin{equation}
 x_i = {\rm c}_i \label{eq:values}
 \end{equation}
-under the restriction of
-\begin{equation}
-{\bf a}\cdot{\bf x} \odot b\textrm{ with }\odot\in\{<,\leq,=\}
-\end{equation}
 
-We assume each variable $x_i$ is bounded by $l_i$ and $u_i$
-\begin{equation}
-l_i \leq x_i \leq u_i \label{eq:boundary}
-\end{equation}
-
-For each variable $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and we add two edits 
-to the original edit matrix that conditionally constrain the value of $x_i$ to $c_i$ 
-
-\begin{eqnarray}
-x_i &\leq& c_i + (u_i - c_i)d_i \\
-(l_i - c_i)d_i + c_i &\leq& x_i
+For each variable $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and add 
+the following two edits to the edit matrix $A$: 
+\begin{eqnarray} \label{eq:binconstraint}
+x_i &\leq& {\rm c}_i + ({\rm u}_i - {\rm c}_i)d_i \\
+({\rm l}_i - {\rm c}_i)d_i + {\rm c}_i &\leq& x_i
 \end{eqnarray}
-Variable $d_i$ signifies if $x_i$ should be adapted: if $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
-that the reported $c_i$ is assumed correct. When $d_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that
-the value of $x_i$ is unconstrained and can take any feasible value.
+Variable $d_i$ signifies if the reported value $\rm c_i$ for variable $x_i$ is wrong: If $d_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within its boundaries $\rm l_i$ and $\rm u_i$.
+If $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
+that the reported ${\rm c}_i$ is assumed correct. 
 
-The principle of Felligi Holt \cite{} is to minimize the weigthed sum of adaptations.
-
-The error localization problem can now be formulated as the folowing mixed integer problem:
+The principle of Felligi Holt \cite{felligi:1976} is to minimize the weigthed sum of adaptations:
+$$\textrm{Minimize} \sum^m_{j=1} \rm{w_j} d_j$$
 
 Minimize $\sum^m_{j=1} w_j d_j$, with:
 \begin{equation}
@@ -153,23 +144,16 @@ Minimize $\sum^m_{j=1} w_j d_j$, with:
 \sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
 \ldots                 &&                  &\ldots& \ldots  \\
 \sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
-    x_1 &-& u^*_1 d_1   &\leq   & c_1 \\
-   -x_1 &+& l^*_1 d_1  &\leq   & -c_1 \\
+    x_1 &-& {\rm u^*_1} d_1   &\leq   & {\rm c}_1 \\
+   -x_1 &+& {\rm l^*_1} d_1  &\leq   & -{\rm c}_1 \\
 \ldots  & & \ldots          &       & \ldots \\
-    x_m &-& u^*_m d_m   &\leq   & c_m \\
-   -x_m &+& l^*_m d_m  &\leq   & -c_m
+    x_m &-& {\rm u^*_m} d_m   &\leq   & {\rm c}_m \\
+   -x_m &+& {\rm l^*_m} d_m  &\leq   & -{\rm c}_m
 
 \end{array}
 \end{equation}
 
-with $u^*_i = u_i - c_i$ and $l^*_i = l_i - c_i$.
-
-For large values of  $\beta^*_i$ or $\alpha^*_i$ the resulting MIP problem becomes numerical unstable
-so it is wise to choose suitable boundaries, which we will discuss later on.
-
-\subsection{Implementation}
-We will use {\tt lpSolveAPI} to solve the mix integer problem. Other candidates are {\tt glpk}
-will extend an existing {\tt editmatrix} with the edits and give the 
+with ${\rm u^*_i} = {\rm u_i} - {\rm c_i}$ and ${\rm l^*_i} = {\rm l_i} - {\rm c_i}$.
 
 \section{Categorical data errors}
 In (ref naar categorical edit paper) we choose an boolean representation for categorical edits.
@@ -192,10 +176,10 @@ A \in {a_j} \lor B \in {b_k}
 
 $$\lnot (A \in {a_j})$$
 
-* error localizing edits: for each variable $c_i$ $c^{c_i}$, introduce an edit
-with $d_i = 1 - c^{c_i}$. When $d_i = 0$,  $c_i = c_{i}$, meaning that the
-reported value of $c_i$ is assumed correct,  When $d_i = 1$, $c^c_i = 0$,
-meaning that $c_i$ should be adapted.
+* error localizing edits: for each variable ${\rm c}_i$ $c^{{\rm c}_i}$, introduce an edit
+with $d_i = 1 - c^{{\rm c}_i}$. When $d_i = 0$,  ${\rm c}_i = {\rm c}_{i}$, meaning that the
+reported value of ${\rm c}_i$ is assumed correct,  When $d_i = 1$, $c^{\rm c}_i = 0$,
+meaning that ${\rm c}_i$ should be adapted.
 
 \subsection{Open vs close domains}
 
