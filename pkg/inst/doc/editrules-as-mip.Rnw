@@ -94,13 +94,13 @@ This paper describes the error localization problem for numerical and categorica
 More formally: 
 \begin{eqnarray}
 \label{eq:mip}
-   \max {\bf w}^T {\bf x} \\
+   \max {\bf c}^T {\bf x} \\
    A {\bf x} \leq {\bf b} \\
    \textrm{with } {\bf x} \geq 0
 \end{eqnarray}
-where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf w}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
+where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
 
-The implementation results in a fast error localization procedure, which is typically much faster than the branch and bound method in {\sf editrules}.
+Error localization implemented as a mixed integer programming results in a fast procedure, which is typically much faster than the branch and bound method also available in {\sf editrules}.
 
 In section ref we describe the mip formuliation for numerical records. Section ref describes the mip formulation for categorical records. We end with a discussion on the implementation in {\sf editrules}.
 
@@ -108,52 +108,130 @@ In section ref we describe the mip formuliation for numerical records. Section r
 %% SECTION 2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical data errors}
-Numerical record $\bf x$  with reported values ${\rm(c_1,\dots,c_m)}$ has to comply to 
+
+A numerical record $\bf x$  with reported values ${\rm(c_1,\dots,c_m)}$ has the following linear constraints:
 \begin{equation}
 \label{eq:edit}
 A {\bf x \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 \end{equation}
 
-In practice variables are always bounded: No person is older than 200 years old or taller than 30 feet. Each variable $x_i$  has a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$. \begin{equation}
+It can easily be checked with {\sf editrules} if $\bf x$ violates any of these constraints. If this is the
+case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
+complies to the edits. These edits are (usually) valid for all records of a data set. 
+For each reported record we define a seperate mip, which contains the set of edits extended with edits that depend on the reported values.
+
+In practice reported values are always bounded: No person is older than 200 years old or taller than 30 feet. So each variable $x_i$  has a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$\footnote{Note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. We will use univariate or boundary constraints explicitly and exclude them from \ref{eq:edit}.}.
+\begin{equation}
 {\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
 \end{equation}
-Please note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. For our formulation as a mip we will use the boundaries explicitly and remove them from \ref{eq:edit}.
 
-
-For each variable $x_i$ the following value is reported:
+For $x_i$ the following value is reported
 \begin{equation}
 x_i = {\rm c}_i \label{eq:values}
 \end{equation}
 
-For each variable $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and add 
-the following two edits to the edit matrix $A$: 
+For each $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and add 
+the following two edits to the edit set: 
 \begin{eqnarray} \label{eq:binconstraint}
 x_i &\leq& {\rm c}_i + ({\rm u}_i - {\rm c}_i)d_i \\
 ({\rm l}_i - {\rm c}_i)d_i + {\rm c}_i &\leq& x_i
 \end{eqnarray}
-Variable $d_i$ signifies if the reported value $\rm c_i$ for variable $x_i$ is wrong: If $d_i = 1$ the edits reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within its boundaries $\rm l_i$ and $\rm u_i$.
+Variable $d_i$ signifies if reported value $\rm c_i$ for variable $x_i$ is wrong: If $d_i = 1$ the edits 
+reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within 
+its boundaries $\rm l_i$ and $\rm u_i$.
 If $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
-that the reported ${\rm c}_i$ is assumed correct. 
+that the reported ${\rm c}_i$ is assumed correct.
 
-The principle of Felligi Holt \cite{felligi:1976} is to minimize the weigthed sum of adaptations:
-$$\textrm{Minimize} \sum^m_{j=1} \rm{w_j} d_j$$
+Using principle of Felligi Holt \cite{felligi:1976} which minimizes the weigthed sum of adaptations, the error localization problem can be written as:
 
-Minimize $\sum^m_{j=1} w_j d_j$, with:
+{\textrm Minimize} $\sum^m_{j=1} {\rm w_j} d_j$, with:
 \begin{equation}
 \begin{array}{rcrcl}
 \sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
 \ldots                 &&                  &\ldots& \ldots  \\
 \sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
-    x_1 &-& {\rm u^*_1} d_1   &\leq   & {\rm c}_1 \\
-   -x_1 &+& {\rm l^*_1} d_1  &\leq   & -{\rm c}_1 \\
+    x_1 &-& ({\rm u_1 - c_1}) d_1   &\leq   & {\rm c}_1 \\
+   -x_1 &+& ({\rm l_1} - {\rm c_1}) d_1  &\leq   & -{\rm c}_1 \\
 \ldots  & & \ldots          &       & \ldots \\
-    x_m &-& {\rm u^*_m} d_m   &\leq   & {\rm c}_m \\
-   -x_m &+& {\rm l^*_m} d_m  &\leq   & -{\rm c}_m
+    x_m &-& ({\rm u_m} - {\rm c_m}) d_m   &\leq   & {\rm c}_m \\
+   -x_m &+& ({\rm l_m} - {\rm c_m}) d_m  &\leq   & -{\rm c}_m
 
 \end{array}
 \end{equation}
+with $\rm w_j$ is a weight for variable $x_j$. This problem is equal to the following mixed integer problem
+$$
+\begin{array}{rcl}
+   \textrm{Maximize } {\bf c}^T {\bf y}& \\
+   A^* {\bf y} & \leq & {\bf b} \\
+   \textrm{with } {\bf y} & \geq & 0 \\
+   {\bf y} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, d_1, \ldots, d_m) \\
+   {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m})
+\end{array}
+$$
 
-with ${\rm u^*_i} = {\rm u_i} - {\rm c_i}$ and ${\rm l^*_i} = {\rm l_i} - {\rm c_i}$.
+\subsection{Implementation in {\sf editrules}}
+The function {\sf localizeErrors} is described in detail in \citep{}. It accepts an {\sf editmatrix} and a {\sf
+data.frame}, and returns an object of class {\sf errorLocation}. An {\sf
+errorLocation} object contains the locations of errors for each record in the
+{\sf data.frame} as well as logging information, solution weights and
+degeneracy. Table \ref{tblErrorLocation} gives an overview of the slots. We extended this method with 
+a parameter {\tt method}, that can be used to select the {\tt localizer} or {\tt mip} method.
+%
+
+Apart from the mandatory arguments (an {\sf editarray} and a {\sf data.frame}),
+there are optional arguments which will be passed to the underlying {\sf
+errorLocalizer} function which is described in detail in the next section.
+These arguments are given in table \ref{tabArglocalize}.
+%
+\input{tex/errorLocation.tex}
+
+\begin{table}
+\begin{threeparttable}
+\caption{Arguments of {\sf localizeErrors}. Optional arguments are given in square brackets.
+The optional arguments are also arguments of the underlying {\sf errorLocalizer} function.
+}
+\label{tabArglocalize}
+\begin{tabular}{lp{0.7\textwidth}}
+\hline
+Argument & description\\
+\hline
+{\sf E}        & An {\sf editmatrix} or an {\sf editarray}.\\
+{\sf dat}      & The data, in the form of a {\sf data.frame}.\\
+$[\textrm{\sf weight}]$   & Nonnegative weights for each variable in {\sf dat}.\\
+$[\textrm{\sf maxadapt}]$ & Maximum number of variables to adapt.\\
+$[\textrm{\sf maxweight}]$& Maximum weight of solution, if weights are not given, this
+                    is equal to the maximum number of variables to adapt.\\
+$[\textrm{\sf maxduration}]$  &  Maximum time (in seconds), spent searching for a solution for a single 
+record.\\
+$[\textrm{\sf method}]$   & Method to be used for solving error localization problem. Can be "mip" or 
+"localizer".\\
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+Figure \ref{RlocalizeErrors} shows an example of localizing errors using mip.
+
+%
+\begin{Rcode}
+<<keep.source=true>>=
+E <- editmatrix(c(
+    "x + y == z",
+    "x > 0",
+    "y > 0",
+    "z > 0"))
+
+dat <- data.frame(
+    x = c(1,-1,1),
+    y = c(-1,1,1),
+    z = c(2,0,2))
+
+# localize all errors in the data using mip
+localizeErrors(E,dat, method="mip")
+@
+\caption{Localizing errors for every record in a data.frame with {\sf localizeErrors}}
+\label{RlocalizeErrors}
+\end{Rcode}
 
 \section{Categorical data errors}
 In (ref naar categorical edit paper) we choose an boolean representation for categorical edits.
