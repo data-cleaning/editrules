@@ -255,23 +255,14 @@ An categorical editmatrix can be seen as a conjunction of disjunctions: it is in
 * each disjunction can be written as a numerical edit where at least one of the variables has to be one
 
 \begin{equation}
-A \in {a_j} \lor B \in {b_k}
+   \lnot \bigwedge_{i=1}^m (v_i \in A_i) = \bigvee_{i=1}^m\lnot (v_i \in {A_i}) = \bigvee_{i=1}^m (v_i \in \lnot {A_i})
 \end{equation}
 
-$$\lnot (A \in {a_j})$$
 
 * error localizing edits: for each variable ${\rm c}_i$ $c^{{\rm c}_i}$, introduce an edit
 with $d_i = 1 - c^{{\rm c}_i}$. When $d_i = 0$,  ${\rm c}_i = {\rm c}_{i}$, meaning that the
 reported value of ${\rm c}_i$ is assumed correct,  When $d_i = 1$, $c^{\rm c}_i = 0$,
 meaning that ${\rm c}_i$ should be adapted.
-
-\subsection{Open vs close domains}
-
-\section{Boundary heuristics}
-\subsection{From data set}
-Minimum and maximum value of each variable in the data set to be checked gives reasonable boundaries for the dataset. 
-\subsection{From observation, per record}
-Assume that maximum values for each observation differ at most a factor $f$ (e.g. 1000) of the reported value.
 
 \section{Discussion}
 
