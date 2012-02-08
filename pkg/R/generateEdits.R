@@ -20,6 +20,7 @@ fcf.env <- function(E,totreat,env){
         # return if there are no more edits
         return()
     }
+    
     # divide and conquer
     B <- blocks(E)
     for ( b in B){

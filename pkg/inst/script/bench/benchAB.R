@@ -9,7 +9,7 @@ if (!require(Hmisc)) stop('install Hmisc')
 
 fdir <- system.file('script/bench',package='editrules')
 edits <- file.path(fdir,'edits.R')
-files <- file.path(fdir,c('eliminator.R','generateEdits.R'))
+files <- file.path(fdir,c('eliminator.R','randomEdits.R'))
 
 for ( f in files ) source(f)
 
