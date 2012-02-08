@@ -164,14 +164,15 @@ Using principle of Felligi Holt \citep{fellegi:1976} which minimizes the weigthe
 
 \end{array}
 \end{equation}
-with $\rm w_j$ is a weight for variable $x_j$. This problem is equal to the following mixed integer problem
+with $\rm w_j$ a weight for variable $x_j$. This problem is equal to the following mixed integer problem
 $$
 \begin{array}{rcl}
    \textrm{Maximize } {\bf c}^T {\bf y}& \\
    A^* {\bf y} & \leq & {\bf b} \\
    \textrm{with } {\bf y} & \geq & 0 \\
    {\bf y} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, d_1, \ldots, d_m) \\
-   {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m})
+   {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m}) \\
+   {\bf b} & = & (b_1, \ldots, b_m, {\rm c_1}, -{\rm c_1}, \ldots, {\rm c_m}, -{\rm c_m})
 \end{array}
 $$
 
