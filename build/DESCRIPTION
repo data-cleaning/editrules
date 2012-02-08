@@ -1,6 +1,6 @@
 Package: editrules
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
-License: GPL version 3
+License: GPL-3
 Title: R package for parsing and manipulating edit rules
 LazyData: no
 Type: Package
