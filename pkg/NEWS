@@ -1,4 +1,5 @@
-version 2.1-0
+version 2.1-2
+- removed some unnecessary files from inst/doc
 - added function generateEdits: derive all nonredundant essentialy new categorical edits.
 - editfile reads categorical, numerical and mixed edits.
 - violatedEdits works for objects of class editset.

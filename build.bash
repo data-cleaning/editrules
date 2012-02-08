@@ -14,9 +14,9 @@ R -q -f roxygen.R
 echo "######## Building package in output..."
 mkdir output
 cd output
-R CMD build ../pkg
+Rdev CMD build ../pkg
 echo "######## Testing package..."
 for x in *.tar.gz 
 do 
-    R CMD check $x
+    Rdev CMD check $x
 done

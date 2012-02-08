@@ -14,6 +14,7 @@
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
 \usepackage{makeidx}
+\usepackage{mySweave}
 \makeindex
 
 % shorthand to make '<category>' in syntax diagram
