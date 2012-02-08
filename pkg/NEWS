@@ -1,11 +1,19 @@
 version 2.1-0
+- NOTE: BETA VERSION NOT A CRAN RELEASE
 - added function generateEdits: derive all nonredundant essentialy new categorical edits.
 - editfile reads categorical, numerical and mixed edits.
 - violatedEdits works for objects of class editset.
 - BREAKING CHANGE: function 'editrules' is obsolete. Use as.data.frame or as.editmatrix.
 - added as.character, print method for editset.
 - as.data.frame.editmatrix and .editarray now only return 'description' column if input has description attribute.
-- edits in editmatrix and editarray are now printed with prefix 'num' and 'cat', in stead of 'e'
+- edits in editmatrix and editarray are now printed with prefix 'num' and 'cat', in stead of 'e', datamodel gets prefix 'dat'
+- added nedits function counting the number of edits in an editmatrix -array or -set
+- added blockIndex function
+- is.editset, getVars, blocks, reduce and row indexing ([) for editset objects
+- violatedEdits, summary, echelon, as.data.frame, plot, as.igraph, adjacency for editset objects
+- simpler internal representation for editset
+- substValue.editmatrix gains argument removeredundant (default:TRUE) indicating wether or not to remove redundant rows.
+- added substValue.editset
 
 version 2.0-3
 - new generic function checkDatamodel: checks data agains datamodel implied by editarray

@@ -18,10 +18,9 @@
 #'       }
 #'      Typically these rules are stored in a external csv file (or database). 
 #' }
-#'
-#' The third form is the prefered form, because it allows the documentation of constraints. This
-#' may be very useful when the incorrect observations are analyzed.
-#' The function \code{\link{editrules}} creates/extracts the third form, which can be used to store edit rules
+#' 
+#' Numerical edits can also be read from a free-form file using \code{\link{editfile}}.
+#' The function \code{\link{as.data.frame}} extracts the third form, which can be used to store edit rules
 #' externally or to recreate an editmatrix later on. Functions \code{\link{as.character}} and \code{\link{as.expression}} extract
 #' the first and second form.
 #'

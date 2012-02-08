@@ -45,11 +45,12 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #' Coerce an cateditmatrix to a \code{character} vector
 #'
 #' Derives readable editrules from an editmatrix.
-#' @export
+#' 
 #' @method as.character cateditmatrix
 #'
 #' @param x cateditmatrix object to be printed
 #' @param ... further arguments passed to or from other methods.
+#' @keywords internal
 as.character.cateditmatrix <- function(x, ...){
   class(x) <- "editmatrix"
   as.character(x)

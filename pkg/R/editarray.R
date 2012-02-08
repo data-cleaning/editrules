@@ -81,9 +81,11 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
         )
 
     }
+
+    editnames <- paste("cat",1:m,sep="")
     E <- array(NA, dim=c(m,n), 
             dimnames = list(
-                edits = paste("cat",1:m,sep=""),
+                edits = editnames,
                 variables = cols
             )
         )
@@ -118,7 +120,6 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
 #'
 #' @seealso as.character.editarray
 #'
-#' not for export
 #' @keywords internal
 ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
     v <- names(ivd)
@@ -208,7 +209,7 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 #' Coerces an editarray to a \code{data.frame}. 
 #'
 #' @method as.data.frame editarray
-#' @param x editmatrix object
+#' @param x \code{\link{editarray}} object
 #' @param ... further arguments passed to or from other methods.
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.

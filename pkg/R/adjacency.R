@@ -1,5 +1,5 @@
 
-#' Derive adjecency matrix from set of edits
+#' Derive adjecency matrix from collection of edits
 #'
 #' A set of edits can be represented in a graph where every vertex is
 #' an edit. Two vertices are connected if they have at least one variable
@@ -14,7 +14,7 @@
 #'
 #'
 #'
-#' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param E \code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}
 #' @param nodetype adjacency between rules, vars or both?
 #' @param rules selection of edits
 #' @param vars selection of variables
@@ -25,16 +25,13 @@
 #'
 #' @example ../examples/graph.R
 #'
-#' @seealso \code{\link{plot.editmatrix}}, \code{\link{plot.editarray}}
+#' @seealso \code{\link{plot.editmatrix}}, \code{\link{plot.editarray}}, \code{\link{plot.editset}}
 #' @export  
 adjacency <- function(E, nodetype=c("all", "rules","vars"), rules=rownames(E), vars=getVars(E),...){
     stopifnot( all(vars %in% getVars(E)) )
     UseMethod('adjacency')
 }
 
-#' editmatrix method for calculating adjacency matrix
-#'
-#'
 #' @rdname adjacency
 #' @method adjacency editmatrix
 #' @export
@@ -45,9 +42,6 @@ adjacency.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=row
 }
 
 
-#' editmatrix method for calculating adjacency matrix
-#'
-#'
 #' @rdname adjacency
 #' @method adjacency editarray
 #' @export
@@ -56,6 +50,19 @@ adjacency.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=rown
     nodetype <- match.arg(nodetype)
     adjec(A,nodetype=nodetype, rules=rules, vars=vars)
 }
+
+
+#' @rdname adjacency
+#' @method adjacency editset
+#' @export
+adjacency.editset <- function(E, nodetype=c("all", "rules","vars"), rules=c(rownames(E$num),rownames(E$mixcat)), vars=getVars(E),...){
+    A <- contains(E)
+    nodetype <- match.arg(nodetype)
+    adjec(A,nodetype=nodetype, rules=rules, vars=vars)
+}
+
+
+
 
 
 # derive adjacency from 1/0 or boolean matrix.

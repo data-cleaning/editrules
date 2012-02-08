@@ -27,7 +27,22 @@ test_that("editarray separates in blocks",{
     expect_true(all(getArr(blocks(E)[[1]]) == c(TRUE,FALSE,FALSE,TRUE,FALSE)))
 })
 
-
+test_that("editset separates in blocks",{
+    E <- editset(expression(
+        if ( x > 0 ) y > 0,
+        x + y == z,
+        A %in% letters[1:2],
+        B %in% letters[2:3],
+        if ( A == 'a') B == 'b',
+        if ( A == 'b') x >= 0,
+        u + v == w,
+        if ( u == 0 ) w >= 0
+    ))
+    b <- blocks(E)
+    expect_equal(length(b),2)
+    expect_equal(sort(getVars(b[[1]])),c("A","B","x","y","z"))
+    expect_equal(sort(getVars(b[[2]])),c("u","v","w"))
+})
 
 
 

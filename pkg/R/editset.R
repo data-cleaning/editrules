@@ -1,74 +1,93 @@
 #' Create an editset which can contain a mix of categorical, numerical and mixededits
 #' 
+#' Mixed edits are most conveniently read from a free-format textfile, using \code{\link{editfile}}.
+#'
 #' NOTE: at the moment, functionality for mixed edit sets is limited and somewhat experimental.
 #'
-#' @param editrules \code{data.frame} with (in)equalities written in R syntax, see details for description or alternatively 
+#' @param editrules \code{data.frame} with (in)equalities written in R syntax, or alternatively 
 #'        a \code{character} or \code{expression} with (in)equalities written in R syntax
 #' @param env environment to parse categorical edits in
 #' @export
 editset <- function(editrules, env=new.env()){
-  #if (is.null(names(editrules)))
-  #  names(editrules) <- paste("me", seq_along(editrules), sep="")
+    
+    # detect edit types
+    num <- parseEdits(editrules, type="num")
+    cat <- parseEdits(editrules, type="cat")
+    mix <- parseEdits(editrules, type="mix")
   
-  num <- parseEdits(editrules, type="num")
-  cat <- parseEdits(editrules, type="cat")
-  mix <- parseEdits(editrules, type="mix")
-  
-  nmix <- length(mix)
-  if (is.null(names(mix))) names(mix) <- paste("mix", seq_along(mix)+length(num)+length(cat), sep="")
-  
-  num <- if (length(num) > 0) editmatrix(num)
-  if (length(cat) > 0){ 
-    cat <- editarray(cat,env=env)
-    rownames(cat) <- paste("cat",(nrow(num)+1):(nrow(num)+nrow(cat)),sep="")
-  }
 
+    # pure numerical edits    
+    num <- editmatrix(num)
+    nnum <- nrow(num)
+    # pure categorical edits    
+    cat <- editarray(cat)
+    ncat <- nrow(cat)
+    if ( ncat > 0 ) rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
+
+
+    nmix <- length(mix)
+    mixnum <- expression()
+    mixcat <- vector(mode="expression", nmix)
+    if ( nmix > 0 ){ 
+        mixl <- vector(mode="list", nmix)
+        nms <- names(mix)
+        numid <- 0
   
-  mixl <- vector(mode="list", nmix)
-  mixcat <- vector(mode="expression", nmix)
-  mixnum <- expression()
-  nms <- names(mix)
-  numid <- 0
+        for (i in seq_along(mix)){
+            m <- parseMix(mix[[i]], nms[i], numid=numid)
+            numid <- m$numid
+            mixl[[i]] <- m
+            mixcat[[i]] <- m$cat
+            mixnum <- c(mixnum, m$nums)
+        }
+
+        # combine categorical edits, datamodel with dummies for mixed edits and mixed edits
+        mix <- c(
+            ind2char(getInd(cat)),
+            if ( length(mixnum) > 0 ) paste(names(mixnum), "%in% c(TRUE,FALSE)"),
+            as.character(mixcat)
+        )
+    }
+
+    # stick categorical and mixed edits in one editarray
+    mixcat <- editarray(mix, env=env)
+    nmix <- nrow(mixcat)
+    if ( nmix>0 ){
+        rownames(mixcat) <- paste("mix",(nnum+ncat+1):(nnum+ncat+nmix),sep="")
+        mixcat <- c(cat, mixcat)
+    } else {
+        mixcat <- cat
+    }
+
+    # create editmatrix for mixed edits and name them with dummy variable names
+    nms <- names(mixnum)
+    mixnum <- editmatrix(as.character(mixnum))
+    rownames(mixnum) <- nms
   
-  for (i in seq_along(mix)){
-    m <- parseMix(mix[[i]], nms[i], numid=numid)
-    numid <- m$numid
-    mixl[[i]] <- m
-    mixcat[[i]] <- m$cat
-    mixnum <- c(mixnum, m$nums)
-  }
-  
-  # add datamodel for categorical edits, add datamodel for dummy variables and add mixed categorical edits
-  mixdatamodel <- c( if (!is.null(cat)) ind2char(getInd(cat))
-                   , paste(names(mixnum), "%in% c(FALSE,TRUE)")
-                   , as.character(mixcat)
-                   )
-  
-  mixcat <- editarray(mixdatamodel, env=env)
-  rownames(mixcat) <- names(mix)
-  #mixnum <- editmatrix(mixnum)
-  
-  # create editmatrix for mixed edits and name them with dummy variable names
-  nms <- names(mixnum)
-  mixnum <- editmatrix(as.character(mixnum))
-  rownames(mixnum) <- nms
-  
-  # the numeric matrix might miss numeric variables used in mixed edits, so add empty columns for these variables
-  missvars <- setdiff(getVars(mixnum), getVars(num))
-  missvars <- matrix(0, ncol=length(missvars), nrow(num), dimnames=list(NULL, missvars))
-  A <- cbind(getA(num), missvars)
-  num <- as.editmatrix(A, getb(num), ops=getOps(num))
-  
+    neweditset(
+        num=num,
+        mixcat=mixcat,
+        mixnum=mixnum
+    )
+}
+
+#
+#
+#
+neweditset <- function(num, mixcat, mixnum,...){
+
   structure(
       list( num = num
-          , cat = cat
           , mixnum = mixnum
           , mixcat = mixcat
           )
-    , class="editset" # maybe mixEdits?
-    , parseMix = mixl
+    , class="editset" 
+    , ...
   )
+
 }
+
+
 
 #' Add dummy variable to the data.frames, these are needed for errorlocations etc.
 #' @param E editset
@@ -88,20 +107,21 @@ adddummies <- function(E, dat){
 #' @param x an \code{\link{editset}}
 #' @param datamodel include datamodel?
 #' @param useIf return vectorized version?
+#' @param dummies return datamodel for dummy variables?
 #' @param ... arguments to be passed to or from other methods
 #' @export
-as.character.editset <- function(x, datamodel=TRUE,useIf=TRUE,...){
+as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, ...){
     num <-  as.character(x$num)
-    cat <-  as.character(x$cat,datamodel=datamodel,useIf=useIf)
     numc <- as.character(x$mixnum)
-    catc <- as.character(x$mixcat,datamodel=FALSE,useIf=useIf)
+    catc <- as.character(x$mixcat, datamodel=datamodel, useIf=useIf)
     for ( n in names(numc) ){
+        catc <- catc[!grepl(paste(n,'%in%'),catc)]
         catc <- gsub(paste(n,'== FALSE'), invert(numc[n]),catc)
         catc <- gsub(paste(n,'== TRUE'), numc[n],catc)
     }
     # remove datamodel which are a consequence of conditional edits
     
-    c(num,cat,catc)
+    c(num,catc)
 }
 
 
@@ -118,11 +138,93 @@ invert <- function(e){
     e[lte]  <- gsub("<=",">",e[lte])
     e[lt]   <- gsub("<",">=",e[lt])
     e[ineq] <- gsub("!=","==",e[ineq])
-    e[eq]   <- gsub("==","!=",e[ineq])
+    e[eq]   <- gsub("==","!=",e[eq])
     e
 }
 
 
+
+#' Coerce an editarset to a \code{data.frame}
+#'
+#' Coerces an editset to a \code{data.frame}. 
+#'
+#' @method as.data.frame editset
+#' @param x \code{\link{editset}} object
+#' @param ... further arguments passed to or from other methods.
+#' @seealso \code{\link{as.character.editarray}}
+#' @return data.frame with columns 'name', 'edit' and 'description'.
+#'
+#' @export 
+as.data.frame.editset <- function(x, ...){
+    edts <- as.character(x, datamodel=TRUE,...)
+    d <- data.frame(
+        name=names(edts),
+        edit=edts,
+        row.names=NULL,
+        stringsAsFactors=FALSE
+    )
+    if (!is.null(attr(x,'description'))) d$description <- attr(x,'description')
+    d
+}
+
+
+
+
+#' Determine edittypes in editset based on 'contains(E)'
+#'
+#' Determines edittypes based on the variables they contain (not on names of edits).
+#'
+#' @param E: editset
+#' @param m: if you happen to have contains(E) handy, it needs not be recalculated.
+#' @keywords internal
+editType <- function(E, m=NULL){
+    # NOTE: might be interesting for @export
+    if ( !is.editset(E) ) stop('Argument is not of class editset')
+    type <- vector(length=nedits(E),mode='character')
+    nnum <- nrow(E$num)
+    if ( is.null(m) ) m <- contains(E)
+    if ( nnum > 0 ){
+        type[1:nnum] <- 'num'
+        m <- m[-(1:nnum),,drop=FALSE]
+    }
+
+    catvar <- getVars(E,'cat')
+    mixvar <- getVars(E,'mix')
+
+    icat <- rowSums(m[,catvar,drop=FALSE])>0
+    imix <- rowSums(m[,mixvar,drop=FALSE])>0
+    type[which(imix) + nnum] <- 'mix'
+    type[which(icat&!imix) + nnum] <- 'cat'
+    type
+}
+
+
+#' Simplify logical mixed edits in an editset
+#'
+#' Logical edits consisting of a single numerical statement are
+#' inverted and added to the \code{editmatrix} (\code{\$num}) of the editset.
+#'
+#' @param E an editset
+#' @param m \code{contains(E)}. Speeds up calculation if you have one handy.
+#'
+#' @keywords internal
+simplify <- function(E, m=NULL){
+    # NOTE: might be interesting for @export
+    if (!is.editset(E)) stop("Argument not of class 'editset'")
+    mixvar <- getVars(E,type='mix')
+    catvar <- getVars(E,type='cat')
+    dummies <- getVars(E,type='dummy')
+    if ( is.null(m) ) m <- contains(E) 
+    
+    g <- contains(E$mixcat)
+    r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
+    if ( any(r) ){ 
+        v <- invert(as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE))
+        E$mixcat <- E$mixcat[!r,,drop=FALSE]
+        E$num <- c(E$num,editmatrix(v))
+    }
+    E
+}
 
 
 

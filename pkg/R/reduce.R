@@ -60,7 +60,27 @@ reduce.editarray <- function(E,...){
 }
 
 
+#'
+#' @method reduce editset
+#' @export
+#' @rdname reduce
+#'
+reduce.editset <- function(E,...){
 
+    num <- reduce(E$num)
+    mixcat <- reduce(E$mixcat)
+    mixnum <- reduce(E$mixnum[rownames(E$mixnum) %in% getVars(mixcat),])
+
+    # TODO better naming (not all should be 'mix')
+    if (nrow(mixcat) > 0 ) rownames(mixcat) <- paste("mix",1:nrow(mixcat),sep="")
+
+    simplify(neweditset(
+        num = num,
+        mixnum = mixnum,
+        mixcat = mixcat
+    ))
+
+}
 
 
 

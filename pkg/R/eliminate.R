@@ -14,6 +14,7 @@ eliminateFM <- function(E, var,...){
 #' @param var name of variable to be eliminated
 #' @param ... argumemts to be passed to or from other methods
 #' @export
+#' @seealso \code{\link{substValue}}
 eliminate <- function(E, var, ...){
     UseMethod("eliminate")
 }
