@@ -243,24 +243,35 @@ localize_mip_rec <- function( E
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
    
-   sol <- get.variables(lps)#[adaptidx]
+   sol <- get.variables(lps)
+   # lps may have optimized and removed redundant adapt.variables, so retrieve names of variable...
+   names(sol) <- colnames(lps)
    w <- get.objective(lps)
+   
+   # get the positions of the adapt.variables
+   aidx <- grepl("^adapt\\.", names(sol))
+   # split solution in a value and a adapt part
+   sol.values <- sol[!aidx]
+   sol.adapt <- sol[aidx]
+   names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
+   
+   #print(list(sol=sol, w=w, aidx=aidx, sol.val=sol.val, sol.adapt=sol.adapt))
    #write.lp(lps, "test.lp")
    
-   vars <- getVars(Ee)
-   idx <- match(vars[-adaptidx], names(x), nomatch=0)
-   names(sol) <- vars
    #print(list(idx=idx, sol=sol))
    
    adapt <- sapply(x, function(i) FALSE)
-   adapt[idx] <- (sol[adaptidx] > 0)
+   adapt[names(sol.adapt)] <- (sol.adapt > 0)
    
    x_feasible <- x
+   idx <- match(names(sol.values), names(x), nomatch=0)
+   
    if (is.cateditmatrix(E)){
-     x_feasible[idx] <- asLevels(sol[-adaptidx])
+     x_feasible[idx] <- asLevels(sol.values)
    } else {
-     x_feasible[idx] <- sol[-adaptidx]
+     x_feasible[idx] <- sol.values
    }
+   
    t.stop <- proc.time()
    duration <- t.stop - t.start
    list( w=w

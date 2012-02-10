@@ -126,6 +126,12 @@ test_that('localizeErrors handles single edits with mip method',{
     expect_true(loc$adapt[1,1])
 })
 
+test_that('localizeErrors handles trivial single edits with mip method',{
+  expect_false( localizeErrors( editmatrix("z == 100")
+                              , data.frame(z=100)
+                              , method='mip'
+                              )$adapt[1,1])
+})
 
 
 
