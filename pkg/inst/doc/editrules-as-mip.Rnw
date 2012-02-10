@@ -94,7 +94,8 @@ with the number of (incorrect) variables. Many surveys have hundreds of variable
 which results in (very) long processing times for records with many errors. 
 
 This paper describes the error localization problem for numerical and categorical 
-edits as a mixed integer problem and its implementation in {\sf editrules}. 
+edits as a mixed integer problem and its implementation in {\sf editrules}. A brief 
+description can be found in \citep{waal:2011} p. 75.
 Mixed integer programming is a special case of linear programming. Linear 
 programming maximizes a linear objective function, which is subject to linear
 equality and linear inequality constraints. More formally: 
@@ -115,7 +116,7 @@ In section \ref{sec:numdataerror} we describe a mip formulation for numerical re
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical data errors}
 \label{sec:numdataerror}
-A numerical record $\bf x$  with reported values ${\rm(c_1,\dots,c_m)}$ has the following linear constraints:
+A numerical record $\bf x$  with reported values $({x^0_1,\dots,x^0_m)}$ has the following linear constraints:
 \begin{equation}
 \label{eq:edit}
 A {\bf x \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
@@ -124,56 +125,61 @@ A {\bf x \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 It can easily be checked with {\sf editrules} if $\bf x$ violates any of these constraints. If this is the
 case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
 complies to the edits. These edits are (usually) valid for all records of a data set. 
-For each reported record we define a seperate mip, which contains the set of edits extended with edits that depend on the reported values.
+For each reported record we define a seperate mip, which contains the set of edits extended with edits 
+that depend on the reported values.
 
-In practice reported values are always bounded: No person is older than 200 years old or taller than 30 feet. So each variable $x_i$  has a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$\footnote{Note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. We will use univariate or boundary constraints explicitly and exclude them from \ref{eq:edit}.}.
+In practice reported values are always bounded: No person is older than 200 years old or taller than 30 feet. So each for each variable $x_i$  we assume a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$\footnote{Note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. We will use univariate or boundary constraints explicitly and exclude them from \ref{eq:edit}.}.
 \begin{equation}
 {\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
 \end{equation}
 
-For $x_i$ the following value is reported
-\begin{equation}
-x_i = {\rm c}_i \label{eq:values}
+For each $x_i$ we introduce a binary variable $\delta_i \in {0,1}$:
+\begin{equation} \label{eq:delta}
+  \delta_i = \delta(x_i, x^0_i)
+           = \left\{ 
+  \begin{array}{ll}
+         0 & \mbox{if $x_i = x^0_i$}\\
+         1 & \mbox{if $x_i \neq x^0_i$}.
+  \end{array} \right. 
+\end{equation}
+where $x^0_i$ is the reported value for $x_i$. We now add the following edits to the edit set: 
+
+\begin{equation} \label{eq:binconstraint}
+ ({\rm l}_i - x^0_i)\delta_i + x^0_i  \leq  & x_i & \leq x^0_i + ({\rm u}_i - x^0_i)\delta_i 
 \end{equation}
 
-For each $x_i$ we introduce a binary variable $d_i \in \{0,1\}$ and add 
-the following two edits to the edit set: 
-\begin{eqnarray} \label{eq:binconstraint}
-x_i &\leq& {\rm c}_i + ({\rm u}_i - {\rm c}_i)d_i \\
-({\rm l}_i - {\rm c}_i)d_i + {\rm c}_i &\leq& x_i
-\end{eqnarray}
-Variable $d_i$ signifies if reported value $\rm c_i$ for variable $x_i$ is wrong: If $d_i = 1$ the edits 
+It can easily be checked that if $\delta_i = 0$ these edits reduce to $x_i = x^0_i$, meaning
+that the reported $x^0_i$ is assumed correct. If $d_i = 1$ the edits 
 reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within 
 its boundaries $\rm l_i$ and $\rm u_i$.
-If $d_i = 0$ these edits reduce to equation \ref{eq:values}, meaning
-that the reported ${\rm c}_i$ is assumed correct.
 
 Using principle of Felligi Holt \citep{fellegi:1976} which minimizes the weigthed sum of adaptations, the error localization problem can be written as:
 
-{\textrm Minimize} $\sum^m_{j=1} {\rm w_j} d_j$, with:
+{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\delta_j$, with:
 \begin{equation}
 \label{eq:nummip}
 \begin{array}{rcrcl}
 \sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
 \ldots                 &&                  &\ldots& \ldots  \\
 \sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
-    x_1 &-& ({\rm u_1 - c_1}) d_1   &\leq   & {\rm c}_1 \\
-   -x_1 &+& ({\rm l_1} - {\rm c_1}) d_1  &\leq   & -{\rm c}_1 \\
+    x_1 &-& ({\rm u_1 -  x^0_1}) \delta_1   &\leq   & x^0_1 \\
+   -x_1 &+& ({\rm l_1} - x^0_1) \delta_1  &\leq   & -x^0_1 \\
 \ldots  & & \ldots          &       & \ldots \\
-    x_m &-& ({\rm u_m} - {\rm c_m}) d_m   &\leq   & {\rm c}_m \\
-   -x_m &+& ({\rm l_m} - {\rm c_m}) d_m  &\leq   & -{\rm c}_m
+    x_m &-& ({\rm u_m} - x^0_m) \delta_m   &\leq   & x^0_m \\
+   -x_m &+& ({\rm l_m} - x^0_m) \delta_m  &\leq   & -x^0_m
 
 \end{array}
 \end{equation}
-with $\rm w_j$ a weight for variable $x_j$. This problem is equal to the following mixed integer problem
+with $\rm w_j$ a weight for variable $x_j$. This problem is equal to the following mixed integer problem:
+
 $$
 \begin{array}{rcl}
-   \textrm{Maximize } {\bf c}^T {\bf y}& \\
-   A^* {\bf y} & \leq & {\bf b} \\
-   \textrm{with } {\bf y} & \geq & 0 \\
-   {\bf y} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, d_1, \ldots, d_m) \\
+   \mbox{Maximize } {\bf c}^T {\bf \hat{x}} \\
+   \hat{A} {\bf \hat{x}} & \leq & {\bf \hat{b}} \\
+   \textrm{with } {\bf \hat{x}} & \geq & 0 \\
+   {\bf \hat{x}} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, \delta_1, \ldots, \delta_m) \\
    {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m}) \\
-   {\bf b} & = & (b_1, \ldots, b_m, {\rm c_1}, -{\rm c_1}, \ldots, {\rm c_m}, -{\rm c_m})
+   {\bf \hat{b}} & = & (b_1, \ldots, b_m, x^0_1, -x^0_1, \ldots, x^0_m, -x^0_m)
 \end{array}
 $$
 
@@ -194,46 +200,18 @@ shouldn't be too large. A reasonable approach is to take the minimum and maximum
 in a dataset and multiply them with a factor $f$ (e.g. $1000$).
 
 \subsection{Implementation in {\sf editrules}}
-The function {\sf localizeErrors} is described in detail in \citep{jonge:2011}. It accepts an {\sf editmatrix} and a {\sf
+{\sf editrules} contains the function {\sf localizeErrors} which can be used to localize errors in a {\tt data.frame}. It default implemention using a branch and bound algorithm is described in detail in \citep{jonge:2011}. It accepts an {\sf editmatrix} and a {\sf
 data.frame}, and returns an object of class {\sf errorLocation}. An {\sf
 errorLocation} object contains the locations of errors for each record in the
 {\sf data.frame} as well as logging information, solution weights and
-degeneracy. We extended this function with a parameter {\tt method}, that can be used to select the {\tt 
+degeneracy. 
+
+We extended this function with a parameter {\tt method}, that can be used to select the {\tt 
 localizer} or {\tt mip} method. If the method "mip" is given, {\sf editrules} internally creates for each 
 record an extended {\sf editmatrix} {\tt E} that contains the conditional boundary conditions as defined 
-in (\ref{eq:nummip}).
-
-\cite{lpSolveAPI:2011}
+in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to solve the resulting mixed integer program.
 %
 
-Apart from the mandatory arguments (an {\sf editarray} and a {\sf data.frame}),
-The arguments are given in table \ref{tabArglocalize}.
-%
-
-\begin{table}
-\begin{threeparttable}
-\caption{Arguments of {\sf localizeErrors}. Optional arguments are given in square brackets.
-The optional arguments are also arguments of the underlying {\sf errorLocalizer} function.
-}
-\label{tabArglocalize}
-\begin{tabular}{lp{0.7\textwidth}}
-\hline
-Argument & description\\
-\hline
-{\sf E}        & An {\sf editmatrix} or an {\sf editarray}.\\
-{\sf dat}      & The data, in the form of a {\sf data.frame}.\\
-$[\textrm{\sf weight}]$   & Nonnegative weights for each variable in {\sf dat}.\\
-$[\textrm{\sf maxadapt}]$ & Maximum number of variables to adapt.\\
-$[\textrm{\sf maxweight}]$& Maximum weight of solution, if weights are not given, this
-                    is equal to the maximum number of variables to adapt.\\
-$[\textrm{\sf maxduration}]$  &  Maximum time (in seconds), spent searching for a solution for a single 
-record.\\
-$[\textrm{\sf method}]$   & Method to be used for solving error localization problem. Can be "mip" or 
-"localizer".\\
-\hline
-\end{tabular}
-\end{threeparttable}
-\end{table}
 
 Figure \ref{RlocalizeErrors} shows an example of localizing errors using mip. 
 
@@ -254,41 +232,124 @@ dat <- data.frame(
 # localize all errors in the data using mip
 localizeErrors(E,dat, method="mip")
 @
-\caption{Localizing errors for every record in a data.frame with {\sf localizeErrors}}
+\caption{Localizing errors in a data.frame using {\tt method="mip"}}
 \label{RlocalizeErrors}
 \end{Rcode}
 
 The default boundary conditions used in {\tt localizeErrors} use ${\rm u_i} = 1000 {\rm c_i}$ and ${\rm l_i} = -1000 {\rm c_i}$.
 
 \section{Categorical data errors}
-\citep{loo:2011b} describes an boolean representation for categorical edits that is conform data editing 
-literature. In this paper we choose a different representation that can be used to formulate the error 
-localization problem for categorical data.
 
+\label{sec:catdataerror}
+A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has the following $n$ constraints:
+\begin{equation}e^i = 
+  \begin{array}{rl}
+    \label{eq:catedit}
+    \mbox{{\bf{if} }} & v_j \in F^i_j \mbox{ for }j = 1, \ldots, m \\
+    \mbox{ {\bf then}} & \mbox{FALSE}
+  \end{array}
+\end{equation}
+with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories for each $v_j$ and $i = 1 \ldots n$ the number of edits.
 
-Each edit should hold (conjunction) and each edit states that at least one statement has to be true.
-An categorical editmatrix can be seen as a conjunction of disjunctions: it is in conjunctive normal form (reference). 
+It can easily be checked with {\sf editrules} if $\bf v$ violates any of these constraints. If this is the
+case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
+complies to the edits. Internally {\sf editrules} uses an {\sf editarray} object which is described in 
+detail in \cite{loo:2011b}. In this paper we use a different, but equivalent, representation to allow for 
+an easy conversion to a mixed integer program: {\sf cateditmatrix}.
 
-* Write a categorical variable as a disjunction of boolean variables for each category, with the restriction that their sum is atmost 1. (equals 1 for a closed domain).
-
-* each edit can be written as a disjunction of statements
-
-* each disjunction can be written as a numerical edit where at least one of the variables has to be one
-
+A record of $m$ categorical variables can be written as an element
+of the cartesian product space $D$:
 \begin{equation}
-   \lnot \bigwedge_{i=1}^m (v_i \in A_i) = \bigvee_{i=1}^m\lnot (v_i \in {A_i}) = \bigvee_{i=1}^m (v_i \in \lnot {A_i})
+  \label{eq:Domain}
+  D = D_1\times D_2\times\cdots\times D_m,
+\end{equation}
+where each $D_j$ is the set of possible categories for variable $j$.
+
+The number of categories for variable $j$ is labeled $d_j$ while the
+total number of categories is labeled $d$, given by
+\begin{equation}
+  d=\sum_{j=1}^n d_j
+\end{equation}
+Categorical record $\bf v$ can be written as in this space as
+\begin{equation}
+  \begin{array}{rcl}
+    {\bf \check{v}} & = & \oplus^m_{j=1} (\check{v}_{j1}, \ldots, \check{v}_{j{d_j}}) \\
+                    & = & (\check{v}_{1 1}, \cdots, \check{v}_{1 {d_1}},
+                          \cdots, \check{v}_{m 1}, \cdots,     \check{v}_{m {d_m}})
+  \end{array}
 \end{equation}
 
-$$
-\lnot \bigwedge_{i=1}^m v_{i} \in A_i= \bigvee_{i=1}^m \lnot v_{i} \in A_i
-$$
+\begin{equation}
+  \mbox{with }
+  \check{v}_{jk} = \delta(v_j, k)
+  =  \left\{ 
+  \begin{array}{ll}
+         0 & \mbox{if } v_j \not= k \\
+         1 & \mbox{if } v_j = k}
+  \end{array} \right
+\end{equation}
 
-\subsection{The cateditmatrix object}
+Equation (\ref{eq:catedit}) can be written in the following form:
+\begin{eqnarray}
+     e^i  & = & \lnot \bigwedge_{j=1}^m v_j \in F^i_j = \bigvee_{j=1}^m\lnot (v_j \in {F^i_j}) \\
+          & = &  \bigvee_{j=1}^m v_j \not\in {F^i_j} = \bigvee_{j=1}^m v_j \in T^i_j
+\end{eqnarray}
+with $T^i_j = D_j \setminus F^i_j$. 
+This means that edit $e^i$ is satisfied is at least one $v_j \in T^i_j$. $e^i$ can therefore be written as:
 
-* error localizing edits: for each variable ${\rm c}_i$ $c^{{\rm c}_i}$, introduce an edit
-with $d_i = 1 - c^{{\rm c}_i}$. When $d_i = 0$,  ${\rm c}_i = {\rm c}_{i}$, meaning that the
-reported value of ${\rm c}_i$ is assumed correct,  When $d_i = 1$, $c^{\rm c}_i = 0$,
-meaning that ${\rm c}_i$ should be adapted.
+\begin{equation} \label{eq:tmip}
+  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}\right) \geq 1
+\end{equation}
+
+\begin{equation} \label{eq:aijk}
+  \mbox{with }
+  t^i_{jk} = \left\{ 
+  \begin{array}{ll}
+         0 & \mbox{if } k \not\in T^i_j}\\
+         1 & \mbox{if } k \in T^i_j}
+  \end{array} \right. 
+\end{equation}
+These edits are (usually) valid for all records of a data set. Note that equation (\ref{eq:catmip}) is in 
+a form to be used in a mixed integer program where $\check{v}_{jk}$ are integer variables.
+
+For each $v_j$ its categories should exclude each other, so the following constraint must hold:
+\begin{equation}
+   \left(\sum^{d_j}_{k=1} \check{v}_{jk}\right) \leq 1
+\end{equation}
+
+We introduce for each $v_j$ a binary variable $\delta_j \in {0,1}$:
+\begin{equation} \label{eq:catdelta}
+  \delta_j = \left\{ 
+  \begin{array}{ll}
+         0 & \mbox{if $v_j = v^0_j$}\\
+         1 & \mbox{if $v_j \neq v^0_j$}.
+  \end{array} \right. 
+\end{equation}
+
+where $v^0_j$ is the reported value for $v_i$. We now add the following edit to the edit set:
+\begin{equation}
+   \check{v}_{jk^0} & = & 1 - \delta_j \mbox{ with } k^0 = v^0_j
+\end{equation}
+It can be easily checked that if $\delta_j = 0$ $\check{v}_{jk^0} = 1$, meaning that the reported value 
+$v^0_j$ is assumed correct. If $\delta_j = 1$, $\check{v}_{jk^0} = 0$, meaning that $v_j$ should have a different value.
+
+{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\delta_j$, with:
+\begin{equation}
+\label{eq:catmip}
+\begin{array}{rcrcl}
+  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^1_{jk} \cdot \check{v}_{jk}\right)&& &\geq& 1 \\
+  \ldots                 &&                  &\ldots& \ldots  \\
+  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^n_{jk} \cdot \check{v}_{jk}\right)&& &\geq& 1 \\
+    \sum^{d_1}_{k=1} \check{v}_{1k} && & \leq & 1 \\
+    \check{v}_{1k^0} & +    & \delta_1 & =    & 1 \\
+    \ldots  & & \ldots          &       & \ldots \\
+    \sum^{d_m}_{k=1} \check{v}_{mk} && & \leq & 1 \\
+    \check{v}_{mk^0} & + & \delta_m & =    & 1 \\
+\end{array}
+\end{equation}
+
+\subsection{The {\sf cateditmatrix} object}
+Special form of {\sf editmatrix}. Can be created from an {\sf editarray}.
 
 \section{Discussion}
 
@@ -303,9 +364,6 @@ used to increase the numerical stability by using smaller boundaries for the var
 \subsection{Comparison to {\tt backtracker}}
 errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.
 It can also find more equivalent solutions, which is not possible or difficult with MIP solvers.
-
-However when speed of finding a solution matters, it is
-\subsection{Previous work}
 
 \bibliographystyle{chicago}
 \bibliography{editrules}
