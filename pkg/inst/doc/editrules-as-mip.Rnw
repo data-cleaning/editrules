@@ -279,7 +279,9 @@ An categorical editmatrix can be seen as a conjunction of disjunctions: it is in
 A \in {a_j} \lor B \in {b_k}
 \end{equation}
 
-$$\lnot (A \in {a_j})$$
+$$
+\lnot \bigwedge_{i=1}^m v_{i} \in A_i= \bigvee_{i=1}^m \lnot v_{i} \in A_i
+$$
 
 \subsection{The cateditmatrix object}
 
