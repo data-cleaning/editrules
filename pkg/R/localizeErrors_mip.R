@@ -143,7 +143,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
              , nrow = nvars
              , dimnames = list(NULL, c(lvls, adaptvars))
              )
-  
+
   for (i in seq_along(vx)){
     A[i,vx[i]] <- 1
     A[i,paste("adapt",names(vx[i]), sep=".")] <- 1
@@ -310,7 +310,7 @@ as.lp.editmatrix <- function(E){
 }
 
 asCat <- function(x){
-  nms <- paste(names(x),x, sep=":")
+  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=":"))
   is.na(nms) <- is.na(x)
   names(nms) <- names(x)
   nms

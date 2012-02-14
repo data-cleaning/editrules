@@ -371,8 +371,8 @@ internally the {\sf cateditmatrix} object. {\sf cateditmatrix} is an {\sf editma
 \begin{Rcode}
 <<keep.source=true>>=
 E <- cateditmatrix( 
-       expression( if (pregnant) gender == "female"
-                 , if (spouse) status %in% c("married")
+       expression( gender %in% c("male", "female")
+                 , if (pregnant) gender == "female"
                  )
                   )
 as.data.frame(E)
@@ -390,7 +390,7 @@ An example is shown in figure \ref{R:localizeCat}
 \begin{Rcode}
 <<keep.source=true>>=
 dat <- data.frame(gender="male", pregnant=TRUE)
-#localizeErrors(E,dat, method="mip")
+localizeErrors(E,dat, method="mip")
 @
 \caption{Using {\sf localizeErrors} method with categorical data}
 \label{R:localizeCat}
