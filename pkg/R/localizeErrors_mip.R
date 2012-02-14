@@ -235,7 +235,7 @@ localize_mip_rec <- function( E
    set.objfn(lps, objfn)
    
    lp.control( lps
-#             , presolve = "rows"    # move univariate constraints into bounds
+             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-8
              )
@@ -287,7 +287,7 @@ localize_mip_rec <- function( E
 # assumes that E is normalized!
 as.lp.editmatrix <- function(E){
    require(lpSolveAPI)
-   epsb <- 1e-6
+   epsb <- 1e-8
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
    dimnames(lps) <- dimnames(A)   
@@ -301,9 +301,11 @@ as.lp.editmatrix <- function(E){
    set.constr.type(lps,types=ops)
 
    b <- getb(E)
+   maxA <- max(abs(getAb(E)))
    # adjust boundaries for less than 
-   b[lt] <- b[lt] - epsb
+   b[lt] <- (b[lt] - maxA*epsb)
    set.constr.value(lps, b)
+   #print(list(maxA=maxA, lps=lps))
    lps
 }
 

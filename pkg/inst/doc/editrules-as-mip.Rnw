@@ -390,7 +390,7 @@ An example is shown in figure \ref{R:localizeCat}
 \begin{Rcode}
 <<keep.source=true>>=
 dat <- data.frame(gender="male", pregnant=TRUE)
-localizeErrors(E,dat, method="mip")
+#localizeErrors(E,dat, method="mip")
 @
 \caption{Using {\sf localizeErrors} method with categorical data}
 \label{R:localizeCat}

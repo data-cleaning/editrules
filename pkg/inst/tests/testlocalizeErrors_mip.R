@@ -31,7 +31,8 @@ test_that('localizeErrors works without specified weight',{
                        , dat = dat
                        , method="mip"
                        )
-    
+  
+  #print(loc)
   expect_equivalent( loc$adapt
                    , matrix(c(
                       TRUE , FALSE, FALSE,
@@ -137,7 +138,7 @@ test_that('localizeErrors handles a ">" edits correctly.',{
                        , data.frame(x=1)
                        , method='mip'
                        )
-  print(loc)
+  #print(loc)
   expect_true( localizeErrors( editmatrix("x < 1")
                              , data.frame(x=1)
                              , method='mip'
