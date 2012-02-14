@@ -20,23 +20,22 @@ test_that("localizeError_mip",{
 })
 
 test_that('localizeErrors works without specified weight',{
-  E <- editmatrix(c('x+y==z','x < (1 - 0.01)'))
+  E <- editmatrix(c('x+y==z','x < 1'))
   dat <- data.frame(
-    x = c(1,1,1),
+    x = c(1,0,2),
     y = c(1,1,1),
     z = c(1,1,1)
   )
   
-  loc <- localizeErrors( E   = E
+  loc <- localizeErrors( E = E
                        , dat = dat
                        , method="mip"
                        )
     
-  #print(loc)
   expect_equivalent( loc$adapt
                    , matrix(c(
                       TRUE , FALSE, FALSE,
-                      TRUE , FALSE, FALSE,
+                      FALSE , FALSE, FALSE,
                       TRUE , FALSE, FALSE),
                            nrow=3,
                            byrow=TRUE
@@ -133,5 +132,17 @@ test_that('localizeErrors handles trivial single edits with mip method',{
                               )$adapt[1,1])
 })
 
+test_that('localizeErrors handles a ">" edits correctly.',{
+  loc <- localizeErrors( editmatrix("x > 1")
+                       , data.frame(x=1)
+                       , method='mip'
+                       )
+  print(loc)
+  expect_true( localizeErrors( editmatrix("x < 1")
+                             , data.frame(x=1)
+                             , method='mip'
+                             )$adapt[1,1]
+             )
+})
 
 

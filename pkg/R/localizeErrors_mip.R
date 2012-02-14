@@ -235,11 +235,11 @@ localize_mip_rec <- function( E
    set.objfn(lps, objfn)
    
    lp.control( lps
-             , presolve = "rows"    # move univariate constraints into bounds
+#             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-8
              )
- 
+   print(lps)
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
    
@@ -255,7 +255,7 @@ localize_mip_rec <- function( E
    sol.adapt <- sol[aidx]
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   #print(list(sol=sol, w=w, aidx=aidx, sol.val=sol.val, sol.adapt=sol.adapt))
+   #print(list(sol=sol, w=w, aidx=aidx, sol.values=sol.values, sol.adapt=sol.adapt))
    #write.lp(lps, "test.lp")
    
    #print(list(idx=idx, sol=sol))
@@ -284,18 +284,26 @@ localize_mip_rec <- function( E
        )
 }
 
+# assumes that E is normalized!
 as.lp.editmatrix <- function(E){
    require(lpSolveAPI)
+   epsb <- 1e-6
    A <- getA(E)
-   ops <- getOps(E)
-   ops[ops=="=="] <- "="
    lps <- make.lp(nrow(A), ncol(A))
-   dimnames(lps) <- dimnames(A)
+   dimnames(lps) <- dimnames(A)   
    for (v in 1:ncol(A)){
      set.column(lps, v, A[,v])
    }
+   ops <- getOps(E)
+   ops[ops=="=="] <- "="
+   lt <- ops == "<"
+   ops[lt] == "<="
    set.constr.type(lps,types=ops)
-   set.constr.value(lps, getb(E))
+
+   b <- getb(E)
+   # adjust boundaries for less than 
+   b[lt] <- b[lt] - epsb
+   set.constr.value(lps, b)
    lps
 }
 

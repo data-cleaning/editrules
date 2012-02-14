@@ -35,8 +35,8 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
         stop("Weight must be vector or array with dimensions equal to argument 'dat'")
 
-    if ( !useBlocks || match.arg(method) == "mip") 
-      return(localize(E,dat,call=sys.call(), weight=weight, method, ...))
+    if ( !useBlocks || match.arg(method) == "mip")
+        return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
 
     B  <- blocks(E)
     n <- length(B)
