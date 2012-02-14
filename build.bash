@@ -1,6 +1,12 @@
 #!/bin/bash
 
 
+if [ $1 == "-dev" ]; then
+    R=Rdev  
+else
+    R=R
+fi
+
 echo "######## Removing building information..."
 rm -rf output
 
@@ -9,14 +15,18 @@ cp build/DESCRIPTION pkg
 cp build/NAMESPACE pkg
 
 echo "######## Generate documentation..."
-R -q -f roxygen.R
+$R -q -f roxygen.R
 
 echo "######## Building package in output..."
 mkdir output
 cd output
-Rdev CMD build ../pkg
+$R CMD build ../pkg
 echo "######## Testing package..."
 for x in *.tar.gz 
 do 
-    Rdev CMD check $x
+    $R CMD check $x
 done
+
+echo "**BUILT USING $R"
+$R --version
+
