@@ -3,6 +3,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{threeparttable}
+\usepackage{mySweave}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
@@ -133,7 +134,7 @@ In practice reported values are always bounded: No person is older than 200 year
 {\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
 \end{equation}
 
-For each $x_i$ we introduce a binary variable $\Delta_i \in {0,1}$:
+For each $x_i$ we introduce a binary variable $\Delta_i \in \{0,1\}$:
 \begin{equation} \label{eq:delta}
   \Delta_i = \left\{ 
   \begin{array}{ll}
@@ -235,7 +236,7 @@ localizeErrors(E,dat, method="mip")
 \label{RlocalizeErrors}
 \end{Rcode}
 
-The default boundary conditions used in {\tt localizeErrors} use ${\rm u_i} = 1000 x^0_i$ and ${\rm l_i} = -1000 x^0_i$.
+The default boundary conditions used in {\tt localizeErrors} use ${\rm u_i} = 1000 \cdot x^0_i$ and ${\rm l_i} = -1000 \cdot x^0_i$.
 
 \section{Categorical data errors}
 
@@ -248,7 +249,7 @@ A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has t
     \mbox{ {\bf then}} & \mbox{FALSE}
   \end{array}
 \end{equation}
-with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories for each $v_j$ and $i = 1 \ldots n$ the number of edits.
+with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
 
 It can easily be checked with {\sf editrules} if $\bf v$ violates any of these constraints. If this is the
 case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
@@ -294,7 +295,7 @@ Equation (\ref{eq:catedit}) can be written in the following form:
           & = &  \bigvee_{j=1}^m v_j \not\in {F^i_j} = \bigvee_{j=1}^m v_j \in T^i_j
 \end{eqnarray}
 with $T^i_j = D_j \setminus F^i_j$. 
-This means that edit $e^i$ is satisfied is at least one $v_j \in T^i_j$. $e^i$ can therefore be written as:
+This means that edit $e^i$ is satisfied if at least one $v_j \in T^i_j$. $e^i$ can therefore be written as:
 
 \begin{equation} \label{eq:tmip}
   \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}\right) \geq 1
