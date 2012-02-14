@@ -133,40 +133,39 @@ In practice reported values are always bounded: No person is older than 200 year
 {\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
 \end{equation}
 
-For each $x_i$ we introduce a binary variable $\delta_i \in {0,1}$:
+For each $x_i$ we introduce a binary variable $\Delta_i \in {0,1}$:
 \begin{equation} \label{eq:delta}
-  \delta_i = \delta(x_i, x^0_i)
-           = \left\{ 
+  \Delta_i = \left\{ 
   \begin{array}{ll}
-         0 & \mbox{if $x_i = x^0_i$}\\
+         0 & \mbox{if $x_i = x^0_i$} \\
          1 & \mbox{if $x_i \neq x^0_i$}.
   \end{array} \right. 
 \end{equation}
 where $x^0_i$ is the reported value for $x_i$. We now add the following edits to the edit set: 
 
 \begin{equation} \label{eq:binconstraint}
- ({\rm l}_i - x^0_i)\delta_i + x^0_i  \leq  & x_i & \leq x^0_i + ({\rm u}_i - x^0_i)\delta_i 
+ ({\rm l}_i - x^0_i)\Delta_i + x^0_i  \leq  & x_i & \leq x^0_i + ({\rm u}_i - x^0_i)\Delta_i 
 \end{equation}
 
-It can easily be checked that if $\delta_i = 0$ these edits reduce to $x_i = x^0_i$, meaning
-that the reported $x^0_i$ is assumed correct. If $d_i = 1$ the edits 
+It can easily be checked that if $\Delta_i = 0$ these edits reduce to $x_i = x^0_i$, meaning
+that the reported $x^0_i$ is assumed correct. If $\Delta_i = 1$ the edits 
 reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within 
 its boundaries $\rm l_i$ and $\rm u_i$.
 
 Using principle of Felligi Holt \citep{fellegi:1976} which minimizes the weigthed sum of adaptations, the error localization problem can be written as:
 
-{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\delta_j$, with:
+{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\Delta_j$, with:
 \begin{equation}
 \label{eq:nummip}
 \begin{array}{rcrcl}
 \sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
 \ldots                 &&                  &\ldots& \ldots  \\
 \sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
-    x_1 &-& ({\rm u_1 -  x^0_1}) \delta_1   &\leq   & x^0_1 \\
-   -x_1 &+& ({\rm l_1} - x^0_1) \delta_1  &\leq   & -x^0_1 \\
+    x_1 &-& ({\rm u_1 -  x^0_1}) \Delta_1   &\leq   & x^0_1 \\
+   -x_1 &+& ({\rm l_1} - x^0_1) \Delta_1  &\leq   & -x^0_1 \\
 \ldots  & & \ldots          &       & \ldots \\
-    x_m &-& ({\rm u_m} - x^0_m) \delta_m   &\leq   & x^0_m \\
-   -x_m &+& ({\rm l_m} - x^0_m) \delta_m  &\leq   & -x^0_m
+    x_m &-& ({\rm u_m} - x^0_m) \Delta_m   &\leq   & x^0_m \\
+   -x_m &+& ({\rm l_m} - x^0_m) \Delta_m  &\leq   & -x^0_m
 
 \end{array}
 \end{equation}
@@ -177,7 +176,7 @@ $$
    \mbox{Maximize } {\bf c}^T {\bf \hat{x}} \\
    \hat{A} {\bf \hat{x}} & \leq & {\bf \hat{b}} \\
    \textrm{with } {\bf \hat{x}} & \geq & 0 \\
-   {\bf \hat{x}} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, \delta_1, \ldots, \delta_m) \\
+   {\bf \hat{x}} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, \Delta_1, \ldots, \Delta_m) \\
    {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m}) \\
    {\bf \hat{b}} & = & (b_1, \ldots, b_m, x^0_1, -x^0_1, \ldots, x^0_m, -x^0_m)
 \end{array}
@@ -236,7 +235,7 @@ localizeErrors(E,dat, method="mip")
 \label{RlocalizeErrors}
 \end{Rcode}
 
-The default boundary conditions used in {\tt localizeErrors} use ${\rm u_i} = 1000 {\rm c_i}$ and ${\rm l_i} = -1000 {\rm c_i}$.
+The default boundary conditions used in {\tt localizeErrors} use ${\rm u_i} = 1000 x^0_i$ and ${\rm l_i} = -1000 x^0_i$.
 
 \section{Categorical data errors}
 
@@ -281,7 +280,7 @@ Categorical record $\bf v$ can be written as in this space as
 
 \begin{equation}
   \mbox{with }
-  \check{v}_{jk} = \delta(v_j, k)
+  \check{v}_{jk} 
   =  \left\{ 
   \begin{array}{ll}
          0 & \mbox{if } v_j \not= k \\
@@ -317,9 +316,9 @@ For each $v_j$ its categories should exclude each other, so the following constr
    \left(\sum^{d_j}_{k=1} \check{v}_{jk}\right) \leq 1
 \end{equation}
 
-We introduce for each $v_j$ a binary variable $\delta_j \in {0,1}$:
+We introduce for each $v_j$ a binary variable $\Delta_j \in {0,1}$:
 \begin{equation} \label{eq:catdelta}
-  \delta_j = \left\{ 
+  \Delta_j = \left\{ 
   \begin{array}{ll}
          0 & \mbox{if $v_j = v^0_j$}\\
          1 & \mbox{if $v_j \neq v^0_j$}.
@@ -328,12 +327,14 @@ We introduce for each $v_j$ a binary variable $\delta_j \in {0,1}$:
 
 where $v^0_j$ is the reported value for $v_i$. We now add the following edit to the edit set:
 \begin{equation}
-   \check{v}_{jk^0} & = & 1 - \delta_j \mbox{ with } k^0 = v^0_j
+   \check{v}_{jk^0_j} & = & 1 - \Delta_j \mbox{ with } k^0_j = v^0_j
 \end{equation}
-It can be easily checked that if $\delta_j = 0$ $\check{v}_{jk^0} = 1$, meaning that the reported value 
-$v^0_j$ is assumed correct. If $\delta_j = 1$, $\check{v}_{jk^0} = 0$, meaning that $v_j$ should have a different value.
+It can be easily checked that if $\Delta_j = 0$ $\check{v}_{jk^0_j} = 1$, meaning that the reported value 
+$v^0_j$ is assumed correct. If $\Delta_j = 1$, $\check{v}_{jk^0_j} = 0$, meaning that $v_j$ should have a different value.
 
-{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\delta_j$, with:
+The categorical error localization problem now can be written as:
+
+{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\Delta_j$, with:
 \begin{equation}
 \label{eq:catmip}
 \begin{array}{rcrcl}
@@ -341,15 +342,59 @@ $v^0_j$ is assumed correct. If $\delta_j = 1$, $\check{v}_{jk^0} = 0$, meaning t
   \ldots                 &&                  &\ldots& \ldots  \\
   \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^n_{jk} \cdot \check{v}_{jk}\right)&& &\geq& 1 \\
     \sum^{d_1}_{k=1} \check{v}_{1k} && & \leq & 1 \\
-    \check{v}_{1k^0} & +    & \delta_1 & =    & 1 \\
+    \check{v}_{1k^0_1} & +    & \Delta_1 & =    & 1 \\
     \ldots  & & \ldots          &       & \ldots \\
     \sum^{d_m}_{k=1} \check{v}_{mk} && & \leq & 1 \\
-    \check{v}_{mk^0} & + & \delta_m & =    & 1 \\
+    \check{v}_{mk^0_m} & + & \Delta_m & =    & 1 \\
 \end{array}
 \end{equation}
 
+Note that parts of equation (\ref{eq:tmip}) can be written in a negated form:
+\begin{equation} \label{eq:fmip}
+  \mbox{ if } T^i_j \neq \emptyset \mbox{ then } \sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}  = 1 - \left(\sum^{d_j}_{k=1} f^i_{jk} \cdot \check{v}_{jk} \right) 
+\end{equation}
+
+\begin{equation} \label{eq:aijk}
+  \mbox{with }
+  f^i_{jk} = \left\{ 
+  \begin{array}{ll}
+         0 & \mbox{if } k \not\in F^i_j}\\
+         1 & \mbox{if } k \in F^i_j}
+  \end{array} \right. 
+\end{equation}
+
 \subsection{The {\sf cateditmatrix} object}
-Special form of {\sf editmatrix}. Can be created from an {\sf editarray}.
+To create a mip formulation for the categorical error localization problem, {\sf editrules} uses
+internally the {\sf cateditmatrix} object. {\sf cateditmatrix} is an {\sf editmatrix} object, which is described in \cite{jonge:2011}, but it "remembers" that it is categorical. 
+
+%
+\begin{Rcode}
+<<keep.source=true>>=
+E <- cateditmatrix( 
+       expression( if (pregnant) gender == "female"
+                 , if (spouse) status %in% c("married")
+                 )
+                  )
+as.data.frame(E)
+getAb(E)
+@
+\caption{Using the {\sf cateditmatrix} object}
+\label{R:cateditmatrix}
+\end{Rcode}
+Figure \ref{R:cateditmatrix} shows an example for the use of {\sf cateditmatrix}. It also shows that categorical edits can be written in the form of a linear constraint to be used in an mixed integer problem solver. 
+{\sf cateditmatrix} can coerce an {\sf editarray}. This method can be called explicitly by a user, but it 
+it will be called implicitly in {\sf localizeErrors} using {\tt method="mip"}.
+An example is shown in figure \ref{R:localizeCat}
+
+%
+\begin{Rcode}
+<<keep.source=true>>=
+dat <- data.frame(gender="male", pregnant=TRUE)
+localizeErrors(E,dat, method="mip")
+@
+\caption{Using {\sf localizeErrors} method with categorical data}
+\label{R:localizeCat}
+\end{Rcode}
 
 \section{Discussion}
 

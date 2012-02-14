@@ -4,9 +4,11 @@
 #' The default representation in editrules is \code{editarray}, but cateditmatrix is useful for
 #' transforming and solving categorical edit into a mixed integer programming problem
 #'
-#' @param x \code{character} with categorical edits
+#' @param x \code{character or expression} with categorical edits
+#' @param sep seperator to be used in naming categories within variables.
+#' @param env environment in which \code{x} will be evaluated.
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
-#' @keywords internal
+#' @export
 cateditmatrix <- function(x, sep=":", env=parent.frame()){
     if (is.editarray(x)) {
       x <- as.character(x,datamodel=FALSE)
@@ -50,7 +52,7 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #'
 #' @param x cateditmatrix object to be printed
 #' @param ... further arguments passed to or from other methods.
-#' @keywords internal
+#' @export
 as.character.cateditmatrix <- function(x, ...){
   class(x) <- "editmatrix"
   as.character(x)
