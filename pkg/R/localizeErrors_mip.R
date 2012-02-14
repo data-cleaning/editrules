@@ -239,7 +239,7 @@ localize_mip_rec <- function( E
              , timeout = maxduration
              , epsint = 1e-8
              )
-   print(lps)
+   #print(lps)
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
    
