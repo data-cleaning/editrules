@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-if [ $1 == "-dev" ]; then
+if [[ $1 == "-dev" ]]; then
     R=Rdev  
 else
     R=R
