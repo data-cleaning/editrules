@@ -136,6 +136,15 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
     # the nonnumeric case is simple
     if ( !is.numeric(value) ){
         E$mixcat <- substValue(E$mixcat,var,value,...)
+        # move substituted dummies to numerical part, if any.
+        id <- var %in% getVars(E,type='dummy')
+        if ( any(id) ){
+            dvar <- rownames(E$mixnum) %in% var[id]
+            v <- as.character(E$mixnum[dvar,])
+            v[!value[id]] <- invert(v[!value[id]])
+            E$num <- c(E$num, editmatrix(v))
+            E$mixnum <- E$mixnum[!dvar,]
+        }
         return(E)
     }
     # substitute pure numeric data
@@ -160,6 +169,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
                 mixval[inmix],
                 removeredundant=FALSE
             )
+            
             # did substitution yield any certainties?
             cntr <- isContradiction(E$mixnum)
             taut <- isTautology(E$mixnum)
