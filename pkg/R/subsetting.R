@@ -11,7 +11,7 @@
 #' @rdname subsetting
 #' @export
 `[.editmatrix` <- function(x, i, j, ...){
-    if ( is.character(i) ) i <- match(i,rownames(x),nomatch=0)
+    if (!missing(i) && is.character(i) ) i <- match(i,rownames(x),nomatch=0)
     E <- neweditmatrix(
         A = as.matrix(x)[i, j, drop=FALSE],
         ops = getOps(x)[i]

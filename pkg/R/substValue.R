@@ -169,7 +169,6 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
                 mixval[inmix],
                 removeredundant=FALSE
             )
-            
             # did substitution yield any certainties?
             cntr <- isContradiction(E$mixnum)
             taut <- isTautology(E$mixnum)
