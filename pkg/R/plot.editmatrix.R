@@ -130,7 +130,7 @@ plot.editarray <- function(
 #' plot method for editset
 #'
 #' @rdname plot.editmatrix
-#' @method plot editarray
+#' @method plot editset
 #' @export
 plot.editset <- function(
     x,

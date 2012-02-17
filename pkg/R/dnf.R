@@ -3,8 +3,8 @@
 #'
 #' An editset is transformed to a list of \code{\link{editset}s} 
 #' which do not contain any mixed edits anymore. Each editset has an extra
-#' attribute \code{condition} stating which assumptions were filled in the original set to
-#' decouple the mixed edits. This attribute will be printed when not \code{NULL}.
+#' attribute \code{condition}, which holds the series of assumptions made to 
+#' decouple the original edits. This attribute will be printed when not \code{NULL}.
 #'
 #'
 #' @param E an object of class \code{\link{editset}}

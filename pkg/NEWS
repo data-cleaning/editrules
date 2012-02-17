@@ -3,6 +3,7 @@ version 2.2-0
 - Fixed two corner case bugs in localizeErrors with method="mip"
 - removed deprecated functions 'eliminateFM' and 'editrules'
 - solved bug in duplicated.editmatrix
+- solved documentation bug in plot.editset 
 
 version 2.1-2
 - removed some unnecessary files from inst/doc
