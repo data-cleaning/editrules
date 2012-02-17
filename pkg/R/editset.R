@@ -216,6 +216,7 @@ simplify <- function(E, m=NULL){
     dummies <- getVars(E,type='dummy')
     if ( is.null(m) ) m <- contains(E) 
     
+    # move pure numerical edits to $num
     g <- contains(E$mixcat)
     r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
     if ( any(r) ){ 
@@ -225,7 +226,9 @@ simplify <- function(E, m=NULL){
         E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])
     } else {
         E$mixcat <- reduce(E$mixcat)
+        E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])
     }
+   
     E
 }   
 

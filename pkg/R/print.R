@@ -90,6 +90,11 @@ print.cateditmatrix <- function(x, ...){
 print.editset <- function(x, ...){
     u <- as.character(x,datamodel=FALSE)
     v <- as.character(x,datamodel=TRUE)
+    cnd <- attr(x,'condition')
+    if (!is.null(cnd)){
+        cat('Conditions:\n')
+        cat(paste(cnd,collapse=', '),'\n\n')
+    }
     cat("Data model:\n")
     v <- v[! v%in% u]
     if ( length(v)>0 ){

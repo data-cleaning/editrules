@@ -1,10 +1,10 @@
 #!/bin/bash
 
-
-if [ $1 == "-dev" ]; then
-    R=Rdev  
-else
-    R=R
+R=R
+if [ ${#} > 0 ]; then
+    if [ "$1" = "-dev" ]; then
+        R=Rdev  
+    fi
 fi
 
 echo "######## Removing building information..."

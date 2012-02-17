@@ -32,7 +32,7 @@
 #' edits are transformed into an A == b, A < b or A <= b form, so that in the specification of the edit rules all inequalities can be mixed, 
 #' but the resulting matrix has similar sign.
 #' @title Create an editmatrix
-#' @seealso \code{\link{editrules}} \code{\link{as.editmatrix}}
+#' @seealso \code{\link{as.editmatrix}}
 #' @export
 #' @example ../examples/editmatrix.R
 #'
