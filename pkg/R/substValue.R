@@ -145,6 +145,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
             E$num <- c(E$num, editmatrix(v))
             E$mixnum <- E$mixnum[!dvar,]
         }
+        if ( simplify ) E <- simplify(E)
         return(E)
     }
     # substitute pure numeric data

@@ -223,9 +223,11 @@ simplify <- function(E, m=NULL){
         E$mixcat <- reduce(E$mixcat[!r,,drop=FALSE])
         E$num <- c(E$num,editmatrix(v))
         E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])
+    } else {
+        E$mixcat <- reduce(E$mixcat)
     }
     E
-}
+}   
 
 
 
