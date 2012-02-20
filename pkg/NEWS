@@ -4,6 +4,7 @@ version 2.2-0
 - removed deprecated functions 'eliminateFM' and 'editrules'
 - solved bug in duplicated.editmatrix
 - solved documentation bug in plot.editset 
+- solved bug in localizeErrors.editmatrix causing error when a doesn't conform to datamodel (Thanks to Elmar Wein)
 
 version 2.1-2
 - removed some unnecessary files from inst/doc

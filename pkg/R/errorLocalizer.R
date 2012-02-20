@@ -26,6 +26,10 @@
 #' The backtracker is prepared such that missing data in the input record \code{x} is already
 #' set to adapt, and missing variables have been eliminated already.
 #'
+#' The backtracker will crash when \code{E} is an \code{\link{editarray}} and one or more values are
+#' not in the datamodel specified by \code{E}. The more user-friendly function \code{\link{localizeErrors}}
+#' circumvents this. See also \code{\link{checkDatamodel}}.
+#'
 #' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
 #'
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
@@ -38,7 +42,7 @@
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example ../examples/errorLocalizer.R
-#' @seealso \code{\link{localizeErrors}}
+#' @seealso \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
 #' Journal of the American Statistical Association 71, pp 17-25

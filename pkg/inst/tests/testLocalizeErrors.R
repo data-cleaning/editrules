@@ -93,3 +93,22 @@ test_that('localizeErrors works with different weights per record',{
 })
 
 
+test_that('localizeErrors handles data out-of-datamodel correctly',{
+# thanks to Elmar Wein for sending us this testcase.
+    E <- editarray(c(
+               "age %in% c('under aged','adult')",
+               "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+               "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+               "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+               "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+       ))
+    record <- data.frame(age='under aged', maritalStatus='unmarried', positionInHousehold='out_of_range')
+    expect_equivalent(
+        localizeErrors(E,record)$adapt,
+        array(c(FALSE,FALSE,TRUE),dim=c(1,3))
+    )
+})
+
+
+
+
