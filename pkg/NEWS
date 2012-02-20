@@ -1,10 +1,10 @@
 version 2.2-0
 - Added function 'disjunct' deriving DNF for edit sets
-- Fixed two corner case bugs in localizeErrors with method="mip"
 - removed deprecated functions 'eliminateFM' and 'editrules'
-- solved bug in duplicated.editmatrix
-- solved documentation bug in plot.editset 
-- solved bug in localizeErrors.editmatrix causing error when a doesn't conform to datamodel (Thanks to Elmar Wein)
+- Fixed two corner case bugs in localizeErrors with method="mip"
+- bugfix in duplicated.editmatrix
+- fix in documentation of plot.editset 
+- bugfix in localizeErrors.editmatrix causing error when a value doesn't conform to datamodel (Thanks to Elmar Wein)
 
 version 2.1-2
 - removed some unnecessary files from inst/doc
