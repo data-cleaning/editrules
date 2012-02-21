@@ -62,7 +62,8 @@
     neweditset(
         num = x$num[i[i<=nnum]],
         mixnum = mixnum,
-        mixcat = mixcat
+        mixcat = mixcat,
+        condition = attr(x,"condition")
     )
 }
 

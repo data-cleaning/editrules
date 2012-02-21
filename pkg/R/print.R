@@ -107,3 +107,16 @@ print.editset <- function(x, ...){
 }
 
 
+#' print editset
+#'
+#' @export
+#' @method print dnf
+#'
+#' @param x editset object to be printed
+#' @param ... further arguments passed to or from other methods.
+#' @keywords internal
+print.dnf <- function(x, ...){
+    cat("Editset in Disjunctive Normal Form:\n\n")
+    lapply(x,function(i) {cat("\n");print(i)}, ...)
+}
+

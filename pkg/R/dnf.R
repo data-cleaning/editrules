@@ -6,10 +6,13 @@
 #' attribute \code{condition}, which holds the series of assumptions made to 
 #' decouple the original edits. This attribute will be printed when not \code{NULL}.
 #'
+#' At the moment this functionality is somewhat experimental and in- or output specification
+#' should be expected to change in coming releases.
 #'
 #' @param E an object of class \code{\link{editset}}
-#' @return A list of editsets. Each has an attribute 'condition' showing which conditions 
-#'  were assumed to derive the editset.
+#' @return An object of class \code{("dnf")}, which is basically a list of editsets. 
+#'  Each element has an attribute 'condition' showing which conditions were assumed to derive the editset.
+#'
 #' @example ../examples/dnf.R
 #' @export
 disjunct <- function(E){
@@ -18,6 +21,7 @@ disjunct <- function(E){
     dnf(E,"E", e)
     L <- as.list(e)
     names(L) <- NULL
+    class(L) <- c("dnf")
     L
 }
 
@@ -30,10 +34,8 @@ dnf <- function(E, name, env){
         nm <- paste(vars[1],c("T","F"),sep="_")
         nm <- paste(name,nm,sep="_and_")
         E1 <- substValue(E,vars[1],TRUE)
-        attr(E1,'condition') <- c(cnd,as.character(E$mixnum[vars[1]]))
         if ( isFeasible(E1$num) && isFeasible(E1$mixcat)) dnf(E1,nm[1],env)
         E2 <- substValue(E,vars[1],FALSE)
-        attr(E2,'condition') <- c(cnd,invert(as.character(E$mixnum[vars[1]])))
         if (isFeasible(E2$num) && isFeasible(E2$mixcat)) dnf(E2,nm[2],env)
     }
 }
