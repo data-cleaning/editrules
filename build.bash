@@ -1,7 +1,7 @@
 #!/bin/bash
 
 R=R
-if [ ${#} > 0 ]; then
+if [ ${#} -gt 0 ]; then
     if [ "$1" = "-dev" ]; then
         R=Rdev  
     fi
