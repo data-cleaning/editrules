@@ -39,7 +39,12 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
     ops <- sapply(edts, function(e){deparse(e[[1]])})
     ops <- ifelse(ops %in% c("if", "||"), "<=", "==")
 
-    E <- as.editmatrix(A,b,ops)
+    E <- as.editmatrix( A
+                      , b
+                      , ops
+                      # create named TRUE vector for dummy variables
+                      , binvars=sapply(categories,`!=`, "b")
+                      )
     class(E) <- c("cateditmatrix", "editmatrix")
     E
 }
@@ -51,11 +56,65 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #' @method as.character cateditmatrix
 #'
 #' @param x cateditmatrix object to be printed
+#' @param asIfStatement if \code{TRUE} the representation will be an \code{if} statement.
 #' @param ... further arguments passed to or from other methods.
 #' @export
-as.character.cateditmatrix <- function(x, ...){
-  class(x) <- "editmatrix"
-  as.character(x)
+as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
+  if (isTRUE(asIfStatement)){
+    A <- getA(x)
+    ops <- getOps(x)
+    
+    ifc <- (A > 0 & ops == "<=")
+    thenc <- (A < 0 | ( A > 0 & ops == "=="))
+
+    vars <- getVars(x, "var")
+    cats <- getVars(x, "cat")
+    
+    #generate %in% statement
+    inclause <- function(idx, collapse=NULL){
+      vc <- split(cats[idx], vars[idx])
+      
+      vc <- sapply( names(vc), function(var){
+        cats <- vc[[var]]
+        if (length(cats) == 1){ #this is for a logical variable
+          if (cats %in% TRUE)
+            return(var)
+          paste(var," == '",cats,"'", sep="")  # cosmetic, for one category we generate an "==" statement
+        } else {
+          cats <- paste("'",cats,"'", sep="", collapse=",")
+          paste(var," %in% c(",cats,")", sep="")
+        }
+      })
+      paste(vc, collapse=collapse)
+    }
+    
+    catedits <- rownames(x)
+    for (i in 1:length(catedits)){
+      if (any(thenc[i,])){
+        thenvars <- inclause(thenc[i,], collapse=" || ")
+        if (any(ifc[i,])){
+          ifvars <- inclause(ifc[i,], collapse=" && ")
+          catedits[i] <- paste("if (",ifvars,") ",thenvars, sep="")
+        } else {
+          catedits[i] <- thenvars
+        }
+      } else {
+        catedits[i] <- paste("!(", inclause(ifc[i,]), ")",sep="",collapse=" || ")
+      }
+    }
+    names(catedits) <- rownames(x)
+    catedits
+  } else {
+    class(x) <- "editmatrix"
+    as.character(x)
+  }
+}
+
+toCat <- function(categories, sep=":"){
+  vars <- sub(":.+", "", categories)
+  lvls <- sub(".+:", "", categories)
+  names(lvls) <- vars
+  split(lvls, vars)
 }
 
 #' parse categorial edit
@@ -79,8 +138,8 @@ parseCatEdit <- function(el){
   val
 }
 
- ### examples....
-
+# ### examples....
+# 
 # #civilStatusLevels <- c("married","unmarried","widowed","divorced")
 # # 
 # x <- c( "if (positionInHousehold == 'marriage partner') civilStatus == 'married'"
@@ -92,3 +151,4 @@ parseCatEdit <- function(el){
 #       )
 # 
 # (E <- cateditmatrix(x))
+# attributes(E)
