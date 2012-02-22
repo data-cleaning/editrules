@@ -109,7 +109,7 @@ print.editset <- function(x, ...){
 
 #' print editset
 #'
-#' @export
+#' 
 #' @method print dnf
 #'
 #' @param x editset object to be printed

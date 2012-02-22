@@ -1,8 +1,8 @@
 
-#' Disjunctive normal form for editsets
+#' Decouple a set of conditional edits
 #'
 #' An editset is transformed to a list of \code{\link{editset}s} 
-#' which do not contain any mixed edits anymore. Each editset has an extra
+#' which do not contain any conditional numeric/categorical edits anymore. Each editset has an extra
 #' attribute \code{condition}, which holds the series of assumptions made to 
 #' decouple the original edits. This attribute will be printed when not \code{NULL}.
 #'
@@ -10,7 +10,7 @@
 #' should be expected to change in coming releases.
 #'
 #' @param E an object of class \code{\link{editset}}
-#' @return An object of class \code{("dnf")}, which is basically a list of editsets. 
+#' @return A list of editsets. 
 #'  Each element has an attribute 'condition' showing which conditions were assumed to derive the editset.
 #'
 #' @example ../examples/dnf.R
