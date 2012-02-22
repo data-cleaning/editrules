@@ -112,7 +112,7 @@ violatedEdits.data.frame <- function(E, dat, ...){
 #' @param datamodel Also check against datamodel?
 #' @rdname violatedEdits
 #' @export
-violatedEdits.editarray <- function(E, dat,datamodel=TRUE,...){
+violatedEdits.editarray <- function(E, dat, datamodel=TRUE,...){
     edits <- as.character(E, useIf=FALSE, datamodel=datamodel)
     v <- violatedEdits.character(edits,dat,...)
 #    dimnames(v) <- list(rownames(dat),names(edits))

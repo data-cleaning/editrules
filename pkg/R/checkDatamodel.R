@@ -67,13 +67,16 @@ checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
 }
 
 
-#' Check categorical edits in an editset against datamodel
-#' 
+#'
+#' For an \code{\link{editset}}, the categorical variables are tested against
+#' the categorical datamodel.
+#'
+#"
 #' @method checkDatamodel editset
 #' @rdname checkDatamodel
 checkDatamodel.editset <- function(E, dat, weight=rep(1,length(getVars(E))), ...){
-    if (is.null(names)[weight]) names(weight) <- getVars(E)
-    E <- E[editType(E) == 'cat',]$mixcat
+    if ( is.null(names(weight)) ) names(weight) <- getVars(E)
+    E <- reduce(E[editType(E) == 'cat',]$mixcat)
     checkDatamodel.editarray(E,dat,weight[getVars(E)])
 }
 
