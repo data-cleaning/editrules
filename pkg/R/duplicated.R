@@ -19,5 +19,8 @@ duplicated.editarray <- function(x, ...) duplicated(getArr(x))
 #' @export
 #' @keywords internal
 duplicated.editmatrix <- function(x,...){
-    duplicated.matrix(getAb(x)) & duplicated.default(getOps(x))
+    duplicated(as.character(x))
 }
+
+
+

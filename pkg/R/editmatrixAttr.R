@@ -1,28 +1,3 @@
-#' Retrieve readables editrules from an editmatrix
-#'
-#' THIS FUNCTION IS OBSOLETE AND WILL BE REMOVED. Use \link{as.data.frame} or \code{as.editmatrix} instead.
-#' \code{editrules} returns a data.frame describing the editrules in editmatrix \code{x}. This data.frame can be used to store the
-#' editrules in a readable format, so that the editrules can be maintained and documented.
-#'
-#' The \code{\link{editmatrix}} function can use the output of \code{editrules} to create an \code{editmatrix}.
-#'
-#' If \code{x} is a normal matrix, the matrix will be coerced to an \code{editmatrix}. The columns of the matrix
-#' are the variables and the rows are the edit rules (constraints).
-#' @example ../examples/editmatrixAttr.R
-#' @aliases editrules
-#' @seealso \code{\link{editmatrix}}
-#' @export editrules
-#' @param x \code{\link{editmatrix}}  or \code{matrix} object
-#' @return \code{data.frame} with information on all edit rules / constraints
-editrules <- function(x){
-   warning("Function 'editrules' is obsolete and will be removed in the next release. Use as.data.frame instead")
-   x <- as.editmatrix(x)
-   edit <- as.character(x)
-   er <- data.frame(name=names(edit), edit=edit, stringsAsFactors=FALSE)
-   er$description <- attr(x, "description")
-   er
-}
-
 
 #' Returns the constant part \code{b} of a linear (in)equality
 #'

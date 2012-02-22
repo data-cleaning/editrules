@@ -14,6 +14,8 @@
 #' of weights is passed, the weights are assumed to be in the same order as the columns of \code{dat}. By passing
 #' an array of weights (same dimension as \code{dat}) separate weights can be specified for each record.
 #'
+#' If \code{E} is a \code{\link{editarray}}, variables not conforming to the datamodel specified vy \code{E}
+#' will be detected as erroneous.
 #'
 #' @param E an object of class \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param dat a \code{data.frame} with variables in E.
@@ -24,7 +26,8 @@
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used? NOTE: option "mip" is currently experimental. 
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
-#'
+#'  
+#' @seealso \code{\link{errorLocalizer}}
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
@@ -43,7 +46,8 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     i <- 0
     blockCount <- NULL
     err <- checkDatamodel(E,dat,weight)
-
+    # values not in datamodel are set to NA
+    dat[err$adapt] <- NA
     for ( b in B ){
         if ( verbose ){
             i <- i + 1
@@ -132,7 +136,6 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
         r <- X[,i]
         if (weightperrecord) wt <- weight[i,]
         le <- localize_mip_rec(E, r, weight=wt, ...)
-#        print(le)
         if (!le$maxdurationExceeded){
           err[i,] <- le$adapt
           wgt[i] <- le$w

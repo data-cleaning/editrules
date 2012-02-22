@@ -23,30 +23,22 @@ isObviouslyRedundant <- function(E, duplicates=TRUE, ...){
 #'
 #' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
 #' @param tol tolerance to check for zeros.
-#' @param duplicates.tol tolerance for duplicate search
 #'
 #' @rdname isObviouslyRedundant
-#' @export
+#' @keywords internal
 #' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
 isObviouslyRedundant.matrix <- function(
     E, 
-    duplicates=TRUE, 
     operators, 
     tol=sqrt(.Machine$double.eps), 
-    duplicates.tol=tol,
     ... ){
     ib <- ncol(E)
     zeroCoef <- rowSums(abs(E[,-ib,drop=FALSE])) < tol
-    v <- as.vector(
+    as.vector(
         zeroCoef & ( (operators %in% c("==","<=")  & abs(E[,ib]) < tol) 
                    | (operators %in% c("<", "<=")  & E[,ib] > tol)
                    )
     )
-    if (duplicates){
-        if ( duplicates.tol > 0 )  E <- round(E, ceiling(-log10(duplicates.tol)))
-        v <- v | (duplicated.matrix(E) & duplicated.default(operators))
-    }
-    return(v)
 }
 
 
@@ -62,7 +54,9 @@ isObviouslyRedundant.matrix <- function(
 #' @export
 isObviouslyRedundant.editmatrix <- function(E, duplicates=TRUE, ...){
     if ( !isNormalized(E) ) E <- normalize(E)
-    isObviouslyRedundant.matrix(getAb(E),duplicates=duplicates, operators=getOps(E), ...)
+    I <- isObviouslyRedundant.matrix(getAb(E), operators=getOps(E), ...)
+    if ( duplicates ) I <- I | duplicated.editmatrix(E)
+    I
 }
 
 

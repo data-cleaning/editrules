@@ -127,12 +127,12 @@ as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, .
 
 # invert a textual numerical edit
 invert <- function(e){
-    gte   <- grep(">=",e)
-    gt    <- grep(">",e) & !gte
-    lte   <- grep("<=",e)
-    lt    <- grep("<",e) & !lte
-    eq    <- grep("==",e)
-    ineq  <- grep("!=",e)
+    gte   <- grepl(">=",e)
+    gt    <- grepl(">",e) & !gte
+    lte   <- grepl("<=",e)
+    lt    <- grepl("<",e) & !lte
+    eq    <- grepl("==",e)
+    ineq  <- grepl("!=",e)
     e[gte]  <- gsub(">=","<",e[gte])
     e[gt]   <- gsub(">","<=",e[gt])
     e[lte]  <- gsub("<=",">",e[lte])
@@ -216,15 +216,21 @@ simplify <- function(E, m=NULL){
     dummies <- getVars(E,type='dummy')
     if ( is.null(m) ) m <- contains(E) 
     
+    # move pure numerical edits to $num
     g <- contains(E$mixcat)
     r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
     if ( any(r) ){ 
         v <- invert(as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE))
-        E$mixcat <- E$mixcat[!r,,drop=FALSE]
+        E$mixcat <- reduce(E$mixcat[!r,,drop=FALSE])
         E$num <- c(E$num,editmatrix(v))
+        E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])
+    } else {
+        E$mixcat <- reduce(E$mixcat)
+        E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])
     }
+   
     E
-}
+}   
 
 
 

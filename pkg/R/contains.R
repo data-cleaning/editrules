@@ -9,6 +9,16 @@
 #' @return \code{logical} vector of length nrow(E), TRUE for edits containing \code{var}
 #' @export
 contains <- function(E,var=NULL,...){
+    if (nedits(E)==0){
+        if ( is.null(var) ) var <- getVars(E)
+        return(
+            array(
+                logical(0),
+                dim=c(0,length(var)),
+                dimnames=list(edit=NULL,variable=var)
+            )
+        )
+    }
     UseMethod('contains')
 }
 

@@ -133,9 +133,26 @@ indFromArray <- function(A,sep){
 #' @rdname substValue 
 #' @export
 substValue.editset <- function(E, var, value, simplify=TRUE, ...){
+# Techical note (for internal use only). Substituting a dummy variable
+# (e.g. .num.1) with TRUE or FALSE amounts to making an assumption about the validity
+# of the condition stated in that dummy. As such, it should not be added
+# to the numerical editmatrix (since that editmatrix is only relevant when the
+# assumed condition is already fulfilled). Instead, the condition is 
+# added to the 'condition' attribute of the editset.
+
     # the nonnumeric case is simple
     if ( !is.numeric(value) ){
         E$mixcat <- substValue(E$mixcat,var,value,...)
+        # move substituted dummies to "condition"
+        id <- var %in% getVars(E,type='dummy')
+        if ( any(id) ){
+            dvar <- rownames(E$mixnum) %in% var[id]
+            v <- as.character(E$mixnum[dvar,])
+            v[!value[id]] <- invert(v[!value[id]])
+            attr(E,"condition") <- c(attr(E,"condition"),v)
+            E$mixnum <- E$mixnum[!dvar,]
+        }
+        if ( simplify ) E <- simplify(E)
         return(E)
     }
     # substitute pure numeric data

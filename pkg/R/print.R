@@ -90,6 +90,11 @@ print.cateditmatrix <- function(x, ...){
 print.editset <- function(x, ...){
     u <- as.character(x,datamodel=FALSE)
     v <- as.character(x,datamodel=TRUE)
+    cnd <- attr(x,'condition')
+    if (!is.null(cnd)){
+        cat('Conditions:\n')
+        cat(paste(cnd,collapse=', '),'\n\n')
+    }
     cat("Data model:\n")
     v <- v[! v%in% u]
     if ( length(v)>0 ){
@@ -101,4 +106,17 @@ print.editset <- function(x, ...){
     cat(paste(format(nm,width=max(nchar(nm))),':',u,collapse='\n'),'\n')
 }
 
+
+#' print editset
+#'
+#' @export
+#' @method print dnf
+#'
+#' @param x editset object to be printed
+#' @param ... further arguments passed to or from other methods.
+#' @keywords internal
+print.dnf <- function(x, ...){
+    cat("Editset in Disjunctive Normal Form:\n\n")
+    lapply(x,function(i) {cat("\n");print(i)}, ...)
+}
 

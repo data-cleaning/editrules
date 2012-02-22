@@ -1,5 +1,9 @@
-#' Graphical representation of editmatrix
+#' Graphical representation of edits
 #' 
+#' Plots a graph, showing which variables occur in what edits. By default,
+#' squares represent edits, circles represent variables and an edge connecing
+#' a variable with an edit indicates that the edit contains the variable.
+#'
 #' Depending on the chosen \code{nodetype}, this function can plot
 #' three types of graphs based on an edit set.
 #'
@@ -130,7 +134,7 @@ plot.editarray <- function(
 #' plot method for editset
 #'
 #' @rdname plot.editmatrix
-#' @method plot editarray
+#' @method plot editset
 #' @export
 plot.editset <- function(
     x,

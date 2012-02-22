@@ -1,9 +1,3 @@
-eliminateFM <- function(E, var,...){
-    warning("eliminateFM is deprecated. Use 'eliminate' in stead")
-    eliminate(E,var,...)
-}
-
-
 
 #' eliminate a variable from a set of edit rules
 #' 
@@ -125,7 +119,7 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
         if ( fancynames ){
             rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
         } else {
-            rownames(m) <- paste("e",1:nrow(m),sep="")
+            rownames(m) <- paste("num",1:nrow(m),sep="")
         }
     }
     neweditmatrix(

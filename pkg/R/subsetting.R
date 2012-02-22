@@ -5,12 +5,13 @@
 #'
 #' @method [ editmatrix 
 #' @param x an object of class \code{\link{editmatrix}} or \code{\link{editarray}}
-#' @param i the row index in the edit matrix
+#' @param i the row index in the edit matrix (numeric, logical or rowname)
 #' @param j the column index in the edit matrix
 #' @param ... arguments to be passed to other methods. Currently ignored.
 #' @rdname subsetting
 #' @export
 `[.editmatrix` <- function(x, i, j, ...){
+    if (!missing(i) && is.character(i) ) i <- match(i,rownames(x),nomatch=0)
     E <- neweditmatrix(
         A = as.matrix(x)[i, j, drop=FALSE],
         ops = getOps(x)[i]
@@ -61,7 +62,8 @@
     neweditset(
         num = x$num[i[i<=nnum]],
         mixnum = mixnum,
-        mixcat = mixcat
+        mixcat = mixcat,
+        condition = attr(x,"condition")
     )
 }
 
