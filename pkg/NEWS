@@ -1,5 +1,5 @@
 version 2.2-0
-- Added function 'disjunct' deriving DNF for edit sets
+- Added function 'disjunct' decoupling conditional numeric/categorical edit sets
 - removed deprecated functions 'eliminateFM' and 'editrules'
 - Fixed two corner case bugs in localizeErrors with method="mip"
 - bugfix in duplicated.editmatrix
