@@ -21,7 +21,7 @@ disjunct <- function(E){
     dnf(E,"E", e)
     L <- as.list(e)
     names(L) <- NULL
-    class(L) <- c("dnf")
+    class(L) <- c("editsets")
     L
 }
 
