@@ -74,17 +74,28 @@ editset <- function(editrules, env=new.env()){
 #
 #
 #
-neweditset <- function(num, mixcat, mixnum,...){
+neweditset <- function(num, mixcat, mixnum, condition=NULL, ...){
 
   structure(
       list( num = num
           , mixnum = mixnum
           , mixcat = mixcat
-          )
-    , class="editset" 
-    , ...
+          ),
+    class="editset", 
+    condition=condition,
+    ...
   )
 
+}
+
+# condition getters and setters
+#
+condition <- function(E) attr(E,'condition')
+
+`condition<-` <- function(x, value,...){
+    if (!is.editset(x) ) stop("only for editset")
+    attr(x,'condition') <- value
+    x
 }
 
 

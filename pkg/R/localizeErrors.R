@@ -170,3 +170,11 @@ getDuration <- function(x){
     y
 }
 
+
+
+
+
+
+
+
+

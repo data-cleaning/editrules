@@ -110,12 +110,12 @@ print.editset <- function(x, ...){
 #' print editset
 #'
 #' @export
-#' @method print editsets
+#' @method print editlist
 #'
 #' @param x editset object to be printed
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
-print.editsets <- function(x, ...){
+print.editlist <- function(x, ...){
     cat("Conditional edit sets :\n\n")
     lapply(x,function(i) {cat("\n");print(i)}, ...)
 }

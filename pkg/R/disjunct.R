@@ -10,7 +10,7 @@
 #' should be expected to change in coming releases.
 #'
 #' @param E an object of class \code{\link{editset}}
-#' @return A list of editsets. 
+#' @return An object of class \code{editlist}, which is nothing more than a \code{list} of \code{editsets} with a class attribute.
 #'  Each element has an attribute 'condition' showing which conditions were assumed to derive the editset.
 #'
 #' @example ../examples/dnf.R
@@ -21,7 +21,7 @@ disjunct <- function(E){
     dnf(E,"E", e)
     L <- as.list(e)
     names(L) <- NULL
-    class(L) <- c("editsets")
+    class(L) <- c("editlist")
     L
 }
 
@@ -39,4 +39,38 @@ dnf <- function(E, name, env){
         if (isFeasible(E2$num) && isFeasible(E2$mixcat)) dnf(E2,nm[2],env)
     }
 }
+
+
+
+#' Separate an editset into its disconnected blocks and simplify
+#'
+#' @param E an editset
+#' @return A \code{list} where each element is either an \code{\link{editmatrix}}, an \code{\link{editarray}}
+#' or an object of class \code{editsets}
+#' @keywords internal
+#' @example ../examples/separate
+separate <- function(E){
+    B <- blocks(E)
+    B <- lapply(B, function(b){
+        et <- editType(b)
+        if ( all(et == 'num') ){ 
+            b <- b$num
+        } else if ( all(et == 'cat') ){
+            b <- b$mixcat
+        } else {
+            b <- disjunct(b)
+        }
+        b
+    })
+}
+
+
+
+
+
+
+
+
+
+
 
