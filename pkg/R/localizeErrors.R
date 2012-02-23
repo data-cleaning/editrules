@@ -41,6 +41,10 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     if ( !useBlocks || match.arg(method) == "mip")
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
 
+    # We need to transform logicals, since transposition of logicals leads to " TRUE", "FALSE"
+    s <- sapply(dat,class) == 'logical'
+    dat[s] <- lapply(dat[s],as.character)
+
     B  <- blocks(E)
     n <- length(B)
     i <- 0
