@@ -48,6 +48,10 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
         )
     )
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
+    # We need to transform logicals, since transposition of logicals leads to " TRUE", "FALSE"
+    s <- sapply(dat,class) == 'logical'
+    dat[s] <- lapply(dat[s],as.character)
+
     B  <- blocks(E)
     n <- length(B)
     i <- 0
