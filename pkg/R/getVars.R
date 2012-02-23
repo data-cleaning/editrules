@@ -23,11 +23,21 @@ getVars.editmatrix <- function(E,...){
 
 #' Returns the variable names of an (in)equality \code{editmatrix} E
 #'
+#' @param type should unique variable names, colnames, all variable names or category names be extracted?
 #' @export
-#' @method getVars editmatrix
+#' @method getVars cateditmatrix
 #' @keywords internal
-getVars.cateditmatrix <- function(E,...){
-  unique(sub(":.+", "", colnames(E)[-ncol(E)]))
+getVars.cateditmatrix <- function(E, type=c("uniquevar", "colnames","var", "cat"), ...){
+  nms <- colnames(E)[-ncol(E)]
+  var <- sub(":.+", "", nms)
+  cat <- sub(".+:", "", nms)
+  cat[var==cat] <- "TRUE"
+  switch( match.arg(type)
+        , colnames = nms
+        , var = var
+        , cat = cat
+        , unique(var)
+        )
 }
 
 #' get variable names in editarray
