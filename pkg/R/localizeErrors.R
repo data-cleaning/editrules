@@ -86,7 +86,9 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
 ## TODO: should we export this function?
     
     weightperrecord <- is.array(weight)
-    if ( !weightperrecord ) wt <- weight
+   
+    vars <- getVars(E)
+    if ( !weightperrecord ) wt <- weight[vars]
     n <- nrow(dat)
     m <- ncol(dat)
     err <- array(NA,
@@ -106,7 +108,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
     wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
-    X <- t(dat)
+    X <- t(dat[,vars])
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
     if (method == "localizer"){
@@ -116,11 +118,11 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
               flush.console() 
           }
           r <- X[,i]
-          if (weightperrecord) wt <- weight[i,]
+          if (weightperrecord) wt <- weight[i,vars]
           bt <- errorLocalizer(E, r, weight=wt, ...)
           e <- bt$searchBest(maxduration=maxduration)
           if (!is.null(e) && !bt$maxdurationExceeded){
-              err[i,] <- e$adapt
+              err[i,vars] <- e$adapt
               wgt[i] <- e$w
           }
           degeneracy[i] <- bt$degeneracy
