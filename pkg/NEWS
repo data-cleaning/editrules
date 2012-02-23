@@ -1,3 +1,7 @@
+version 2.2-1
+- bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein).
+- Better printing of cateditmatrix
+
 version 2.2-0
 - Added function 'disjunct' decoupling conditional numeric/categorical edit sets
 - removed deprecated functions 'eliminateFM' and 'editrules'

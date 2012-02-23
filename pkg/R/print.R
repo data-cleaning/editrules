@@ -72,8 +72,7 @@ print.cateditmatrix <- function(x, ...){
     } else {
         desc <- paste('[',desc,']')
     }
-    u <- as.character(x)
-    u <- sub('<=','=>',u)
+    u <- as.character(x, asIfStatement=TRUE)
     nm <- names(u)
     pr <- paste(format(nm,width=max(nchar(nm))),':',paste(u,desc),collapse='\n')
     cat(pr,'\n')

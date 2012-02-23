@@ -114,7 +114,7 @@ buildELMatrix.editarray <- function(E,x, weight=rep(1, length(x)), ...){
 
 #' @method buildELMatrix cateditmatrix
 buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
-  vars <- getVars(E)
+  vars <- getVars(E, type="var")
   nvars <- length(vars)
   lvls <- colnames(E)[-ncol(E)]
   nlvls <- length(lvls)

@@ -20,6 +20,14 @@
 #' @return a logical matrix where each row indicates which contraints are violated
 violatedEdits <- function(E, dat, ...){
     if (any(!getVars(E) %in% names(dat))) stop("E contains variables not in dat")
+    if (nedits(E)==0){
+        v <- matrix( logical(0)
+                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
+                   , ncol=0
+                   )
+        dimnames(v) <- list(record=rownames(dat),edit=NULL)
+        return(newviolatedEdits(v))
+    }
     UseMethod("violatedEdits")
 }
 
@@ -57,14 +65,14 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 #' @export
 violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     if (tol < 0 ) stop("Argument tol must be nonnegative")
-    if (nrow(E)==0){
-        v <- matrix( logical(0)
-                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
-                   , ncol=0
-                   )
-        dimnames(v) <- list(record=rownames(dat),edit=NULL)
-        return(newviolatedEdits(v))
-    }
+#    if (nrow(E)==0){
+#        v <- matrix( logical(0)
+#                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
+#                   , ncol=0
+#                   )
+#        dimnames(v) <- list(record=rownames(dat),edit=NULL)
+#        return(newviolatedEdits(v))
+#    }
     if (tol==0) return(violatedEdits.character(as.character(E),dat))
     if ( !isNormalized(E) ) E <- normalize(E)
 
@@ -114,9 +122,7 @@ violatedEdits.data.frame <- function(E, dat, ...){
 #' @export
 violatedEdits.editarray <- function(E, dat, datamodel=TRUE,...){
     edits <- as.character(E, useIf=FALSE, datamodel=datamodel)
-    v <- violatedEdits.character(edits,dat,...)
-#    dimnames(v) <- list(rownames(dat),names(edits))
-    newviolatedEdits(v)
+    violatedEdits.character(edits,dat,...)
 }
 
 #'
