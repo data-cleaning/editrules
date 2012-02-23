@@ -126,7 +126,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
           }
           r <- X[,i]
           if (weightperrecord) wt <- weight[i,vars]
-          bt <- errorLocalizer(E, r, weight=wt, ...)
+          bt <- errorLocalizer(E, r, weight=as.vector(wt), ...)
           e <- bt$searchBest(maxduration=maxduration)
           if (!is.null(e) && !bt$maxdurationExceeded){
               err[i,vars] <- e$adapt
