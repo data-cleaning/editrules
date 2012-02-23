@@ -43,7 +43,7 @@ checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
     }
 
     m <- nrow(dat)
-    if ( is.vector(weight) ){
+    if ( is.vector(weight) || (is.array(weight) && nrow(weight)==1) ){
         weight <- t(array(rep(weight,m),dim=c(ncol(dat),m)))
         dimnames(weight) <- dimnames(dat)
     }

@@ -41,6 +41,13 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     if ( !useBlocks || match.arg(method) == "mip")
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
 
+    weight <- array(weight,
+        dim=c(
+            ifelse(is.vector(weight),1,nrow(dat)),
+            ncol(dat)
+        )
+    )
+    if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
     B  <- blocks(E)
     n <- length(B)
     i <- 0
@@ -76,7 +83,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @param dat \code{data.frame}
 #' @param verbose \code{logical} print progress report during run?
 #' @param pretext \code{character} text to print before progress report
-#' @param weight vector or array of weights
+#' @param weight either \code{1xncol(dat)} or \code{nrow(dat)xncol(dat)} array of weights
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
 #' @param call call to include in \code{\link{errorLocation}} object
 #' @param maxduration max time for searchBest()
@@ -85,13 +92,13 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
 ## TODO: should we export this function?
     
-    weightperrecord <- is.array(weight)
-   
     vars <- getVars(E)
-    if ( !weightperrecord ) wt <- weight[vars]
+    wt <- weight[,vars,drop=FALSE]
+    weightperrecord <- nrow(weight) > 1    
+
     n <- nrow(dat)
     m <- ncol(dat)
-    err <- array(NA,
+    err <- array(FALSE,
         dim=c(n,m),
         dimnames = list(
             record=rownames(dat),
