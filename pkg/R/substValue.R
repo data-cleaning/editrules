@@ -164,6 +164,10 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
         if ( any(innum) ) 
             E$num <- substValue(E$num, numvar[innum], numval[innum])
     }
+    # substitute in condition 
+    cnd <- condition(E)
+    if ( var %in% getVars(cnd) ) condition(E) <- substValue(cnd,var,value,...)
+    # substitute in then-clauses
     i1 <- var %in% getVars(E$mixnum)
     if ( any (i1) ){ # time-saving condition
         mixvar <- var[i1]
@@ -247,20 +251,13 @@ substValue.editlist <- function(E, var, value, ...){
         stop("Variable",var,"does not occur in E")
     }
     type = L$type
-    iRemove <- logical(length(L))
+    iRemove <- logical(length(E))
     for ( i in which(L$occurs) ){
-        if ( type == "num" && 
-            var %in% getVars(condition(E[[i]])) && 
-            !isFeasible(substValue(condition(E[[i]]),var,value))
-        ){
-            iRemove[i] <- TRUE
-        } else {
-            E[[i]][[type]] <- substValue(E[[i]][[type]],var,value)
-        }
+        E[[i]] <- substValue(E[[i]],var,value)
+        if ( !isFeasible(condition(E[[i]])) ) iRemove[i] <- TRUE
     }
     E[!iRemove]
 }
-
 
 
 

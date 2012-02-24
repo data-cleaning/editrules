@@ -9,34 +9,41 @@
 #' At the moment this functionality is somewhat experimental and in- or output specification
 #' should be expected to change in coming releases.
 #'
-#' @param E an object of class \code{\link{editset}}
-#' @return An object of class \code{editlist}, which is nothing more than a \code{list} of \code{editsets} with a class attribute.
-#'  Each element has an attribute 'condition' showing which conditions were assumed to derive the editset.
+#' @param E Object of class \code{\link{editset}}
+#' @param type Return type: \code{list} (default) for \code{editlist}, \code{env} for \code{editenv}.
+#' @return An object of class \code{editlist} (\code{editenv}), which is nothing more than a \code{list} (\code{environment}) of 
+#'  \code{editsets} with a class attribute. Each element has an attribute 'condition' showing which conditions 
+#'  were assumed to derive the editset.
 #'
 #' @example ../examples/dnf.R
 #' @export
-disjunct <- function(E){
+disjunct <- function(E, type=c('list','env')){
     if (!inherits(E,'editset')) stop('only for objects of class editset')
+    type=match.arg(type)
     e <- new.env()
-    dnf(E,"E", e)
-    L <- as.list(e)
-    names(L) <- NULL
-    class(L) <- c("editlist")
-    L
+    e$i <- 0
+    dnf(E, e)
+    rm('i',envir=e)
+    if ( type == 'list'){
+        e <- as.list(e)
+        class(e) <- c("editlist")
+    } else {
+        class(e) <- c("editenv")
+    }
+    e
 }
 
-dnf <- function(E, name, env){
+dnf <- function(E, env){
     cnd <- attr(E,'condition')
     vars <- getVars(E,type="dummy")
-    if (length(vars) == 0){ 
-        assign(name,E,envir=env)
+    if (length(vars) == 0){
+        env$i <- env$i + 1
+        assign(paste("E",env$i,sep=""),E,envir=env)
     } else {
-        nm <- paste(vars[1],c("T","F"),sep="_")
-        nm <- paste(name,nm,sep="_and_")
         E1 <- substValue(E,vars[1],TRUE)
-        if ( isFeasible(E1$num) && isFeasible(E1$mixcat)) dnf(E1,nm[1],env)
+        if ( isFeasible(E1$num) && isFeasible(E1$mixcat)) dnf(E1,env)
         E2 <- substValue(E,vars[1],FALSE)
-        if (isFeasible(E2$num) && isFeasible(E2$mixcat)) dnf(E2,nm[2],env)
+        if (isFeasible(E2$num) && isFeasible(E2$mixcat)) dnf(E2,env)
     }
 }
 
