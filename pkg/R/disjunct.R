@@ -62,6 +62,7 @@ separate <- function(E){
         }
         b
     })
+    B
 }
 
 

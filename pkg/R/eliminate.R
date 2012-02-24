@@ -136,7 +136,8 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 
 #' Eliminate variable from editarray.
 #' 
-#' The elimination method is based on repeated logical reduction on categories.
+#' For categorical edits in an \code{\link{editarray}}, the elimination 
+#' method is based on repeated logical reduction on categories.
 #'
 #' @method eliminate editarray
 #' @rdname eliminate
@@ -181,6 +182,43 @@ eliminate.editarray <- function(E, var, ...){
     }
 
     neweditarray(At,ind=ind,sep=getSep(E),levels=getlevels(E))
+}
+
+
+#'
+#' For an \code{\link{editlist}}, the variable is eliminated from each
+#' consituting \code{\link{editset}}. An \code{\link{editlist}} it the
+#' result of decoupling mixed numerical and categorical edits by the
+#' \code{\link{disjunct}} function.
+#'
+#' @export
+#' @rdname eliminate
+#' @method eliminate editlist
+#'
+eliminate.editlist <- function(E, var, ...){
+    # determine variable type (num or cat)
+    ivar <- sapply(E,function(e) c(
+            var %in% getVars(e$num),
+            var %in% getVars(e$mixcat)
+        )
+    )
+    if ( sum(ivar) == 0 ){
+        warning(paste('Trying to eliminate variable',var,', which does not occur in E'))
+        return(E)
+    }
+    if ( !(is.array(ivar)) ) ivar <- array(ivar,dim=c(2,1))
+    if ( any(ivar[1,]) ) {
+        type <- 'num'
+        iset <- ivar[1,]
+    } else {
+        type <- 'mixcat'
+        iset <- ivar[2,]
+    }
+    # eliminate where relevant
+    for ( i in which(iset) ){
+        E[[i]][[type]] <- eliminate(E[[i]][[type]],var)
+    }
+    E
 }
 
 
