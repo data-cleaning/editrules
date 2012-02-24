@@ -197,26 +197,15 @@ eliminate.editarray <- function(E, var, ...){
 #'
 eliminate.editlist <- function(E, var, ...){
     # determine variable type (num or cat)
-    ivar <- sapply(E,function(e) c(
-            var %in% getVars(e$num),
-            var %in% getVars(e$mixcat)
-        )
-    )
-    if ( sum(ivar) == 0 ){
+    L <- varTypeAndOccurrence(E,var)
+    if ( length(L) == 1 && is.na(L) ){
         warning(paste('Trying to eliminate variable',var,', which does not occur in E'))
         return(E)
-    }
-    if ( !(is.array(ivar)) ) ivar <- array(ivar,dim=c(2,1))
-    if ( any(ivar[1,]) ) {
-        type <- 'num'
-        iset <- ivar[1,]
     } else {
-        type <- 'mixcat'
-        iset <- ivar[2,]
-    }
-    # eliminate where relevant
-    for ( i in which(iset) ){
-        E[[i]][[type]] <- eliminate(E[[i]][[type]],var)
+        type <- L$type
+        for ( i in which(L$occurs) ){
+            E[[i]][[type]] <- eliminate(E[[i]][[type]],var)
+        }
     }
     E
 }

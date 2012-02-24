@@ -66,6 +66,34 @@ separate <- function(E){
 }
 
 
+# For an editlist, determine the variable type and where in the list it occurs
+# E editlist
+# var character
+# returns
+# list()
+#   $type   : 'num' or 'mixcat'
+#   $occurs : logical of length(E)
+varTypeAndOccurrence <- function(E,var){
+    ivar <- sapply(E,function(e) c(
+            var %in% getVars(e$num),
+            var %in% getVars(e$mixcat)
+        )
+    )
+    if ( sum(ivar) == 0 ){
+        return(NA)
+    }
+    if ( !(is.array(ivar)) ) ivar <- array(ivar,dim=c(2,1))
+    if ( any(ivar[1,]) ) {
+        type <- 'num'
+        iset <- ivar[1,]
+    } else {
+        type <- 'mixcat'
+        iset <- ivar[2,]
+    }
+    list(type=type,occurs=iset)
+}
+
+
 
 
 

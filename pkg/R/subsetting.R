@@ -68,5 +68,15 @@
 }
 
 
+#' Index operator for \code{editlist}
+#' @method [ editlist
+#' @rdname subsetting
+#' @export
+`[.editlist` <- function(x,i,j, ...){
+    x <- unclass(x)[i]
+    class(x) <- 'editlist'
+    x
+}
+
 
 

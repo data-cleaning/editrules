@@ -53,7 +53,7 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=T
 
 #' Substitute a value in an editarray
 #'
-#' For editarrays, only rows with \code{<var>:<value>==TRUE} are kept.
+#' For an \code{\link{editarray}}, only rows with \code{<var>:<value>==TRUE} are kept.
 #' In the kept rows, categories not equal to <value> are set to \code{FALSE}
 #' If \code{reduce=TRUE}, columns corresponding to categories which are set
 #' to \code{FALSE} will be removed. Note that the function \code{\link{reduce}}
@@ -149,7 +149,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
             dvar <- rownames(E$mixnum) %in% var[id]
             v <- as.character(E$mixnum[dvar,])
             v[!value[id]] <- invert(v[!value[id]])
-            attr(E,"condition") <- c(attr(E,"condition"),v)
+            attr(E,"condition") <- c(editmatrix(v),attr(E,"condition"))
             E$mixnum <- E$mixnum[!dvar,]
         }
         if ( simplify ) E <- simplify(E)
@@ -237,10 +237,29 @@ isTautology <- function(E, tol=sqrt(.Machine$double.eps)){
 
 
 
-
-
-
-
+#'
+#' @method substValue editlist
+#' @rdname substValue
+#' @export
+substValue.editlist <- function(E, var, value, ...){
+    L <- varTypeAndOccurrence(E,var)
+    if ( length(L) == 1 && is.na(L) ){
+        stop("Variable",var,"does not occur in E")
+    }
+    type = L$type
+    iRemove <- logical(length(L))
+    for ( i in which(L$occurs) ){
+        if ( type == "num" && 
+            var %in% getVars(condition(E[[i]])) && 
+            !isFeasible(substValue(condition(E[[i]]),var,value))
+        ){
+            iRemove[i] <- TRUE
+        } else {
+            E[[i]][[type]] <- substValue(E[[i]][[type]],var,value)
+        }
+    }
+    E[!iRemove]
+}
 
 
 

@@ -5,6 +5,8 @@
 #' @return \code{editmatrix}
 c.editmatrix <- function(...){
   ems <- list(...)
+  ems <- ems[!sapply(ems,is.null)]
+
   ems <- lapply(ems, as.editmatrix)
   vars <- sort(unique(unlist(lapply(ems, getVars.editmatrix))))
   
@@ -28,6 +30,7 @@ c.editmatrix <- function(...){
 #' @return \code{editarray}
 c.editarray <- function(...){
   ems <- list(...)
+  ems <- ems[!sapply(ems,is.null)]
   
   lvls <- sort(unique(unlist(lapply(ems, getlevels))))
   seps <- unlist(sapply(ems, getSep))
