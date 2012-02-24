@@ -248,7 +248,7 @@ isTautology <- function(E, tol=sqrt(.Machine$double.eps)){
 substValue.editlist <- function(E, var, value, ...){
     L <- varTypeAndOccurrence(E,var)
     if ( length(L) == 1 && is.na(L) ){
-        stop("Variable",var,"does not occur in E")
+        return(E)      
     }
     type = L$type
     iRemove <- logical(length(E))

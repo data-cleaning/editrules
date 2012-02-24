@@ -199,7 +199,7 @@ eliminate.editlist <- function(E, var, ...){
     # determine variable type (num or cat)
     L <- varTypeAndOccurrence(E,var)
     if ( length(L) == 1 && is.na(L) ){
-        warning(paste('Trying to eliminate variable',var,', which does not occur in E'))
+#        warning(paste('Trying to eliminate variable',var,', which does not occur in E'))
         return(E)
     } else {
         type <- L$type

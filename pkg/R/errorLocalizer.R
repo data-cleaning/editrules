@@ -33,7 +33,8 @@
 #' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
 #'
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
-#' @param x a named numerical vecor (if E is an editmatrix) or a named character vector (if E is an editarray). 
+#' @param x a named numerical vecor (if E is an editmatrix), a named character vector (if E is an editarray), 
+#'   or a named \code{list} if E is an \code{\link[=disjunct]{editlist}} or \code{\link{editset}}.
 #'    This is the record for which errors will be localized.
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
@@ -204,7 +205,7 @@ errorLocalizer.editarray <- function(
             if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
-            .I <- unique(do.call(c, c(ind[.totreat],ind[adapt])))
+            .I <- unique(do.call(c, c(ind[.totreat],ind[names(adapt)[adapt]])))
             if ( length(.totreat) > 0 &&  any(rowSums(.E[,.I,drop=FALSE]) == length(.I)) ) return(FALSE)
             
             if ( length(.totreat) == 0 ){
@@ -259,7 +260,131 @@ errorLocalizer.editarray <- function(
     bt
 }
 
+#'
+#' @method errorLocalizer editlist
+#' @rdname errorLocalizer
+#' @export
+errorLocalizer.editlist <- function(
+    E, 
+    x, 
+    weight=rep(1,length(x)), 
+    maxadapt=length(x),
+    maxweight=sum(weight),
+    maxduration=600,
+    ...){
+    
+    stopifnot(
+        is.numeric(weight), 
+        all(!is.na(weight)), 
+        all(weight>=0), 
+        length(weight)==length(x) 
+    )
+    adapt <- is.na(x)
 
+    vars <- getVars.editlist(E)
+    cont <- names(x)[!adapt] %in% vars    
+    if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
+
+    o <- order(weight[!adapt], decreasing=TRUE)[cont]
+    totreat <- names(x)[!adapt][o]
+
+    catvar <- getVars.editlist(E,type='cat')
+    icat <- logical(length(adapt))
+    names(icat) <- names(adapt)
+    icat[catvar] <- TRUE
+    for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editlist(E,v)
+    wsol <- min(sum(weight[vars %in% totreat | adapt[vars]]),maxweight)
+    ind <- getInd(E)
+    bt <- backtracker(
+        isSolution = {
+            w <- sum(weight[adapt])
+
+            if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
+
+            # check feasibility 
+            .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
+            # shortcut: 
+            if (all(.infNum)) return(FALSE)
+            
+    #        if ( w == wsol )        
+
+
+
+            # categorical variables
+            .infCat <- logical(length(.E))
+            .catadapt <- names(adapt)[adapt & .icat]
+            if ( length(.catadapt) > 0 ){
+            .trcat <- .totreat[.totreat %in% .catvar]
+            if ( length(.totreat) > 0 ){
+                .I <- unique(do.call(c, c(ind[.totreat],ind[.catadapt])))
+            } else  { # nothing to treat...
+                .I <- do.call(c,ind[.catadapt])
+            }
+            if ( length(.I) > 0 ) {
+                .infCat <- sapply(.E, function(e){
+                        any(rowSums(e$mixcat[,.I,drop=FALSE]) == length(.I)) 
+                })
+            } else { # corner case: check that the record is invalid
+                .infCat <- sapply(.E, function(e){
+                    nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
+                })
+            }
+            }
+            # No feasible region left: bound
+            if ( all(.infNum |.infCat) ) return(FALSE)
+
+            # remove infeasible regions
+            .E <- .E[!.infNum | .infCat]
+            
+            # at leaf:
+            if ( length(.totreat) == 0 ){
+                
+                # prepare output
+                wsol <<- w
+                adapt <- adapt 
+                return(TRUE)
+            } 
+        },
+        choiceLeft = {
+            .var <- .totreat[1]
+            .E <- substValue.editlist(.E, .var , x[[.var]], reduce=FALSE)
+            adapt[.var] <- FALSE
+            .totreat <- .totreat[-1]
+        },
+        choiceRight = {
+            .var <- .totreat[1]
+            .E <- eliminate.editlist(.E, .var)
+            adapt[.var] <- TRUE
+            .totreat <- .totreat[-1]
+        },
+        .E       = E,
+        x       = x,
+        maxadapt= maxadapt,
+        maxweight=maxweight,
+        .totreat = totreat,
+        adapt   = adapt,
+        weight  = weight,
+        wsol    = wsol,
+        ind     = ind,
+        .icat   = icat,
+        .catvar = catvar
+    )
+    # add a searchBest function, currently returns random solution when multiple weights are encountered.
+    with(bt,{
+        degeneracy <- NA
+        searchBest <- function(maxduration=600, VERBOSE=FALSE){
+            l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
+            if (length(l)>0){ 
+                ws <- sapply(l,function(s) s$w)
+                iwmin <- which(ws==min(ws))
+                degeneracy <<- length(iwmin)
+                if (length(iwmin) == 1) return(l[[iwmin]])
+                return(l[[sample(iwmin,1)]])
+            }
+        }
+    })
+    bt
+}
 
 
 
