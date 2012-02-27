@@ -38,9 +38,6 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
         stop("Weight must be vector or array with dimensions equal to argument 'dat'")
 
-    if ( !useBlocks || match.arg(method) == "mip")
-        return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
-
     weight <- array(weight,
         dim=c(
             ifelse(is.vector(weight),1,nrow(dat)),
@@ -49,8 +46,12 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
     )
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
     # We need to transform logicals, since transposition of logicals leads to " TRUE", "FALSE"
-    s <- sapply(dat,class) == 'logical'
+    s <- sapply( dat, function(x) class(x)=='logical' && !all(is.na(x)) ) 
     dat[s] <- lapply(dat[s],as.character)
+
+    if ( !useBlocks || match.arg(method) == "mip")
+        return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
+
 
     B  <- blocks(E)
     n <- length(B)
@@ -95,7 +96,8 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @keywords internal
 localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
 ## TODO: should we export this function?
-    
+
+
     vars <- getVars(E)
     wt <- weight[,vars,drop=FALSE]
     weightperrecord <- nrow(weight) > 1    
@@ -119,7 +121,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
     wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
-    X <- t(dat[,vars])
+    X <- t(dat[,vars,drop=FALSE])
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
     if (method == "localizer"){
@@ -129,8 +131,8 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
               flush.console() 
           }
           r <- X[,i]
-          if (weightperrecord) wt <- weight[i,vars]
-          bt <- errorLocalizer(E, r, weight=as.vector(wt), ...)
+          if (weightperrecord) wt <- weight[i,]
+          bt <- errorLocalizer(E, r, weight=wt, ...)
           e <- bt$searchBest(maxduration=maxduration)
           if (!is.null(e) && !bt$maxdurationExceeded){
               err[i,vars] <- e$adapt
@@ -150,7 +152,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
         if (weightperrecord) wt <- weight[i,]
         le <- localize_mip_rec(E, r, weight=wt, ...)
         if (!le$maxdurationExceeded){
-          err[i,] <- le$adapt
+          err[i,vars] <- le$adapt
           wgt[i] <- le$w
         }
         degeneracy[i] <- NA

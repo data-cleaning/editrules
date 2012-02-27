@@ -259,10 +259,9 @@ localize_mip_rec <- function( E
    #write.lp(lps, "test.lp")
    
    #print(list(idx=idx, sol=sol))
-   
    adapt <- sapply(x, function(i) FALSE)
    adapt[names(sol.adapt)] <- (sol.adapt > 0)
-   
+
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
    
