@@ -75,9 +75,10 @@ getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
     c(numvars, catvars)
 }
 
-#' @export
+#'
 #' @method getVars NULL
-#' @rdname
+#' @export
+#' @rdname getVars
 getVars.NULL <- function(E,...){
     NULL
 }
