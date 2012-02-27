@@ -186,8 +186,8 @@ eliminate.editarray <- function(E, var, ...){
 
 
 #'
-#' For an \code{\link{editlist}}, the variable is eliminated from each
-#' consituting \code{\link{editset}}. An \code{\link{editlist}} it the
+#' For an \code{\link[=disjunct]{editlist}}, the variable is eliminated from each
+#' consituting \code{\link{editset}}. An \code{\link[=disjunct]{editlist}} it the
 #' result of decoupling mixed numerical and categorical edits by the
 #' \code{\link{disjunct}} function.
 #'

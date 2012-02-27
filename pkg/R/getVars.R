@@ -49,12 +49,11 @@ getVars.editarray <- function(E,...) names(attr(E,"ind"))
 
 #'
 #'
+#' @method getVars editset
 #' @param type (editset- or list only) which variables? \code{all} means all (except dummies), \code{num} means 
 #'      all numericals, \code{cat} means all categoricals, \code{mix} means those numericals appearing in a logical 
 #'      constraint and \code{dummy} means dummy variables connecting the logical with numerical constraints.
-#' @param dummies Also return dummy variables used in \code{E$mixcat} (only if \code{type} is \code{all} or \code{cat})
 #' @export
-#' @method getVars editset
 #' @rdname getVars
 getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
     type <- match.arg(type)
@@ -86,7 +85,7 @@ getVars.NULL <- function(E,...){
 #'
 #' @export
 #' @method getVars editlist
-#' @rdname getVars
+#' @keywords internal
 getVars.editlist <- function(E,...){
 # under normal circumstances, each part of an editlist has the same variables
     if ( length(E) == 0 ) return(NULL)

@@ -53,9 +53,11 @@ dnf <- function(E, env){
 #'
 #' @param E an editset
 #' @return A \code{list} where each element is either an \code{\link{editmatrix}}, an \code{\link{editarray}}
-#' or an object of class \code{editsets}
-#' @keywords internal
+#' or an object of class \code{\link[=disjunct]{editlist}} which cannot be simplified further.
+#' 
 #' @example ../examples/separate.R
+#' @export
+#' @seealso \code{\link{blocks}}
 separate <- function(E){
     B <- blocks(E)
     B <- lapply(B, function(b){

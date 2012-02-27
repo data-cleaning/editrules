@@ -94,7 +94,7 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
+localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
 ## TODO: should we export this function?
 
 
@@ -131,6 +131,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
               flush.console() 
           }
           r <- X[,i]
+          names(r) <- rownames(X)
           if (weightperrecord) wt <- weight[i,]
           bt <- errorLocalizer(E, r, weight=wt, ...)
           e <- bt$searchBest(maxduration=maxduration)
@@ -149,6 +150,7 @@ localize <- function(E, dat, verbose, pretext, call=sys.call(), weight, maxdurat
           flush.console() 
         }
         r <- X[,i]
+        names(r) <- rownames(X)
         if (weightperrecord) wt <- weight[i,]
         le <- localize_mip_rec(E, r, weight=wt, ...)
         if (!le$maxdurationExceeded){

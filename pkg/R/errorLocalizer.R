@@ -308,7 +308,8 @@ errorLocalizer.editlist <- function(
             
     #        if ( w == wsol )        
 
-
+            .icat <- .icat
+            .catvar <- .catvar
 
             # categorical variables
             .infCat <- logical(length(.E))

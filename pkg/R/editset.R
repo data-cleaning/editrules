@@ -92,7 +92,7 @@ neweditset <- function(num, mixcat, mixnum, condition=NULL, ...){
 #
 condition <- function(E) attr(E,'condition')
 
-`condition<-` <- function(x, value,...){
+`condition<-` <- function(x, value){
     if (!is.editset(x) ) stop("only for editset")
     attr(x,'condition') <- value
     x
