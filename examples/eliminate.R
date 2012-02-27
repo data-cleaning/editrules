@@ -66,10 +66,6 @@ E
 # by eliminating 'maritalStatus' we can deduce that under aged persones cannot be partner in marriage.
 eliminate(E,"maritalStatus")
 
-
-for ( f in dir('../pkg/R',full.names=TRUE)) dmp <- source(f)
-
-
 E <- editarray(c(
     "age \%in\% c('under aged','adult')",
     "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",

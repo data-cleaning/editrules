@@ -46,6 +46,12 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     )
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
+    # convert logical and factor to character
+    dat <- data.frame(rapply(
+            dat, f=as.character, classes=c('logiocal','factor'), how='replace'),
+            stringsAsFactors=FALSE
+    )
+
     if ( match.arg(method) == "mip" )
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
 

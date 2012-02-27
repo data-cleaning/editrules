@@ -121,7 +121,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   
   v <- integer(nlvls)
   names(v) <- lvls
-  
+
   vx <- asCat(x)
   v[vx] <- 1
   
