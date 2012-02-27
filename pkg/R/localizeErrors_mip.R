@@ -215,10 +215,12 @@ localize_mip_rec <- function( E
                             , ...
                             ){
    checklpSolveAPI()
-   
+
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
    }   
+
+    if ( is.list(x) ) x <- do.call(c,x)
    
    t.start <- proc.time()
    elm <- buildELMatrix(E, x, weight, ...)

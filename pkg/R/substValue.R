@@ -36,7 +36,8 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=T
     }
     v <- v[v != 0]
     ib <- ncol(E)
-    E[,ib] <- E[ ,ib] - E[ ,v]%*%value
+   # typecast of 'value' so it may be passed as list (usefull in error localization).
+    E[,ib] <- E[ ,ib] - E[ ,v]%*%as.numeric(value)
 
     if (reduce)
         E <- E[,-v, drop=FALSE]

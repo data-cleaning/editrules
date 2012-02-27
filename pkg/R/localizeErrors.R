@@ -19,7 +19,7 @@
 #'
 #' @param E an object of class \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param dat a \code{data.frame} with variables in E.
-#' @param useBlocks process error localization seperatly for independent blocks in E?
+#' @param useBlocks \code{DEPRECATED}. Process error localization seperatly for independent blocks in \code{E} (always \code{TRUE})?
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an array of weights with the same dimensions as \code{dat}.
@@ -31,7 +31,7 @@
 #' @return an object of class \code{\link{errorLocation}}
 #' @example ../examples/localizeErrors.R
 #' @export
-localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("localizer", "mip"), ...){
+localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("localizer", "mip"), useBlocks=TRUE, ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
 
@@ -45,15 +45,16 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
         )
     )
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
-    # We need to transform logicals, since transposition of logicals leads to " TRUE", "FALSE"
-    s <- sapply( dat, function(x) class(x)=='logical' && !all(is.na(x)) ) 
-    dat[s] <- lapply(dat[s],as.character)
 
-    if ( !useBlocks || match.arg(method) == "mip")
+    if ( match.arg(method) == "mip" )
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
 
+    if ( is.editset(E) ){
+        B <- separate(E)
+    } else {
+        B  <- blocks(E)
+    }
 
-    B  <- blocks(E)
     n <- length(B)
     i <- 0
     blockCount <- NULL
@@ -95,8 +96,6 @@ localizeErrors <- function(E, dat, useBlocks=TRUE, verbose=FALSE, weight=rep(1,n
 #' 
 #' @keywords internal
 localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
-## TODO: should we export this function?
-
 
     vars <- getVars(E)
     wt <- weight[,vars,drop=FALSE]
@@ -130,8 +129,7 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
               cat(sprintf(fmt,pretext,i,n)) 
               flush.console() 
           }
-          r <- X[,i]
-          names(r) <- rownames(X)
+          r <- as.list(dat[i,vars,drop=FALSE])
           if (weightperrecord) wt <- weight[i,]
           bt <- errorLocalizer(E, r, weight=wt, ...)
           e <- bt$searchBest(maxduration=maxduration)
@@ -149,8 +147,7 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
           cat(sprintf(fmt,pretext,i,n)) 
           flush.console() 
         }
-        r <- X[,i]
-        names(r) <- rownames(X)
+        r <- as.list(dat[i,vars,drop=FALSE])
         if (weightperrecord) wt <- weight[i,]
         le <- localize_mip_rec(E, r, weight=wt, ...)
         if (!le$maxdurationExceeded){

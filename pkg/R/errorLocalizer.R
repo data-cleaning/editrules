@@ -33,7 +33,7 @@
 #' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
 #'
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
-#' @param x a named numerical vecor (if E is an editmatrix), a named character vector (if E is an editarray), 
+#' @param x a named numerical \code{vector} or \code{list} (if E is an editmatrix), a named character \code{vector} or \code{list} (if E is an editarray), 
 #'   or a named \code{list} if E is an \code{\link[=disjunct]{editlist}} or \code{\link{editset}}.
 #'    This is the record for which errors will be localized.
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
@@ -115,9 +115,11 @@ errorLocalizer.editmatrix <- function(
               || isObviouslyInfeasible.editmatrix(.E)
                ) return(FALSE)
 
-            if ( w == wsol && isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat])) ) 
-                    return(FALSE)
-            # TODO report status
+            # shortcut: can this ever lead to a solution?
+            if ( w == wsol && 
+                isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat]))
+            ) return(FALSE)
+
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -127,7 +129,7 @@ errorLocalizer.editmatrix <- function(
         },
         choiceLeft = {
             .var <- totreat[1]
-            .E <- substValue.editmatrix(.E, .var , x[.var])
+            .E <- substValue.editmatrix(.E, .var , x[[.var]])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
@@ -187,7 +189,6 @@ errorLocalizer.editarray <- function(
     )
     adapt <- is.na(x)
 
-
     vars <- getVars.editarray(E)
     cont <- names(x)[!adapt] %in% vars    
     if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
@@ -223,7 +224,7 @@ errorLocalizer.editarray <- function(
         },
         choiceLeft = {
             .var <- .totreat[1]
-            .E <- substValue.editarray(.E, .var , x[.var], reduce=FALSE)
+            .E <- substValue.editarray(.E, .var , x[[.var]], reduce=FALSE)
             adapt[.var] <- FALSE
             .totreat <- .totreat[-1]
         },
