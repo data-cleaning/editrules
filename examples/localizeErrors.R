@@ -23,7 +23,7 @@ err$status
 
 
 ## Not run
-
+for ( d in dir("../pkg/R",full.names=T)) dmp <- source(d)
 # Demonstration of verbose processing
 # construct 2-block editmatrix
 F <- editmatrix(c(
