@@ -1,14 +1,16 @@
 #' Localize errors in a record based on Fellegi and Holt's paradigm
 #' 
-#' Returns a \code{\link{backtracker}} object for error localization in numerical data.
-#' The returned backtracker containts methods to search depth-first to the least weighted
-#' number of variables that need to be adapted so that all restrictions in E can be 
+#' Generate a \code{\link{backtracker}} object for error localization in numerical, categorical, or mixed data.
+#'
+#' The returned backtracker contains methods to search depth-first to the least weighted
+#' number of variables that need to be adapted so that all restrictions in \code{E} can be 
 #' satisfied. (Generalized principle of Fellegi and Holt (1976)).
 #'
 #' The search is excecuted with a branch-and-bound algorithm, where in the left branche,
 #' a variable is assumed correct and its value subsituted in \code{E}, while in the right
 #' branche a variable is assumed incorrect and eliminated from \code{E} with Fourier-Motzkin
-#' elimination. See De Waal (2003), chapter 8 for a consice description.
+#' elimination. See De Waal (2003), chapter 8 or De Waal, Pannekoek and Scholtus (2011) for 
+#' a concise description.
 #'
 #' Every call to \code{<backtracker>$searchNext()} returns one solution \code{list}, consisting of
 #' \itemize{
@@ -52,6 +54,9 @@
 #' of management, Erasmus university Rotterdam. 
 #' http://www.cbs.nl/nl-NL/menu/methoden/onderzoek-methoden/onderzoeksrapporten/proefschriften/2008-proefschrift-de-waal.htm
 #' 
+#' T. De Waal, Pannekoek, J. and Scholtus, S. (2011) Handbook of Statistical Data Editing. Wiley Handbooks
+#' on Survey Methodology.
+#'
 #' @export
 errorLocalizer <- function(E, x, ...){
     UseMethod("errorLocalizer")
@@ -388,5 +393,16 @@ errorLocalizer.editlist <- function(
     bt
 }
 
-
+#'
+#' When \code{E} is an \code{\link{editset}}, it is converted to an \code{\link[=disjunct]{editlist}}
+#' by \code{\link{disjunct}} and the method for \code{\link[=disjunct]{editlist}} is called.
+#'
+#' @method errorLocalizer editset
+#' @rdname errorLocalizer
+#' @export
+#'
+errorLocalizer.editset <- function(E, dat, ...){
+    D <- disjunct(E)
+    errorLocalizer.editlist(E,dat,...)
+}
 

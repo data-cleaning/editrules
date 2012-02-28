@@ -47,7 +47,8 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
     # convert logical and factor to character (except for complete NA-columns)
-    dat <- data.frame(rapply(
+    dat <- data.frame(
+        rapply(
             dat, f=function(x){
                 if ( !all(is.na(x)) ){  
                     as.character(x)
@@ -57,14 +58,16 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             }, 
             classes=c('logical','factor'), 
             how='replace'
-            ),
-            stringsAsFactors=FALSE
+        ),
+        stringsAsFactors=FALSE
     )
     # call mip method (no blocking necessary: this is done by lpSolve)
     if ( match.arg(method) == "mip" ){
         checklpSolveAPI()
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
     }
+
+    # separate E in independent blocks
     if ( is.editset(E) ){
         B <- separate(E)
     } else {
