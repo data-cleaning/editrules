@@ -117,7 +117,7 @@ test_that('localizeErrors works with different weights per record',{
               )
 })
 
-
+for ( d in dir("../pkg/R",full.names=TRUE)) source(d)
 test_that('localizeErrors handles single edits with mip method',{
     expect_true(
         localizeErrors(editmatrix("x>0"),data.frame(x=-1),method='mip')$adapt[1,1]

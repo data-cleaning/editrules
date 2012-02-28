@@ -46,15 +46,25 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     )
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
-    # convert logical and factor to character
+    # convert logical and factor to character (except for complete NA-columns)
     dat <- data.frame(rapply(
-            dat, f=as.character, classes=c('logiocal','factor'), how='replace'),
+            dat, f=function(x){
+                if ( !all(is.na(x)) ){  
+                    as.character(x)
+                } else {
+                    x
+                }
+            }, 
+            classes=c('logical','factor'), 
+            how='replace'
+            ),
             stringsAsFactors=FALSE
     )
-
-    if ( match.arg(method) == "mip" )
+    # call mip method (no blocking necessary: this is done by lpSolve)
+    if ( match.arg(method) == "mip" ){
+        checklpSolveAPI()
         return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
-
+    }
     if ( is.editset(E) ){
         B <- separate(E)
     } else {
@@ -126,7 +136,6 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
     wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
-    X <- t(dat[,vars,drop=FALSE])
     fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
     if (method == "localizer"){

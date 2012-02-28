@@ -214,7 +214,6 @@ localize_mip_rec <- function( E
                             , verbose="neutral"
                             , ...
                             ){
-   checklpSolveAPI()
 
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
