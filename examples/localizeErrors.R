@@ -94,5 +94,43 @@ localizeErrors(E,dat)
 localizeErrors(E,dat,weight=c(1,1,2))
 
 
+# an example with mixed data:
+
+E <- editset(expression(
+    x + y == z,
+    2*u  + 0.5*v == 3*w,
+    w >= 0,
+    if ( x > 0 ) y > 0,
+    x >= 0,
+    y >= 0,
+    z >= 0,
+    A %in% letters[1:4],
+    B %in% letters[1:4],
+    C %in% c(TRUE,FALSE),
+    D %in% letters[5:8],
+    if ( A %in% c('a','b') ) y > 0,
+    if ( A == 'c' ) B %in% letters[1:3],
+    if ( !C == TRUE) D %in% c('e','f')
+))
+
+set.seed(1)
+dat <- data.frame(
+    x = sample(-1:8),
+    y = sample(-1:8),
+    z = sample(10),
+    u = sample(-1:8),
+    v = sample(-1:8),
+    w = sample(10),
+    A = sample(letters[1:4],10,replace=TRUE),
+    B = sample(letters[1:4],10,replace=TRUE),
+    C = sample(c(TRUE,FALSE),10,replace=TRUE),
+    D = sample(letters[5:9],10,replace=TRUE),
+    stringsAsFactors=FALSE
+)
+
+(el <-localizeErrors(E,dat,verbose=TRUE))
+
+
+
 
 

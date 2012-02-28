@@ -1,0 +1,195 @@
+%\VignetteIndexEntry{Manipulation of categorical data edits and error localization with the editrules package}
+\documentclass[11pt, fleqn, a4paper]{article}
+\usepackage{inconsolata}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{array}
+\usepackage[rounded]{syntax}
+\usepackage{color, colortbl}
+\usepackage{tex/smalltree}
+\usepackage{natbib}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{threeparttable}
+\usepackage{makeidx}
+\usepackage{mySweave}
+\makeindex
+
+% shorthand to make '<category>' in syntax diagram
+\newcommand{\syncat}{ $\textrm{\sf '}\langle category\rangle\textrm{\sf '}$ }
+
+
+\DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator*{\Lor}{\lor}
+\DeclareMathOperator*{\Land}{\land}
+\DeclareMathOperator{\ocup}{\cup}
+\DeclareMathOperator{\ocap}{\cap}
+\DeclareMathOperator{\res}{\mathfrak{R}}
+\newcommand{\rhomap}{\xrightarrow{\rho}}
+\newcommand{\rows}{\textrm{rows}}
+\newcommand{\columns}{\textrm{columns}}
+\newcommand{\ind}{\textrm{\bf ind}}
+\newcommand{\true}{\textrm{\sc true} }
+\newcommand{\false}{\textrm{\sc false} }
+
+\newtheorem{theorem}{Theorem}[subsection]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\theend}{\hfill$\Box$}
+
+
+\usepackage{float}
+ 
+\floatstyle{boxed}
+\newfloat{Rcode}{t!}{rco}
+\floatname{Rcode}{Figure}
+
+
+
+% stimulate latex to put multiple floats on a page.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{3}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.75}
+\renewcommand{\floatpagefraction}{.9}
+\renewcommand{\dblfloatpagefraction}{.9}
+\renewcommand{\dbltopfraction}{.9}
+\hyphenation{
+    time-stamp 
+    se-pa-ra-te-ly
+    ge-ne-ra-li-zed
+    e-dit-rules
+}
+
+<<echo=false>>=
+library(editrules)
+@
+
+\title{Manipulation of conditional restrictions and error localization with the
+    {\sf editrules} package\\
+{\small package version \Sexpr{packageVersion("editrules")}}}
+\author{Mark van der Loo and Edwin de Jonge}
+\begin{document}
+\maketitle
+\begin{abstract}
+{\em This vignette is far from finished. Version 3.0 of the package will have the
+full vignette.}
+
+
+Analyses of categorical data are often hindered by the occurrence of
+inconsistent or incomplete raw data. Although {\sf R} has many features for
+analyzing categorical data, the functionality for error localization and error
+correction are currently limited.  The {\sf editrules} package is designed to
+offer a user-friendly toolbox for edit definition, manipulation, and error
+localization based on the generalized paradigm of Fellegi and Holt.  
+
+This is the third paper describing functionalities of the {\sf R} {\sf
+editrules} package and marks the completion of {\sf editrules} version $3.0$.
+The first paper \citep{jonge:2011} describes methods and implementation for
+handling numerical data, the second paper \citep{loo:2011b} describes methods and implementation
+for handling categorical data, while this paper is concerned with mixed 
+data and conditional restrictions. A fourth paper \citep{jonge:2011b} is dedicated
+to error localization as a mixed integer problem.
+
+
+%{\em For package version 3.0-0, this vignette is a near literal 
+%    transcript of \cite{loo:2011b}. Please refer to that paper
+%    when referencing categorical data handling with {\sf editrules}.
+%    This vignette will be updated with the package if necessary.}
+
+\end{abstract}
+
+\newpage
+\tableofcontents
+\listofalgorithms
+
+\newpage
+
+
+\section{Introduction}
+\label{sIntroduction}
+Analyses of categorical data are often hindered by occurrences of incomplete or
+inconsistent raw data records.  The process of locating and correcting such
+errors is referred to as {\em data editing}, and it has been estimated that
+National Statistics Institutes spend up to 40\% of their resources on this
+process \citep{waal:2011}. For this reason, considerable attention is paid to
+the development of data editing methods that can be automated. Since data are
+often required to obey many interrelated consistency rules, data
+editing can be too complex to perform manually. \citet{winkler:1999} mentions
+practical cases where records have to obey 250, 300 or even 750 internal
+consistency rules.  Although the {\sf R} statistical environment has numerous
+facilities for analyzing categorical data [See {\em e.g.} \citet{husson:2010}],
+the options for error localization and record correction are currently limited.
+
+This paper presents version 3.0 of {\sf R} package {\sf editrules}, which was
+developed to help closing the gap between raw data retrieval and data analysis
+with {\sf R}.  The main purpose of the {\sf editrules} package is to provide a
+user-friendly environment for handling data restriction rules, to apply those
+rules to data, and to localize erroneous fields in data based on the
+generalized principle of \cite{fellegi:1976}.  The package does not offer
+functionality for data correction. However, it does facilitate the
+identification of the set of solutions for an error correction problem.
+
+This package contains several innovations with respect to the branch-and-bound
+algorithm for error localization in categorical data described in
+\cite{waal:2003}. Most importantly, support for handling conditional
+restrictions of the form 
+\begin{verbatim}
+    if ( <linear conditions> ) <other linear conditions>
+\end{verbatim}
+are supported out-of-the-box, whereas the formulation of \cite{waal:2003}
+requires that restrictions in the if-condition contains only categorical variables.
+Functionality has been added to read sets of such edits and to manipulate them
+by means of variable elimination and value substitution through the same
+interfaces as used for numerical and categorical data.
+
+The current paper complements our previous papers on the treatment numerical
+\citep{jonge:2011} and categorical \citep{loo:2011b}. We describe some of the
+algorithms underlying {\sf editrules}' functionality and the internal
+representation of mixed data edits Examples in {\sf R} code are given
+throughout the text to assist new users in getting started with this 
+functionality.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 1
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Categorical data and edit rules}
+
+\clearpage
+\section{Conclusions}
+This paper describes the theory and implementation of categorical edit
+manipulation in {\sf R} package {\sf editrules}. Categorical restrictions may
+be defined textually in standard {\sf R} syntax. Edits can be manipulated by
+variable elimination and value substitution. Many other functionalities such as
+feasibility checks, block detection and redundancy removal are implemented as
+well.  Moreover, the package offers functionality to check records against
+rules and can determine the location of errors based on the generalized
+principle of Fellegi and Holt. 
+
+Future work will include performance enhancements of error localization by
+restating the problem as a mixed-integer problem, the treatment of mixed 
+data and handling interdependent edits.
+
+
+\bibliographystyle{chicago}
+\bibliography{editrules}
+
+\clearpage
+\addcontentsline{toc}{section}{Index}
+\printindex
+
+
+
+\end{document}
+
+

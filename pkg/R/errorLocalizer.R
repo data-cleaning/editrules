@@ -154,7 +154,7 @@ errorLocalizer.editmatrix <- function(
         wsol = wsol
     )
     
-    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    # add a searchBest function, currently returns random solution in the case of multiple optima
     with(cp,{
         degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
@@ -249,7 +249,7 @@ errorLocalizer.editarray <- function(
         wsol    = wsol,
         ind     = ind
     )
-    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    # add a searchBest function, currently returns random solution in the case of multiple optima
     with(bt,{
         degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
@@ -309,33 +309,36 @@ errorLocalizer.editlist <- function(
 
             # check feasibility 
             .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
-            # shortcut: 
+            # shortcut 1: 
             if (all(.infNum)) return(FALSE)
-            
-    #        if ( w == wsol )        
-
-            .icat <- .icat
+            # shortcut 2: bound if numerical part cannot lead to a solution     
             .catvar <- .catvar
+            if ( w == wsol ){
+                .subvar <- .totreat[!.totreat %in% .catvar]
+                if (isObviouslyInfeasible(.E$num, .subvar,x[.subvar])) return(FALSE)
+            }
+
 
             # categorical variables
+            .icat <- .icat
             .infCat <- logical(length(.E))
             .catadapt <- names(adapt)[adapt & .icat]
             if ( length(.catadapt) > 0 ){
-            .trcat <- .totreat[.totreat %in% .catvar]
-            if ( length(.totreat) > 0 ){
-                .I <- unique(do.call(c, c(ind[.totreat],ind[.catadapt])))
-            } else  { # nothing to treat...
-                .I <- do.call(c,ind[.catadapt])
-            }
-            if ( length(.I) > 0 ) {
-                .infCat <- sapply(.E, function(e){
-                        any(rowSums(e$mixcat[,.I,drop=FALSE]) == length(.I)) 
-                })
-            } else { # corner case: check that the record is invalid
-                .infCat <- sapply(.E, function(e){
-                    nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
-                })
-            }
+                .trcat <- .totreat[.totreat %in% .catvar]
+                if ( length(.totreat) > 0 ){
+                    .I <- unique(do.call(c, c(ind[.totreat],ind[.catadapt])))
+                } else  { # nothing to treat...
+                    .I <- do.call(c,ind[.catadapt])
+                }
+                if ( length(.I) > 0 ) {
+                    .infCat <- sapply(.E, function(e){
+                            any(rowSums(e$mixcat[,.I,drop=FALSE]) == length(.I)) 
+                    })
+                } else { # corner case: check that the record is invalid
+                    .infCat <- sapply(.E, function(e){
+                        nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
+                    })
+                }
             }
             # No feasible region left: bound
             if ( all(.infNum |.infCat) ) return(FALSE)
@@ -364,19 +367,19 @@ errorLocalizer.editlist <- function(
             adapt[.var] <- TRUE
             .totreat <- .totreat[-1]
         },
-        .E       = E,
-        x       = x,
-        maxadapt= maxadapt,
-        maxweight=maxweight,
-        .totreat = totreat,
-        adapt   = adapt,
-        weight  = weight,
-        wsol    = wsol,
-        ind     = ind,
-        .icat   = icat,
-        .catvar = catvar
+        .E          = E,
+        x           = x,
+        maxadapt    = maxadapt,
+        maxweight   = maxweight,
+        .totreat    = totreat,
+        adapt       = adapt,
+        weight      = weight,
+        wsol        = wsol,
+        ind         = ind,
+        .icat       = icat,
+        .catvar     = catvar
     )
-    # add a searchBest function, currently returns random solution when multiple weights are encountered.
+    # add a searchBest function, returns random solution when multiple weights are encountered.
     with(bt,{
         degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
@@ -401,8 +404,8 @@ errorLocalizer.editlist <- function(
 #' @rdname errorLocalizer
 #' @export
 #'
-errorLocalizer.editset <- function(E, dat, ...){
+errorLocalizer.editset <- function(E, x, ...){
     D <- disjunct(E)
-    errorLocalizer.editlist(E,dat,...)
+    errorLocalizer.editlist(E,x,...)
 }
 

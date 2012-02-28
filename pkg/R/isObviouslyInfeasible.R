@@ -48,7 +48,9 @@ isObviouslyInfeasible.editarray <- function(E,...){
     any(rowSums(E)==ncol(E))
 }
 
-
-
+ 
+isObviouslyInfeasible.NULL <- function(E,...){
+    FALSE
+}
 
 
