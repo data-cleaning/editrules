@@ -19,7 +19,7 @@
 
 % shorthand to make '<category>' in syntax diagram
 \newcommand{\syncat}{ $\textrm{\sf '}\langle category\rangle\textrm{\sf '}$ }
-
+\newcommand{\notodot}{\odot\kern-0.85em/\:\,}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
@@ -121,64 +121,181 @@ inconsistent raw data records.  The process of locating and correcting such
 errors is referred to as {\em data editing}, and it has been estimated that
 National Statistics Institutes spend up to 40\% of their resources on this
 process \citep{waal:2011}. For this reason, considerable attention is paid to
-the development of data editing methods that can be automated. Since data are
-often required to obey many interrelated consistency rules, data
-editing can be too complex to perform manually. \citet{winkler:1999} mentions
-practical cases where records have to obey 250, 300 or even 750 internal
-consistency rules.  Although the {\sf R} statistical environment has numerous
-facilities for analyzing categorical data [See {\em e.g.} \citet{husson:2010}],
-the options for error localization and record correction are currently limited.
+the development of data editing methods that can be automated. 
 
-This paper presents version 3.0 of {\sf R} package {\sf editrules}, which was
-developed to help closing the gap between raw data retrieval and data analysis
-with {\sf R}.  The main purpose of the {\sf editrules} package is to provide a
-user-friendly environment for handling data restriction rules, to apply those
-rules to data, and to localize erroneous fields in data based on the
-generalized principle of \cite{fellegi:1976}.  The package does not offer
-functionality for data correction. However, it does facilitate the
-identification of the set of solutions for an error correction problem.
+In the practive of (official) statistics, data records are often required to obey 
+various restrictions, including sum rules, positivity demands or other linear
+inequalities, and categorical restictions which exclude certain value combinations.
+In literature on data editing, such restrictions are often called {\em edit rules}
+or {\em edits}, in short.
 
-This package contains several innovations with respect to the branch-and-bound
-algorithm for error localization in categorical data described in
-\cite{waal:2003}. Most importantly, support for handling conditional
-restrictions of the form 
-\begin{verbatim}
-    if ( <linear conditions> ) <other linear conditions>
-\end{verbatim}
-are supported out-of-the-box, whereas the formulation of \cite{waal:2003}
-requires that restrictions in the if-condition contains only categorical variables.
-Functionality has been added to read sets of such edits and to manipulate them
-by means of variable elimination and value substitution through the same
-interfaces as used for numerical and categorical data.
+Data editing is severely complicated by the fact that the fact that these rules
+are often interrelated: a variable can occur in more than one restriction, and
+a restriction can contain more than a single variable. Sets of restrictions on
+purely numerical or purely categorical data have been treated in our previous
+papers on the editrules package \citep{jonge:2011,loo:2011c}. Here, we extend
+our treatment to restrictions which are related by conditional statements. An
+example of such a statement, connecting a categorical variable {\em legal
+form} with a numerical variable ({\em number of employees}), is
+\begin{quote}
+If the legal form (of a business) is self-employed, the number of employees must be zero.
+\end{quote}
+\cite{waal:2003} and \cite{waal:2003a} showed that every edit containing catorical as
+well as numerical data can be written in such a form. That is, all
+restrictions on categorical data occur in the predicate and numerical restrictions
+occur in the consequent expression. The formulation is general enough to encompass
+purely numerical restrictions (the predicate becomes {\sc true}) as well as purely
+categorical rules (the consequent becomes {\sc false}).
+However, rules connecting numerical restrictions are not uncommon, as shown by
+the following example, which is commonly applied to business surveys.
+\begin{quote}
+If the number of employees is positive, the amount of salary payed must be
+positive.
+\end{quote}
 
-The current paper complements our previous papers on the treatment numerical
-\citep{jonge:2011} and categorical \citep{loo:2011b}. We describe some of the
-algorithms underlying {\sf editrules}' functionality and the internal
-representation of mixed data edits Examples in {\sf R} code are given
-throughout the text to assist new users in getting started with this 
-functionality.
+The purpose of this paper is to present version 3.0 of the {\sf R} extension
+package {\sf editrules}. This package extends the functionality of the previous
+versions by introducing the ability to parse, manipulate conditional
+restrictions and to apply them to data. The package can handle restrictions
+where numerical restrictions occur in the predicate as well as in the
+consequent, and extends the methodology described by \cite{waal:2003}.  The
+basic manipulations on edits which were introduced in the previous versions for
+numerical or categorical data are extended here to include conditional
+restrictions. These manipulations include, but are not limited to, redundancy
+checking, block decomposition, variable elimination and value substitution.
+Error localization for data under conditional edits based the generalized
+Fellegi-Holt assumption \cite{fellegi:1976} is provided as well. Error
+localization has been implemented based on two computational methods. One based
+on a branch-and-bound algorithm and one based on a mixed-integer formulation.
+Here, the branch-and-bound formulation will be discussed, leaving treatment of
+the mixed-integer approach to a seperate paper \citep{jonge:2011b}.
 
+The rest of this paper is structured as follows. In Section \ref{smixeddata}
+we describe which restrictions can be handled by the package, and introduce
+the central object for handling conditional restrictions: the {\sf editset}
+object. In Section \ref{smanipulation} we provide details on the most important 
+edit manipulations that the package provides and Section \ref{serrorlocalization}
+is devoted to error localization. Examples in {\sf R} code are given throughout
+to aide new users getting started with this functionality.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 1
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Categorical data and edit rules}
+\section{Mixed data and conditional edits}
+\label{smixeddata}
+The term ``mixed data'' is used here to indicate data containing both numerical
+and categorical data. We do not distinguish between integer and real numbers
+here: currently, both are handled as real numbers by editrules. We also do not
+distinguish between logical and categorical data: under the hood, editrules
+handles these data types as {\sf character}, although a user need not consider
+this when specifying types (see also \cite{loo:2011b}).
+
+\subsection{The {\sf editset} object}
+A record in a mixed dataset can be described as an element of the domain
+\begin{equation}
+R = D_1\times D_2\times\cdots\times D_p\times \mathbb{R}^{q}.
+\end{equation}
+Here, $p$ and $q$ are positive integers that denote the number of categorical
+and numerical variables respectively. The $D_k$ are the possible set of
+categories for each categorical variable $k$. Henceforth, we shall denote a
+record as ${\bf r}=(v_1,v_2,\ldots,v_p,x_1,x_2,\ldots,x_q)=({\bf v},{\bf x})$, where
+the $v_k$ are categorical and the $x_k$ are numerical variables.
+
+The conditional edits that can be treated with the {\sf editrules} package can
+be written as either
+\begin{eqnarray}
+\label{eqedit1}
+\lefteqn{
+\textrm{\sf if } {\bf Ax}\boldsymbol{\odot}{\bf b} \textrm{ \sf then } {\bf c\cdot x}\odot  d 
+\textrm{, where }}\\
+&&\begin{array}{l}
+{\bf A} \in \mathbb{R}^{m\times q} \textrm{, }  
+    {\bf b} \in \mathbb{R}^{m}\textrm{, }   
+    \boldsymbol{\odot}\in\{<,\leq,\geq, >\}^m\\
+    {\bf c} \in \mathbb{R}^{q}\textrm{, } 
+    d \in \mathbb{R}\textrm{, } 
+    \odot\in\{<,\leq,\geq, >\},\nonumber
+\end{array}
+\end{eqnarray}
+or
+\begin{eqnarray}
+\label{eqedit2}
+\lefteqn{
+\textrm{\sf if } {\bf v}\in F \textrm{ \sf then } {\bf c\cdot x} \odot d,
+\textrm{ \sf where }}\\
+&& \begin{array}{l}
+F \subset D_1 \times D_2 \times\cdots\times D_p,\\
+\textrm{ and } {\bf c}\textrm{, }d\textrm{, }\odot\textrm{ as in Eq.\ \eqref{eqedit1}.} 
+\end{array}\nonumber
+\end{eqnarray}
+Here, $F$ is used to denote a set of categorical edits, as defined in
+\cite{loo:2011b}. It is important to note that equality restrictions are not
+allowed in this formulation, neither in the premise, nor in the consequent. The
+(technical) reason is that the logical negation of a linear equality yields a
+nonlinear edit which prohibits certain operations such as variable elimination
+by the Fourier-Motzkin procedure. Under the hood, negations of the premise or
+consequents of conditional restrictions are often necessary to perform edit
+manipulations.
+
+Internally, such conditional edits are represented by replacing each linear condition
+with a dummy variable $t$, which is defined as
+\begin{equation}
+t = \left\{\begin{array}{l}
+\true\textrm{ when } {\bf a\cdot x}\odot b\\
+\false\textrm{ when }{\bf a\cdot x}\notodot b.
+\end{array}\right.
+\end{equation}
+%
+This way, the edits of Eq.\ \eqref{eqedit1} may be written as
+\begin{equation}
+\label{eqdummyedit1}
+\textrm{\sf if } t_1\land t_2\land\cdots\land t_m \textrm{ \sf then } t_{m+1},
+\end{equation}
+where $t_1\cdots t_m$ correspond to the $m$ linear restrictions in the premise
+of Eq.\ \eqref{eqedit1} and $t_{m+1}$ to the restriction in the consequent.
+Similary, Eq.\ \eqref{eqedit2} may be rewritten as
+\begin{equation}
+\label{eqdummyedit2}
+\textrm{\sf if } {\bf v} \in F \textrm{ \sf then } t,
+\end{equation}
+where $t$ corresponds to the linear restriction of Eq. \eqref{eqedit2}.
+The restrictions of Eqs.\ \eqref{eqdummyedit1} and \eqref{eqdummyedit2}
+are of a form that can be stored in a boolean representation  as described 
+in \cite{loo:2011b} for the case of categorical variables. The editrules
+package uses an object class called {\sf editarray} to store such a
+representation.
+
+The linear restrictions which are replaced by the dummy variables can be
+gathered in a matrix representation, as described in \cite{jonge:2011}. 
+In {\sf editrules} such a representation is stored in an object of 
+class {\sf editmatrix}. To store conditional edits, along
+with pure numerical and pure categorical edits, we defined the 
+class {\sf editset}, which can be denoted as
+\begin{equation}
+E = \langle {\bf num},{\bf mixnum},{\bf mixcat}\rangle
+\end{equation}
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Manipulation of conditional edits}
+\label{smanipulation}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Error Localization on mixed data}
+\label{serrorlocalization}
+
 
 \clearpage
 \section{Conclusions}
-This paper describes the theory and implementation of categorical edit
-manipulation in {\sf R} package {\sf editrules}. Categorical restrictions may
-be defined textually in standard {\sf R} syntax. Edits can be manipulated by
-variable elimination and value substitution. Many other functionalities such as
-feasibility checks, block detection and redundancy removal are implemented as
-well.  Moreover, the package offers functionality to check records against
-rules and can determine the location of errors based on the generalized
-principle of Fellegi and Holt. 
-
-Future work will include performance enhancements of error localization by
-restating the problem as a mixed-integer problem, the treatment of mixed 
-data and handling interdependent edits.
+\label{sconclusions}
 
 
 \bibliographystyle{chicago}
