@@ -199,7 +199,6 @@ eliminate.editlist <- function(E, var, ...){
     # determine variable type (num or cat)
     L <- varTypeAndOccurrence(E,var)
     if ( length(L) == 1 && is.na(L) ){
-#        warning(paste('Trying to eliminate variable',var,', which does not occur in E'))
         return(E)
     } else {
         type <- L$type
@@ -211,5 +210,17 @@ eliminate.editlist <- function(E, var, ...){
 }
 
 
+
+#'
+#' For an \code{\link{editset}}, \code{E} is transformed to an \code{\link[=disjunct]{editlist}}.
+#' Next, the elimination method for \code{\link[=disjunct]{editlist}} is called.
+#'
+#' @export 
+#' @rdname eliminate
+#' @method eliminate editset
+eliminate.editset <- function(E,var,...){
+    D <- disjunct(E)
+    eliminate.editlist(D,...)
+}
 
 
