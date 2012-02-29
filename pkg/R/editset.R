@@ -20,7 +20,7 @@ editset <- function(editrules, env=new.env()){
     num <- editmatrix(num)
     nnum <- nrow(num)
     # pure categorical edits    
-    cat <- editarray(cat)
+    cat <- editarray(cat,env=env)
     ncat <- nrow(cat)
     if ( ncat > 0 ) rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
 
