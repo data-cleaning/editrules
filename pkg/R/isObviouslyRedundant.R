@@ -113,8 +113,4 @@ isObviouslyRedundant.editset <- function(E, duplicates=rep(TRUE,2), ...){
 #' @rdname isObviouslyRedundant
 #' @export
 isObviouslyRedundant.editset <- function(E, duplicates=TRUE, ...){
-
-
-
-
-
+}
