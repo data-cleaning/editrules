@@ -215,7 +215,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 buildELMatrix.editset <- function( E
                                  , x
                                  , weight = rep(1, length(x))
-                                 , xlim = 1000 * cbind(l=-abs(as.numeric(x)), u=abs(as.numeric(x)))
+                                 , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,0)}))
                                  , maxvalue = 1e8
                                  ){
   Eel <- NULL
@@ -237,14 +237,15 @@ buildELMatrix.editset <- function( E
   if (length(E$mixnum)){
     mixnumidx <- which(getVars(E) %in% getVars(E$mixnum))
     xlimmn <- xlim[mixnumidx,,drop=FALSE]
+    mixNum <- editmatrix(invert(as.character(E$mixnum)))
     #print(xlimmn)
-    mixNum <- softEdits(E$mixnum, xlim=xlimmn, prefix=".me")
+    mixNum <- softEdits(mixNum, xlim=xlimmn, prefix=".me")
     Eel <- c(mixNum, Eel)
   }
   Eel
 }
 #testing...
-
+# 
 # E <- editset(expression(
 #          if (x>0) y > 0
 #       ,  maritalstatus %in% c("married", "single")
