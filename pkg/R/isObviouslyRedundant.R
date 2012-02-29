@@ -62,7 +62,8 @@ isObviouslyRedundant.editmatrix <- function(E, duplicates=TRUE, ...){
 
 #' Redundancy check for \code{editarray}
 #'
-#' Check if any of the variables has FALSE for every category (a record can never be contained in such a set).
+#' For an \code{\link{editarray}}, it checks if any of the variables has 
+#' \code{FALSE} for each category (a record can never be contained in such a set).
 #'
 #' @method isObviouslyRedundant editarray
 #' @rdname isObviouslyRedundant
@@ -87,6 +88,33 @@ isRedundant.boolmat <- function(A, ind){
         1,any
     )
 }
+
+#'
+#' For an \code{\link{editset}} it checks for obvious redundancies in the numerical
+#' and categorical/mixed parts separately. Arguments \code{duplicates} must be a
+#' logical 2-vector, the first element corresponding to the numeric part, the second 
+#' element to the conditional part.
+#'
+#' @method isObviouslyRedundant editset
+#' @rdname isObviouslyRedundant
+#' @export
+isObviouslyRedundant.editset <- function(E, duplicates=rep(TRUE,2), ...){
+    c(
+        isObviouslyRedundant(E$num, duplicates=duplicates[1], ...),
+        isObviouslyRedundant(E$mixcat, duplicates=duplicates[2], ...)
+    ) 
+}
+
+
+#' For an \code{\link{editset}} it checks for obvious redundancies in the numerical
+#' and categorical/mixed parts separately.
+#'
+#' @method isObviouslyRedundant editset
+#' @rdname isObviouslyRedundant
+#' @export
+isObviouslyRedundant.editset <- function(E, duplicates=TRUE, ...){
+
+
 
 
 
