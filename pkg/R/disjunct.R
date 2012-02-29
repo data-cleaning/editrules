@@ -36,9 +36,9 @@ disjunct <- function(E, type=c('list','env')){
 dnf <- function(E, env){
     cnd <- attr(E,'condition')
     vars <- getVars(E,type="dummy")
-    if (length(vars) == 0){
-        env$i <- env$i + 1
-        assign(paste("E",env$i,sep=""),E,envir=env)
+    if (length(vars) == 0 ){
+            env$i <- env$i + 1
+            assign(paste("E",env$i,sep=""),E,envir=env)
     } else {
         E1 <- substValue(E,vars[1],TRUE)
         if ( isFeasible(E1$num) && isFeasible(E1$mixcat)) dnf(E1,env)

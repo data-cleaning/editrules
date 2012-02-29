@@ -241,6 +241,7 @@ manipulations.
 Internally, such conditional edits are represented by replacing each linear condition
 with a dummy variable $t$, which is defined as
 \begin{equation}
+\label{eqdummy}
 t = \left\{\begin{array}{l}
 \true\textrm{ when } {\bf a\cdot x}\odot b\\
 \false\textrm{ when }{\bf a\cdot x}\notodot b.
@@ -270,11 +271,303 @@ The linear restrictions which are replaced by the dummy variables can be
 gathered in a matrix representation, as described in \cite{jonge:2011}. 
 In {\sf editrules} such a representation is stored in an object of 
 class {\sf editmatrix}. To store conditional edits, along
-with pure numerical and pure categorical edits, we defined the 
+with pure numerical and pure categorical edits, we implemented the 
 class {\sf editset}, which can be denoted as
 \begin{equation}
-E = \langle {\bf num},{\bf mixnum},{\bf mixcat}\rangle
+E = \langle {\bf num},{\bf mixnum},{\bf mixcat}\rangle.
 \end{equation}
+Here, {\bf num} is an {\sf editmatrix} object holding numerical edits
+not connected to any edits with nonnumerical variables. The object
+{\bf mixnum} is an {\sf editmatrix}, holding numerical edits occuring
+in conditional edits. The rownames of {\bf mixnum} correspond to 
+dummy variables, occuring in the categorical edits stored as 
+an {\sf editarray} in {\bf mixcat}. The {\sf mixcat} object stores
+``pure categorical'' edits, as well as conditional edits containing
+dummy variables referring to edits in {\bf mixnum}.
+
+The functionality of {\sf editrules} is implemented such that the user can
+remain agnostic of the internal representation of edit sets. There is however a
+second representation of conditional edits which is used and returned by
+several basic manipulation functions. This representation, stored in the form
+of an {\sf editlist} or {\sf editenv} will be described in Section
+\ref{sseditlist}, but first we discuss how edits can be imported to and
+exported from the {\sf R} environment.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Reading and writing edits}
+As described in our previous papers on {\sf editrules}, edits can be read from
+the commandline in {\sf character} form, or from a {\sf data.frame}. However it
+is now also possible to read edits from {\sf R} {\sf expression} vectors or,
+most conveniently, from a free-form textfile.
+%
+\begin{figure}
+\begin{Verbatim}[frame=single]
+# define category domains
+    BOOL <- c(TRUE,FALSE)
+    OPTIONS <- letters[1:4]
+
+# numerical edits
+    x + y == z
+    2*u  + 0.5*v == 3*w
+    w >= 0
+    if ( x > 0 ) y > 0
+    x >= 0
+    y >= 0
+    z >= 0
+
+# categorical edits
+    A %in% OPTIONS
+    B %in% OPTIONS
+    C %in% BOOL
+    D %in% letters[5:8]
+    if ( A %in% c('a','b') ) y > 0
+    if ( A == 'c' ) B %in% letters[1:3]
+    if ( !C == TRUE) D %in% c('e','f')
+\end{Verbatim}
+\caption{Example of a free-form textfile defining numerical, categorical and conditional 
+edits. The edits can be read into {\sf R} with the {\sf editfile} function.}
+\label{figeditfile}
+\end{figure}
+
+For example, in Figure \ref{figeditfile} the contents of an example textfile is
+printed. Note that it is possible to define the domains of categories
+separately from the edits themselves, which is convenient for domains which are
+reused over several variables. Comments are allowed as well, and will be ignored
+by the parser. If the file is stored in a file called {\sf myedits.txt}, the
+file can be read as follows:
+<<>>=
+(E <- editfile("myedits.txt"))
+@
+Here, {\sf E} is an object of class {\sf editset}. When printed to screen,
+the datamodel for categorical variables, as well as the textual representation
+of the edits are shown. For convenience, edits are named according to their type.
+Pure numerical edits are numbered with prefix {\sf num}, pure categorical with
+prefix {\sf cat} and conditional edits are prefixed with {\sf mix}. Edits
+can be selected with the bracket operator, using integer or logical indices,
+for example:
+<<>>=
+E[c(7,10),]
+@
+By default, the full datamodel is retained. The {\sf reduce} function removes
+all variables numerical variables not occurring in any edit and all categorical
+variables not occurring in a multivariate edit.
+
+The function {\sf editfile} has an optional {\sf type} option, allowing for
+extracting only the numerical ({\sf type="num"}), categorical ({\sf
+type="cat"}) or conditional edits ({\sf type="mix"}) from the textfile.  When
+{\sf type="num"} or {\sf type="cat"}, an {\sf editmatrix} or {\sf editarray}
+are returned respectively. Under the hood, {\sf editfile} parses the file,
+looks for assignments (by {\sf <-} or {\sf =}) and evaluates them in a separate
+{\sf R} {\sf environment}. Next, the edits are generated within that
+environment.
+
+
+To export edits, the most convenient way is to use either {\sf as.character} to
+convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
+2-column {\sf data.frame}. One can then use {\sf R}'s standard I/O
+functionality to store edits as a structured textfile, or use one of the
+database interfaces to send edits to a database. When edits are read into
+{\sf R}, the function {\sf editset} is capable of converting textual edits
+to an {\sf editset} object. See Table \ref{tabcoercion} for an overview of
+coercion options.
+
+
+\begin{table}
+\begin{threeparttable}
+\caption{Functions for reading and coercing (conditional) edits.}
+\label{tabcoercion}
+\begin{tabular}{lp{0.7\textwidth}}
+\hline
+Function        & Description\\
+\hline
+{\sf editset}      & read from {\sf character} or {\sf expression} vector.\\
+{\sf editfile}     & read from free-form textfile\\
+{\sf as.character} & convert editset to {\sf character} vector\\
+{\sf as.data.frame}& convert editset to two-column {\sf data.frame}\\ 
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Untangling condtional edits}
+\label{sseditlist}
+%
+\begin{figure}[t]
+<<fig=TRUE,echo=FALSE>>=
+par(oma=c(0,0,0,0),mar=c(0,0,1.5,0))
+set.seed(1)
+plot(E)
+@
+\caption{A graph view of the edits of Figure \ref{figeditfile}, generated  with
+{\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
+indicates that a variable occurs in an edit. The graph is displayed with the
+help of the {\sf igraph} package of \cite{csardi:2006} .}
+\label{figgraph}
+\end{figure}
+%
+%
+As mentioned in the introduction, edits can be interrelated because an edit 
+can contain multiple variables and each variable can occur in multiple edits.
+The function {\sf contains} returns a boolean matrix, indicating which variables
+occur in each edit. The default {\sf plot} function has also been for objects
+of class {\sf editset} (and {\sf editmatrix} and {\sf editarray}) to generate
+a graphical display of this connectivity. Figure \ref{figgraph} shows the 
+connectivity graph between the variables and edits of Figure \ref{figeditfile}.
+
+The set of edits clearly consists of three independent blocks. The function
+{\sf blocks} separates an {\sf editset} into its constituting independent edits
+and returns a {\sf list} of independent {\sf editset} objects. The {\sf blocks}
+function has been introduced before in \cite{jonge:2011} and \cite{loo:2011b}
+for {\sf editmatrix} and {\sf editarray} objects respectively.
+
+For conditional edits, there is a second way of separating them.
+As an example, consider the following simple editset:
+<<>>=
+F <- editset(expression(
+    if ( x > 0 ) y > 0,   # edit 1
+    if ( x < 0 ) y < 0))  # edit 2
+@
+were we also demonstrate the use of expression vectors for defining edits.
+Clearly, the valid areas are points in the first and third quadrant
+of the Euclidian plane, excluding the $x$-axis, but including the $y$-axis. 
+
+The valid area is clearly not convex, which has some computational
+consequences, for example when we wish to compute projections on the $x$- or
+$y$ axes, using Fourier-Motzkin elimination. The strategy we follow
+here is to separate the solution space into convex subspaces. The
+function {\sf disjunct} is designed to do just that.
+<<>>=
+disjunct(F)
+@
+The result of a call to {\sf disjunct} is an object of class {\sf editlist} (or
+{\sf editenv}) which is a list of editsets which do not contain any conditional
+edits anymore. However, the assumptions made to generate the separated editlist
+are added as an extra property to each editset (printed as {\sf Conditions}).
+
+The list is generated by generating all combinations of values of premises
+occuring in conditional edits, and may therefore become large when many
+conditional edits are present.  For example, in the example above, there are
+two conditional edits. The following steps generate sets of edits describing
+the two separate convex solution spaces.
+
+\begin{enumerate}
+\item Assume \true for the premise of edit 1 and \true for the premise
+of edit 2. This yields the condition $x>0$ and $x<0$, which is a
+contradiction and no edits are generated.
+\item Assume \true for the premise of edit 1 and \false for the premise
+of edit 2. This yields the conditions $x>0$ and $x\geq0$ and the edit
+$y>0$ ({\em i.e.} the first quadrant).
+\item Assume \false for the premise of edit 1 and \true for the premise
+of edit 2. This yields the conditions $x\leq0$ and $x<0$ and the edit
+$y<0$ ({\em i.e.} the third quadrant).
+\item Assume \false for the premise of edit 1 and \false for the premise
+of edit 2. This yields the condition $x\leq 0$ and $x\geq0$ and no conditions
+on $y$.
+\end{enumerate}
+%
+%
+\begin{algorithm}
+\caption{Determine all feasible convex regions of an {\sf editset}.}
+\label{algeditlist}
+\begin{algorithmic}[1]
+    \State $S\leftarrow \varnothing$
+    \Procedure{disjunct}{$E$}
+    \State $T\leftarrow \{t : t \textrm{ is a dummy variable of }E \}$
+    \If {$T = \varnothing$}
+        \State $S \leftarrow S\cup E$
+    \Else
+        \State Choose a $t$ from $T$
+        \State $E\leftarrow \textrm{\sf substValue}(E,t,\true)$
+        \If {$\textrm{\sf isFeasible}(E_{\bf num})\land \textrm{\sf isFeasible}(E_{\bf mixcat})$}
+        \State $\textrm{\sc disjunct}(E)$
+        \EndIf
+        \State $E\leftarrow \textrm{\sf substValue}(E,t,\false)$
+        \If {$\textrm{\sf isFeasible}(E_{\bf num})\land \textrm{\sf isFeasible}(E_{\bf mixcat})$}
+        \State $\textrm{\sc disjunct}(E)$
+        \EndIf
+    \EndIf
+    \EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+The above example is generalized by the simple recursive procedure shown in
+Algorithm \ref{algeditlist}. The algorithm runs depth-first through a binary
+tree, generating all possible assumtions about the premises in the conditional
+edits. The tree is pruned whenever an inconsistent set of assumptions is made,
+so no spurious edit sets are generated. The procedure uses the functions {\sf
+isFeasible} on objects of class {\sf editmatrix} and {\sf editarray} which have
+been discussed in \cite{jonge:2011} and \cite{loo:2011b} respectively.  The
+{\sf substValue} function for objects of class {\sf editset} will be discussed
+in Section \ref{sssubstitution}. For here, just note that substituting a value
+for a dummy variable [see also Eq. \ref{eqdummy}] is equivalent to assuming a
+value for edits in the premise or consequent in a conditional edit.
+
+\begin{figure}
+<<fig=true,echo=false>>=
+v <- disjunct(E)
+par(oma=c(0,0,0,0),mar=c(0,0,1.5,0),mfrow=c(2,2))
+for ( i in 1:4 ){
+    set.seed(1)
+    plot(
+        v[[i]],
+        main=paste(as.character(editrules:::condition(v[[i]])),collapse=', ')
+    )
+}
+@
+\caption{Connectivity graphs of the disjunct edit sets
+generated from the edits of Figure \ref{figeditfile}. There are no paths from
+numerical variables ($x$, $y$, $z$, $u$, $v$, $w$) to categorical 
+variables ($A$, $B$, $C$, $D$) anymore. The titles of the subplots indicate
+the conditions for each editset.}
+\label{figdisjunct}
+\end{figure}
+%
+%
+As an example of how {\sf disjunct} separates numerical from categorical
+variables, the four editsets, resulting from passing the edits of Figure
+\ref{figeditfile} to {\sf disjunct} are plotted in Figure \ref{figdisjunct}.
+The original editset has two dummy variables, corresponding to $x>0$ and $y>0$,
+yielding four disjunct spaces. Note that contrary to Figure \ref{figgraph},
+there are no paths connecting numerical variables ($x$,$y$,$z$,$u$,$v$,$w$) to
+categorical variables ($A$, $B$, $C$, $D$) anymore.
+%
+\begin{table}[t]
+\caption{Edit separation functions}
+\label{tabseparators}
+\begin{tabular}{lp{0.8\textwidth}}
+\hline
+Function & Description\\
+\hline
+{\sf blocks}   & Splits an editset in smaller editsets not sharing any variables.\\
+{\sf disjunct} & Splits an editset in disjunct sets, not containing conditional edits.\\
+{\sf separate} & Uses {\sf blocks}, simplifies and calls {\sf disjunct} where possible.\\
+\hline
+\end{tabular}
+\end{table}
+
+The {\sf editlist} ({\sf editenv}) class is of importance, especially since the
+{\sf eliminate} function uses and returns an {\sf editlist} ({\sf editenv}),
+regardless of whether one passes an {\sf editset} or an {\sf editlist} ({\sf
+editenv}). The elimination function for editsets is further discussed in Section
+\ref{sselimination}
+
+Finally, we note that there is one function that combines the blocking 
+functionality with the disjunct functionality. Function {\sf separate}
+blocks each an editset based on variable occurrence and simplifies
+the blocks to objects of class {\sf editmatrix} or {\sf editarray}
+where possible. After this, the remaining {\sf editset} objects are
+split into an {\sf editlist} using {\sf disjunct}. The result is
+returned as an {\sf R} {\sf list}. Table \ref{tabseparators} summarizes
+the edit separation functions.
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Edit checking, obvious redundancy and (in)feasibility}
 
 
 
@@ -285,6 +578,13 @@ E = \langle {\bf num},{\bf mixnum},{\bf mixcat}\rangle
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Manipulation of conditional edits}
 \label{smanipulation}
+
+\subsection{Value substitution}
+\label{sssubstitution}
+
+\subsection{Variable elimination}
+\label{sselimination}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3

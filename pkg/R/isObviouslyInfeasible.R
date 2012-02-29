@@ -5,7 +5,8 @@
 #'
 #' @param E An \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param ... Arguments to be passed to or from other methods.
-#' @return a boolean vector of indicating which edits are obviously infeasible
+#' @return a \code{logical} oif the editset is obviously infeasible. A \code{logical} 
+#'  vector in the case of an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editset}}.
 #' @export
 isObviouslyInfeasible <- function(E,...){
     UseMethod("isObviouslyInfeasible")
@@ -37,7 +38,7 @@ isObviouslyInfeasible.editmatrix <- function(E, tol=sqrt(.Machine$double.eps), .
 
 #' Check for obvious infeasibility
 #' 
-#' Check for edits wich have TRUE in all columns of the representation.
+#' For an \code{\link{editarray}}, it checks for edits wich have TRUE in all columns.
 #' This corresponds to an espression stating that every possible value combination is erroneous.
 #'
 #' @method isObviouslyInfeasible editarray
@@ -52,5 +53,52 @@ isObviouslyInfeasible.editarray <- function(E,...){
 isObviouslyInfeasible.NULL <- function(E,...){
     FALSE
 }
+
+
+#' Check for obvious infeasibility
+#' 
+#' For an \code{\link{editset}} it checks infeasibility the numerical part,
+#' contains an obvious infeasibility.
+#'
+#' @method isObviouslyInfeasible editset
+#' @rdname isObviouslyInfeasible
+#' @export
+#' 
+isObviouslyInfeasible.editset <- function(E,...){
+    isObviouslyInfeasible(E$num) || isObviouslyInfeasible(E$mixcat)
+}
+
+#' Check for obvious infeasibility
+#' 
+#' For an \code{\link[=disjunct]{editlist}}, or \code{\link[=disjunct]{editenv}} 
+#' each constituting \code{\link{editset}} is checked for obvious infeasibilities and 
+#' returns a boolean vector of length \code{length(E)}.
+#'
+#' @method isObviouslyInfeasible editlist
+#' @rdname isObviouslyInfeasible
+#' @export
+#' 
+isObviouslyInfeasible.editlist <- function(E,...){
+    vapply(E,isObviouslyInfeasible, FUN.VALUE=FALSE)
+}
+
+#'
+#'
+#'
+#' @method isObviouslyInfeasible editenv
+#' @rdname isObviouslyInfeasible
+#' @export
+#'
+#'
+isObviouslyInfeasible.editenv <- function(E,...){
+    # note: environments are coerced to lists by lapply
+    vapply(E,isObviouslyInfeasiblea, FUN.VALUE=FALSE)
+}
+
+
+
+
+
+
 
 
