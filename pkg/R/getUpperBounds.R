@@ -4,6 +4,7 @@
 #' @return matrix with upperbounds per edit and a possible value
 #' @keywords internal
 getUpperBounds <- function(E, xlim){
+  #print(xlim)
   A_p <- A_m <- A <- getA(E)
   A_p[A < 0] <- 0
   A_m[A > 0] <- 0

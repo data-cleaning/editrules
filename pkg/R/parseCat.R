@@ -15,7 +15,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
        if (is.logical(x)){
          if (val == x) { return(edit)
          }else { 
-           # if this happens the statements is always true, so delete it...
+           # if this happens the statement is always true, so delete it...
            return (logical())
          }
        }
