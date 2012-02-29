@@ -35,7 +35,7 @@ localize_mip_rec <- function( E
    
    t.start <- proc.time()
    elm <- buildELMatrix(E, x, weight, ...)
-   #print(elm)
+   
    Ee <- elm$E
    objfn <- elm$objfn
    adaptidx <- which(objfn > 0)
@@ -43,7 +43,7 @@ localize_mip_rec <- function( E
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee)
    
-   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:length(elm$lb))
+   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
    

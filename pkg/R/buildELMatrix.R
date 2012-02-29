@@ -242,7 +242,16 @@ buildELMatrix.editset <- function( E
     mixNum <- softEdits(mixNum, xlim=xlimmn, prefix=".me")
     Eel <- c(mixNum, Eel)
   }
-  Eel
+  
+  vars <- getVars(Eel)
+  binvars <- sapply(vars, is.character)
+  binvars[getVars(E, type="num")] <- FALSE
+  
+  list( E = Eel
+      , objfn = sapply(vars, function(v) grepl("^adapt", v))
+      , xlim = xlim
+      , binvars = which(binvars)
+      )
 }
 #testing...
 # 
@@ -253,3 +262,4 @@ buildELMatrix.editset <- function( E
 #       ))
 # 
 # buildELMatrix(E, list(x = 1, y = -1, age=16, maritalstatus="married"))
+# localize_mip_rec(E, x=list(x = 1, y = -1, age=16, maritalstatus="married"))
