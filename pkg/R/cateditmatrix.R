@@ -11,12 +11,18 @@
 #' @export
 cateditmatrix <- function(x, sep=":", env=parent.frame()){
     if (is.editarray(x)) {
-      x <- as.character(x,datamodel=FALSE)
+      x <- as.character(x)
     }
     edts <- parseEdits(x)
     
     catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE, env=env)
     catedits <- lapply(catedits, parseCatEdit)
+    
+    # remove empty rules...
+    empty <- sapply(catedits, is.null)
+    
+    catedits <- catedits[!empty]
+    edts <- edts[!empty]
     
     categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
@@ -125,8 +131,11 @@ toCat <- function(categories, sep=":"){
 parseCatEdit <- function(el){
   #el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
+    if (length(el) == 1) return(NULL)
+    #browser(expr={length(el) == 1})
     val <- rep(1, length(el)+1)
-    names(val) <- c(names(el), "b")
+    names(val) <- c(names(el), "b")    
+    #print(el)
   } else {
     vars <- gsub(":.+","",names(el))
     # coefficients in form 

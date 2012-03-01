@@ -1,5 +1,5 @@
 #' Extend an editmatrix or editarray with extra constraints needed for error
-#' localization
+#' localization with \code{mip}
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @return list with extended E, objfn and lower and upper bound
@@ -25,6 +25,7 @@ buildELMatrix.editmatrix <- function( E
                                     ){
   #TODO sample order of variables
   E <- E[, c(sample(length(getVars(E))), ncol(E))]
+  
   vars <- getVars(E)
   idx <- match(vars, names(x))
   
@@ -220,54 +221,74 @@ buildELMatrix.editset <- function( E
                                  ){
   Eel <- NULL
   
-  numvars <- getVars(E, type="num")
-  numidx <- which(getVars(E) %in% numvars)
-  numA <- diag(1, nrow=length(numvars))
-  dimnames(numA) <- list(numvars,numvars)
-  numE <- as.editmatrix(numA, as.numeric(x[numidx]), "==")
-  print(list(numvars=numvars, numidx=numidx, numA=numA, numE=numE, soft=softEdits(numE, xlim[numidx,], prefix="adapt.")))
+  #check xlim
+  # NOTE not doing anything right now...
+  xlim <- checkXlim(xlim, x)
+  # num part
+  num.vars <- getVars(E, type="num")
+  num.idx <- which(getVars(E) %in% num.vars)
+  num.x_i <- diag(1, nrow=length(num.vars))
+  dimnames(num.x_i) <- list(num.vars,num.vars)
+  num.x_0 <- as.numeric(x[num.idx])
+  num.xlim <- xlim[num.idx, ,drop=FALSE]
+  # create an editmatrix x_i == x^0_i
+  num.E <- as.editmatrix(num.x_i, num.x_0, "==")
+  num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
+
+  # cat part
+  cat.vars <- getVars(E, type="cat")
+  cat.idx <- which(getVars(E) %in% cat.vars)
+  cat.A <- diag(1, nrow=length(cat.vars))
+  cat.A <- cbind(cat.A,cat.A)
+  cat.x_0 <- unlist(x[cat.idx])
+  colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
+  cat.se <- as.editmatrix(cat.A, b=1, ops="==")
   
-  #TODO fix passing xlim and weights
-  if (length(E$num)){
-     numidx <- which(getVars(E) %in% getVars(E$num))
-     elNum <- buildELMatrix.editmatrix(E$num, x=x[numidx], weight=weight[numidx])
-     Eel <- c(elNum$E, Eel)
-  }
+  # mix part
+  mix.E <- editmatrix(invert(as.character(E$mixnum)))
+  mix.vars <- getVars(mix.E)
+  mix.idx <- which(getVars(E) %in% mix.vars)
+  mix.xlim <- xlim[mix.idx,,drop=FALSE]
+  mix.se <- softEdits(mix.E, xlim=mix.xlim, prefix="")
   
-  if (length(E$mixcat)){
-    catidx <- which(getVars(E) %in% getVars(E$mixcat))
-    # TODO fix data model issues with logical vectors
-    mixcat <- cateditmatrix(as.character(E$mixcat, datamodel=FALSE))
-    elMixCat <- buildELMatrix.cateditmatrix(mixcat, x=x[catidx])
-    Eel <- c(elMixCat$E, Eel)
-  }
+  el.E <- c(mix.se, cat.se, num.se, E$num, cateditmatrix(E$mixcat))     
+
+  el.vars <- getVars(el.E)
+  el.binvars <- sapply(el.vars, is.character)
+  el.binvars[el.vars %in% num.vars] <- FALSE
   
-  if (length(E$mixnum)){
-    mixnumidx <- which(getVars(E) %in% getVars(E$mixnum))
-    xlimmn <- xlim[mixnumidx,,drop=FALSE]
-    mixNum <- editmatrix(invert(as.character(E$mixnum)))
-    #print(xlimmn)
-    mixNum <- softEdits(mixNum, xlim=xlimmn, prefix=".me")
-    Eel <- c(mixNum, Eel)
-  }
+  objfn <- sapply(el.vars, function(v) 0)
+  adapt.idx <- grep("^adapt\\.", el.vars)
+  adapt.nms <- names(adapt.idx) <- sub("^adapt\\.", "", el.vars[adapt.idx])
   
-  vars <- getVars(Eel)
-  binvars <- sapply(vars, is.character)
-  binvars[getVars(E, type="num")] <- FALSE
+  objfn[adapt.idx] <- weight[match(adapt.nms, names(x))]
   
-  list( E = Eel
-      , objfn = sapply(vars, function(v) grepl("^adapt", v))
+  list( E = el.E
+      , objfn = objfn #sapply(vars, function(v) grepl("^adapt", v))
       , xlim = xlim
-      , binvars = which(binvars)
+      , binvars = which(el.binvars)
       )
 }
+
+# TODO this function should check xlim and potentially adjust it, to fix (very) small boundary conditions
+checkXlim <- function(xlim, x){
+  xlim
+}
+
 #testing...
-# 
+
 # E <- editset(expression(
 #          if (x>0) y > 0
 #       ,  maritalstatus %in% c("married", "single")
 #       ,  if (maritalstatus == "married") age > 16 
 #       ))
 # 
-# buildELMatrix(E, list(x = 1, y = -1, age=16, maritalstatus="married")) -> B
-# localize_mip_rec(E, x=list(x = 1, y = -1, age=16, maritalstatus="married"))
+# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+# e <- expression( pregnant %in% c(TRUE, FALSE)
+#                , gender %in% c("male", "female")
+#                , if (pregnant) gender == "female"
+#                )
+# 
+# cateditmatrix(e)
+# #buildELMatrix(E, x)# -> B
+# localize_mip_rec(E, x=x)

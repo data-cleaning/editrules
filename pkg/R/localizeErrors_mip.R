@@ -27,6 +27,8 @@ localize_mip_rec <- function( E
                             , ...
                             ){
 
+   vars <- getVars(E)
+   
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
    }   
@@ -41,11 +43,13 @@ localize_mip_rec <- function( E
    adaptidx <- which(objfn > 0)
    
    ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee)
+   lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
    
+   # TODO move this code into as.lp.editmatrix
    set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
+   # end TODO
    
    lp.control( lps
              , presolve = "rows"    # move univariate constraints into bounds
@@ -66,6 +70,7 @@ localize_mip_rec <- function( E
    # split solution in a value and a adapt part
    sol.values <- sol[!aidx]
    sol.adapt <- sol[aidx]
+   
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
    #print(list(sol=sol, w=w, aidx=aidx, sol.values=sol.values, sol.adapt=sol.adapt))
@@ -97,7 +102,7 @@ localize_mip_rec <- function( E
 }
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E){
+as.lp.editmatrix <- function(E, obj, xlim, type){
    require(lpSolveAPI)
    epsb <- 1e-8
    A <- getA(E)
