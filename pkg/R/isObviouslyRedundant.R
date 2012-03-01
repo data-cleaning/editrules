@@ -106,14 +106,30 @@ isObviouslyRedundant.editset <- function(E, duplicates=rep(TRUE,2), ...){
 }
 
 
-#' For an \code{\link{editset}} it checks for obvious redundancies in the numerical
-#' and categorical/mixed parts separately.
+
 #'
-#' @method isObviouslyRedundant editset
+#' 
+#' For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
+#' a list of logical vectors is returned.
+#'
+#' @method isObviouslyRedundant editlist
 #' @rdname isObviouslyRedundant
 #' @export
-isObviouslyRedundant.editset <- function(E, duplicates=TRUE, ...){
+isObviouslyRedundant.editlist <- function(E, duplicates=rep(TRUE,2), ...){
+    lapply(E, isObviouslyRedundant.editset, duplicates=duplicates, ...)
+}
 
+
+#' 
+#' For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
+#' a list of logical vectors is returned.
+#'
+#' @method isObviouslyRedundant editenv
+#' @rdname isObviouslyRedundant
+#' @export
+isObviouslyRedundant.editenv <- function(E, duplicates=rep(TRUE,2), ...){
+    lapply(E, isObviouslyRedundant.editset, duplicates=duplicates, ...)
+}
 
 
 

@@ -92,7 +92,7 @@ isObviouslyInfeasible.editlist <- function(E,...){
 #'
 isObviouslyInfeasible.editenv <- function(E,...){
     # note: environments are coerced to lists by lapply
-    vapply(E,isObviouslyInfeasiblea, FUN.VALUE=FALSE)
+    vapply(E,isObviouslyInfeasible, FUN.VALUE=FALSE)
 }
 
 

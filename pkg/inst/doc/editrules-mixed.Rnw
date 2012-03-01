@@ -133,7 +133,7 @@ Data editing is severely complicated by the fact that the fact that these rules
 are often interrelated: a variable can occur in more than one restriction, and
 a restriction can contain more than a single variable. Sets of restrictions on
 purely numerical or purely categorical data have been treated in our previous
-papers on the editrules package \citep{jonge:2011,loo:2011c}. Here, we extend
+papers on the editrules package \citep{jonge:2011,loo:2011b}. Here, we extend
 our treatment to restrictions which are related by conditional statements. An
 example of such a statement, connecting a categorical variable {\em legal
 form} with a numerical variable ({\em number of employees}), is
@@ -274,16 +274,17 @@ class {\sf editmatrix}. To store conditional edits, along
 with pure numerical and pure categorical edits, we implemented the 
 class {\sf editset}, which can be denoted as
 \begin{equation}
-E = \langle {\bf num},{\bf mixnum},{\bf mixcat}\rangle.
+\label{eqeditset}
+E = \langle E_{\sf num}, E_{\sf mixnum}, E_{\sf mixcat}\rangle.
 \end{equation}
-Here, {\bf num} is an {\sf editmatrix} object holding numerical edits
+Here, $E_{\sf num}$ is an {\sf editmatrix} object holding numerical edits
 not connected to any edits with nonnumerical variables. The object
-{\bf mixnum} is an {\sf editmatrix}, holding numerical edits occuring
+$E_{\sf mixnum}$ is an {\sf editmatrix}, holding numerical edits occuring
 in conditional edits. The rownames of {\bf mixnum} correspond to 
 dummy variables, occuring in the categorical edits stored as 
-an {\sf editarray} in {\bf mixcat}. The {\sf mixcat} object stores
+an {\sf editarray} in $E_{\sf mixcat}$. The $E_{\sf mixcat}$ object stores
 ``pure categorical'' edits, as well as conditional edits containing
-dummy variables referring to edits in {\bf mixnum}.
+dummy variables referring to edits in $E_{\sf mixnum}$.
 
 The functionality of {\sf editrules} is implemented such that the user can
 remain agnostic of the internal representation of edit sets. There is however a
@@ -361,6 +362,29 @@ looks for assignments (by {\sf <-} or {\sf =}) and evaluates them in a separate
 {\sf R} {\sf environment}. Next, the edits are generated within that
 environment.
 
+In summary, each conditional edit definition is of the form, indicated by the
+following syntax diagram.
+\begin{syntdiag}
+if ( 
+\begin{rep}
+    \begin{stack}
+        <linear inequality>\\
+        <set expression>
+    \end{stack}\\
+\begin{stack}   "&"\\"&&"\end{stack}
+\end{rep}
+)
+\begin{rep}
+    \begin{stack}
+        <linear inequality>\\
+        <set expression>
+    \end{stack}\\
+\begin{stack}   "|"\\"||"\end{stack}
+\end{rep}
+\end{syntdiag}
+Here, a $\langle\textrm{\em set expression}\rangle$ is an expression indicating
+set membership of categorical variables, such {\tt A \%in\% c("a","b")}. See
+\cite{loo:2011b} for a complete syntax diagram of possible set expressions.
 
 To export edits, the most convenient way is to use either {\sf as.character} to
 convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
@@ -468,7 +492,7 @@ on $y$.
 \end{enumerate}
 %
 %
-\begin{algorithm}
+\begin{algorithm}[t]
 \caption{Determine all feasible convex regions of an {\sf editset}.}
 \label{algeditlist}
 \begin{algorithmic}[1]
@@ -480,11 +504,11 @@ on $y$.
     \Else
         \State Choose a $t$ from $T$
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\true)$
-        \If {$\textrm{\sf isFeasible}(E_{\bf num})\land \textrm{\sf isFeasible}(E_{\bf mixcat})$}
+        \If {$\textrm{\sf isFeasible}(E_{\sf num})\land \textrm{\sf isFeasible}(E_{\sf mixcat})$}
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\false)$
-        \If {$\textrm{\sf isFeasible}(E_{\bf num})\land \textrm{\sf isFeasible}(E_{\bf mixcat})$}
+        \If {$\textrm{\sf isFeasible}(E_{\sf num})\land \textrm{\sf isFeasible}(E_{\sf mixcat})$}
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
     \EndIf
@@ -568,8 +592,36 @@ the edit separation functions.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Edit checking, obvious redundancy and (in)feasibility}
+Data can be checked against edits in an editset with the {\sf violatedEdits}
+function. This function accepts an {\sf editset} and a {\sf data.frame} and
+returns a logical array (of class {\sf violatedEdits}) where each row and
+column indicates which record violates what edit. A {\sf summary} and {\sf
+plot} method is available for {\sf violatedEdits} objects so users can get a
+quick overview of edit violation frequencies. Internally, the {\sf
+violatedEdits} method for editsets works by coercing the edits to logical {\sf
+character} expression and using {\sf R}'s evaluation functionality to parse and
+evaluate these expressions in the context of the {\sf data.frame}. 
 
+An edit in an {\sf editset} is obviously redundant when it is the duplicate of
+another edit or when it has an easily recognizable form such as $0 < 1$. Such
+redundancies may arise after edit manipulations (value substitution, variable
+elimination).  The {\sf isObviouslyRedundant} method for {\sf editset} returns
+a logical vector indicating which edit in an editset is redundant (\true) or
+not (\false). For an {\sf editlist} ({\sf editenv}) a list of boolean vectors
+is returned. For a detailed description of detecting obvious redundancies in
+numerical or categorical edits, refer to \cite{jonge:2011} and
+\cite{loo:2011b}.
 
+The {\sf S3} methods of {\sf isObviouslyInfeasible} for objects of class {\sf
+editset} and {\sf editlist} work the methods previously implemented for objects
+of class {\sf editarray} and {\sf editmatrix}. For an {\sf editset}, {\sf
+isObviouslyInfeasible} returns \true if either the {\bf num} or the {\bf
+mixcat} [See Eq. \eqref{eqeditset}] part contains an obvious contradiction. For
+objects of class {\bf editlist} or {\sf editenv} a vector of logicals is
+returned. Note that the presence of an obvious contradiction is sufficient, but
+not necessary for a set of edits to be infeasible. To prove (in)feasibility,
+one needs to call {\sf isFeasible}, which is usually a much more expensive
+calculation.
 
 
 
@@ -578,11 +630,71 @@ the edit separation functions.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Manipulation of conditional edits}
 \label{smanipulation}
+The two basic operations on any set of restrictions, either numerical,
+categorical, or mixed/conditional consist of value substitution and variable
+elimination. Methods for the pure numerical and pure categorical situations are
+fairly straightforward and have been implemented in the {\sf editrules} package
+before. Operations on conditional edits require a bit more care, which will
+be detailed in the next two subsections.
 
 \subsection{Value substitution}
 \label{sssubstitution}
+Recall that conditional edits in an editset are stored as a combination of
+categorical edits with dummy variables ($E_{\sf mixnum}$), referring to linear
+edits in $E_{\sf mixnum}$. Purely numerical edits are stored in a seperate
+object called $E_{\sf num}$.
+To substitute a value in an editset, we need to distinguis several cases.
+If a variable occurs in $E_{\sf num}$, but not in ${E_{\sf mixnum}}$ the
+{\sf substValue} method for {\sf editarray} is used on $E_{\sf num}$, as
+described in \cite{jonge:2011}. For a categorical variable, the procedure
+for substitition in an {\sf editarray} is followed for $E_{\sf mixcat}$,
+as described in \cite{loo:2011b}. If the substituted variable is a numerical
+variable, occuring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following
+steps must be performed.
+%
+\begin{enumerate}
+\item If the variable occurs in $E_{\sf num}$ substitute its value there.
+\item Substitute the variable in $E_{\sf mixnum}$.
+\item If any edits in $E_{\sf mixnum}$ have become obviously redundant ({\em e.g.} $0 < 1$) or
+obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \false for
+the corresponding dummy variables in $E_{\sf mixcat}$.
+\item Remove all edits of the form 
+\begin{displaymath}
+\textrm{\sf if } \true \textrm{ \sf then  } t,
+\end{displaymath}
+from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit2}).
+\item If the dummy variable $t$ does not occur anywhere $E_{\sf mixcat}$ anymore, move the 
+corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
+\item Remove all edits of the form
+\begin{displaymath}
+\textrm{\sf if } \false \textrm{ \sf then  } t
+\end{displaymath}
+\end{enumerate}
+%
+%
+Besides the above procedure, the {\sf substValue} function performs some simplifications
+on $E_{\sf mixnum}$ and $E_{\sf mixcat}$.
 
-\subsection{Variable elimination}
+As an example, consider the code below.
+<<>>=
+F <- editset(expression(
+x + y == z,
+if ( x > 0 ) y > 0))
+substValue(F,"x",3)
+@
+Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then } y>0$, so the 
+condition $y>0$ may be added the numerical edits (here: $x+y=z$) and the conditional edit
+removed. On the other hand, substituting $x = -3$ gives $\textrm{\sf  if } -3 > 0 \textrm{ \sf  then } y>0$,
+so the conditional edit can be deleted, as is done by {\sf substValue}.
+<<>>=
+substValue(F,"x",-3)
+@
+
+
+
+
+
+\subsection{Variable elimination and satisfiability}
 \label{sselimination}
 
 
@@ -593,11 +705,11 @@ the edit separation functions.
 \label{serrorlocalization}
 
 
-\clearpage
+
 \section{Conclusions}
 \label{sconclusions}
 
-
+\clearpage
 \bibliographystyle{chicago}
 \bibliography{editrules}
 
