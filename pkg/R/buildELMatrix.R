@@ -215,10 +215,18 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 buildELMatrix.editset <- function( E
                                  , x
                                  , weight = rep(1, length(x))
-                                 , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,0)}))
+                                 , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
                                  , maxvalue = 1e8
                                  ){
   Eel <- NULL
+  
+  numvars <- getVars(E, type="num")
+  numidx <- which(getVars(E) %in% numvars)
+  numA <- diag(1, nrow=length(numvars))
+  dimnames(numA) <- list(numvars,numvars)
+  numE <- as.editmatrix(numA, as.numeric(x[numidx]), "==")
+  print(list(numvars=numvars, numidx=numidx, numA=numA, numE=numE, soft=softEdits(numE, xlim[numidx,], prefix="adapt.")))
+  
   #TODO fix passing xlim and weights
   if (length(E$num)){
      numidx <- which(getVars(E) %in% getVars(E$num))
@@ -261,5 +269,5 @@ buildELMatrix.editset <- function( E
 #       ,  if (maritalstatus == "married") age > 16 
 #       ))
 # 
-# buildELMatrix(E, list(x = 1, y = -1, age=16, maritalstatus="married"))
+# buildELMatrix(E, list(x = 1, y = -1, age=16, maritalstatus="married")) -> B
 # localize_mip_rec(E, x=list(x = 1, y = -1, age=16, maritalstatus="married"))

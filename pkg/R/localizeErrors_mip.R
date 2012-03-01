@@ -121,8 +121,8 @@ as.lp.editmatrix <- function(E){
    lps
 }
 
-asCat <- function(x){
-  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=":"))
+asCat <- function(x, sep=":"){
+  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=sep))
   is.na(nms) <- is.na(x)
   names(nms) <- names(x)
   nms
