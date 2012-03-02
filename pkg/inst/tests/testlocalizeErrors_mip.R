@@ -291,3 +291,32 @@ test_that('localizeErrors handles a ">" edits correctly., editset',{
                )
 })
 
+test_that('localizeErrors',{
+  E <- editset(c(
+    "age %in% c('under aged','adult')",
+    "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+    "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+    "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+    ))
+  record <- data.frame(age='under aged', maritalStatus='married', positionInHousehold='child')
+  expect_equivalent(
+    localizeErrors(E,record, method="mip")$adapt
+    ,
+    array(c(FALSE,FALSE,TRUE),dim=c(1,3))
+    )
+})
+
+test_that("localizeErrors works with TRUE/FALSE",{
+  E <- editset(expression(
+    A %in% c(TRUE,FALSE),
+    B %in% letters[1:4],
+    if ( !A ) B %in% letters[1:2]
+    ))
+  
+  # should run without errors...
+  localizeErrors(E,data.frame(A=c(TRUE,FALSE),B=c('c',"d")), method="mip")
+})
+
+
+

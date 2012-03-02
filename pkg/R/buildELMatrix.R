@@ -249,7 +249,7 @@ buildELMatrix.editset <- function( E
     cat.A <- cbind(cat.A,cat.A)
     cat.x_0 <- unlist(x[cat.idx])
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
-    cat.se <- as.editmatrix(cat.A, b=1, ops="==")
+    cat.se <- as.editmatrix(cat.A, b=1)
     el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)
   }
   
@@ -291,13 +291,13 @@ checkXlim <- function(xlim, x){
 
 #testing...
 
-# E <- editset(expression(
-#          if (x>0) y > 0
-#       ,  maritalstatus %in% c("married", "single")
-#       ,  if (maritalstatus == "married") age > 16 
-#       ))
-# 
-# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+E <- editset(expression(
+         if (x>0) y > 0
+      ,  maritalstatus %in% c("married", "single")
+      ,  if (maritalstatus == "married") age > 16 
+      ))
+
+x <- list(x = 1, y = -1, age=16, maritalstatus="married")
 # e <- expression( pregnant %in% c(TRUE, FALSE)
 #                , gender %in% c("male", "female")
 #                , if (pregnant) gender == "female"
@@ -305,4 +305,4 @@ checkXlim <- function(xlim, x){
 # 
 # cateditmatrix(e)
 # #buildELMatrix(E, x)# -> B
-#  localize_mip_rec(E, x=x)
+  localize_mip_rec(E, x=x)

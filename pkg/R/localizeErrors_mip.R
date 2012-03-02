@@ -40,7 +40,6 @@ localize_mip_rec <- function( E
    
    Ee <- elm$E
    objfn <- elm$objfn
-   adaptidx <- which(objfn > 0)
    
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
@@ -68,12 +67,17 @@ localize_mip_rec <- function( E
    # get the positions of the adapt.variables
    aidx <- grepl("^adapt\\.", names(sol))
    # split solution in a value and a adapt part
-   sol.values <- sol[!aidx]
    sol.adapt <- sol[aidx]
+   sol.values <- sol[!aidx]
+   
+   cat.idx <- names(sol.values) %in% names(elm$binvars)
+   sol.cat <- asLevels(sol.values[cat.idx])
+   sol.num <- sol.values[!cat.idx]
+   
+   #print(list(sol.cat=sol.cat, sol.num=sol.num))
    
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   #print(list(sol=sol, w=w, aidx=aidx, sol.values=sol.values, sol.adapt=sol.adapt))
    #write.lp(lps, "test.lp")
    
    #print(list(idx=idx, sol=sol))
@@ -82,12 +86,13 @@ localize_mip_rec <- function( E
 
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
-   
-   if (is.cateditmatrix(E)){
-     x_feasible[idx] <- asLevels(sol.values)
-   } else {
-     x_feasible[idx] <- sol.values
-   }
+   x_feasible[names(sol.num)] <- sol.num
+   x_feasible[names(sol.cat)] <- sol.cat
+#    if (is.cateditmatrix(E)){
+#      x_feasible[idx] <- asLevels(sol.values)
+#    } else {
+#      x_feasible[idx] <- sol.values
+#    }
    
    t.stop <- proc.time()
    duration <- t.stop - t.start
@@ -138,8 +143,10 @@ asCat <- function(x, sep=":"){
 asLevels <- function(x){
   vars <- sub(":.+", "", names(x))
   lvls <- sub(".+:", "", names(x))
+  logicals <- vars == lvls
+  lvls[logicals] <- as.character(x[logicals] > 0)
   names(lvls) <- vars
-  lvls[x > 0]
+  lvls[x > 0 | logicals]
 }
    
 #testing...
