@@ -262,9 +262,11 @@ removeRedundantDummies <- function(E, tol=1e-8){
 
     d <- dist(cbind(getAb(E$mixnum), op2num[getOps(E$mixnum)]))
     id <- d < tol
-    if ( !any( id < tol ) ) return(E)
+    if ( !any( id ) ) return(E)
 
-
+    m <- nrow(E$mixnum)
+    dupnames <- rownames(E$mixnum)[2:m]
+    orgnames <- rownames(E$mixnum)[1:(m-1)]
     v <- matrix(FALSE,nrow=m-1, ncol=m-1, dimnames=list(dupnames,orgnames))
     v[lower.tri(v,1)] <- d < tol
     v <- v[apply(v,1,any),,drop=FALSE]
@@ -286,6 +288,7 @@ removeRedundantDummies <- function(E, tol=1e-8){
         }
     }
     idup <- unlist(ind[dupvars])
+print(idup)
     A <- A[,-idup,drop=FALSE]
     ind <- indFromArray(A,sep)
     E$mixcat <- neweditarray(A,ind=ind,names=rownames(A),sep=sep)

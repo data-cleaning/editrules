@@ -1,6 +1,5 @@
 
 context("Editset")
-
 test_that("editset parses categorical edits",{
     
     v <- expression(
@@ -31,6 +30,7 @@ test_that("editset parses conditional numeric edits",{
     expect_equivalent(getArr(E$mixcat),array(c(F,T,F,T),dim=c(1,4)))
 
     # test 2: with equality in if-statement
+
     v <- expression( if ( x == 0 ) y >= 0)
     E <- editset(v)
     expect_equal(E$num, editmatrix(expression()))
