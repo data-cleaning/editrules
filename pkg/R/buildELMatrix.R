@@ -218,16 +218,29 @@ buildELMatrix.editset <- function( E
                                  , weight = rep(1, length(x))
                                  , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
                                  , maxvalue = 1e8
+#                                 , editweights = rep(Inf, nrow(E))
                                  ){
-  el.E <- NULL
-  
   #check xlim
   # NOTE not doing anything right now...
   xlim <- checkXlim(xlim, x)
   
+  el.E <- NULL
+    
+#   soft <- is.finite(editweights)
+#   if (any(soft)){
+#     soft.E <- E[soft,]
+#     soft.weights <- editweights[soft]
+#     
+#     #TODO process softedits into el.E
+#     soft.num <- softEdits(soft.E$num, xlim)
+#     soft.cat <- softEdits(cateditmatrix(soft.E$mixcat), xlim)
+#     el.E <- c(soft.num, soft.cat, el.E)
+#     E <- E[!soft]
+#   }
+    
   # num part
   num.vars <- getVars(E, type="num")
-  num.se <- NULL
+  #TODO check NA values...
   if (!is.null(num.vars)){
     num.idx <- match(num.vars, names(x))
     num.x_i <- diag(1, nrow=length(num.vars))
@@ -242,10 +255,10 @@ buildELMatrix.editset <- function( E
 
   # cat part
   cat.vars <- getVars(E, type="cat")
-  cat.se <- NULL
+  #TODO check NA values...
   if (!is.null(cat.vars)){
     cat.idx <- match(cat.vars, names(x))
-    cat.A <- diag(1, nrow=length(cat.vars))
+    cat.A <- diag(1, nrow=length(cat.idx))
     cat.A <- cbind(cat.A,cat.A)
     cat.x_0 <- unlist(x[cat.idx])
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
@@ -253,11 +266,9 @@ buildELMatrix.editset <- function( E
     el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)
   }
   
-  # mix part
-  
+  # mix part  
   mix.E <- editmatrix(invert(as.character(E$mixnum)))
   mix.vars <- getVars(mix.E)
-  mix.se <- NULL
   if (!is.null(mix.vars)){
     mix.idx <- which(getVars(E) %in% mix.vars)
     mix.xlim <- xlim[mix.idx,,drop=FALSE]
