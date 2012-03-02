@@ -280,11 +280,11 @@ removeRedundantDummies <- function(E, tol=1e-8){
     A <- getArr(E$mixcat)
     ind <- getInd(E$mixcat)
     sep <- getSep(E$mixcat)
-
+   
     for ( org in colnames(v) ){
         for ( dup in dupvars ){
-            iM <- apply(contains(E2,c(org,dup)),1,all)
-            A[iM,ind[[org]]] <- E2[iM,ind[[dup]],drop=FALSE]
+            iM <- apply(contains(E$mixcat,c(org,dup)),1,all)
+            A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
         }
     }
     idup <- unlist(ind[dupvars])
