@@ -128,14 +128,16 @@ indFromArray <- function(A,sep){
 #' 
 #' @param simplify Simplify editset by moving logical edits containing a simple 
 #'      numerical statement to the pure numerical part?
+#' @param removedummies Substituting numerical values may cause doublures in dummy variables.
+#'   If this parameter is {\sf TRUE}, some internal restructuring is performed to get rid of those.
 #'
 #' @method substValue editset
-#'
+#' 
 #' @rdname substValue 
 #' @export
-substValue.editset <- function(E, var, value, simplify=TRUE, ...){
-# Techical note (for internal use only). Substituting a dummy variable
-# (e.g. .num.1) with TRUE or FALSE amounts to making an assumption about the validity
+substValue.editset <- function(E, var, value, simplify=TRUE, removedummies=TRUE, ...){
+# Techical note. Substituting a dummy variable (e.g. .num.1) with TRUE or 
+# FALSE amounts to making an assumption about the validity
 # of the condition stated in that dummy. As such, it should not be added
 # to the numerical editmatrix (since that editmatrix is only relevant when the
 # assumed condition is already fulfilled). Instead, the condition is 
@@ -196,6 +198,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
         }
     }
     if ( simplify ) E <- simplify(E)
+    if ( removedummies ) E <- removeRedundantDummies(E)
     E
 }
 

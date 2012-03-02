@@ -63,11 +63,13 @@ editset <- function(editrules, env=new.env()){
     nms <- names(mixnum)
     mixnum <- editmatrix(as.character(mixnum))
     rownames(mixnum) <- nms
-  
-    neweditset(
-        num=num,
-        mixcat=mixcat,
-        mixnum=mixnum
+
+    removeRedundantDummies( 
+        neweditset(
+            num=num,
+            mixcat=mixcat,
+            mixnum=mixnum
+        )
     )
 }
 
@@ -244,8 +246,61 @@ simplify <- function(E, m=NULL){
 }   
 
 
+#' Remove redundant dummy variables
+#'
+#' Remove duplicated dummy variables from an editset.
+#'
+#' @param E \code{\link{editset}}
+#' @param tol positive number
+#' @keywords internal
+#'
+removeRedundantDummies <- function(E, tol=1e-8){
+    if ( is.null(E$mixnum) || nrow(E$mixnum) < 2) return(E)
+    if (!isNormalized(E$mixnum)) E$mixnum <- normalize(E$mixnum)
+    
+    op2num <- c("<" = 1, "<=" = 2, "==" = 3, ">=" = 4, ">" = 5)
+
+    d <- dist(cbind(getAb(E$mixnum), op2num[getOps(E$mixnum)]))
+    id <- d < tol
+    if ( !any( id < tol ) ) return(E)
 
 
+    v <- matrix(FALSE,nrow=m-1, ncol=m-1, dimnames=list(dupnames,orgnames))
+    v[lower.tri(v,1)] <- d < tol
+    v <- v[apply(v,1,any),,drop=FALSE]
+    v <- v[,!apply(!v,2,all),drop=FALSE]
+    v <- v[,!colnames(v) %in% rownames(v)]
+
+    dupvars <- rownames(v)
+    w <- rownames(E$mixnum)
+    E$mixnum <- E$mixnum[!w %in% dupvars,]
+
+    A <- getArr(E$mixcat)
+    ind <- getInd(E$mixcat)
+    sep <- getSep(E$mixcat)
+
+    for ( org in colnames(v) ){
+        for ( dup in dupvars ){
+            iM <- apply(contains(E2,c(org,dup)),1,all)
+            A[iM,ind[[org]]] <- E2[iM,ind[[dup]],drop=FALSE]
+        }
+    }
+    idup <- unlist(ind[dupvars])
+    A <- A[,-idup,drop=FALSE]
+    ind <- indFromArray(A,sep)
+    E$mixcat <- neweditarray(A,ind=ind,names=rownames(A),sep=sep)
+
+# alternative implementation:
+#    e <- as.character(E2)
+#    for ( org in colnames(v) ){
+#        repstr <- paste(dup[v[,org]],collapse="|")
+#        e <- gsub(repstr,org,e)
+#    }
+#    E$mixnum <- E1
+#    e <- unique(e)
+#    E$mixcat <- editarray(unique(e))
+    E
+}
 
 
 
