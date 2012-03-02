@@ -129,7 +129,7 @@ indFromArray <- function(A,sep){
 #' @param simplify Simplify editset by moving logical edits containing a simple 
 #'      numerical statement to the pure numerical part?
 #' @param removedummies Substituting numerical values may cause doublures in dummy variables.
-#'   If this parameter is {\sf TRUE}, some internal restructuring is performed to get rid of those.
+#'   If this parameter is \code{TRUE}, some internal restructuring is performed to get rid of those.
 #'
 #' @method substValue editset
 #' 

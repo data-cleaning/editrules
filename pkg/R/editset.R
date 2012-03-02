@@ -263,7 +263,6 @@ removeRedundantDummies <- function(E, tol=1e-8){
     d <- dist(cbind(getAb(E$mixnum), op2num[getOps(E$mixnum)]))
     id <- d < tol
     if ( !any( id ) ) return(E)
-
     m <- nrow(E$mixnum)
     dupnames <- rownames(E$mixnum)[2:m]
     orgnames <- rownames(E$mixnum)[1:(m-1)]
@@ -271,7 +270,7 @@ removeRedundantDummies <- function(E, tol=1e-8){
     v[lower.tri(v,1)] <- d < tol
     v <- v[apply(v,1,any),,drop=FALSE]
     v <- v[,!apply(!v,2,all),drop=FALSE]
-    v <- v[,!colnames(v) %in% rownames(v)]
+    v <- v[,!colnames(v) %in% rownames(v),drop=FALSE]
 
     dupvars <- rownames(v)
     w <- rownames(E$mixnum)

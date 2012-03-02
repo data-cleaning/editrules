@@ -312,6 +312,7 @@ most conveniently, from a free-form textfile.
     2*u  + 0.5*v == 3*w
     w >= 0
     if ( x > 0 ) y > 0
+    if ( x > y ) z < 10
     x >= 0
     y >= 0
     z >= 0
@@ -337,7 +338,8 @@ reused over several variables. Comments are allowed as well, and will be ignored
 by the parser. If the file is stored in a file called {\sf myedits.txt}, the
 file can be read as follows:
 <<>>=
-(E <- editfile("myedits.txt"))
+myfile <- system.file("script/edits/myedits.txt",package="editrules")
+(E <- editfile(myfile))
 @
 Here, {\sf E} is an object of class {\sf editset}. When printed to screen,
 the datamodel for categorical variables, as well as the textual representation
@@ -421,7 +423,7 @@ Function        & Description\\
 \begin{figure}[t]
 <<fig=TRUE,echo=FALSE>>=
 par(oma=c(0,0,0,0),mar=c(0,0,1.5,0))
-set.seed(1)
+set.seed(2)
 plot(E)
 @
 \caption{A graph view of the edits of Figure \ref{figeditfile}, generated  with
@@ -531,8 +533,8 @@ value for edits in the premise or consequent in a conditional edit.
 \begin{figure}
 <<fig=true,echo=false>>=
 v <- disjunct(E)
-par(oma=c(0,0,0,0),mar=c(0,0,1.5,0),mfrow=c(2,2))
-for ( i in 1:4 ){
+par(oma=c(0,0,0,0),mar=c(0,0,1.5,0),mfrow=c(2,2),pty='m')
+for ( i in 1:length(v) ){
     set.seed(1)
     plot(
         v[[i]],
