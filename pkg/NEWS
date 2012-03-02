@@ -1,4 +1,5 @@
 version 2.2-1
+- duplicated dummyvariables in an editset are removed (making 'disjunct' much more efficient)
 - localizeErrors for conditional restrictions (editset)
 - errorLocalizer.-functions now accept a named list as records (as well as named vector)
 - Option 'useBlocks' in function 'localizeErrors' is now ignored (always TRUE) and will be removed
@@ -6,8 +7,6 @@ version 2.2-1
 - isObviouslyInfeasible for editlist/editenv/editset
 - bugfix in localizeErrors: logical columns caused crashes when both TRUE and FALSE present
 - bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein)
-- bugfix in localizeErrors: logical columns caused crashes when both TRUE and FALSE present.
-- bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein).
 - Better printing of cateditmatrix.
 
 version 2.2-0
