@@ -74,7 +74,6 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         B  <- blocks(E)
     }
 
-
     n <- length(B)
     i <- 0
     blockCount <- NULL
