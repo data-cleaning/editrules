@@ -7,194 +7,6 @@ checklpSolveAPI <- function(){
     require(lpSolveAPI) || stop(nolpSolveAPI)
 }
 
-#' Extend an editmatrix or editarray with extra constraints needed for error
-#' localization
-#' @param E editmatrix 
-#' @param x named numeric with data
-#' @return list with extended E, objfn and lower and upper bound
-#' @keywords internal
-buildELMatrix <- function(E,x,weight,...){
-  UseMethod("buildELMatrix")
-}
-
-#' Extend an editmatrix with extra constraints needed for error
-#' localization
-#' @method buildELMatrix editmatrix
-#' @param E editmatrix 
-#' @param x named numeric with data
-#' @param weight vector with weights of the variable in the same order as x
-#' @param xlim upper and lower boundaries of \code{x}
-#' @return list with extended E, objfn and lower and upper bound
-#' @keywords internal
-buildELMatrix.editmatrix <- function( E
-                                    , x
-                                    , weight = rep(1, length(x))
-                                    , xlim = 1000 * cbind(l=-abs(x), u=abs(x))
-                                    , maxvalue = 1e8
-                                    ){
-  #TODO sample order of variables
-  E <- E[, c(sample(length(getVars(E))), ncol(E))]
-  vars <- getVars(E)
-  idx <- match(vars, names(x))
-  
-  weight <- weight[idx]
-  xlim <- xlim[idx,,drop=FALSE]
-  x <- x[idx]
-  nvars <- length(vars)
-  
-  adaptvars <- paste("adapt", vars, sep=".")
-  adaptidx <- seq_along(vars) + nvars
-  
-  ub <- xlim[,2]
-  lb <- xlim[,1]
-  ub[is.na(ub)] <- maxvalue
-  ub[round(x) == 0] <- maxvalue # to cope with very small (or 0) values
-  lb <- -ub
-  x[is.na(x)] <- 2 * (ub[is.na(x)] + 1) # put value for NA's out of bound
-  
-  A <- getA(E)
-  
-  Ael <- cbind(A,A,getb(E))
-  colnames(Ael)[adaptidx] <- adaptvars
-  Ael[,adaptidx] <- 0
-       
-  r_x <- diag(-1, nvars)
-  if ( nvars == 1 ){
-    r_lower = matrix(lb-x,ncol=1,nrow=1)
-  } else {
-    r_lower <- diag(lb-x)
-  }
-  r <- cbind(r_x, r_lower, -x)
-  Ael <- rbind(Ael, r)
-   
-  r_x <- diag(1, nvars)
-  if ( nvars == 1 ){
-    r_upper <- matrix(x-ub,ncol=1,nrow=1)
-  } else {
-    r_upper <- diag(x-ub)
-  }
-  r <- cbind(r_x, r_upper, x)
-  Ael <- rbind(Ael, r)
-    
-  ops <- c(getOps(E), rep("<=", 2*nvars))
-  
-  nb <- ncol(Ael)
-  
-  # remove NA rows
-  Ena <- !is.na(Ael[,nb])
-  Ael <- Ael[Ena,,drop=FALSE]
-  ops <- ops[Ena]
-    
-  Eel <- as.editmatrix( Ael[,-nb,drop=FALSE]
-                      , Ael[,nb]
-                      , ops
-                      )
-  
-  objfn <- numeric(2*nvars)
-  objfn[adaptidx] <- weight
-  
-  names(lb) <- names(ub) <- vars
-  names(objfn) <- getVars(Eel)
-  binvars <- which(objfn > 0)
-  xlim <- cbind(lower=lb, upper=ub)
-  
-  list( E = Eel
-      , objfn = objfn
-      , lb=lb
-      , ub=ub
-      , binvars=binvars
-      , xlim=xlim
-      )
-}
-
-#' @method buildELMatrix editarray
-buildELMatrix.editarray <- function(E,x, weight=rep(1, length(x)), ...){
-  buildELMatrix.cateditmatrix(cateditmatrix(E), x, weight, ...)
-}
-
-#' @method buildELMatrix cateditmatrix
-buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
-  vars <- getVars(E, type="var")
-  nvars <- length(vars)
-  lvls <- colnames(E)[-ncol(E)]
-  nlvls <- length(lvls)
-  
-  v <- integer(nlvls)
-  names(v) <- lvls
-
-  vx <- asCat(x)
-  v[vx] <- 1
-  
-  #print(v)
-  x <- x[vars]
-  weight <- weight[match(vars, names(x))]
-  
-  adaptvars <- paste("adapt", vars, sep=".")
-  adaptidx <- seq_along(vars) + nlvls
-    
-  A <- getA(E)
-  Aa <- matrix(0L, ncol=nvars, nrow=nrow(A))
-  Ael <- cbind(A,Aa,getb(E))
-  colnames(Ael)[adaptidx] <- adaptvars
-  ops <- getOps(E)
-  
-  A <- matrix( 0L
-             , ncol = nvars+nlvls
-             , nrow = nvars
-             , dimnames = list(NULL, c(lvls, adaptvars))
-             )
-
-  for (i in seq_along(vx)){
-    A[i,vx[i]] <- 1
-    A[i,paste("adapt",names(vx[i]), sep=".")] <- 1
-  }
-  A <- cbind(A, 1)
-
-  Ael <- rbind(Ael, A)
-  ops <- c(ops, rep("==", nrow(A)))
-  
-  # domain constraints, (in case of open domains)
-  A <- matrix( 0L
-             , ncol = nvars+nlvls
-             , nrow = nvars
-             , dimnames = list(NULL, c(lvls, adaptvars))
-             )
-  
-  nlvls <- sub(":.+","", lvls)
-  #print(nlvls)
-  for (i in seq_along(vars)){
-    A[i,which(nlvls==vars[i])] <- 1
-  }
-  A <- cbind(A, 1)
-  
-  Ael <- rbind(Ael, A)
-  ops <- c(ops, rep("<=", nrow(A)))
-  
-  nb <- ncol(Ael)
-  
-  Eel <- as.editmatrix( Ael[,-nb,drop=FALSE]
-                      , Ael[,nb]
-                      , ops
-                      )
-  
-  objfn <- lb <- ub <- Ael[1,-nb]
-  lb[] <- 0
-  ub[] <- 1
-  objfn[] <- 0
-  xlim <- cbind(lower=objfn, upper=objfn+1)
-  objfn[adaptidx] <- weight
-  
-  binvars <- seq_along(objfn)
-    
-  list( E = Eel
-      , objfn = objfn
-      , lb = lb
-      , ub = ub
-      , xlim = xlim
-      , binvars=binvars
-      )
-}
-
 #' Localize errors by using lpSolveApi
 #' 
 #' \code{localize_mip_rec} uses \code{E} and \code{x} to define a mixed integer problem
@@ -215,25 +27,28 @@ localize_mip_rec <- function( E
                             , ...
                             ){
 
+   vars <- getVars(E)
+   
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
    }   
 
-    if ( is.list(x) ) x <- do.call(c,x)
+   if (is.list(x)) x <- do.call(c,x)
    
    t.start <- proc.time()
    elm <- buildELMatrix(E, x, weight, ...)
-   #print(elm)
+   
    Ee <- elm$E
    objfn <- elm$objfn
-   adaptidx <- which(objfn > 0)
    
    ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee)
+   lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
    
-   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:length(elm$lb))
+   # TODO move this code into as.lp.editmatrix
+   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
+   # end TODO
    
    lp.control( lps
              , presolve = "rows"    # move univariate constraints into bounds
@@ -252,11 +67,17 @@ localize_mip_rec <- function( E
    # get the positions of the adapt.variables
    aidx <- grepl("^adapt\\.", names(sol))
    # split solution in a value and a adapt part
-   sol.values <- sol[!aidx]
    sol.adapt <- sol[aidx]
+   sol.values <- sol[!aidx]
+   
+   cat.idx <- names(sol.values) %in% names(elm$binvars)
+   sol.cat <- asLevels(sol.values[cat.idx])
+   sol.num <- sol.values[!cat.idx]
+   
+   #print(list(sol.cat=sol.cat, sol.num=sol.num))
+   
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   #print(list(sol=sol, w=w, aidx=aidx, sol.values=sol.values, sol.adapt=sol.adapt))
    #write.lp(lps, "test.lp")
    
    #print(list(idx=idx, sol=sol))
@@ -265,12 +86,13 @@ localize_mip_rec <- function( E
 
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
-   
-   if (is.cateditmatrix(E)){
-     x_feasible[idx] <- asLevels(sol.values)
-   } else {
-     x_feasible[idx] <- sol.values
-   }
+   x_feasible[names(sol.num)] <- sol.num
+   x_feasible[names(sol.cat)] <- sol.cat
+#    if (is.cateditmatrix(E)){
+#      x_feasible[idx] <- asLevels(sol.values)
+#    } else {
+#      x_feasible[idx] <- sol.values
+#    }
    
    t.stop <- proc.time()
    duration <- t.stop - t.start
@@ -285,7 +107,7 @@ localize_mip_rec <- function( E
 }
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E){
+as.lp.editmatrix <- function(E, obj, xlim, type){
    require(lpSolveAPI)
    epsb <- 1e-8
    A <- getA(E)
@@ -309,8 +131,8 @@ as.lp.editmatrix <- function(E){
    lps
 }
 
-asCat <- function(x){
-  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=":"))
+asCat <- function(x, sep=":"){
+  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=sep))
   is.na(nms) <- is.na(x)
   names(nms) <- names(x)
   nms
@@ -321,8 +143,10 @@ asCat <- function(x){
 asLevels <- function(x){
   vars <- sub(":.+", "", names(x))
   lvls <- sub(".+:", "", names(x))
+  logicals <- vars == lvls
+  lvls[logicals] <- as.character(x[logicals] > 0)
   names(lvls) <- vars
-  lvls[x > 0]
+  lvls[x > 0 | logicals]
 }
    
 #testing...

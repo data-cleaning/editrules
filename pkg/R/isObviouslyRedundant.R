@@ -133,4 +133,3 @@ isObviouslyRedundant.editenv <- function(E, duplicates=rep(TRUE,2), ...){
 
 
 
-

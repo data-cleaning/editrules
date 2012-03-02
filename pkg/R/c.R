@@ -12,7 +12,7 @@ c.editmatrix <- function(...){
   
   A <- lapply(ems, function(E){
     a <- matrix(0, nrow=nrow(E), ncol=length(vars), dimnames=list(NULL, vars))
-    a[, getVars(E)] <- getA(E)
+    a[, getVars(E, type="colnames")] <- getA(E)
     a
   })
   A <- do.call(rbind, A)
