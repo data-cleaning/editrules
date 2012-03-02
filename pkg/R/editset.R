@@ -288,7 +288,6 @@ removeRedundantDummies <- function(E, tol=1e-8){
         }
     }
     idup <- unlist(ind[dupvars])
-print(idup)
     A <- A[,-idup,drop=FALSE]
     ind <- indFromArray(A,sep)
     E$mixcat <- neweditarray(A,ind=ind,names=rownames(A),sep=sep)
