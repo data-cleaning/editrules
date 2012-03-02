@@ -226,7 +226,7 @@ buildELMatrix.editset <- function( E
   xlim <- checkXlim(xlim, x)
   # num part
   num.vars <- getVars(E, type="num")
-  num.idx <- which(getVars(E) %in% num.vars)
+  num.idx <- match(num.vars, names(x))
   num.x_i <- diag(1, nrow=length(num.vars))
   dimnames(num.x_i) <- list(num.vars,num.vars)
   num.x_0 <- as.numeric(x[num.idx])
@@ -237,7 +237,7 @@ buildELMatrix.editset <- function( E
 
   # cat part
   cat.vars <- getVars(E, type="cat")
-  cat.idx <- which(getVars(E) %in% cat.vars)
+  cat.idx <- match(cat.vars, names(x))
   cat.A <- diag(1, nrow=length(cat.vars))
   cat.A <- cbind(cat.A,cat.A)
   cat.x_0 <- unlist(x[cat.idx])
@@ -291,4 +291,4 @@ checkXlim <- function(xlim, x){
 # 
 # cateditmatrix(e)
 # #buildELMatrix(E, x)# -> B
-# localize_mip_rec(E, x=x)
+#  localize_mip_rec(E, x=x)
