@@ -303,6 +303,22 @@ test_that('localizeErrors',{
   expect_equivalent(
     localizeErrors(E,record, method="mip")$adapt
     ,
+    array(c(FALSE,TRUE,FALSE),dim=c(1,3))
+    )
+})
+
+test_that('localizeErrors with outofrange error',{
+  E <- editset(c(
+    "age %in% c('under aged','adult')",
+    "maritalStatus %in% c('unmarried','married','widowed','divorced')",
+    "positionInHousehold %in% c('marriage partner', 'child', 'other')",
+    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
+    "if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')"
+    ))
+  record <- data.frame(age='under aged', maritalStatus='unmarried', positionInHousehold='out-of-range')
+  expect_equivalent(
+    localizeErrors(E,record, method="mip")$adapt
+    ,
     array(c(FALSE,FALSE,TRUE),dim=c(1,3))
     )
 })

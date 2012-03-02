@@ -42,6 +42,7 @@ softEdits <- function(E, xlim, prefix=".se."){
   
   seA <- sapply(dummies, function(d) { ifelse(d == seNms, ub[,2], 0)})
   seA <- cbind(A,seA)
+  colnames(seA) <- c(colnames(A), dummies)
   
   binvars <- sapply(colnames(seA), `%in%`, dummies)
   seE <- as.editmatrix(seA, getb(E), getOps(E), binvars=binvars)

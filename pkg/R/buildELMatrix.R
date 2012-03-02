@@ -20,11 +20,12 @@ buildELMatrix <- function(E,x,weight,...){
 buildELMatrix.editmatrix <- function( E
                                     , x
                                     , weight = rep(1, length(x))
-                                    , xlim = 1000 * cbind(l=-abs(x), u=abs(x))
+                                    , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
                                     , maxvalue = 1e8
                                     ){
   #TODO sample order of variables
   E <- E[, c(sample(length(getVars(E))), ncol(E))]
+  x <- unlist(x)
   
   vars <- getVars(E)
   idx <- match(vars, names(x))
@@ -232,8 +233,8 @@ buildELMatrix.editset <- function( E
 #     soft.weights <- editweights[soft]
 #     
 #     #TODO process softedits into el.E
-#     soft.num <- softEdits(soft.E$num, xlim)
-#     soft.cat <- softEdits(cateditmatrix(soft.E$mixcat), xlim)
+#     soft.num <- softEdits(soft.E$num, xlim, prefix=".softnum.")
+#     soft.cat <- softEdits(cateditmatrix(soft.E$mixcat), xlim,prefix=".softcat."")
 #     el.E <- c(soft.num, soft.cat, el.E)
 #     E <- E[!soft]
 #   }
@@ -243,12 +244,12 @@ buildELMatrix.editset <- function( E
   #TODO check NA values...
   if (!is.null(num.vars)){
     num.idx <- match(num.vars, names(x))
-    num.x_i <- diag(1, nrow=length(num.vars))
-    dimnames(num.x_i) <- list(num.vars,num.vars)
-    num.x_0 <- as.numeric(x[num.idx])
-    num.xlim <- xlim[num.idx, ,drop=FALSE]
+    num.x <- diag(1, nrow=length(num.vars))
+    dimnames(num.x) <- list(num.vars,num.vars)
+    num.x0 <- unlist(x[num.idx])
+    num.xlim <- xlim[num.idx,,drop=FALSE]
     # create an editmatrix x_i == x^0_i
-    num.E <- as.editmatrix(num.x_i, num.x_0, "==")
+    num.E <- as.editmatrix(num.x, num.x0, "==")
     num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
     el.E <- c(num.se, E$num, el.E)
   }
@@ -261,6 +262,7 @@ buildELMatrix.editset <- function( E
     cat.A <- diag(1, nrow=length(cat.idx))
     cat.A <- cbind(cat.A,cat.A)
     cat.x_0 <- unlist(x[cat.idx])
+    #print(asCat(cat.x_0))
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
     cat.se <- as.editmatrix(cat.A, b=1)
     el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)

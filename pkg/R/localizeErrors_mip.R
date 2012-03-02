@@ -31,9 +31,7 @@ localize_mip_rec <- function( E
    
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
-   }   
-
-   if (is.list(x)) x <- do.call(c,x)
+   }
    
    t.start <- proc.time()
    elm <- buildELMatrix(E, x, weight, ...)
@@ -86,8 +84,12 @@ localize_mip_rec <- function( E
 
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
+   
+   
    x_feasible[names(sol.num)] <- sol.num
-   x_feasible[names(sol.cat)] <- sol.cat
+   
+   if (length(sol.cat))
+      x_feasible[names(sol.cat)] <- sol.cat
 #    if (is.cateditmatrix(E)){
 #      x_feasible[idx] <- asLevels(sol.values)
 #    } else {
