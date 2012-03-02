@@ -219,39 +219,53 @@ buildELMatrix.editset <- function( E
                                  , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
                                  , maxvalue = 1e8
                                  ){
-  Eel <- NULL
+  el.E <- NULL
   
   #check xlim
   # NOTE not doing anything right now...
   xlim <- checkXlim(xlim, x)
+  
   # num part
   num.vars <- getVars(E, type="num")
-  num.idx <- match(num.vars, names(x))
-  num.x_i <- diag(1, nrow=length(num.vars))
-  dimnames(num.x_i) <- list(num.vars,num.vars)
-  num.x_0 <- as.numeric(x[num.idx])
-  num.xlim <- xlim[num.idx, ,drop=FALSE]
-  # create an editmatrix x_i == x^0_i
-  num.E <- as.editmatrix(num.x_i, num.x_0, "==")
-  num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
+  num.se <- NULL
+  if (!is.null(num.vars)){
+    num.idx <- match(num.vars, names(x))
+    num.x_i <- diag(1, nrow=length(num.vars))
+    dimnames(num.x_i) <- list(num.vars,num.vars)
+    num.x_0 <- as.numeric(x[num.idx])
+    num.xlim <- xlim[num.idx, ,drop=FALSE]
+    # create an editmatrix x_i == x^0_i
+    num.E <- as.editmatrix(num.x_i, num.x_0, "==")
+    num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
+    el.E <- c(num.se, E$num, el.E)
+  }
 
   # cat part
   cat.vars <- getVars(E, type="cat")
-  cat.idx <- match(cat.vars, names(x))
-  cat.A <- diag(1, nrow=length(cat.vars))
-  cat.A <- cbind(cat.A,cat.A)
-  cat.x_0 <- unlist(x[cat.idx])
-  colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
-  cat.se <- as.editmatrix(cat.A, b=1, ops="==")
+  cat.se <- NULL
+  if (!is.null(cat.vars)){
+    cat.idx <- match(cat.vars, names(x))
+    cat.A <- diag(1, nrow=length(cat.vars))
+    cat.A <- cbind(cat.A,cat.A)
+    cat.x_0 <- unlist(x[cat.idx])
+    colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
+    cat.se <- as.editmatrix(cat.A, b=1, ops="==")
+    el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)
+  }
   
   # mix part
+  
   mix.E <- editmatrix(invert(as.character(E$mixnum)))
   mix.vars <- getVars(mix.E)
-  mix.idx <- which(getVars(E) %in% mix.vars)
-  mix.xlim <- xlim[mix.idx,,drop=FALSE]
-  mix.se <- softEdits(mix.E, xlim=mix.xlim, prefix="")
+  mix.se <- NULL
+  if (!is.null(mix.vars)){
+    mix.idx <- which(getVars(E) %in% mix.vars)
+    mix.xlim <- xlim[mix.idx,,drop=FALSE]
+    mix.se <- softEdits(mix.E, xlim=mix.xlim, prefix="")
+    el.E <- c(mix.se, el.E)
+  }
   
-  el.E <- c(mix.se, cat.se, num.se, E$num, cateditmatrix(E$mixcat))     
+#  el.E <- c(mix.se, cat.se, num.se, E$num, cateditmatrix(E$mixcat))     
 
   el.vars <- getVars(el.E)
   el.binvars <- sapply(el.vars, is.character)

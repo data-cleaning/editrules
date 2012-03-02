@@ -33,7 +33,7 @@ softEdits <- function(E, xlim, prefix=".se."){
     Ab <- rbind(Ab, -Ab)
     ops <- rep("<=", nrow(Ab))
     E <- c(E[!eq,], neweditmatrix(Ab, ops))
-    seNms <- c(dummies[!eq], rep(dummies[eq], each=2))
+    seNms <- c(dummies[!eq], rep(dummies[eq], 2))
   }
   
   # E now contains only inequalities (i.e. "<" and "<=")
