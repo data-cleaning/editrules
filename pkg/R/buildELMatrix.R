@@ -14,7 +14,7 @@ buildELMatrix <- function(E,x,weight,...){
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @param weight vector with weights of the variable in the same order as x
-#' @param xlim upper and lower boundaries of \code{x}
+#' @param xlim optional \code{list} with upper and lower boundaries of \code{x}
 #' @return list with extended E, objfn and lower and upper bound
 #' @keywords internal
 buildELMatrix.editmatrix <- function( E
@@ -262,9 +262,11 @@ buildELMatrix.editset <- function( E
     cat.A <- diag(1, nrow=length(cat.idx))
     cat.A <- cbind(cat.A,cat.A)
     cat.x_0 <- unlist(x[cat.idx])
-    #print(asCat(cat.x_0))
+    
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
-    cat.se <- as.editmatrix(cat.A, b=1)
+    # check for non existing levels (including NA's)
+    cat.b <- ifelse(asCat(cat.x_0, useLogicals=FALSE) %in% getlevels(E$mixcat), 1, 2)
+    cat.se <- as.editmatrix(cat.A, b=cat.b)
     el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)
   }
   
@@ -297,8 +299,18 @@ buildELMatrix.editset <- function( E
       )
 }
 
-# TODO this function should check xlim and potentially adjust it, to fix (very) small boundary conditions
-checkXlim <- function(xlim, x){
+checkXlim <- function(xlim, x, maxvalue=1e8){
+  # expand list
+  if (is.list(xlim)){
+    xlim2 <- t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
+    for (var in names(xlim)) { 
+      xlim2[var,] <- xlim[[var]]
+    }
+    xlim <- xlim2
+  }
+  
+  xlim[is.na(xlim[,1]),] <- -maxvalue
+  xlim[is.na(xlim[,2]),] <- maxvalue
   xlim
 }
 
@@ -307,15 +319,18 @@ checkXlim <- function(xlim, x){
 # E <- editset(expression(
 #          if (x>0) y > 0
 #       ,  maritalstatus %in% c("married", "single")
-#       ,  if (maritalstatus == "married") age > 16 
+#       ,  if (maritalstatus == "married") age >= 17
 #       ))
 # 
 # x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+# #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
 # # e <- expression( pregnant %in% c(TRUE, FALSE)
 # #                , gender %in% c("male", "female")
 # #                , if (pregnant) gender == "female"
 # #                )
 # # 
 # # cateditmatrix(e)
-# # #buildELMatrix(E, x)# -> B
-#   localize_mip_rec(E, x=x)
+# checkXlim(list(age=c(0,200)), x)
+# 
+# buildELMatrix(E, x)# -> B
+# localize_mip_rec(E, x=x)
