@@ -24,7 +24,7 @@ $R CMD build ../pkg
 echo "######## Testing package..."
 for x in *.tar.gz 
 do 
-    $R CMD check $x
+    $R CMD check --as-cran $x
 done
 
 echo "**BUILT USING $R"
