@@ -6,7 +6,10 @@
 #'
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, or alternatively 
 #'        a \code{character} or \code{expression} with (in)equalities written in R syntax
-#' @param env environment to parse categorical edits in
+#' @param env environment to parse categorical edits in (normally, users need not specify this)
+#' @seealso \code{\link{editfile}}
+#' @example ../examples/editset.R
+#'
 #' @export
 editset <- function(editrules, env=new.env()){
     
@@ -297,26 +300,46 @@ removeRedundantDummies <- function(E, tol=1e-8){
     v <- v[,!apply(!v,2,all),drop=FALSE]
     v <- v[,!colnames(v) %in% rownames(v),drop=FALSE]
 
+    # remove duplicates from mixnum
     dupvars <- rownames(v)
     w <- rownames(E$mixnum)
     E$mixnum <- E$mixnum[!w %in% dupvars,]
 
+    # replace original values by duplicates in mixcat; remove duplicates
     A <- getArr(E$mixcat)
     ind <- getInd(E$mixcat)
     sep <- getSep(E$mixcat)
-   
-    for ( org in colnames(v) ){
-        for ( dup in dupvars ){
-            iM <- apply(contains(E$mixcat,c(org,dup)),1,all)
-            A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
-        }
+
+    w <- which(v,arr.ind=TRUE)
+    dups <- rownames(v)[w[,1]]
+    names(dups) <- colnames(v)[w[,2]]
+    while( length(dups) > 0 ){
+        dup <- dups[1]
+        org <- names(dup)
+        iM <- contains.boolmat(A, ind, dup)
+        A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
+        dups <- dups[-1]
     }
+
     idup <- unlist(ind[dupvars])
     A <- A[,-idup,drop=FALSE]
     ind <- indFromArray(A,sep)
     E$mixcat <- neweditarray(A,ind=ind,names=rownames(A),sep=sep)
 
-# alternative implementation:
+    E
+}
+
+
+# alternative implementation 1
+#    for ( org in colnames(v) ){
+#        for ( dup in dupvars ){
+#            if ( v[dup,org] ){
+#                iM <- contains.boolmat(A,ind,dup)
+#                A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
+#            }
+#        }
+#    }
+# alternative implementation 2:
 #    e <- as.character(E2)
 #    for ( org in colnames(v) ){
 #        repstr <- paste(dup[v[,org]],collapse="|")
@@ -325,10 +348,6 @@ removeRedundantDummies <- function(E, tol=1e-8){
 #    E$mixnum <- E1
 #    e <- unique(e)
 #    E$mixcat <- editarray(unique(e))
-    E
-}
-
-
 
 
 
