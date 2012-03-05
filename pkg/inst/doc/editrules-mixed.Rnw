@@ -1,4 +1,4 @@
-%\VignetteIndexEntry{Manipulation of categorical data edits and error localization with the editrules package}
+%\VignetteIndexEntry{Manipulation of conditional restrictions and error localization with the editrules package}
 \documentclass[11pt, fleqn, a4paper]{article}
 \usepackage{inconsolata}
 \usepackage[english]{babel}
@@ -47,9 +47,8 @@
  
 \floatstyle{boxed}
 \newfloat{Rcode}{t!}{rco}
-\floatname{Rcode}{Figure}
-
-
+\floatname{Rcode}{{\rm Figure}}
+\floatstyle{plain}
 
 % stimulate latex to put multiple floats on a page.
 \setcounter{topnumber}{2}
@@ -503,17 +502,18 @@ on $y$.
     \State $T\leftarrow \{t : t \textrm{ is a dummy variable of }E \}$
     \If {$T = \varnothing$}
         \State $S \leftarrow S\cup E$
-    \Else
+        \State {\bf return}
+    \EndIf
         \State Choose a $t$ from $T$
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\true)$
-        \If {$\textrm{\sf isFeasible}(E_{\sf num})\land \textrm{\sf isFeasible}(E_{\sf mixcat})$}
+        \If {{\sf condition($E$)}, $E_{\sf num}$, and $E_{\sf mixnum}$ all feasible }
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\false)$
-        \If {$\textrm{\sf isFeasible}(E_{\sf num})\land \textrm{\sf isFeasible}(E_{\sf mixcat})$}
+        \If {{\sf condition($E$)}, $E_{\sf num}$, and $E_{\sf mixnum}$ all feasible }
+        
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
-    \EndIf
     \EndProcedure
 \end{algorithmic}
 \end{algorithm}
@@ -644,15 +644,19 @@ be detailed in the next two subsections.
 Recall that conditional edits in an editset are stored as a combination of
 categorical edits with dummy variables ($E_{\sf mixnum}$), referring to linear
 edits in $E_{\sf mixnum}$. Purely numerical edits are stored in a seperate
-object called $E_{\sf num}$.
-To substitute a value in an editset, we need to distinguis several cases.
-If a variable occurs in $E_{\sf num}$, but not in ${E_{\sf mixnum}}$ the
-{\sf substValue} method for {\sf editarray} is used on $E_{\sf num}$, as
-described in \cite{jonge:2011}. For a categorical variable, the procedure
-for substitition in an {\sf editarray} is followed for $E_{\sf mixcat}$,
-as described in \cite{loo:2011b}. If the substituted variable is a numerical
-variable, occuring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following
-steps must be performed.
+object called $E_{\sf num}$.  To substitute a value in an editset, four cases
+are distinguised.
+
+The first two cases are the simplest and concern variables which are either
+numerical and not occuring in $E_{\sf mixnum}$ or categorical variables. These
+cases are handled by dispatching the appropriate {\sf substValue} methods for
+$E_{\sf num}$ or $E_{\sf mixcat}$ ({\sf editmatrix} and {\sf editarray}
+respectively) which have been described in \cite{jonge:2011} and
+\cite{loo:2011b}.
+
+The third case occurs when the substituted variable is a numerical variable,
+occuring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following steps
+must be performed.
 %
 \begin{enumerate}
 \item If the variable occurs in $E_{\sf num}$ substitute its value there.
@@ -660,23 +664,15 @@ steps must be performed.
 \item If any edits in $E_{\sf mixnum}$ have become obviously redundant ({\em e.g.} $0 < 1$) or
 obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \false for
 the corresponding dummy variables in $E_{\sf mixcat}$.
-\item Remove all edits of the form 
-\begin{displaymath}
-\textrm{\sf if } \true \textrm{ \sf then  } t,
-\end{displaymath}
+\item Remove all edits of the form $\textrm{\sf if } \true \textrm{ \sf then  } t$
 from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit2}).
 \item If the dummy variable $t$ does not occur anywhere $E_{\sf mixcat}$ anymore, move the 
 corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
-\item Remove all edits of the form
-\begin{displaymath}
-\textrm{\sf if } \false \textrm{ \sf then  } t
-\end{displaymath}
+\item Remove all edits of the form $\textrm{\sf if } \false \textrm{ \sf then  } t$.
+
 \end{enumerate}
 %
 %
-Besides the above procedure, the {\sf substValue} function performs some simplifications
-on $E_{\sf mixnum}$ and $E_{\sf mixcat}$.
-
 As an example, consider the code below.
 <<>>=
 F <- editset(expression(
@@ -692,23 +688,131 @@ yielding a false premise and the conditional edit can be deleted:
 substValue(F,"x",-3)
 @
 
+The fourth and final case concerns substitution of dummy variables.  Recall
+that dummy variables are used to code linear inequalities that occur in
+conditional edits. Filling in \true or \false for a dummy variable is not the
+same substituting a value for a variable that is subject to the edit rules.
+Rather, it is equivalent to asserting that a linear relationship on one or more
+variables holds.  If a dummy variable is substituted, the {\sf substValue}
+moves the corresponding numerical edit from $E_{\sf mixnum}$ to the {\sf
+condition} attribute of the {\sf editset}. Next, $E_{\sf mixcat}$ is updated
+accordingly. Substituting dummy variables explicitly is not normally done by
+end users, as the names and values of dummy variables remain hidden to them.
+The {\sf condition} attribute is stored as an {\sf editmatrix} and can be
+requested with {\sf condition}.
+
+
+
+
 
 
 
 
 \subsection{Variable elimination and satisfiability}
 \label{sselimination}
+Variable elimination on an editset is executed by first separating
+the edits in disjunct sets where no numerical edits appear in
+conditional edits anymore (See Section \ref{sseditlist}).
+Next, since in each element of the resulting editlist, the 
+dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable
+elimination takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$
+for numerical or categorical variables respectively. The
+methods used for variable elimination in an {\sf editmatrix}
+are described in {\sf jonge:2011} while the methods for
+variable elimination from an editarray are described in
+\cite{loo:2011b} and \cite{loo:2012}.
+
+Consequently, the result of an {\sf eliminate} operation is an object
+of class {\sf editlist}. As an example, consider the following set of 
+edits.
+\begin{equation}
+E = \left\{\begin{array}{l}
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } y\geq 0\\
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } x \leq y\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } y < 0\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } x - y < -2. \\
+\end{array}\right.
+\label{eqedits}
+\end{equation}
+These edits are all connected, since all of them contain both $x$ and $y$.
+Figure \ref{figprojections} shows (in grey) the valid areas in the $x$-$y$
+plane, defined by these edits. From the sketch it is clear that the edits can
+be separated in two purely linear edit sets. Algebraically, this can be done by
+working out the assumptions $x\leq 0$ is $\true$ ($\false$) and consequently
+$x<0$ is $\false$ ($\true$). We obtain
+\begin{displaymath}
+E = \left(
+x\geq0 \land  \left\{\begin{array}{l}
+        y\geq 0\\
+        x\leq y\\
+\end{array}\right.,
+x < 0 \land \left\{\begin{array}{l}
+        y < 0\\
+        x - y < 2\\
+\end{array}\right.\right).
+\end{displaymath}
+Here, each element consists of a conjunction of two sets of linear edits. In
+each element, the first edit set holds the conditions under which the edits in
+the second set are valid. Since the conditions are mutually exclusive, 
+we may perform variable elimination for edit sets on each element separately. 
+Geometrically, this amounts to projecting along the $y$-axis when $y$ is eliminated
+or along the $x$-axis when $x$ is eliminated. In Figure \ref{figprojections} the
+projections are indicated with bold lines. Algebraically, we need to apply
+Fourier-Motzkin elimination on the second set of linear edits of each element of $E$
+to obtain
+\begin{displaymath}
+E = \left(
+x\geq0 \land  \varnothing
+,
+x < 0 \land x < -2\right).
+\end{displaymath}
+The first edit element says that if $x\geq 0$, there are no further restrictions.
+The second element says that when $x<0$, it must be smaller than $-2$.
+
+\setkeys{Gin}{width=0.5\textwidth}
+\begin{figure}
+\centering
+<<fig=true,echo=false>>=
+    par(mar=rep(0,4),oma=rep(0,4))
+    lwd=2
+    pcol <- "#E3E3E3" 
+    x <- c(0,4)
+    plot(x,x,"l",axes=FALSE,xlab="",ylab="",xlim=c(-4,4),ylim=c(-2,3),lwd=lwd)
+    polygon(c(0,3.9,3.9),c(0,3.9,0),border=NA,col=pcol)
+    polygon(c(-2,-3.9,-3.9),c(0,0,-1.9),border=NA,col=pcol)
+    lines(x,x,lwd=lwd)
+    abline(v=0,lwd=lwd)
+    abline(h=0,lwd=lwd)
+    x2 <- c(0,-4)
+    lines(x2,x2+2,lwd=lwd)
+    lines(c(0,5),c(0,0),lwd=4)
+    points(0,0,pch=16,cex=2)
+    lines(c(-2,-5),c(0,0),lwd=4)
+    text(4,-0.2,expression(x),cex=2)
+    text(-0.2,3,expression(y),cex=2)
+@
+\caption{Graphical representation (in grey) of the valid areas defined
+by the edits of Eq.\ \eqref{eqedits}. Depicted are the bordering lines $y=x$ and $y=-x-2$.
+The bold lines indicate the projections of the grey areas along the $y$-axis.
+}
+\label{figprojections}
+\end{figure}
+
+
+\setcounter{Rcode}{4}
+\begin{Rcode}[htbp]
 <<>>=
 E <- editset(expression(
     if ( x >= 0 ) y >= 0,
     if ( x >= 0 ) x <= y,
     if ( x < 0 ) y < 0,
-    if ( x < 0 ) x + y < 2
+    if ( x < 0 ) x - y < -2
 ))
-E
+eliminate(E,"y")
 @
 
-
+\caption{Eliminating a variable from an object of class {\sf editset} results in an {\sf editlist}.}
+\end{Rcode}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
