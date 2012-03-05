@@ -220,7 +220,7 @@ eliminate.editlist <- function(E, var, ...){
 #' @method eliminate editset
 eliminate.editset <- function(E,var,...){
     D <- disjunct(E)
-    eliminate.editlist(D,...)
+    eliminate.editlist(D,var,...)
 }
 
 
