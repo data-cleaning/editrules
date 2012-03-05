@@ -685,9 +685,9 @@ if ( x > 0 ) y > 0))
 substValue(F,"x",3)
 @
 Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then } y>0$, so the 
-condition $y>0$ may be added the numerical edits (here: $x+y=z$) and the conditional edit
-removed. On the other hand, substituting $x = -3$ gives $\textrm{\sf  if } -3 > 0 \textrm{ \sf  then } y>0$,
-so the conditional edit can be deleted, as is done by {\sf substValue}.
+consequent $y>0$ may be added the numerical edits (here: $x+y=z$). 
+On the other hand, substituting $x = -3$ gives $\textrm{\sf  if } -3 > 0 \textrm{ \sf  then } y>0$,
+yielding a false premise and the conditional edit can be deleted:
 <<>>=
 substValue(F,"x",-3)
 @
@@ -698,6 +698,16 @@ substValue(F,"x",-3)
 
 \subsection{Variable elimination and satisfiability}
 \label{sselimination}
+<<>>=
+E <- editset(expression(
+    if ( x >= 0 ) y >= 0,
+    if ( x >= 0 ) x <= y,
+    if ( x < 0 ) y < 0,
+    if ( x < 0 ) x + y < 2
+))
+E
+@
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
