@@ -217,7 +217,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 buildELMatrix.editset <- function( E
                                  , x
                                  , weight = rep(1, length(x))
-                                 , xlim = t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
+                                 , xlim = generateXlims(x)
                                  , maxvalue = 1e8
 #                                 , editweights = rep(Inf, nrow(E))
                                  ){
@@ -274,7 +274,7 @@ buildELMatrix.editset <- function( E
   mix.E <- editmatrix(invert(as.character(E$mixnum)))
   mix.vars <- getVars(mix.E)
   if (!is.null(mix.vars)){
-    mix.idx <- which(getVars(E) %in% mix.vars)
+    mix.idx <- match(mix.vars, names(x))
     mix.xlim <- xlim[mix.idx,,drop=FALSE]
     mix.se <- softEdits(mix.E, xlim=mix.xlim, prefix="")
     el.E <- c(mix.se, el.E)
@@ -297,6 +297,36 @@ buildELMatrix.editset <- function( E
       , xlim = xlim
       , binvars = which(el.binvars)
       )
+}
+
+#' Utility function for generating sensible boundaries for variables
+#' Needed for mip error localization.
+#' 
+#' This function determines the minimum and maximum value in \code{x} and 
+#' applies an offset to it. NA values will be treated as zero.
+#'
+#' @param x \code{data vector}
+#' @param factor 
+#' @param offset 
+#' @param maxvalue
+#' @param ... not used
+#' @returns a lower and upper boundary of \code{x}
+createXlim <- function(x, factor=1, offset=c(-1000,1000), maxvalue=1e8, ...){
+  if (!is.numeric(x)){
+    return(c(0,1))
+  }
+  
+  x[is.na(x)] <- 0
+  xlim <- factor*c(min(x), max(x)) + offset
+  return(xlim)
+}
+
+generateXlims <- function(x, xlim=list(), create=createXlim, ...){
+  boundaries <- lapply(x, createXlim, ...)
+  for (var in names(xlim)){
+    boundaries[[var]] <- xlim[[var]]    
+  }
+  t(sapply(boundaries, c))
 }
 
 checkXlim <- function(xlim, x, maxvalue=1e8){

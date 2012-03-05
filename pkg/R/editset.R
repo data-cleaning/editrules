@@ -215,6 +215,31 @@ editType <- function(E, m=NULL){
 }
 
 
+#' Coerce x to an editset
+#'
+#' \code{x} may be an editset, editmatrix, editarray or character vector
+#' @param x object or vector to be coerced to an editset
+#' @param ... extra parameters that will be passed to \code{as.character}, if necessary
+#' @export
+as.editset <- function(x, ...){
+  if (is.editset(x))
+    return(x)
+  
+  if (is.editmatrix(x)){
+    E <- editset(expression())
+    E$num <- x
+    return(E)
+  }
+  
+  if (is.editarray(x)){
+    E <- editset(expression())
+    E$mixcat <- x
+  }
+  
+  editset(as.character(x, ...))
+}
+
+
 #' Simplify logical mixed edits in an editset
 #'
 #' Logical edits consisting of a single numerical statement are
