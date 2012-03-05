@@ -133,9 +133,12 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    lps
 }
 
-asCat <- function(x, sep=":"){
-  nms <- ifelse(x == "TRUE", names(x), paste(names(x),x, sep=sep))
-  is.na(nms) <- is.na(x)
+asCat <- function(x, sep=":", useLogicals=TRUE){
+  nms <- paste(names(x),x, sep=sep)
+  if (useLogicals) {
+    idx <- x %in% c("TRUE", "FALSE")
+    nms[idx] <- names(x)[idx]
+  }
   names(nms) <- names(x)
   nms
 }
