@@ -78,7 +78,7 @@ localize_mip_rec <- function( E
    
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   #write.lp(lps, "test.lp")
+   write.lp(lps, "test.lp")
    
    #print(list(idx=idx, sol=sol))
    adapt <- sapply(x, function(i) FALSE)
@@ -113,7 +113,7 @@ localize_mip_rec <- function( E
 # assumes that E is normalized!
 as.lp.editmatrix <- function(E, obj, xlim, type){
    require(lpSolveAPI)
-   epsb <- 1e-8
+   epsb <- 1e-7
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
    dimnames(lps) <- dimnames(A)   
@@ -127,9 +127,17 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    set.constr.type(lps,types=ops)
 
    b <- getb(E)
-   maxA <- max(abs(getAb(E)))
+   Ab <- abs(getAb(E))
+   
+   maxA <- max(Ab)
+   rangeA <- range(Ab[Ab>0])
+   m <- rangeA[1]/rangeA[2]
+   
+   #print(epsb/m)
+   #print(range(Ab[Ab>0]))
    # adjust boundaries for less than 
-   b[lt] <- (b[lt] - maxA*epsb)
+   
+   b[lt] <- (b[lt] - m)
    set.constr.value(lps, b)
    #print(list(maxA=maxA, lps=lps))
    lps
