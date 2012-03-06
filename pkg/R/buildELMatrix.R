@@ -106,6 +106,7 @@ buildELMatrix.editarray <- function(E,x, weight=rep(1, length(x)), ...){
 }
 
 #' @method buildELMatrix cateditmatrix
+#' @keywords internal
 buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
   #browser()
   vars <- getVars(E, type="var")
@@ -207,7 +208,7 @@ buildELMatrix.cateditmatrix <- function(E,x, weight=rep(1, length(x)), ...){
 
 #' Extend an editmatrix with extra constraints needed for error
 #' localization
-#' @method buildELMatrix editmatrix
+#' @method buildELMatrix editset
 #' @param E editmatrix 
 #' @param x named numeric with data
 #' @param weight vector with weights of the variable in the same order as x
@@ -306,11 +307,11 @@ buildELMatrix.editset <- function( E
 #' applies an offset to it. NA values will be treated as zero.
 #'
 #' @param x \code{data vector}
-#' @param factor 
-#' @param offset 
-#' @param maxvalue
+#' @param factor multiplicative factor for range of x
+#' @param offset offset added to range of x
+#' @param maxvalue Not used
 #' @param ... not used
-#' @returns a lower and upper boundary of \code{x}
+#' @return a lower and upper boundary of \code{x}
 createXlim <- function(x, factor=1, offset=c(-1000,1000), maxvalue=1e8, ...){
   if (!is.numeric(x)){
     return(c(0,1))

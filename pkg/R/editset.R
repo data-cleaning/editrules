@@ -79,7 +79,7 @@ editset <- function(editrules, env=new.env()){
 #
 #
 #
-neweditset <- function(num, mixcat, mixnum, condition=NULL, ...){
+neweditset <- function(num, mixcat, mixnum, condition=editmatrix(expression()), ...){
 
   structure(
       list( num = num

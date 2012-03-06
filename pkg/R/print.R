@@ -90,7 +90,7 @@ print.editset <- function(x, ...){
     u <- as.character(x,datamodel=FALSE)
     v <- as.character(x,datamodel=TRUE)
     cnd <- attr(x,'condition')
-    if (!is.null(cnd)){
+    if ( nedits(cnd) > 0 ){
         cat('Conditions:\n')
         cat(paste(cnd,collapse=', '),'\n\n')
     }

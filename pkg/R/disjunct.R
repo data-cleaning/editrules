@@ -42,9 +42,15 @@ dnf <- function(E, env){
             assign(paste("E",env$i,sep=""),E,envir=env)
     } else {
         E1 <- substValue(E,vars[1],TRUE)
-        if ( isFeasible(condition(E1)) && isFeasible(E1$num) && isFeasible(E1$mixcat)) dnf(E1,env)
+        if ( isFeasible(condition(E1)) && 
+             isFeasible(c(condition(E1), E1$num)) && 
+             isFeasible(E1$mixcat)
+        ) dnf(E1,env)
         E2 <- substValue(E,vars[1],FALSE)
-        if ( isFeasible(condition(E2)) && isFeasible(E2$num) && isFeasible(E2$mixcat)) dnf(E2,env)
+        if ( isFeasible(condition(E2)) && 
+             isFeasible(c(condition(E2), E2$num)) && 
+             isFeasible(E2$mixcat)
+        ) dnf(E2,env)
     }
 }
 
