@@ -29,6 +29,8 @@ localize_mip_rec <- function( E
 
    vars <- getVars(E)
    
+#   E <- as.editset(E)
+   
    if (is.editarray(E)){
      E <- cateditmatrix(as.character(E))
    }
