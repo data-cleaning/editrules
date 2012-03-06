@@ -19,7 +19,13 @@ duplicated.editarray <- function(x, ...) duplicated(getArr(x))
 #' @export
 #' @keywords internal
 duplicated.editmatrix <- function(x,...){
-    duplicated(as.character(x))
+    ops2num <- c('<'=1,'<='=2,'=='=3,'>='=4,'>'=5)
+    duplicated(
+        cbind(
+            getAb(x),
+            ops2num[getOps(x)]
+        )
+    )
 }
 
 

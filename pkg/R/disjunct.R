@@ -38,6 +38,7 @@ dnf <- function(E, env){
     vars <- getVars(E,type="dummy")
     if (length(vars) == 0 ){
             env$i <- env$i + 1
+            condition(E) <- condition(E)[!duplicated(condition(E)),]
             assign(paste("E",env$i,sep=""),E,envir=env)
     } else {
         E1 <- substValue(E,vars[1],TRUE)
