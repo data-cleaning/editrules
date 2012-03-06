@@ -26,7 +26,6 @@
 \DeclareMathOperator*{\Land}{\land}
 \DeclareMathOperator{\ocup}{\cup}
 \DeclareMathOperator{\ocap}{\cap}
-\DeclareMathOperator{\res}{\mathfrak{R}}
 \newcommand{\rhomap}{\xrightarrow{\rho}}
 \newcommand{\rows}{\textrm{rows}}
 \newcommand{\columns}{\textrm{columns}}
@@ -48,19 +47,16 @@
 \floatstyle{boxed}
 \newfloat{Rcode}{t!}{rco}
 \floatname{Rcode}{{\rm Figure}}
-\floatstyle{plain}
+\makeatletter
+\renewcommand{\fnum@Rcode}{%
+%% make Rcound count and look like a figure.
+    \setcounter{Rcode}{\value{figure}}
+    \addtocounter{Rcode}{1}
+    \rm Figure~\arabic{Rcode}% <- avoid space before ':'
+}
+\makeatother
 
-% stimulate latex to put multiple floats on a page.
-\setcounter{topnumber}{2}
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{3}
-\setcounter{dbltopnumber}{2}
-\renewcommand{\topfraction}{.9}
-\renewcommand{\textfraction}{.1}
-\renewcommand{\bottomfraction}{.75}
-\renewcommand{\floatpagefraction}{.9}
-\renewcommand{\dblfloatpagefraction}{.9}
-\renewcommand{\dbltopfraction}{.9}
+
 \hyphenation{
     time-stamp 
     se-pa-ra-te-ly
@@ -79,6 +75,7 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
+
 {\em This vignette is far from finished. Version 3.0 of the package will have the
 full vignette.}
 
@@ -798,8 +795,7 @@ The bold lines indicate the projections of the grey areas along the $y$-axis.
 \label{figprojections}
 \end{figure}
 
-
-\setcounter{Rcode}{4}
+\setcounter{Rcode}{\value{figure}}
 \begin{Rcode}[htbp]
 <<>>=
 E <- editset(expression(
