@@ -57,6 +57,20 @@
 \makeatother
 
 
+% stimulate latex to put multiple floats on a page.
+\setcounter{topnumber}{2}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{3}
+\setcounter{dbltopnumber}{2}
+\renewcommand{\topfraction}{.9}
+\renewcommand{\textfraction}{.1}
+\renewcommand{\bottomfraction}{.75}
+\renewcommand{\floatpagefraction}{.9}
+\renewcommand{\dblfloatpagefraction}{.9}
+\renewcommand{\dbltopfraction}{.9}
+
+
+
 \hyphenation{
     time-stamp 
     se-pa-ra-te-ly
@@ -303,7 +317,7 @@ most conveniently, from a free-form textfile.
     BOOL <- c(TRUE,FALSE)
     OPTIONS <- letters[1:4]
 
-# numerical edits
+# (conditional) numerical edits
     x + y == z
     2*u  + 0.5*v == 3*w
     w >= 0
@@ -313,7 +327,7 @@ most conveniently, from a free-form textfile.
     y >= 0
     z >= 0
 
-# categorical edits
+# categorical and mixed data edits
     A %in% OPTIONS
     B %in% OPTIONS
     C %in% BOOL
@@ -322,6 +336,7 @@ most conveniently, from a free-form textfile.
     if ( A == 'c' ) B %in% letters[1:3]
     if ( !C == TRUE) D %in% c('e','f')
 \end{Verbatim}
+\vspace{-0.8cm}
 \caption{Example of a free-form textfile defining numerical, categorical and conditional 
 edits. The edits can be read into {\sf R} with the {\sf editfile} function.}
 \label{figeditfile}
@@ -348,10 +363,10 @@ for example:
 E[c(7,10),]
 @
 By default, the full datamodel is retained. The {\sf reduce} function removes
-all variables numerical variables not occurring in any edit and all categorical
+all variables not occurring in any edit and all categorical
 variables not occurring in a multivariate edit.
 
-The function {\sf editfile} has an optional {\sf type} option, allowing for
+The function {\sf editfile} has an optional {\sf type} argument, allowing for
 extracting only the numerical ({\sf type="num"}), categorical ({\sf
 type="cat"}) or conditional edits ({\sf type="mix"}) from the textfile.  When
 {\sf type="num"} or {\sf type="cat"}, an {\sf editmatrix} or {\sf editarray}
@@ -382,7 +397,7 @@ if (
 \end{syntdiag}
 Here, a $\langle\textrm{\em set expression}\rangle$ is an expression indicating
 set membership of categorical variables, such {\tt A \%in\% c("a","b")}. See
-\cite{loo:2011b} for a complete syntax diagram of possible set expressions.
+\cite{loo:2011b} for a syntax diagram of possible set expressions.
 
 To export edits, the most convenient way is to use either {\sf as.character} to
 convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
@@ -424,19 +439,22 @@ plot(E)
 @
 \caption{A graph view of the edits of Figure \ref{figeditfile}, generated  with
 {\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
-indicates that a variable occurs in an edit. The graph is displayed with the
-help of the {\sf igraph} package of \cite{csardi:2006} .}
+indicates that a variable occurs in an edit. The {\sf blocks} function
+separates an {\sf editset} into the independent editsets corresponding to the
+independent graphs shown here. This graph is displayed using the {\sf igraph}
+package of \cite{csardi:2006}.}
 \label{figgraph}
 \end{figure}
 %
 %
-As mentioned in the introduction, edits can be interrelated because an edit 
-can contain multiple variables and each variable can occur in multiple edits.
-The function {\sf contains} returns a boolean matrix, indicating which variables
-occur in each edit. The default {\sf plot} function has also been for objects
-of class {\sf editset} (and {\sf editmatrix} and {\sf editarray}) to generate
-a graphical display of this connectivity. Figure \ref{figgraph} shows the 
-connectivity graph between the variables and edits of Figure \ref{figeditfile}.
+As mentioned in the introduction, edits can be interrelated because an edit can
+contain multiple variables and each variable can occur in multiple edits.  The
+function {\sf contains} returns a boolean matrix, indicating which variables
+occur in each edit. The default {\sf plot} function has been overloaded for
+objects of class {\sf editset} (and {\sf editmatrix} and {\sf editarray}) to
+generate a graphical display of this connectivity. Figure \ref{figgraph} shows
+the connectivity graph between the variables and edits of Figure
+\ref{figeditfile}.
 
 The set of edits clearly consists of three independent blocks. The function
 {\sf blocks} separates an {\sf editset} into its constituting independent edits
@@ -444,50 +462,44 @@ and returns a {\sf list} of independent {\sf editset} objects. The {\sf blocks}
 function has been introduced before in \cite{jonge:2011} and \cite{loo:2011b}
 for {\sf editmatrix} and {\sf editarray} objects respectively.
 
-For conditional edits, there is a second way of separating them.
-As an example, consider the following simple editset:
-<<>>=
-F <- editset(expression(
-    if ( x > 0 ) y > 0,   # edit 1
-    if ( x < 0 ) y < 0))  # edit 2
-@
-were we also demonstrate the use of expression vectors for defining edits.
-Clearly, the valid areas are points in the first and third quadrant
-of the Euclidian plane, excluding the $x$-axis, but including the $y$-axis. 
-
-The valid area is clearly not convex, which has some computational
-consequences, for example when we wish to compute projections on the $x$- or
-$y$ axes, using Fourier-Motzkin elimination. The strategy we follow
-here is to separate the solution space into convex subspaces. The
-function {\sf disjunct} is designed to do just that.
-<<>>=
-disjunct(F)
-@
-The result of a call to {\sf disjunct} is an object of class {\sf editlist} (or
-{\sf editenv}) which is a list of editsets which do not contain any conditional
-edits anymore. However, the assumptions made to generate the separated editlist
-are added as an extra property to each editset (printed as {\sf Conditions}).
-
-The list is generated by generating all combinations of values of premises
-occuring in conditional edits, and may therefore become large when many
-conditional edits are present.  For example, in the example above, there are
-two conditional edits. The following steps generate sets of edits describing
-the two separate convex solution spaces.
-
-\begin{enumerate}
-\item Assume \true for the premise of edit 1 and \true for the premise
-of edit 2. This yields the condition $x>0$ and $x<0$, which is a
-contradiction and no edits are generated.
-\item Assume \true for the premise of edit 1 and \false for the premise
-of edit 2. This yields the conditions $x>0$ and $x\geq0$ and the edit
-$y>0$ ({\em i.e.} the first quadrant).
-\item Assume \false for the premise of edit 1 and \true for the premise
-of edit 2. This yields the conditions $x\leq0$ and $x<0$ and the edit
-$y<0$ ({\em i.e.} the third quadrant).
-\item Assume \false for the premise of edit 1 and \false for the premise
-of edit 2. This yields the condition $x\leq 0$ and $x\geq0$ and no conditions
-on $y$.
-\end{enumerate}
+To be able to manipulate conditional edits, it is convenient to separate them
+by eliminating the dummy variables. This is possible by making assumptions
+about their truth values and processing the consequences. As an example,
+consider the following set of edits.
+%
+\begin{equation}
+E = \left\{\begin{array}{l}
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } y\geq 0\\
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } x \leq y\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } y < 0\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } x - y < -2. \\
+\end{array}\right.
+\label{eqedits}
+\end{equation}
+These edits are all connected, since all of them contain both $x$ and $y$.
+Figure \ref{figprojections} (page \pageref{figprojections}) shows (in grey) the
+valid areas in the $x$-$y$ plane, defined by these edits. From the sketch it is
+clear that the edits can be separated in two purely linear edit sets, and that
+a record must obey the rules defining either the left, or the right grey area.
+Algebraically, this can be done by working out the assumptions $x\leq 0$ is
+$\true$ ($\false$) and consequently $x<0$ is $\false$ ($\true$). We obtain
+\begin{equation}
+E = \left(
+x\geq0 \land  \left\{\begin{array}{l}
+        y\geq 0\\
+        x\leq y\\
+\end{array}\right.,
+x < 0 \land \left\{\begin{array}{l}
+        y < 0\\
+        x - y < 2\\
+\end{array}\right.\right).
+\label{eqeditlist}
+\end{equation}
+Here, each element consists of a conjunction of two sets of linear edits.  In
+each element, the first edit set holds the conditions under which the edits in
+the second set are valid. The fact that the conditions are mutually exclusive,
+ensures that a record can be in the valid region defined by either one of the
+elements of $E$, but not in both. 
 %
 %
 \begin{algorithm}[t]
@@ -503,29 +515,61 @@ on $y$.
     \EndIf
         \State Choose a $t$ from $T$
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\true)$
-        \If {{\sf condition($E$)}, $E_{\sf num}$, and $E_{\sf mixnum}$ all feasible }
+        \If { ${\textrm{\sf isFeasible}\left(E_{\sf num}\cup \textrm{\sf condition}(E)\right)} \land \textrm{\sf isFeasible}(E_{\sf mixnum})$ }
+\label{algp1}  
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
         \State $E\leftarrow \textrm{\sf substValue}(E,t,\false)$
-        \If {{\sf condition($E$)}, $E_{\sf num}$, and $E_{\sf mixnum}$ all feasible }
-        
+        \If { ${\textrm{\sf isFeasible}\left(E_{\sf num}\cup \textrm{\sf condition}(E)\right)} \land \textrm{\sf isFeasible}(E_{\sf mixnum})$ }
+\label{algp2} 
+        %\If { $E_{\sf num}$, {\sf condition($E$)} and $E_{\sf mixnum}$ all feasible }
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
     \EndProcedure
 \end{algorithmic}
 \end{algorithm}
 
-The above example is generalized by the simple recursive procedure shown in
-Algorithm \ref{algeditlist}. The algorithm runs depth-first through a binary
-tree, generating all possible assumtions about the premises in the conditional
-edits. The tree is pruned whenever an inconsistent set of assumptions is made,
-so no spurious edit sets are generated. The procedure uses the functions {\sf
-isFeasible} on objects of class {\sf editmatrix} and {\sf editarray} which have
-been discussed in \cite{jonge:2011} and \cite{loo:2011b} respectively.  The
-{\sf substValue} function for objects of class {\sf editset} will be discussed
-in Section \ref{sssubstitution}. For here, just note that substituting a value
-for a dummy variable [see also Eq. \ref{eqdummy}] is equivalent to assuming a
-value for edits in the premise or consequent in a conditional edit.
+The above example is generalized by the recursive procedure shown in Algorithm
+\ref{algeditlist}. The algorithm runs depth-first through a binary tree,
+generating all possible assumptions about the truth values of linear
+edits that occur in the premise or consequent of a conditional edit. Each
+leave of the tree corresponds to one complete set of assumptions about the
+truth values of the linear restrictions occuring in conditional edits.
+
+Here, making an assumption about such a truth value amounts to substituting a
+dummy variable in the $E_{\sf mixnum}$ part of an {\sf editset}, copying the
+assumption to a separate conditional {\sf editmatrix} attribute of the {\sf
+editset}, and updating $E_{\sf mixcat}$ and $E_{\sf mixnum}$ accordingly.  The
+{\sf substValue} function, which will be discussed in more detail in Section
+\ref{sssubstitution}, is equipped to do this. The assumptions which have become
+an attribute of the resulting {\sf editset}, are returned by {\sf condition}.
+
+To save computational time, the tree is pruned whenever an inconsistent set of
+edits arises, so no spurious edit sets are generated. The procedure uses the
+functions {\sf isFeasible} on objects of class {\sf editmatrix} and {\sf
+editarray} which have been discussed in \cite{jonge:2011} and \cite{loo:2011b}
+respectively.  Note that in the pruning conditions in lines \ref{algp1} and
+\ref{algp2}, the feasibility of the union of $E_{\sf num}$ with the generated
+numerical conditions is checked. This is done to make sure that no conditions
+can arise that contradict the pure numerical edits. This can only happen when
+the {\sf editset} contains internal contradictions, and implementing it this
+way will help idendifying infeasible sets of conditional edits, to be discussed
+in Section \ref{sselimination}. Feasibility checks can be computationally
+expensive, so some short-circuiting is done in the implementation of lines
+\ref{algp1} and \ref{algp2} to avoid unnecessary computations.
+
+
+The {\sf editrules} function {\sf disjunct} implements the procedure of
+Algorithm~\ref{algeditlist}. The name ``disjunct'' derives from the fact that a
+valid record is in precisely one of the regions defined by the resulting set of
+{\sf editset} objects.  By default the {\sf disjunct} function returns all
+editsets as a {\sf list}. However, operations on lists can be time-consuming
+when elements in a list have to be treated and replaced one by one. For this
+reason, {\sf disjunct} accepts an optional {\sf type} argument.  If {\sf
+type="env"}, the set of {\sf editsets} are returned as an environment, which
+may be used to avoid unnecessary copying. To allow overloading of functions
+such as {\sf eliminate} and {\sf localizeErrors}, the result of {\sf disjunct}
+is of class {\sf editlist} or {\sf editenv}. 
 
 \begin{figure}
 <<fig=true,echo=false>>=
@@ -551,42 +595,36 @@ the conditions for each editset.}
 As an example of how {\sf disjunct} separates numerical from categorical
 variables, the four editsets, resulting from passing the edits of Figure
 \ref{figeditfile} to {\sf disjunct} are plotted in Figure \ref{figdisjunct}.
-The original editset has two dummy variables, corresponding to $x>0$ and $y>0$,
-yielding four disjunct spaces. Note that contrary to Figure \ref{figgraph},
-there are no paths connecting numerical variables ($x$,$y$,$z$,$u$,$v$,$w$) to
-categorical variables ($A$, $B$, $C$, $D$) anymore.
+The original editset has three dummy variables, corresponding to $x>0$, $y>0$,
+and $x>y$, yielding eight disjunct spaces. Four of these are empty, because not
+all combinations of truth values are valid. For example, the conditions
+$x>y=\true$, $x>0=\false$ and $y>0=\true$ contradict.  Note that contrary to
+Figure \ref{figgraph}, there are no paths connecting numerical variables
+($x$,$y$,$z$,$u$,$v$,$w$) to categorical variables ($A$, $B$, $C$, $D$) in any
+of the dependency graphs.
 %
 \begin{table}[t]
-\caption{Edit separation functions}
+\caption{Edit separation functions. Each function accepts an {\sf editset} as input.}
 \label{tabseparators}
 \begin{tabular}{lp{0.8\textwidth}}
 \hline
 Function & Description\\
 \hline
-{\sf blocks}   & Splits an editset in smaller editsets not sharing any variables.\\
-{\sf disjunct} & Splits an editset in disjunct sets, not containing conditional edits.\\
-{\sf separate} & Uses {\sf blocks}, simplifies and calls {\sf disjunct} where possible.\\
+{\sf blocks}   & Splits an {\sf editset} in independent edits not sharing any variables.\\
+{\sf disjunct} & Splits an {\sf editset} in disjunct sets, not containing mixed edits.\\
+{\sf condition} & Returns the {\sf editmatrix} holding the conditions for an {\sf editset} generated by {\sf disjunct}.\\
+{\sf separate} & Uses {\sf blocks}, simplifies the results, and calls {\sf disjunct} on the remaining {\sf editset}s.\\
 \hline
 \end{tabular}
 \end{table}
 
-The {\sf editlist} ({\sf editenv}) class is of importance, especially since the
-{\sf eliminate} function uses and returns an {\sf editlist} ({\sf editenv}),
-regardless of whether one passes an {\sf editset} or an {\sf editlist} ({\sf
-editenv}). The elimination function for editsets is further discussed in Section
-\ref{sselimination}
-
-Finally, we note that there is one function that combines the blocking 
-functionality with the disjunct functionality. Function {\sf separate}
-blocks each an editset based on variable occurrence and simplifies
-the blocks to objects of class {\sf editmatrix} or {\sf editarray}
-where possible. After this, the remaining {\sf editset} objects are
-split into an {\sf editlist} using {\sf disjunct}. The result is
-returned as an {\sf R} {\sf list}. Table \ref{tabseparators} summarizes
-the edit separation functions.
-
-
-
+Finally, we note the {\sf separate} function that combines {\sf blocks} and
+{\sf disjunct}. Function {\sf separate} blocks an editset based on variable
+occurrence and simplifies the blocks to objects of class {\sf editmatrix} or
+{\sf editarray} where possible. After this, the remaining {\sf editset} objects
+are split into an {\sf editlist} using {\sf disjunct}. The result is returned
+as an {\sf R} {\sf list}. Table \ref{tabseparators} summarizes the edit
+separation functions.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -614,9 +652,9 @@ numerical or categorical edits, refer to \cite{jonge:2011} and
 The {\sf S3} methods of {\sf isObviouslyInfeasible} for objects of class {\sf
 editset} and {\sf editlist} work the methods previously implemented for objects
 of class {\sf editarray} and {\sf editmatrix}. For an {\sf editset}, {\sf
-isObviouslyInfeasible} returns \true if either the {\bf num} or the {\bf
-mixcat} [See Eq. \eqref{eqeditset}] part contains an obvious contradiction. For
-objects of class {\bf editlist} or {\sf editenv} a vector of logicals is
+isObviouslyInfeasible} returns \true if either the $E_{\sf num}$ or the $E_{\sf
+mixcat}$ [See Eq. \eqref{eqeditset}] part contains an obvious contradiction. For
+objects of class {\sf editlist} or {\sf editenv} a vector of logicals is
 returned. Note that the presence of an obvious contradiction is sufficient, but
 not necessary for a set of edits to be infeasible. To prove (in)feasibility,
 one needs to call {\sf isFeasible}, which is usually a much more expensive
@@ -699,64 +737,27 @@ The {\sf condition} attribute is stored as an {\sf editmatrix} and can be
 requested with {\sf condition}.
 
 
-
-
-
-
-
-
 \subsection{Variable elimination and satisfiability}
 \label{sselimination}
-Variable elimination on an editset is executed by first separating
-the edits in disjunct sets where no numerical edits appear in
-conditional edits anymore (See Section \ref{sseditlist}).
-Next, since in each element of the resulting editlist, the 
-dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable
-elimination takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$
-for numerical or categorical variables respectively. The
-methods used for variable elimination in an {\sf editmatrix}
-are described in {\sf jonge:2011} while the methods for
-variable elimination from an editarray are described in
-\cite{loo:2011b} and \cite{loo:2012}.
+Variable elimination on an editset is executed by first separating the edits in
+disjunct sets where no numerical edits appear in conditional edits anymore (See
+Section \ref{sseditlist}).  Next, since in each element of the resulting
+editlist, the dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable
+elimination takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$ of the {\sf
+editlist} for numerical or categorical variables respectively. The methods used
+for variable elimination in an {\sf editmatrix} are described in {\sf
+jonge:2011} while the methods for variable elimination from an editarray are
+described in \cite{loo:2011b} and \cite{loo:2012}. Consequently, the result of
+an {\sf eliminate} operation is an object of class {\sf editlist}. 
 
-Consequently, the result of an {\sf eliminate} operation is an object
-of class {\sf editlist}. As an example, consider the following set of 
-edits.
-\begin{equation}
-E = \left\{\begin{array}{l}
-\textrm{\sf if } x \geq 0 \textrm{ \sf then } y\geq 0\\
-\textrm{\sf if } x \geq 0 \textrm{ \sf then } x \leq y\\
-\textrm{\sf if } x < 0 \textrm{ \sf then } y < 0\\
-\textrm{\sf if } x < 0 \textrm{ \sf then } x - y < -2. \\
-\end{array}\right.
-\label{eqedits}
-\end{equation}
-These edits are all connected, since all of them contain both $x$ and $y$.
-Figure \ref{figprojections} shows (in grey) the valid areas in the $x$-$y$
-plane, defined by these edits. From the sketch it is clear that the edits can
-be separated in two purely linear edit sets. Algebraically, this can be done by
-working out the assumptions $x\leq 0$ is $\true$ ($\false$) and consequently
-$x<0$ is $\false$ ($\true$). We obtain
-\begin{displaymath}
-E = \left(
-x\geq0 \land  \left\{\begin{array}{l}
-        y\geq 0\\
-        x\leq y\\
-\end{array}\right.,
-x < 0 \land \left\{\begin{array}{l}
-        y < 0\\
-        x - y < 2\\
-\end{array}\right.\right).
-\end{displaymath}
-Here, each element consists of a conjunction of two sets of linear edits. In
-each element, the first edit set holds the conditions under which the edits in
-the second set are valid. Since the conditions are mutually exclusive, 
-we may perform variable elimination for edit sets on each element separately. 
-Geometrically, this amounts to projecting along the $y$-axis when $y$ is eliminated
-or along the $x$-axis when $x$ is eliminated. In Figure \ref{figprojections} the
-projections are indicated with bold lines. Algebraically, we need to apply
-Fourier-Motzkin elimination on the second set of linear edits of each element of $E$
-to obtain
+As an example, consider again the set of edits of
+Eqs.~\eqref{eqedits} and~\eqref{eqeditlist}. In Figure~\ref{figprojections},
+the valid regions are indicated as grey areas. 
+Geometrically, eliminating variable $y$ amounts to projecting along the
+$y$-axis when $y$ is eliminated or along the $x$-axis when $x$ is eliminated.
+In Figure \ref{figprojections} the projections are indicated with bold lines.
+Algebraically, we need to apply Fourier-Motzkin elimination on the second set
+of linear edits of each element of Eq.~\eqref{eqeditlist} to obtain
 \begin{displaymath}
 E = \left(
 x\geq0 \land  \varnothing
@@ -764,7 +765,8 @@ x\geq0 \land  \varnothing
 x < 0 \land x < -2\right).
 \end{displaymath}
 The first edit element says that if $x\geq 0$, there are no further restrictions.
-The second element says that when $x<0$, it must be smaller than $-2$.
+The second element says that when $x<0$, it must be smaller than $-2$. Figure
+\ref{figelimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
 
 \setkeys{Gin}{width=0.5\textwidth}
 \begin{figure}
@@ -780,7 +782,7 @@ The second element says that when $x<0$, it must be smaller than $-2$.
     lines(x,x,lwd=lwd)
     abline(v=0,lwd=lwd)
     abline(h=0,lwd=lwd)
-    x2 <- c(0,-4)
+    x2 <- c(-2,-4)
     lines(x2,x2+2,lwd=lwd)
     lines(c(0,5),c(0,0),lwd=4)
     points(0,0,pch=16,cex=2)
@@ -788,9 +790,10 @@ The second element says that when $x<0$, it must be smaller than $-2$.
     text(4,-0.2,expression(x),cex=2)
     text(-0.2,3,expression(y),cex=2)
 @
-\caption{Graphical representation (in grey) of the valid areas defined
-by the edits of Eq.\ \eqref{eqedits}. Depicted are the bordering lines $y=x$ and $y=-x-2$.
-The bold lines indicate the projections of the grey areas along the $y$-axis.
+\caption{Graphical representation (in grey) of the valid areas defined by the
+edits of Eq.\ \eqref{eqedits}. Depicted are sections of the bordering lines
+$y=x$ and $y=x+2$.  The bold lines indicate the projections of the grey areas
+along the $y$-axis.
 }
 \label{figprojections}
 \end{figure}
@@ -806,14 +809,14 @@ E <- editset(expression(
 ))
 eliminate(E,"y")
 @
-
 \caption{Eliminating a variable from an object of class {\sf editset} results in an {\sf editlist}.}
+\label{figelimination}
 \end{Rcode}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Error Localization on mixed data}
+\section{Error Localization in mixed data}
 \label{serrorlocalization}
 
 
