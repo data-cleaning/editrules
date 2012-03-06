@@ -244,7 +244,7 @@ test_that('localizeErrors works with different weights per record, editset',{
                            )
                     )
   expect_that(localizeErrors(
-    E = editmatrix('x +y==z'),
+    E = editset('x +y==z'),
     dat     = data.frame(
       x = c(1,1,1),
       y = c(1,1,1),
@@ -262,11 +262,11 @@ test_that('localizeErrors works with different weights per record, editset',{
               )
 })
 
-test_that('localizeErrors handles single edits with mip method, editset',{
+test_that('localizeErrors handles single edits containing NA with mip method, editset',{
   expect_true(
     localizeErrors(editset("x>0"),data.frame(x=-1),method='mip')$adapt[1,1]
     )
-  loc <- localizeErrors(editmatrix("x>0"),data.frame(x=NA),method='mip')
+  loc <- localizeErrors(editset("x>0"),data.frame(x=NA),method='mip')
   expect_true(loc$adapt[1,1])
 })
 
@@ -278,13 +278,13 @@ test_that('localizeErrors handles trivial single edits with mip method, editset'
                     )$adapt[1,1])
 })
 
-test_that('localizeErrors handles a ">" edits correctly., editset',{
+test_that('localizeErrors handles a "<" edits correctly., editset',{
   loc <- localizeErrors( editset("x > 1")
                          , data.frame(x=1)
                          , method='mip'
                          )
   #print(loc)
-  expect_true( localizeErrors( editmatrix("x < 1")
+  expect_true( localizeErrors( editset("x < 1")
                                , data.frame(x=1)
                                , method='mip'
                                )$adapt[1,1]
