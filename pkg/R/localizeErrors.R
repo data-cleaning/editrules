@@ -160,6 +160,7 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
           maxDurationExceeded[i] <- bt$maxdurationExceeded
       }
     } else if (method == "mip"){
+      xlim <- generateXlims(dat, ...)
       for ( i in 1:n ){
         if (verbose){ 
           cat(sprintf(fmt,pretext,i,n)) 
@@ -167,7 +168,7 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
         }
         r <- as.list(dat[i,vars,drop=FALSE])
         if (weightperrecord) wt <- weight[i,]
-        le <- localize_mip_rec(E, r, weight=wt, ...)
+        le <- localize_mip_rec(E, r, weight=wt, xlim=xlim, ...)
         if (!le$maxdurationExceeded){
           err[i,vars] <- le$adapt
           wgt[i] <- le$w

@@ -13,12 +13,13 @@ checklpSolveAPI <- function(){
 #' and solves this problem using \code{lpSolveApi}. 
 #' This function can be much faster then \code{errorLocalizer} but does not return the degeneracy
 #' of a solution. However it does return an bonus: \code{x_feasible}, a feasible solution
-#' @param E editmatrix 
-#' @param x named numeric with data
-#' @param weight  numeric with weights
+#' @param E an \code{\link{editset}}
+#' @param x named \code{numeric} with data
+#' @param weight  \code{numeric} with weights
 #' @param maxduration number of seconds that is spent on finding a solution
-#' @return list with w, adapt and x_c
-#' @keywords internal
+#' @param verbose verbosity argument that will be passed on to \code{solve} lpSolveAPI
+#' @param ... other arguments that will be passed on to \code{solve} or to generateXlims.
+#' @return list with w, adapt and x_feasible and the lp problem
 localize_mip_rec <- function( E
                             , x
                             , weight=rep(1, length(x))
@@ -101,6 +102,7 @@ localize_mip_rec <- function( E
        , maxdurationExceeded = unname(duration[3] >= maxduration)
        , statuscode = statuscode
        , degeneracy = degeneracy
+       , lp=lps
        )
 }
 
