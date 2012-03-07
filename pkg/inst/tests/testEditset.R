@@ -86,6 +86,15 @@ test_that("contains finds the right variables in an editset",{
 
 })
 
+test_that("as.editset for cateditmatrix works",{
+  E <- cateditmatrix(expression(
+      gender %in% c("male", "female")
+    , if (pregnant) gender == "female"
+    ))
+  
+  as.editset(E)
+})
+
 
 
 

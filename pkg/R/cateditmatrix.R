@@ -109,7 +109,8 @@ as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
       }
     }
     names(catedits) <- rownames(x)
-    catedits
+    log <- sapply(which(cats == "TRUE"), function(v){paste(vars[v]," %in% c(TRUE,FALSE)",sep="")})
+    c(catedits, log)
   } else {
     class(x) <- "editmatrix"
     as.character(x)

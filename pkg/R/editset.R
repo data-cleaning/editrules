@@ -225,6 +225,10 @@ as.editset <- function(x, ...){
   if (is.editset(x))
     return(x)
   
+  if (is.cateditmatrix(x)){
+    return (editset(as.character(x, asIfStatement=TRUE)))
+  }
+  
   if (is.editmatrix(x)){
     E <- editset(expression())
     E$num <- x

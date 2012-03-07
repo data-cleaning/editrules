@@ -29,14 +29,10 @@ localize_mip_rec <- function( E
 
    vars <- getVars(E)
    
-#   E <- as.editset(E)
-   
-   if (is.editarray(E)){
-     E <- cateditmatrix(as.character(E))
-   }
+   E <- as.editset(E)
    
    t.start <- proc.time()
-   elm <- buildELMatrix(E, x, weight, ...)
+   elm <- buildELMatrix(E=E, x=x, weight=weight, ...)
    
    Ee <- elm$E
    objfn <- elm$objfn
