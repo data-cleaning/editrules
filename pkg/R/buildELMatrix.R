@@ -249,6 +249,7 @@ buildELMatrix.editset <- function( E
     dimnames(num.x) <- list(num.vars,num.vars)
     num.x0 <- unlist(x[num.idx])
     num.xlim <- xlim[num.idx,,drop=FALSE]
+    #num.x0[is.na(num.x0)] <- 1e8
     # create an editmatrix x_i == x^0_i
     num.E <- as.editmatrix(num.x, num.x0, "==")
     num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
@@ -333,15 +334,16 @@ generateXlims <- function(x, xlim=list(), create=createXlim, ...){
 checkXlim <- function(xlim, x, maxvalue=1e8){
   # expand list
   if (is.list(xlim)){
-    xlim2 <- t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
+    xlims <- generateXlims(x, xlim)
+    #xlim2 <- t(sapply(x, function(i) {if (is.numeric(i)) 1000*abs(i)*c(-1,1) else c(0,1)}))
     for (var in names(xlim)) { 
-      xlim2[var,] <- xlim[[var]]
+      xlims[var,] <- xlim[[var]]
     }
-    xlim <- xlim2
+    xlim <- xlims
   }
   
-  xlim[is.na(xlim[,1]),] <- -maxvalue
-  xlim[is.na(xlim[,2]),] <- maxvalue
+  #xlim[is.na(xlim[,1]),] <- -maxvalue
+  #xlim[is.na(xlim[,2]),] <- maxvalue
   xlim
 }
 

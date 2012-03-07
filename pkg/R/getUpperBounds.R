@@ -8,16 +8,18 @@ getUpperBounds <- function(E, xlim){
   A_p <- A_m <- A <- getA(E)
   A_p[A < 0] <- 0
   A_m[A > 0] <- 0
-  ub <- A_m %*% xlim[,1] + A_p %*% xlim[,2]  
-  ub <- cbind(ub,getb(E)-ub)
+  ub <- A_m %*% xlim[,1] + A_p %*% xlim[,2]
+  lb <- A_m %*% xlim[,2] + A_p %*% xlim[,1]
   
-  colnames(ub) <- c("lim", "dummy")
+  b <- getb(E)
+  b[is.na(b)] <- lb
+  
+  ub <- cbind(ub=ub, b=b, dummy=b-ub)
+  #colnames(ub) <- c("lim", "dummy")
   rownames(ub) <- rownames(E)
   ub
 }
 
-
-# TODO adjust softedit function for editset / cateditmatrix
 #' Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for 
 #' constructing a mip/lp problem.
 #' @param E normalized \code{editmatrix}
@@ -40,12 +42,12 @@ softEdits <- function(E, xlim, prefix=".se."){
   ub <- getUpperBounds(E,xlim)
   A <- getA(E)
   
-  seA <- sapply(dummies, function(d) { ifelse(d == seNms, ub[,2], 0)})
+  seA <- sapply(dummies, function(d) { ifelse(d == seNms, ub[,3], 0)})
   seA <- cbind(A,seA)
   colnames(seA) <- c(colnames(A), dummies)
   
   binvars <- sapply(colnames(seA), `%in%`, dummies)
-  seE <- as.editmatrix(seA, getb(E), getOps(E), binvars=binvars)
+  seE <- as.editmatrix(seA, ub[,2], getOps(E), binvars=binvars)
   seE
 }
 
