@@ -103,7 +103,7 @@ plot.errorLocation <- function(x, topn=min(10,ncol(x$adapt)), ...){
     mtext(paste('User time (',secToHuman(sum(x$status$user)),')', sep=''),side=3,line=1,col='blue',adj=0,font=2)
     mtext(paste(sum(x$status$maxDurationExceeded),'exceeded max. duration'),side=3,line=0)
 
-  if(x$method != "mip"){
+  if(!("mip" %in% x$method)){
       #########################################################################
       # PLOT DEGENERACY
       #########################################################################
