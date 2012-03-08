@@ -300,7 +300,8 @@ errorLocalizer.editlist <- function(
     icat[catvar] <- TRUE
     for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editlist(E,v)
     wsol <- min(sum(weight[vars %in% totreat | adapt[vars]]),maxweight)
-    ind <- getInd(E)
+    # index may be read like this, since the datamodel is constant over all elements of an editlist
+    ind <- getInd(E[[1]]$mixcat)
     bt <- backtracker(
         isSolution = {
             w <- sum(weight[adapt])
@@ -308,9 +309,12 @@ errorLocalizer.editlist <- function(
             if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
-            .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
+#            .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
+            .inf <- isObviouslyInfeasible(.E)
+            if ( all(.inf) ) return(FALSE)
+            if ( any(.inf) ) .E <- .E[!.inf]
             # shortcut 1: 
-            if (all(.infNum)) return(FALSE)
+#            if (all(.infNum)) return(FALSE)
             # shortcut 2: bound if numerical part cannot lead to a solution     
             .catvar <- .catvar
             if ( w == wsol ){
@@ -326,7 +330,7 @@ errorLocalizer.editlist <- function(
             if ( length(.catadapt) > 0 ){
                 .trcat <- .totreat[.totreat %in% .catvar]
                 if ( length(.totreat) > 0 ){
-                    .I <- unique(do.call(c, c(ind[.totreat],ind[.catadapt])))
+                    .I <- unique( unlist(c(ind[.totreat],ind[.catadapt])) )
                 } else  { # nothing to treat...
                     .I <- do.call(c,ind[.catadapt])
                 }
@@ -334,17 +338,17 @@ errorLocalizer.editlist <- function(
                     .infCat <- sapply(.E, function(e){
                             any(rowSums(e$mixcat[,.I,drop=FALSE]) == length(.I)) 
                     })
-                } else { # corner case: check that the record is invalid
-                    .infCat <- sapply(.E, function(e){
-                        nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
-                    })
-                }
+                } #else { # corner case: check that the record is invalid
+                  #  .infCat <- sapply(.E, function(e){
+                  #      nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
+                  #  })
+                  #}
             }
             # No feasible region left: bound
-            if ( all(.infNum |.infCat) ) return(FALSE)
+            if ( all( .infCat) ) return(FALSE)
 
             # remove infeasible regions
-            .E <- .E[!.infNum | .infCat]
+            .E <- .E[!.infCat]
             
             # at leaf:
             if ( length(.totreat) == 0 ){
@@ -357,7 +361,7 @@ errorLocalizer.editlist <- function(
         },
         choiceLeft = {
             .var <- .totreat[1]
-            .E <- substValue.editlist(.E, .var , x[[.var]], reduce=FALSE)
+            .E <- substValue.editlist(.E, .var , x[[.var]], simplify=FALSE, reduce=FALSE)
             adapt[.var] <- FALSE
             .totreat <- .totreat[-1]
         },

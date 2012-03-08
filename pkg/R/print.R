@@ -115,7 +115,11 @@ print.editset <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editlist <- function(x, ...){
-    cat("Conditional edit sets :\n\n")
-    lapply(x,function(i) {cat("\n");print(i)}, ...)
+    cat("Conditional edit sets :\n")
+    j <- 0
+    lapply(x,function(i) {j <<- j+1;cat("set",j,"\n");print(i)}, ...)
 }
+
+
+
 

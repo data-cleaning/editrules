@@ -257,7 +257,7 @@ substValue.editlist <- function(E, var, value, ...){
     type = L$type
     iRemove <- logical(length(E))
     for ( i in which(L$occurs) ){
-        E[[i]] <- substValue(E[[i]],var,value)
+        E[[i]] <- substValue(E[[i]],var,value,...)
         if ( !isFeasible(condition(E[[i]])) ) iRemove[i] <- TRUE
     }
     E[!iRemove]

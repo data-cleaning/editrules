@@ -44,7 +44,7 @@ reduce.editarray <- function(E,...){
     m <- as.matrix(E)
     ind <- getInd(E)
     H <- getH(E)
-    b <- sapply(ind,function(ind) all(m[,ind])) 
+    b <- sapply(ind,function(ind) all(m[,ind,drop=FALSE])) 
     if ( any(b) ){
         J <- logical(0)   
         for ( j in ind[b] ) J <- c(J,j)
