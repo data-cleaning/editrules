@@ -1,5 +1,5 @@
 NUMCMP <- c("==","<","<=",">",">=")
-NUMOPS <- c("+","-","*")
+NUMOPS <- c("+","-","*","<","<=",">=",">")
 
 #' Parse a numerical edit expression 
 #'
