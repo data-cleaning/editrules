@@ -93,8 +93,12 @@ neweditset <- function(num, mixcat, mixnum, condition=editmatrix(expression()), 
 
 }
 
-# condition getters and setters
-#
+#' Get condition matrix from an editset. 
+#'
+#' @param E an \code{\link{editset}}
+#' @return an \code{\link{editmatrix}}, holding conditions under which the editset is relevant.
+#' @export
+#' @seealso \code{\link{disjunct}}
 condition <- function(E) attr(E,'condition')
 
 `condition<-` <- function(x, value){
