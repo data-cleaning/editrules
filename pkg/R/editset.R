@@ -195,10 +195,10 @@ as.data.frame.editset <- function(x, ...){
 #' Determines edittypes based on the variables they contain (not on names of edits).
 #'
 #' @param E: editset
-#' @param m: if you happen to have contains(E) handy, it needs not be recalculated.
-#' @keywords internal
+#' @param m: if you happen to have \code{contains(E)} handy, it needs not be recalculated.
+#' @seealso \code{\link{contains}}
+#' @export
 editType <- function(E, m=NULL){
-    # NOTE: might be interesting for @export
     if ( !is.editset(E) ) stop('Argument is not of class editset')
     type <- vector(length=nedits(E),mode='character')
     nnum <- nrow(E$num)
