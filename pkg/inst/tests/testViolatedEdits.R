@@ -141,11 +141,12 @@ test_that("Empty editarray is handled correctly",{
 
 for ( d in dir("../../../pkg/R",full.names=TRUE) ) dmp <- source(d)
 test_that("Pure numerical editset",{
-    violatedEdits(
-        E = editset("x + y == z"),
-        dat = data.frame(x=1,y=1,z=1)
+    expect_true(
+        violatedEdits(
+            E = editset("x + y == z"),
+            dat = data.frame(x=1,y=1,z=1)
+        )[1,1]
     )
-
 })
 
 
