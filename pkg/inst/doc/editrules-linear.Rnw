@@ -926,7 +926,7 @@ We will have more to say on conditional edits\index{edit rules!conditional} in
 the accompanying paper \citep{loo:2011b} where the error localization problem for categorical and
 mixed data are treated.
 
-\subsection[{(\bf new!}) Error localization with {\sf localizeErrors}]{Error localization with {\sf localizeErrors} }
+\subsection{Error localization with {\sf localizeErrors} }
 \index{localizeErrors@{\sf localizeErrors}}
 The function {\sf localizeErrors} accepts an {\sf editmatrix} and a {\sf
 data.frame}, and returns an object of class {\sf errorLocation}. An {\sf
