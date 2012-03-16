@@ -65,14 +65,6 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 #' @export
 violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     if (tol < 0 ) stop("Argument tol must be nonnegative")
-#    if (nrow(E)==0){
-#        v <- matrix( logical(0)
-#                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
-#                   , ncol=0
-#                   )
-#        dimnames(v) <- list(record=rownames(dat),edit=NULL)
-#        return(newviolatedEdits(v))
-#    }
     if (tol==0) return(violatedEdits.character(as.character(E),dat))
     if ( !isNormalized(E) ) E <- normalize(E)
 
@@ -130,8 +122,8 @@ violatedEdits.editarray <- function(E, dat, datamodel=TRUE,...){
 #' @method violatedEdits editset
 #' @rdname violatedEdits
 #' @export
-violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
-    v1 <- violatedEdits.editarray(E$num,dat,...)
+violatedEdits.editset <- function(E, dat, datamodel=TRUE, ...){
+    v1 <- violatedEdits(E$num,dat,...)
     E$num <- editmatrix(expression())
     u <- as.character(E,datamodel=datamodel,useIf=FALSE)
     v2 <- violatedEdits.character(u,dat)
