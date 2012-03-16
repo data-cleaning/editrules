@@ -19,7 +19,6 @@
 #' @param ... further arguments that can be used by methods implementing this generic function
 #' @return a logical matrix where each row indicates which contraints are violated
 violatedEdits <- function(E, dat, ...){
-    if (any(!getVars(E) %in% names(dat))) stop("E contains variables not in dat")
     if (nedits(E)==0){
         v <- matrix( logical(0)
                    , nrow=ifelse(is.vector(dat),1,nrow(dat))
@@ -126,7 +125,7 @@ violatedEdits.editset <- function(E, dat, datamodel=TRUE, ...){
     v1 <- violatedEdits(E$num,dat,...)
     E$num <- editmatrix(expression())
     u <- as.character(E,datamodel=datamodel,useIf=FALSE)
-    v2 <- violatedEdits.character(u,dat)
+    v2 <- violatedEdits(u,dat)
     newviolatedEdits(cbind(v1,v2))
 }
 
