@@ -73,7 +73,8 @@ reduce.editset <- function(E,...){
     mixnum <- reduce(E$mixnum[rownames(E$mixnum) %in% v,])
 
     imix <- grepl("^.num",v)
-    if ( nrow(mixcat) > 0 ){ 
+    if ( nrow(mixcat) > 0 ){
+        m <- logical(nedits(mixcat)) 
         if ( any(imix) ) m <- apply(contains(mixcat, v[imix]), 1, any)
         pref <- ifelse(m,"mix","cat")
         rownames(mixcat) <- paste(pref, 1:nrow(mixcat), sep="")
