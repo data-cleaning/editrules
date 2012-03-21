@@ -5,6 +5,9 @@
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
 softEdits <- function(E, xlim, prefix=".se."){
+  if (!nrow(E)){
+    return(E)
+  }
   eq <- getOps(E) == "=="
   
   seNms <- dummies <- paste(prefix, rownames(E), sep="")

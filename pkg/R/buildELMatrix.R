@@ -1,7 +1,7 @@
 #' Extend an editset with extra constraints needed for error
 #' localization
 #' @param E editset
-#' @param x named numeric with data
+#' @param x named list with data
 #' @param weight vector with weights of the variable in the same order as x
 #' @param xlim upper and lower boundaries of \code{x}
 #' @return list with extended E, objfn and lower and upper bound
@@ -11,28 +11,33 @@ buildELMatrix <- function( E
                          , weight = rep(1, length(x))
                          , xlim = generateXlims(x)
                          , maxvalue = 1e8
-#                        , editweight = rep(Inf, nrow(E))
-#                        , lambda = if(missing(editweight)) 1 else 0.5
+#                          , editweight = rep(Inf, nedits(E))
+#                          , lambda = if(any(is.finite(editweight))) 0.5 else 1
+                         , ...
                          ){
   xlim <- checkXlim(xlim, x)
   
   el.E <- NULL
     
-#   soft <- is.finite(editweights)
+#   soft <- is.finite(editweight)
 #   if (any(soft)){
 #     soft.E <- E[soft,]
-#     soft.weights <- editweights[soft]
+#     soft.weights <- editweight[soft]
 #     
 #     #TODO process softedits into el.E
-#     soft.num <- softEdits(soft.E$num, xlim, prefix=".softnum.")
-#     soft.cat <- softEdits(cateditmatrix(soft.E$mixcat), xlim,prefix=".softcat."")
+#     soft.num <- softEdits(soft.E$num, xlim, prefix=".soft.")
+#     
+#     #TODO column with diag(1, nrow(soft.E$mixcat))
+#     soft.cat <- NULL
+#     #soft.cat <- softEdits(cateditmatrix(soft.E$mixcat),xlim,prefix=".softcat.")
 #     el.E <- c(soft.num, soft.cat, el.E)
-#     E <- E[!soft]
+#     E <- E[!soft,]
 #   }
     
   # num part
   num.vars <- getVars(E, type="num")
   #TODO check NA values...
+  
   if (!is.null(num.vars)){
     num.idx <- match(num.vars, names(x))
     num.x <- diag(1, nrow=length(num.vars))
@@ -47,7 +52,6 @@ buildELMatrix <- function( E
 
   # cat part
   cat.vars <- getVars(E, type="cat")
-  #TODO check NA values...
   if (!is.null(cat.vars)){
     cat.idx <- match(cat.vars, names(x))
     cat.A <- diag(1, nrow=length(cat.idx))
@@ -82,6 +86,11 @@ buildELMatrix <- function( E
   adapt.nms <- names(adapt.idx) <- sub("^adapt\\.", "", el.vars[adapt.idx])
   
   objfn[adapt.idx] <- weight[match(adapt.nms, names(x))]
+
+#   if (any(soft)){
+#      soft.idx <- grep("^\\.soft", el.vars)
+#      objfn[soft.idx] <- (1-lambda) * soft.weights
+#   }
   
   list( E = el.E
       , objfn = objfn #sapply(vars, function(v) grepl("^adapt", v))
@@ -151,16 +160,16 @@ checkXlim <- function(xlim, x, maxvalue=1e8){
 #       ,  maritalstatus %in% c("married", "single")
 #       ,  if (maritalstatus == "married") age >= 17
 #       ))
-# 
-# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
-# #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
-# # e <- expression( pregnant %in% c(TRUE, FALSE)
-# #                , gender %in% c("male", "female")
-# #                , if (pregnant) gender == "female"
-# #                )
 # # 
-# # cateditmatrix(e)
-# checkXlim(list(age=c(0,200)), x)
-# 
-# buildELMatrix(E, x)# -> B
-# localize_mip_rec(E, x=x)
+# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+# # #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
+# # # e <- expression( pregnant %in% c(TRUE, FALSE)
+# # #                , gender %in% c("male", "female")
+# # #                , if (pregnant) gender == "female"
+# # #                )
+# # # 
+# # # cateditmatrix(e)
+# # checkXlim(list(age=c(0,200)), x)
+# # 
+# buildELMatrix(E, x, editweight=c(Inf, 1))# -> B
+# # localize_mip_rec(E, x=x)
