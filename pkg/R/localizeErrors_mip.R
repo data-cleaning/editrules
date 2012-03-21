@@ -37,12 +37,18 @@ localize_mip_rec <- function( E
    
    Ee <- elm$E
    objfn <- elm$objfn
-   
+  
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
-   
    # TODO move this code into as.lp.editmatrix
-   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
+    ## the following code...
+    #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
+    ## attempted to set bounds at non-existent columns 
+    ## this is better solved in buildELMatrix (mvdl)
+   icol <- match(rownames(elm$xlim),colnames(lps),nomatch=0)
+   lo <- elm$xlim[icol>0,1]
+   up <- elm$xlim[icol>0,2]
+   set.bounds(lps, lower=lo, upper=up, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
    # end TODO

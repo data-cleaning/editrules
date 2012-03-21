@@ -83,7 +83,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     for ( b in B ){
         if ( verbose ){
             i <- i + 1
-            blockCount <- paste('Processing block',format(i,width=nchar(n)), 'of',n)
+            blockCount <- paste('Processing block ',format(i,width=nchar(n)), ' of ',n,',',sep="")
         }
 
         err <- err %+% localize(
@@ -114,7 +114,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
 #' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
+localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
 
     vars <- getVars(E)
     wt <- weight[,vars,drop=FALSE]
@@ -139,7 +139,7 @@ localize <- function(E, dat, verbose, pretext="", call=sys.call(), weight, maxdu
     wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
-    fmt <- paste('\r%s, record %',nchar(n),'d of %d',sep="")
+    fmt <- paste('\r%s record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
     if (method == "localizer"){
       for ( i in 1:n ){

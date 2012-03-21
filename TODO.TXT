@@ -9,7 +9,6 @@ pkg/R/isFeasible.R:    ## TODO: make it return the subset of edits causing the c
 pkg/R/localizeErrors_mip.R:   # TODO move this code into as.lp.editmatrix
 pkg/R/localizeErrors_mip.R:   # end TODO
 pkg/R/parseEdits.R:  # todo add check for "=="
-pkg/R/pkg.R:# TODO: give better example
 
 # others
 
