@@ -12,7 +12,7 @@ getUpperBounds <- function(E, xlim){
   lb <- A_m %*% xlim[,2] + A_p %*% xlim[,1]
   
   b <- getb(E)
-  b[is.na(b)] <- lb
+  b[is.na(b)] <- lb[is.na(b)]
   
   ub <- cbind(ub=ub, b=b, dummy=b-ub)
   #colnames(ub) <- c("lim", "dummy")
