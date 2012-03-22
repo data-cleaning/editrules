@@ -32,7 +32,7 @@
 #' edits are transformed into an A == b, A < b or A <= b form, so that in the specification of the edit rules all inequalities can be mixed, 
 #' but the resulting matrix has similar sign.
 #' @title Create an editmatrix
-#' @seealso \code{\link{as.editmatrix}}
+#' @seealso \code{\link{as.editmatrix}}, \code{\link{getA}}, \code{\link{getAb}}, \code{\link{getb}}, \code{\link{getVars}}
 #' @export
 #' @example ../examples/editmatrix.R
 #'
@@ -165,7 +165,7 @@ as.editmatrix <- function( A
 #' Coerce an editmatrix to a \code{data.frame}
 #'
 #' Coerces an editmatrix to a \code{data.frame}. Useful for storing manipulated edits.
-#' NOTE: since version 2.0-0, the behaviour of this function changed to be more symmetrical 
+#' @note since version 2.0-0, the behaviour of this function changed to be more symmetrical 
 #' with \code{editmatrix.data.frame} and \code{as.data.frame.editarray}. 
 #' Use \code{\link{toDataFrame}} for the old behaviour.
 #'
