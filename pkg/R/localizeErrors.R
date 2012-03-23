@@ -62,10 +62,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         stringsAsFactors=FALSE
     )
     # call mip method (no blocking necessary: this is done by lpSolve)
-    if ( match.arg(method) == "mip" ){
-        checklpSolveAPI()
-        return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
-    }
+    if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
     if ( is.editset(E) ){
@@ -74,13 +71,19 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         B  <- blocks(E)
     }
 
-    n <- length(B)
+    # detect singletons and localize errors
+    st <- sapply(B,function(b) length(getVars(b)) == 1)
+    if (verbose) cat("Detected",sum(st),"trivial and",sum(!st),"nontrivial blocks\n")
+    err <- NULL
+    if ( any(st) )  err <- err %+% localize_singleton(B[st],dat,call=sys.call())
+
+    n <- sum(!st)
     i <- 0
     blockCount <- NULL
-    err <- checkDatamodel(E,dat,weight)
+    err <- err %+% checkDatamodel(E,dat,weight)
     # values not in datamodel are set to NA
     dat[err$adapt] <- NA
-    for ( b in B ){
+    for ( b in B[!st] ){
         if ( verbose ){
             i <- i + 1
             blockCount <- paste('Processing block ',format(i,width=nchar(n)), ' of ',n,',',sep="")
@@ -94,7 +97,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             call=sys.call(),
             weight=weight, 
             maxduration=maxduration,
-            method, ...)
+            method=method, ...)
     }
     if (verbose) cat('\n')
     err
@@ -203,7 +206,40 @@ getDuration <- function(x){
     y
 }
 
+# error localization for a list of simple 1D editsets/arrays/matrices/cateditmatrices
+#
+localize_singleton <- function(B, dat, method, call, user, timestamp){
+    if (missing(method)) method <- "singleton"
+    if (missing(call)) call <- sys.call(-1)
+    if (missing(user)) user <- Sys.info()["user"]
+    if (missing(timestamp)) timestamp <- date()
+    # actual work
+    E <- do.call(c,B)
+    n <- nrow(dat)
+    vars <- getVars(E)
+    v <- violatedEdits(E,dat)
+    v[is.na(v)] <- TRUE
+    adapt <- array(FALSE,dim=c(nrow(dat),ncol(dat)),dimnames=list(record=1:n, adapt=names(dat)))
+    adapt[,vars] <-  v %*% contains(E) > 0
 
+    # derive status and create errorLocation object.
+    status <- data.frame(
+        weight = rowSums(adapt),
+        degeneracy = rep(1,n),
+        user = numeric(n),
+        system=numeric(n),
+        elapsed=numeric(n),
+        maxDurationExceeded=logical(n)
+    )
+    newerrorlocation(
+        adapt       = adapt,
+        status      = status, 
+        call        = call,
+        method      = method,
+        user        = user,
+        timestamp   = timestamp
+    )
+}   
 
 
 
