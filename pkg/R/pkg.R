@@ -27,21 +27,19 @@
 #' \code{editrules} provides several methods for creating edits from a \code{character}
 #' , \code{expression}, \code{data.frame} or a text file.
 #' \tabular{ll}{
-#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints \cr
+#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints from textfile \cr
 #'   \code{\link{editset}}     \tab Create conditional numerical, numerical and categorical constraints \cr
 #'   \code{\link{editmatrix}} \tab Create a linear constraint matrix for numerical data \cr
 #'   \code{\link{editarray}}  \tab Create value combination constraints for categorical data \cr
-#' from a text file\cr
 #' }
 #'
 #' @section II. Check and find errors in data:
 #'
 #' \code{editrules} provides several method for checking \code{data.frame}s with edits
 #' \tabular{ll}{
-#'   \code{\link{violatedEdits}} \tab TODO \cr
-#'   \code{\link{checkRows}} \tab TODO \cr
-#'   \code{\link{localizeErrors}}  \tab TODO \cr
-#'   \code{\link{errorLocalizer}}  \tab TODO \cr
+#'   \code{\link{violatedEdits}} \tab Find out which record violates which edit. \cr
+#'   \code{\link{localizeErrors}}  \tab Localize erroneous fields using Fellegi and Holt's principle. \cr
+#'   \code{\link{errorLocalizer}}  \tab Low-level error localization function using B&B algorithm \cr
 #' }
 #' Note that you can call \code{plot}, \code{summary} and \code{print}  on results of these functions.
 #'
@@ -56,18 +54,19 @@
 #'   \code{\link{blocks}} \tab Separate a rule set in unconnected subsets \cr
 #'   \code{\link{reduce}} \tab Remove variables not occuring in any rule \cr
 #'   \code{\link{simplify}} \tab Simplify internal structure of editset \cr
-#'   \code{\link{separate}} \tab TODO \cr
-#'   \code{\link{generateEdits}} \tab TODO \cr
+#'   \code{\link{disjunct}} \tab Split an editset in disjunct edit sets, not containing mixed edits\cr
+#'   \code{\link{separate}} \tab Block separation, apply disjunct to appropriate blocks \cr
+#'   \code{\link{generateEdits}} \tab Generate every nonredundant implicit edit (\code{\link{editarray}} only) \cr
 #' }
 #'
 #' @section V. Plot and coerce edits:
 #'
-#' \code{editrules} provides several methods for manipulating edits
+#' \code{editrules} provides several methods for plotting and coercion.
 #' \tabular{ll}{
-#'   \code{\link{plot.editset}} \tab TODO \cr
-#'   \code{\link{as.igraph}} \tab TODO \cr
-#'   \code{\link{as.character}} \tab TODO \cr
-#'   \code{\link{as.data.frame}} \tab TODO \cr
+#'   \code{\link{plot.editset}} \tab Plot edit-variable connectivity graph \cr
+#'   \code{\link{as.igraph}} \tab Coerce to edit-variable connectivity \code{igraph} object \cr
+#'   \code{\link{as.character}} \tab Coerce edits to \code{character} representation \cr
+#'   \code{\link{as.data.frame}} \tab Store \code{character} representation in \code{data.frame} \cr
 #' }
 #'
 #' @name editrules-package 
