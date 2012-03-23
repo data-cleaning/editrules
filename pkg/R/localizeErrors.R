@@ -62,10 +62,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         stringsAsFactors=FALSE
     )
     # call mip method (no blocking necessary: this is done by lpSolve)
-    if ( match.arg(method) == "mip" ){
-        checklpSolveAPI()
-        return(localize(E,dat,call=sys.call(), verbose=verbose, weight=weight, maxduration=maxduration, method=method, ...))
-    }
+    if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
     if ( is.editset(E) ){
@@ -94,7 +91,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             call=sys.call(),
             weight=weight, 
             maxduration=maxduration,
-            method, ...)
+            method=method, ...)
     }
     if (verbose) cat('\n')
     err

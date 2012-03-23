@@ -27,7 +27,7 @@
 #' \code{editrules} provides several methods for creating edits from a \code{character}
 #' , \code{expression}, \code{data.frame} or a text file.
 #' \tabular{ll}{
-#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints
+#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints \cr
 #'   \code{\link{editset}}     \tab Create conditional numerical, numerical and categorical constraints \cr
 #'   \code{\link{editmatrix}} \tab Create a linear constraint matrix for numerical data \cr
 #'   \code{\link{editarray}}  \tab Create value combination constraints for categorical data \cr

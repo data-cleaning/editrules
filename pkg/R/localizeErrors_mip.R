@@ -52,7 +52,6 @@ localize_mip_rec <- function( E
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
    # end TODO
-   
    lp.control( lps
              , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration

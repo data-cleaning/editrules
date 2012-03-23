@@ -47,7 +47,7 @@ contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps),...){
 #' @keywords internal
 contains.editmatrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps), ...){
     A <- getA(E)
-    if (is.null(var)) var <- getVars(E)
+    if (is.null(var)) var <- getVars.editmatrix(E)
     
     u <- abs(A[,var,drop=FALSE]) > tol
     dimnames(u) <- list(edit=rownames(E),variable=var) 
@@ -85,6 +85,17 @@ contains.boolmat <- function(A, ind, var){
   v
 }
 
+#' contains method for cateditmatrix
+#'
+#' @method contains editset
+#' @rdname contains 
+#' @export
+#' @keywords internal
+contains.cateditmatrix <- function(E, var=NULL, ...){
+    m <- contains.editmatrix(E)
+    ind <- indFromArray(m,sep=":")
+    vapply(ind, function(ii) rowSums(m[,ii,drop=FALSE])>0, FUN.VALUE=logical(nrow(m)) )
+}
 
 #' contains method for editset
 #'
