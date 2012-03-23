@@ -1,9 +1,9 @@
 
-#' \code{\link{str}} method for editmatrix object
+
+#' \code{str} method for editmatrix object
 #'
 #' @method str editmatrix
-#' @param object \code{\link{editmatrix}} object
-#' @param ... arguments to pass to other methods
+#' @rdname editmatrix
 #' @export
 str.editmatrix <- function(object,...){
     vars <- paste(getVars(object),collapse=", ")
@@ -12,11 +12,10 @@ str.editmatrix <- function(object,...){
 }
 
 
-#' \code{\link{str}} method for editarray object
+#' \code{str} method for editarray object
 #'
 #' @method str editarray
-#' @param object \code{\link{editarray}} object
-#' @param ... arguments to pass to other methods
+#' @rdname editarray
 #' @export
 str.editarray <- function(object,...){
     vars <- paste(getVars(object),collapse=", ")

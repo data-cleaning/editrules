@@ -1,3 +1,7 @@
+#' @include editmatrix.R
+#' @include editarray.R
+#' @include editset.R
+{}
 
 #' Coerce an editmatrix to a normal matrix
 #' 
@@ -8,9 +12,7 @@
 #'
 #' @export
 #' @method as.matrix editmatrix
-#'
-#' @param x editmatrix object
-#' @param ... further arguments passed to or from other methods.
+#' @rdname editmatrix
 #'
 #' @return augmented matrix of editmatrix
 as.matrix.editmatrix <- function(x, ...){
@@ -26,9 +28,7 @@ as.matrix.editmatrix <- function(x, ...){
 #' @export
 #' @method as.matrix editarray
 #'
-#' @param x editarray object
-#' @param ... further arguments to be passed to or from other methods
-#'
+#' @rdname editarray
 #' @return boolean matrix of editarray.
 as.matrix.editarray <- function(x,...){
     array(x,dim=dim(x),dimnames=dimnames(x))

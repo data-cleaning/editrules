@@ -9,8 +9,8 @@
 #'
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
-#' @param expandEdits should edits be expanded with \code{\link{expandEdits}}? (currently ignored)
-#' @param ... extra parameters that will be passed to \code{expandEdits}
+#' @param expandEdits currently ignored
+#' @param ... extra parameters that are currently ignored 
 #'
 #' @return \code{editset} with all edits if \code{type=all}, \code{\link{editarray}} if \code{type='cat'}, 
 #'      \code{\link{editmatrix}} if \code{type='num'}, \code{\link{editset}} with conditional edits if \code{type='mix'}. 

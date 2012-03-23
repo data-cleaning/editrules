@@ -36,7 +36,7 @@
 #' function.
 #'
 #' @method plot editmatrix 
-#'
+#' @aliases editrules.plotting
 #' @param x object of class \code{\link{editmatrix}}
 #' @param nodetype \code{'rules'}, \code{'vars'} or \code{'all'}.
 #' @param rules selection of edits
@@ -59,7 +59,7 @@
 #' @references
 #'  Csardi G, Nepusz T: The igraph software package for complex network
 #'  research, InterJournal, Complex Systems 1695. 2006. http://igraph.sf.net
-#'
+#' @rdname editrules.plotting
 #' @export
 plot.editmatrix <- function(x,
     nodetype="all", 
@@ -95,7 +95,7 @@ plot.editmatrix <- function(x,
 
 #' plot method for editarray
 #'
-#' @rdname plot.editmatrix
+#' @rdname editrules.plotting
 #' @method plot editarray
 #' @export
 plot.editarray <- function(
@@ -133,7 +133,7 @@ plot.editarray <- function(
 
 #' plot method for editset
 #'
-#' @rdname plot.editmatrix
+#' @rdname editrules.plotting
 #' @method plot editset
 #' @export
 plot.editset <- function(

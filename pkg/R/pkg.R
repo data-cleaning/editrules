@@ -53,7 +53,6 @@
 #'   \code{\link{duplicated}} \tab Find duplicated rules \cr
 #'   \code{\link{blocks}} \tab Separate a rule set in unconnected subsets \cr
 #'   \code{\link{reduce}} \tab Remove variables not occuring in any rule \cr
-#'   \code{\link{simplify}} \tab Simplify internal structure of editset \cr
 #'   \code{\link{disjunct}} \tab Split an editset in disjunct edit sets, not containing mixed edits\cr
 #'   \code{\link{separate}} \tab Block separation, apply disjunct to appropriate blocks \cr
 #'   \code{\link{generateEdits}} \tab Generate every nonredundant implicit edit (\code{\link{editarray}} only) \cr
@@ -65,8 +64,8 @@
 #' \tabular{ll}{
 #'   \code{\link{plot.editset}} \tab Plot edit-variable connectivity graph \cr
 #'   \code{\link{as.igraph}} \tab Coerce to edit-variable connectivity \code{igraph} object \cr
-#'   \code{\link{as.character}} \tab Coerce edits to \code{character} representation \cr
-#'   \code{\link{as.data.frame}} \tab Store \code{character} representation in \code{data.frame} \cr
+#'   \code{as.character} \tab Coerce edits to \code{character} representation \cr
+#'   \code{as.data.frame} \tab Store \code{character} representation in \code{data.frame} \cr
 #' }
 #'
 #' @name editrules-package 
