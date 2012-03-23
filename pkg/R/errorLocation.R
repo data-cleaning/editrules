@@ -94,6 +94,7 @@ print.errorLocation <- function(x,...){
 # @name plus
 # @rdname plus
 `%+%` <- function(x,y,...){
+    if ( is.null(y) ) return(x)
     UseMethod("%+%")
 }
 
@@ -103,7 +104,7 @@ print.errorLocation <- function(x,...){
 # 
 # @rdname plus
 `%+%.errorLocation` <- function(x,y,...){
-   stopifnot( class(y) == 'errorLocation' )
+    stopifnot( class(y) == 'errorLocation' )
     call <- unique(c(x$call,y$call))
     if (length(call) == 1) call <- call[[1]]
     newerrorlocation(    

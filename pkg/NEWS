@@ -1,4 +1,6 @@
 version 2.2-1
+- localizeErrors uses vectorized method for single-variable, single-edit blocks ('singleton' method)
+- error localization based on lpSolveApi uses block-wise processing for enhanced numerical stability
 - function editType exported: lists edit categorie for 'editset' ('num', 'cat', 'mix')
 - duplicated dummyvariables in an editset are removed (making 'disjunct' much more efficient)
 - localizeErrors for conditional restrictions (editset)
