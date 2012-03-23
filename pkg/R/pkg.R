@@ -27,10 +27,10 @@
 #' \code{editrules} provides several methods for creating edits from a \code{character}
 #' , \code{expression}, \code{data.frame} or a text file.
 #' \tabular{ll}{
+#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints
+#'   \code{\link{editset}}     \tab Create conditional numerical, numerical and categorical constraints \cr
 #'   \code{\link{editmatrix}} \tab Create a linear constraint matrix for numerical data \cr
 #'   \code{\link{editarray}}  \tab Create value combination constraints for categorical data \cr
-#'   \code{\link{editset}}     \tab Create conditional numerical, numerical and categorical constraints \cr
-#'   \code{\link{editfile}}     \tab Read  conditional numerical, numerical and categorical constraints
 #' from a text file\cr
 #' }
 #'
@@ -38,8 +38,8 @@
 #'
 #' \code{editrules} provides several method for checking \code{data.frame}s with edits
 #' \tabular{ll}{
-#'   \code{\link{checkRows}} \tab TODO \cr
 #'   \code{\link{violatedEdits}} \tab TODO \cr
+#'   \code{\link{checkRows}} \tab TODO \cr
 #'   \code{\link{localizeErrors}}  \tab TODO \cr
 #'   \code{\link{errorLocalizer}}  \tab TODO \cr
 #' }
@@ -49,14 +49,14 @@
 #'
 #' \code{editrules} provides several methods for manipulating edits
 #' \tabular{ll}{
-#'   \code{\link{substValue}} \tab TODO \cr
-#'   \code{\link{eliminate}} \tab TODO \cr
-#'   \code{\link{isFeasible}} \tab TODO \cr
-#'   \code{\link{duplicated}} \tab TODO \cr
-#'   \code{\link{blocks}} \tab TODO \cr
-#'   \code{\link{reduce}} \tab TODO \cr
-#'   \code{\link{simplify}} \tab TODO \cr
-#'   \code{\link{seperate}} \tab TODO \cr
+#'   \code{\link{substValue}} \tab Substitute a value in a set of rules \cr
+#'   \code{\link{eliminate}} \tab Derive implied rules by variable elimination \cr
+#'   \code{\link{isFeasible}} \tab Check for contradictions \cr
+#'   \code{\link{duplicated}} \tab Find duplicated rules \cr
+#'   \code{\link{blocks}} \tab Separate a rule set in unconnected subsets \cr
+#'   \code{\link{reduce}} \tab Remove variables not occuring in any rule \cr
+#'   \code{\link{simplify}} \tab Simplify internal structure of editset \cr
+#'   \code{\link{separate}} \tab TODO \cr
 #'   \code{\link{generateEdits}} \tab TODO \cr
 #' }
 #'
