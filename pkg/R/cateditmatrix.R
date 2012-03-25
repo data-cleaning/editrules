@@ -64,7 +64,7 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #' @param x cateditmatrix object to be printed
 #' @param asIfStatement if \code{TRUE} the representation will be an \code{if} statement.
 #' @param ... further arguments passed to or from other methods.
-#' @export
+#' @keywords internal
 as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
   if (isTRUE(asIfStatement)){
     A <- getA(x)

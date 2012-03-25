@@ -10,7 +10,7 @@
 #' @param useBlocks \code{logical} Summarize each block?
 #' @param ... Arguments to pass to or from other methods 
 #'
-#' @rdname summary
+#' @rdname editmatrix
 #' @export
 #' @example ../examples/editmatrix.R
 summary.editmatrix <- function(object, useBlocks=TRUE, ...){
@@ -41,9 +41,11 @@ summary.editmatrix <- function(object, useBlocks=TRUE, ...){
 #' Summary of editarray
 #'
 #'
+#' @param object an R object
+#' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editarray
 #' 
-#' @rdname summary
+#' @rdname editarray
 #' @export
 #' @example ../examples/editarray.R
 summary.editarray <- function(object, useBlocks=TRUE, ...){
@@ -70,9 +72,11 @@ summary.editarray <- function(object, useBlocks=TRUE, ...){
 #' Summary of editset
 #'
 #'
+#' @param object an R object
+#' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editset
 #' 
-#' @rdname summary
+#' @rdname editset
 #' @export
 #' @example ../examples/editset.R
 summary.editset <- function(object, useBlocks=TRUE, ...){
@@ -118,9 +122,9 @@ print.editsummary <- function(x,...){
 #' Summarize error location
 #' 
 #' Generates an object of class 'locationsummary' for which a print method is implemented.
-#'
+#' @param object an R object
 #' @method summary errorLocation
-#' @rdname summary
+#' @rdname localizeErrors
 #' @export
 #' @example ../examples/localizeErrors.R
 summary.errorLocation <- function(object,...){

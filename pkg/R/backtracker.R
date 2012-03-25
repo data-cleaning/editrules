@@ -167,6 +167,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
 #' print a backtracker
 #'
 #' @export
+#' @keywords internal
 #' @method print backtracker
 #' @param x backtracker object to be printed
 #' @param ... other parameters passed to print method

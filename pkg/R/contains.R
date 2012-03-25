@@ -1,4 +1,4 @@
-#' determine which edits in an editmatrix contain a variable.
+#' determine which edits contain which variable(s)
 #'
 #' For an \code{\link{editmatrix}}, variables with coefficients smaller than
 #' \code{tol} are considered not to be contained in an edit.

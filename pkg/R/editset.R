@@ -7,7 +7,7 @@
 #' @param editrules \code{data.frame} with (in)equalities written in R syntax, or alternatively 
 #'        a \code{character} or \code{expression} with (in)equalities written in R syntax
 #' @param env environment to parse categorical edits in (normally, users need not specify this)
-#' @seealso \code{\link{editfile}}
+#' @seealso \code{\link{editfile}}, \code{\link{editrules.plotting}}, \code{\link{getVars}}
 #' @example ../examples/editset.R
 #'
 #' @export
@@ -129,6 +129,7 @@ adddummies <- function(E, dat){
 #' @param useIf return vectorized version?
 #' @param dummies return datamodel for dummy variables?
 #' @param ... arguments to be passed to or from other methods
+#' @rdname editset
 #' @export
 as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, ...){
     num <-  as.character(x$num)
@@ -169,11 +170,9 @@ invert <- function(e){
 #' Coerces an editset to a \code{data.frame}. 
 #'
 #' @method as.data.frame editset
-#' @param x \code{\link{editset}} object
-#' @param ... further arguments passed to or from other methods.
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.
-#'
+#' @rdname editset
 #' @export 
 as.data.frame.editset <- function(x, ...){
     edts <- as.character(x, datamodel=TRUE,...)
@@ -336,27 +335,6 @@ removeRedundantDummies <- function(E, tol=1e-8){
 
     E
 }
-
-
-# alternative implementation 1
-#    for ( org in colnames(v) ){
-#        for ( dup in dupvars ){
-#            if ( v[dup,org] ){
-#                iM <- contains.boolmat(A,ind,dup)
-#                A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
-#            }
-#        }
-#    }
-# alternative implementation 2:
-#    e <- as.character(E2)
-#    for ( org in colnames(v) ){
-#        repstr <- paste(dup[v[,org]],collapse="|")
-#        e <- gsub(repstr,org,e)
-#    }
-#    E$mixnum <- E1
-#    e <- unique(e)
-#    E$mixcat <- editarray(unique(e))
-
 
 
 

@@ -155,7 +155,8 @@ newviolatedEdits <- function(x){
 #' @method plot violatedEdits
 #' @param x \code{violatedEdits} object.
 #' @param topn Top \code{n} edits to be plotted.
-#' @param ... parameters passed to \code{barplot} method.
+#' 
+#' @rdname violatedEdits
 #' @export
 plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
   N <- nrow(x)
@@ -206,9 +207,8 @@ plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
 #'
 #' @method summary violatedEdits
 #' @param object \code{violatedEdits} object
-#' @param E optional \code{editmatrix} or \code{editarray}
 #' @param minfreq minimum freq for edit to be printed
-#' @param ... (not used)
+#' @rdname violatedEdits
 #' @export
 summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
   N <- nrow(object)
@@ -239,16 +239,15 @@ summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
 #' Print violatedEdits
 #' @method print violatedEdits
 #' @param x violatedEdits
-#' @param ... not used
 #' @export
+#' @keywords internal
 print.violatedEdits <- function(x,...){
   print(unclass(x))
 }
 
 #' as.data.frame violatedEdits
 #' @method as.data.frame violatedEdits
-#' @param x violatedEdits
-#' @param ... not used
+#' @rdname violatedEdits 
 #' @export
 as.data.frame.violatedEdits <- function(x, ...){
   as.data.frame(unclass(x),...)

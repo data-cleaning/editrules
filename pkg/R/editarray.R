@@ -35,7 +35,7 @@
 #'
 #'
 #'
-#' @param editrules \code{character} vector 
+#' @param editrules \code{character} or \code{expression} vector.
 #' @param sep textual separator, to be used internally for separating variable from category names. 
 #' @param env environment to evaluate the rhs of '==' or '\%in\%' in. 
 #' @return editarray
@@ -153,7 +153,7 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
 #' @param useIf \code{logical}. Use if( <condition> ) <statement> or !<condition> | <statement> ? 
 #' @param datamodel \code{logical}. Include datamodel explicitly?
 #' @param ... further arguments passed to or from other methods
-#'
+#' @rdname editarray
 #' @export
 as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     A <- getArr(x)
@@ -209,11 +209,10 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 #' Coerces an editarray to a \code{data.frame}. 
 #'
 #' @method as.data.frame editarray
-#' @param x \code{\link{editarray}} object
-#' @param ... further arguments passed to or from other methods.
+#'
 #' @seealso \code{\link{as.character.editarray}}
 #' @return data.frame with columns 'name', 'edit' and 'description'.
-#'
+#' @rdname editarray
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x, ...)
@@ -229,12 +228,10 @@ as.data.frame.editarray <- function(x, ...){
 
 #' Coerce an editarray to R expressions
 #'
-#' Generates an R \code{expression} vector that can be used to check data using \code{\link{eval}}.
+#' Generates an R \code{expression} vector that can be used to check data using \code{eval}.
 #' @export
 #' @method as.expression editarray
-#'
-#' @param x editarray object to be parsed
-#' @param ... further arguments passed to or from other methods.
+#' @rdname editarray
 as.expression.editarray <- function(x, ...){
   return(
     tryCatch(parse(text=as.character(x, ...)), 
