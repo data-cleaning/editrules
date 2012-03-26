@@ -1,7 +1,5 @@
 
 
-#' \code{str} method for editmatrix object
-#'
 #' @method str editmatrix
 #' @rdname editmatrix
 #' @export
@@ -12,8 +10,6 @@ str.editmatrix <- function(object,...){
 }
 
 
-#' \code{str} method for editarray object
-#'
 #' @method str editarray
 #' @rdname editarray
 #' @export
@@ -22,5 +18,8 @@ str.editarray <- function(object,...){
     if (nchar(vars) > 20 ) vars <-  paste(strtrim(vars,16),"...") 
     cat(paste("editarray with", nrow(object), "edits containing variables",vars,"\n"))
 }
+
+
+
 
 

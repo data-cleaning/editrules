@@ -20,16 +20,16 @@ as.matrix.editmatrix <- function(x, ...){
 }
 
 
-#' Coerce an editarray to a boolean matrix
+# Coerce an editarray to a boolean matrix
 #' 
-#' An \code{\link{editarray}} is a boolean array with extra attributes. The boolean
-#' array may be extracted with this method.
+#' 
+#' 
 #'
 #' @export
 #' @method as.matrix editarray
 #'
 #' @rdname editarray
-#' @return boolean matrix of editarray.
+#' @return \code{as.matrix}: The boolean matrix part of the \code{editarray}.
 as.matrix.editarray <- function(x,...){
     array(x,dim=dim(x),dimnames=dimnames(x))
 }
