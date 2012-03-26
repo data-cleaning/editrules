@@ -1,8 +1,8 @@
 #' Check data against a datamodel
 #'
-#' Variables in \code{dat} which also occur in \code{E} are checked against the datamodel for 
-#' those variables. Currently, this function is only usefull for categorical data (i.e. objects of class 
-#' \code{\link{editarray}}
+#' Categorical variables in \code{dat} which also occur in \code{E} are checked against the datamodel for 
+#' those variables. Numerical variables are checked against edits in \code{E} that contain only a single
+#' variable (e.g. \eqn{x > 0}).
 #'
 #' @param E an object of class \code{\link{editarray}} or \code{\link{editmatrix}}
 #' @param dat a \code{data.frame}
@@ -15,28 +15,23 @@ checkDatamodel <- function(E, dat,weight=rep(1,ncol(dat)), ...){
     UseMethod('checkDatamodel')
 }
 
-#' Check numerical data against datamodel (not implemented) 
-#'
-#' Currently, this method returns \code{NULL}, and is only used internally.
-#'
-#' @method checkDatamodel editmatrix
-#' @rdname checkDatamodel
-checkDatamodel.editmatrix <- function(E, dat, weight=rep(1,ncol(dat)), ...){
-    NULL
+# 
+#
+# @method checkDatamodel editmatrix
+#
+checkDatamodel.editmatrix <- function(E, dat, weight=rep(1,ncol(dat)), call=sys.call(), ...){
+    if (nrow(E)==0) return(emptyerrorlocation(dat ,method="checkDatamodel",call=call,... ))
+    I <- rowSums( abs(getA(E)) > 1e-8 ) == 1
+    localize_singleton(E[I,], dat, weight, method="checkDatamodel", call=call, ...  )
 }
 
-#' Check categorical data against datamodel
-#'
-#' In an \code{\link{editarray}}, each row codes a multivariate edit, while the columns 
-#' define the datamodel. This function checks if every variable, occuring in \code{dat} 
-#' takes values in the datamodel of \code{E}. The function is used by \code{\link{localizeErrors}} 
-#' prior to performing error localization on multivariate edits. 
-#'
-#' @method checkDatamodel editarray
-#' @rdname checkDatamodel
-#'
+# Check categorical data against datamodel
+#
+#
+# @method checkDatamodel editarray
+# @keywords internal
+#
 checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
-
     if (any(! (getVars(E) %in% names(dat)) ) ){ 
             vr <- paste(getVars(E)[!getVars(E) %in% names(dat)],collapse=', ')
             stop(paste('Variables',vr,'defined in E not present in dat'))
@@ -67,17 +62,32 @@ checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
 }
 
 
-#'
-#' For an \code{\link{editset}}, the categorical variables are tested against
-#' the categorical datamodel.
-#'
-#"
-#' @method checkDatamodel editset
-#' @rdname checkDatamodel
+#
+# For an \code{\link{editset}}, the categorical variables are tested against
+# the categorical datamodel.
+#
+#
+# @method checkDatamodel editset
+# @rdname checkDatamodel
 checkDatamodel.editset <- function(E, dat, weight=rep(1,length(getVars(E))), ...){
     if ( is.null(names(weight)) ) names(weight) <- getVars(E)
-    E <- reduce(E[editType(E) == 'cat',]$mixcat)
-    checkDatamodel.editarray(E,dat,weight[getVars(E)])
+    et <- editType(E)
+    err <- NULL
+    if ( ncol(E$mixcat) > 0 ){
+        dvar <- getVars(E,type="dummy")
+        iv <- -(1:ncol(E$mixcat))
+        if ( length(dvar) > 0 ) iv <- unlist(getInd(E$mixcat)[dvar])
+        A <- getArr(E$mixcat)[,-iv,drop=FALSE]
+        sep <- getSep(E$mixcat)
+        F <- neweditarray(
+            A,
+            indFromArray(A,sep),
+            sep
+        )
+        err <- checkDatamodel.editarray(F,dat,weight)
+    }
+    G <- reduce(E$num)
+    err %+% checkDatamodel.editmatrix(G,dat,weight)
 }
 
 
