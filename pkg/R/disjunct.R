@@ -2,19 +2,17 @@
 #' Decouple a set of conditional edits
 #'
 #' An editset is transformed to a list of \code{\link{editset}s} 
-#' which do not contain any conditional numeric/categorical edits anymore. Each editset has an extra
-#' attribute \code{condition}, which holds the series of assumptions made to 
-#' decouple the original edits. This attribute will be printed when not \code{NULL}.
-#'
-#' At the moment this functionality is somewhat experimental and in- or output specification
-#' should be expected to change in coming releases.
+#' which do not contain any conditional numeric/categorical edits anymore. Each \code{\link{editset}} gains an
+#' attribute \code{\link{condition}}, which holds the series of assumptions made to 
+#' decouple the original edits. This attribute will be printed when not \code{NULL}. Warning: this may be slow
+#' for large, highly entangled sets of edits.
 #'
 #' @param E Object of class \code{\link{editset}}
 #' @param type Return type: \code{list} (default) for \code{editlist}, \code{env} for \code{editenv}.
 #' @return An object of class \code{editlist} (\code{editenv}), which is nothing more than a \code{list} (\code{environment}) of 
 #'  \code{editsets} with a class attribute. Each element has an attribute 'condition' showing which conditions 
 #'  were assumed to derive the editset.
-#'
+#' @seealso \code{\link{separate}}, \code{\link{condition}}
 #' @example ../examples/dnf.R
 #' @export
 disjunct <- function(E, type=c('list','env')){
@@ -64,7 +62,7 @@ dnf <- function(E, env){
 #' 
 #' @example ../examples/separate.R
 #' @export
-#' @seealso \code{\link{blocks}}
+#' @seealso \code{\link{blocks}}, \code{\link{disjunct}}, \code{\link{condition}}
 separate <- function(E){
     B <- blocks(E)
     B <- lapply(B, function(b){

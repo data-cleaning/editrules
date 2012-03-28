@@ -48,7 +48,7 @@ plot(err)
 
 ## End(Not run)
 
-
+for ( d in dir("../pkg/R",full.names=TRUE)) dmp <- source(d)
 # Example with different weights for each record
 E <- editmatrix('x + y == z')
 dat <- data.frame(
@@ -68,12 +68,12 @@ localizeErrors(E,dat,weight=w)
 
 
 # an example with categorical variables
-E <- editarray(c(
-    "age \%in\% c('under aged','adult')",
-    "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
-    "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
-    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-    "if( maritalStatus \%in\% c('married','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
+E <- editarray(expression(
+    age %in% c('under aged','adult'),
+    maritalStatus %in% c('unmarried','married','widowed','divorced'),
+    positionInHousehold %in% c('marriage partner', 'child', 'other'),
+    if( age == 'under aged' ) maritalStatus == 'unmarried',
+    if( maritalStatus %in% c('married','widowed','divorced')) !positionInHousehold %in% c('marriage partner','child')
     )
 )
 E

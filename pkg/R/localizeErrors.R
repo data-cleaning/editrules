@@ -61,7 +61,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         ),
         stringsAsFactors=FALSE
     )
-    # call mip method (no blocking necessary: this is done by lpSolve)
+    # cchek for lpSolveApi 
     if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
@@ -70,17 +70,12 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     } else {
         B  <- blocks(E)
     }
-
-    # detect singletons and localize errors
+    
+    # detect singletons 
     st <- sapply(B,function(b) length(getVars(b)) == 1)
-    if (verbose) cat("Detected",sum(st),"trivial and",sum(!st),"nontrivial blocks\n")
-    err <- NULL
-    if ( any(st) )  err <- err %+% localize_singleton(B[st],dat,call=sys.call())
-
-    n <- sum(!st)
+    n <- sum(st)
     i <- 0
-    blockCount <- NULL
-    err <- err %+% checkDatamodel(E,dat,weight)
+    err <- checkDatamodel(E,dat,weight)
     # values not in datamodel are set to NA
     dat[err$adapt] <- NA
     for ( b in B[!st] ){
@@ -206,25 +201,30 @@ getDuration <- function(x){
     y
 }
 
-# error localization for a list of simple 1D editsets/arrays/matrices/cateditmatrices
+# error localization for simple 1-var edits stored as editsets/arrays/matrices/cateditmatrices
 #
-localize_singleton <- function(B, dat, method, call, user, timestamp){
-    if (missing(method)) method <- "singleton"
-    if (missing(call)) call <- sys.call(-1)
-    if (missing(user)) user <- Sys.info()["user"]
-    if (missing(timestamp)) timestamp <- date()
-    # actual work
-    E <- do.call(c,B)
+localize_singleton <- function(E, dat, 
+        weight=rep(1,ncol(dat)), 
+        method="singleton", 
+        call=sys.call(-1), 
+        user=Sys.info()["user"], 
+        timestamp = date())
+{
+
+    if (nedits(E) == 0) return(emptyerrorlocation(dat, method=method, call=call, user=user, timestamp=timestamp ))
+    
     n <- nrow(dat)
+    if ( is.vector(weight) || nrow(weight)==1 ) weight <- matrix(rep(weight,n), nrow=n ,byrow=TRUE)
     vars <- getVars(E)
     v <- violatedEdits(E,dat)
     v[is.na(v)] <- TRUE
     adapt <- array(FALSE,dim=c(nrow(dat),ncol(dat)),dimnames=list(record=1:n, adapt=names(dat)))
     adapt[,vars] <-  v %*% contains(E) > 0
 
+
     # derive status and create errorLocation object.
     status <- data.frame(
-        weight = rowSums(adapt),
+        weight = rowSums(adapt*weight),
         degeneracy = rep(1,n),
         user = numeric(n),
         system=numeric(n),

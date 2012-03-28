@@ -53,6 +53,19 @@ newerrorlocation <- function(adapt, status, call=sys.call(-1), method, user=Sys.
     ) 
 }
 
+
+# empty errorLocation object for a data.frame adapt array
+emptyerrorlocation <- function(dat, ...){
+    m <- nrow(dat)
+    n <- ncol(dat)
+    newerrorlocation(
+        array(FALSE,dim=c(m,n),dimnames=dimnames(dat)),
+        status = emptyStatus(m),
+        ...
+    )
+}
+
+
 #' Print object of class errorLocation 
 #'
 #' @param x object of class errorLocation

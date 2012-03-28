@@ -365,9 +365,10 @@ Note that parts of equation (\ref{eq:tmip}) can be written in a negated form:
 \end{equation}
 
 \subsection{The {\sf cateditmatrix} object}
-To create a mip formulation for the categorical error localization problem, {\sf editrules} uses
-internally the {\sf cateditmatrix} object. {\sf cateditmatrix} is an {\sf editmatrix} object, which is described in \cite{jonge:2011}, but it "remembers" that it is categorical. 
-
+To create a mip formulation for the categorical error localization problem,
+{\sf editrules} uses internally the {\sf cateditmatrix} object. {\sf
+cateditmatrix} is an {\sf editmatrix} object, which is described in
+\cite{jonge:2011}, but it "remembers" that it is categorical. 
 %
 \begin{Rcode}
 <<keep.source=true>>=
@@ -387,11 +388,11 @@ Figure \ref{R:cateditmatrix} shows an example for the use of {\sf cateditmatrix}
 it will be called implicitly in {\sf localizeErrors} using {\tt method="mip"}.
 An example is shown in figure \ref{R:localizeCat}
 
-%
+% checkDatamodel is niet overloaded voor cateditmatrix. Moeten we dit doen, aangezien cateditmatrix (nog) niet 'public' is.
 \begin{Rcode}
 <<keep.source=true>>=
-dat <- data.frame(gender="male", pregnant=TRUE)
-localizeErrors(E,dat, method="mip")
+#dat <- data.frame(gender="male", pregnant=TRUE)
+#localizeErrors(E,dat, method="mip")
 @
 \caption{Using {\sf localizeErrors} method with categorical data}
 \label{R:localizeCat}
