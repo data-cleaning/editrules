@@ -113,6 +113,7 @@ buildELMatrix <- function( E
 #' @param maxvalue If x contains \code{NA} and na.rm is \code{FALSE}, the returned xlim will have maxvalue as upper boundary
 #' @param ... not used
 #' @return a lower and upper boundary of \code{x}
+#' @keywords internal
 createXlim <- function(x, factor=1, offset=c(-1000,1000), na.rm = FALSE, maxvalue=1e8, minvalue=-maxvalue, ...){
   if (!is.numeric(x)){
     return(c(0,1))

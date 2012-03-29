@@ -14,6 +14,8 @@ version 2.5-0
 - bugfix in violatedEdits.editset: wrong handling of numerical edits.
 - Better printing of cateditmatrix.
 - BREAKING CHANGE: listViolatededits and checkRows are deprecated. Use violatedEdits in stead.
+- BREAKING CHANGE: toDataFrame is now editrules internal and no longer supported
+- BREAKING CHANGE: argument fancynames of eliminate.editmatrix is removed
 
 version 2.2-0
 - Added function 'disjunct' decoupling conditional numeric/categorical edit sets

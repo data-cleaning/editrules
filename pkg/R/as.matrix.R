@@ -3,27 +3,18 @@
 #' @include editset.R
 {}
 
-#' Coerce an editmatrix to a normal matrix
 #' 
-#' An \code{\link{editmatrix}} is a matrix and can be used as such, but it has extra attributes.
-#' In some cases it is preferable to convert the editmatrix to a normal matrix.
-#
-#' Please note that coercion returns the augmented matrix \code{A|b} and not the \code{ops} part.
 #'
 #' @export
 #' @method as.matrix editmatrix
 #' @rdname editmatrix
 #'
-#' @return augmented matrix of editmatrix
+#' @return \code{as.matrix}: Augmented \code{matrix} of \code{editmatrix}. (See also \code{\link{getAb}}).
 as.matrix.editmatrix <- function(x, ...){
    array(x, dim=dim(x), dimnames=dimnames(x))
 }
 
 
-# Coerce an editarray to a boolean matrix
-#' 
-#' 
-#' 
 #'
 #' @export
 #' @method as.matrix editarray

@@ -4,7 +4,7 @@
 #' 
 #' The \code{errorlocation} objects consists of the following slots wich can be 
 #' accessed with the dollar operator, just like with lists. Right now the only
-#' function creating such objects is \code{\link{localizeErrors}}
+#' functions creating such objects are \code{\link{localizeErrors}} and \code{\link{checkDatamodel}}.
 #'
 #' \itemize{
 #'      \item{\code{adapt} a \code{logical} array where each row/column shows which record/variable should be adapted.}
@@ -26,7 +26,7 @@
 #' }
 #' @rdname errorLocation
 #' @name errorLocation
-#' @seealso \code{\link{localizeErrors}}
+#' @seealso \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}
 {}
 
 

@@ -1,8 +1,8 @@
-#' concatenate editmatrix
+
 #' @method c editmatrix
+#' @rdname editmatrix
 #' @export
-#' @param ... \code{editmatrix} objects to be concatenated.
-#' @return \code{editmatrix}
+#' 
 c.editmatrix <- function(...){
   ems <- list(...)
   ems <- ems[!sapply(ems,is.null)]
@@ -23,11 +23,11 @@ c.editmatrix <- function(...){
   as.editmatrix(A=A, ops=ops, b=b)
 }
 
-#' concatenate editarray
+#' 
+#' @rdname editarray
 #' @method c editarray
 #' @export
-#' @param ... \code{editarray} objects to be concatenated.
-#' @return \code{editarray}
+#' 
 c.editarray <- function(...){
   ems <- list(...)
   ems <- ems[!sapply(ems,is.null)]
@@ -52,4 +52,12 @@ c.editarray <- function(...){
   neweditarray(B, ind, names=rownames(B), sep=":")
 }
 
+
+#' @rdname editset
+#' @method c editset
+#' @export
+#' 
+c.editset <- function(...){
+    editset( unlist(lapply(list(...), as.character)) )
+}
 

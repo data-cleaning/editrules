@@ -372,7 +372,7 @@ cateditmatrix} is an {\sf editmatrix} object, which is described in
 %
 \begin{Rcode}
 <<keep.source=true>>=
-E <- cateditmatrix( 
+E <- editrules:::cateditmatrix( 
        expression( gender %in% c("male", "female")
                  , if (pregnant) gender == "female"
                  )

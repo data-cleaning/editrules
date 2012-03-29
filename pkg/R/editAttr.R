@@ -15,6 +15,7 @@ nedits <- function(E){
 }
 
 #' Names of edits
+#'
 #' Retrieve edit names from editset, -array or -matrix
 #' @param E \code{\link{editset}}, \code{\link{editarray}} or \code{\link{editmatrix}}
 #' @export

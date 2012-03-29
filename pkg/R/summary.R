@@ -64,9 +64,6 @@ summary.editarray <- function(object, useBlocks=TRUE, ...){
         type ='editarray')
 }
 
-#' Summary of editset
-#'
-#'
 #' @param object an R object
 #' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editset

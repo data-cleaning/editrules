@@ -1,17 +1,29 @@
-#' Create an editset which can contain a mix of categorical, numerical and mixededits
+#' Read general edits
 #' 
-#' Mixed edits are most conveniently read from a free-format textfile, using \code{\link{editfile}}.
+#' An \code{editset} combines numerical (linear), categorical and conditional restrictions
+#' in a single object. Internally, it consists of two \code{\link[=editmatrix]{editmatrices}} 
+#' and an \code{\link{editarray}}.
 #'
-#' NOTE: at the moment, functionality for mixed edit sets is limited and somewhat experimental.
+#' The function \code{editset} converts a \code{character} or \code{expression} vector to an editset.
+#' Alternatively, a \code{data.frame} with a column called \code{edit} can be supplied. Function
+#' \code{\link{editfile}} reads edits from a free-form textfile.
 #'
-#' @param editrules \code{data.frame} with (in)equalities written in R syntax, or alternatively 
-#'        a \code{character} or \code{expression} with (in)equalities written in R syntax
+#' 
+#'
+#' @param editrules \code{character} vector, \code{expression} vector or \code{data.frame} (see details) containing edits.
 #' @param env environment to parse categorical edits in (normally, users need not specify this)
-#' @seealso \code{\link{editfile}}, \code{\link{editrules.plotting}}, \code{\link{getVars}}
-#' @example ../examples/editset.R
 #'
+#' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
+#'  \code{\link{getVars}}, \code{\link{disjunct}}, \code{\link{eliminate}}, \code{\link{substValue}}, 
+#'  \code{\link{isFeasible}}, \code{\link{contains}}
+#' @example ../examples/editset.R
+#' @return \code{editset}: An object of class \code{editset}
 #' @export
 editset <- function(editrules, env=new.env()){
+    if (is.data.frame(editrules)){
+        stopifnot("edit" %in% names(editrules))
+        editrules <- editrules$edit
+    }
     
     # detect edit types
     num <- parseEdits(editrules, type="num")
@@ -98,7 +110,7 @@ neweditset <- function(num, mixcat, mixnum, condition=editmatrix(expression()), 
 #' @param E an \code{\link{editset}}
 #' @return an \code{\link{editmatrix}}, holding conditions under which the editset is relevant.
 #' @export
-#' @seealso \code{\link{disjunct}}, \code{\link{separate}}
+#' @seealso \code{\link{disjunct}}, \code{\link{separate}}, \code{\link{editset}}
 condition <- function(E) attr(E,'condition')
 
 `condition<-` <- function(x, value){
@@ -121,7 +133,6 @@ adddummies <- function(E, dat){
 
 
 
-#' Convert an editset to character
 #' @method as.character editset
 #'
 #' @param x an \code{\link{editset}}
@@ -165,15 +176,12 @@ invert <- function(e){
 
 
 
-#' Coerce an editarset to a \code{data.frame}
-#'
-#' Coerces an editset to a \code{data.frame}. 
 #'
 #' @method as.data.frame editset
-#' @seealso \code{\link{as.character.editarray}}
-#' @return data.frame with columns 'name', 'edit' and 'description'.
 #' @rdname editset
 #' @export 
+#' @return \code{as.data.frame}: a \code{data.frame} with columns 'name' and 'edit'. 
+#   If the editset has a \code{description} attribute, a third column named 'description' is added.
 as.data.frame.editset <- function(x, ...){
     edts <- as.character(x, datamodel=TRUE,...)
     d <- data.frame(

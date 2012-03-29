@@ -12,7 +12,7 @@
 #' @return An object of class \code{editlist} (\code{editenv}), which is nothing more than a \code{list} (\code{environment}) of 
 #'  \code{editsets} with a class attribute. Each element has an attribute 'condition' showing which conditions 
 #'  were assumed to derive the editset.
-#' @seealso \code{\link{separate}}, \code{\link{condition}}
+#' @seealso \code{\link{separate}}, \code{\link{condition}}, \code{\link{blocks}}
 #' @example ../examples/dnf.R
 #' @export
 disjunct <- function(E, type=c('list','env')){

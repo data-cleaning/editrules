@@ -10,6 +10,7 @@
 #' @param E a matrix or editmatrix
 #' @param ... options to pass on to further methods.
 #' @export
+#' @seealso \code{\link{eliminate}}, \code{\link{substValue}}
 echelon <- function(E,...){
     UseMethod("echelon")
 }

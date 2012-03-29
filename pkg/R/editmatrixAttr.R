@@ -37,6 +37,9 @@ getA <- function(E){
 
 #' Returns augmented matrix representation of edit set.
 #'
+#' For a system of linear (in)equations of the form \eqn{Ax \odot b}, \eqn{\odot\in\{<,\leq,=\}},
+#' the matrix \eqn{A|b} is called the augmented matrix.
+#'
 #' @example ../examples/editmatrixAttr.R
 #' @seealso \code{\link{editmatrix}} \code{\link{as.matrix.editmatrix}}
 #'
