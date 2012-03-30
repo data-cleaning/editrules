@@ -25,7 +25,7 @@
 #' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
 #'    \code{\link{editfile}}, \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{getVars}},
 #'    \code{\link{blocks}}, \code{\link{eliminate}}, \code{\link{substValue}}, \code{\link{isFeasible}} 
-#'    \code{\link{generateEdits}}, \code{\link{contains}}
+#'    \code{\link{generateEdits}}, \code{\link{contains}}, \code{\link{is.editarray}}, \code{\link{isSubset}}
 #'    
 #' @export
 editarray <- function(editrules, sep=":", env=parent.frame()){
@@ -238,15 +238,6 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
 }
 
 
-#' return vector with number of categories for each variable in editarray
-#' 
-#' @param E object of class \code{\link{editarray}}
-#' @return a vector of \code{length(getVar(E))} with the number of categories for every variable in E.
-#' @export
-numcat <- function(E){
-    if ( !is.editarray(E) ) stop('Argument not of class editarray')
-    sapply(getInd(E),length)
-}
 
 
 

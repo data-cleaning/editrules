@@ -1,4 +1,6 @@
 version 2.5-0
+- complete documentation overhaul
+- overloaded 'c' for editset
 - localizeErrors uses vectorized method for single-variable, single-edit blocks ('singleton' method)
 - error localization based on lpSolveApi uses block-wise processing for enhanced numerical stability
 - function editType exported: lists edit categorie for 'editset' ('num', 'cat', 'mix')
@@ -14,7 +16,7 @@ version 2.5-0
 - bugfix in violatedEdits.editset: wrong handling of numerical edits.
 - Better printing of cateditmatrix.
 - BREAKING CHANGE: listViolatededits and checkRows are deprecated. Use violatedEdits in stead.
-- BREAKING CHANGE: toDataFrame is now editrules internal and no longer supported
+- BREAKING CHANGE: violatedEdits.data.frame, toDataFrame and iter.backtracker are now editrules internal and no longer supported
 - BREAKING CHANGE: argument fancynames of eliminate.editmatrix is removed
 
 version 2.2-0

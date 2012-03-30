@@ -1,21 +1,24 @@
 
-#' Check for obviously infeasible edit rules
+#' Check for obvious contradictions in a set of edits
+#' 
+#' Obvious contradictions are edits of the form \eqn{1 < 0}, or categorical
+#' edits defining that a record fails for any value combination If
+#' this function evaluates to \code{TRUE}, the set of edits is guaranteed
+#' infeasible. If it evaluates to \code{FALSE} this does not garuantee feasibility.
+#' See \code{\link{isFeasible}} for a complete test.
 #'
-#' Find any obviously contradictory edit rules.
-#'
-#' @param E An \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param E An \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{editarray}}, \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}}
 #' @param ... Arguments to be passed to or from other methods.
-#' @return a \code{logical} oif the editset is obviously infeasible. A \code{logical} 
-#'  vector in the case of an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editset}}.
+#' @return A \code{logical} for objects of class \code{\link{editset}}, \code{\link{editarray}} or \code{\link{editmatrix}}. 
+#'  A \code{logical}  vector in the case of an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editset}}.
+#'
 #' @export
+#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isFeasible}}
 isObviouslyInfeasible <- function(E,...){
     UseMethod("isObviouslyInfeasible")
 }
 
 
-#' Check for obvious contradictions in set of (in)equalities
-#' 
-#' Check for obvious infeasible rows, equivalent to 0 < -1.
 #'
 #' @method isObviouslyInfeasible editmatrix
 #' @param tol Tolerance for checking against zero.
@@ -36,10 +39,6 @@ isObviouslyInfeasible.editmatrix <- function(E, tol=sqrt(.Machine$double.eps), .
     return(FALSE)
 }
 
-#' Check for obvious infeasibility
-#' 
-#' For an \code{\link{editarray}}, it checks for edits wich have TRUE in all columns.
-#' This corresponds to an espression stating that every possible value combination is erroneous.
 #'
 #' @method isObviouslyInfeasible editarray
 #' @rdname isObviouslyInfeasible
@@ -55,10 +54,6 @@ isObviouslyInfeasible.NULL <- function(E,...){
 }
 
 
-#' Check for obvious infeasibility
-#' 
-#' For an \code{\link{editset}} it checks infeasibility the numerical part,
-#' contains an obvious infeasibility.
 #'
 #' @method isObviouslyInfeasible editset
 #' @rdname isObviouslyInfeasible
@@ -68,11 +63,6 @@ isObviouslyInfeasible.editset <- function(E,...){
     isObviouslyInfeasible(E$num) || isObviouslyInfeasible(E$mixcat)
 }
 
-#' Check for obvious infeasibility
-#' 
-#' For an \code{\link[=disjunct]{editlist}}, or \code{\link[=disjunct]{editenv}} 
-#' each constituting \code{\link{editset}} is checked for obvious infeasibilities and 
-#' returns a boolean vector of length \code{length(E)}.
 #'
 #' @method isObviouslyInfeasible editlist
 #' @rdname isObviouslyInfeasible

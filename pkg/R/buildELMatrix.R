@@ -173,4 +173,4 @@ checkXlim <- function(xlim, x, maxvalue=1e8){
 # # checkXlim(list(age=c(0,200)), x)
 # # 
 # buildELMatrix(E, x, editweight=c(Inf, 1))# -> B
-# # localize_mip_rec(E, x=x)
+# # errorLocalizer.mip(E, x=x)

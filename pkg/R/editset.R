@@ -15,7 +15,7 @@
 #'
 #' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
 #'  \code{\link{getVars}}, \code{\link{disjunct}}, \code{\link{eliminate}}, \code{\link{substValue}}, 
-#'  \code{\link{isFeasible}}, \code{\link{contains}}
+#'  \code{\link{isFeasible}}, \code{\link{contains}}, \code{\link{is.editset}}
 #' @example ../examples/editset.R
 #' @return \code{editset}: An object of class \code{editset}
 #' @export

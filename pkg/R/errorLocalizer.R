@@ -52,8 +52,8 @@
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example ../examples/errorLocalizer.R
-#' @seealso \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}, 
-#'      \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{editarray}}
+#' @seealso \code{\link{errorLocalizer.mip}}, \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}, 
+#'      
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
 #' Journal of the American Statistical Association 71, pp 17-25

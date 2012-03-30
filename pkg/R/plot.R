@@ -36,7 +36,8 @@
 #' function.
 #'
 #' @method plot editmatrix 
-#' @aliases editrules.plotting
+#' @aliases plot.editmatrix plot.editset plot.editarray
+#' @name editrules.plotting
 #' @param x object of class \code{\link{editmatrix}}
 #' @param nodetype \code{'rules'}, \code{'vars'} or \code{'all'}.
 #' @param rules selection of edits

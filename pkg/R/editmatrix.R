@@ -14,7 +14,7 @@
 #' @title Create an editmatrix
 #' @seealso 
 #'      \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
-#'      \code{\link{normalize}}, \code{\link{contains}},
+#'      \code{\link{normalize}}, \code{\link{contains}}, \code{\link{is.editmatrix}},
 #'      \code{\link{getA}}, \code{\link{getAb}}, \code{\link{getb}}, \code{\link{getOps}} \code{\link{getVars}},
 #'      \code{\link{eliminate}}, \code{\link{substValue}}, \code{\link{isFeasible}}
 #' @export
@@ -89,6 +89,7 @@ editmatrix <- function( editrules
 #' @param normalized \code{logical} TRUE or FALSE
 #' @param ... optional attributes
 #' @return an S3 object of class \code{editmatrix} 
+#' @keywords internal
 neweditmatrix <- function(A, ops, normalized=FALSE,...){
    structure( A
             , class="editmatrix"

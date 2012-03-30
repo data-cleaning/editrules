@@ -74,11 +74,9 @@ getOps <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example ../examples/editmatrixAttr.R
-#' 
 #' @param E \code{\link{editmatrix}}
 #'
-#' @return TRUE if editmatrix was normalized or created with \code{normalize=TRUE} 
+#' @return TRUE when all comparison operators of \code{E} are in \{\code{<,<=,==}\}
 isNormalized <- function(E){
   if (!is.editmatrix(E)){
      stop("Argument not of class editmatrix")

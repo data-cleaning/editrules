@@ -1,32 +1,32 @@
 #' Find obvious redundancies in set of edits
 #' 
-#' 
-#' 
-#' @param E Augmented matrix A|b, editmatrix 
-#' @param duplicates \code{logical}: check for duplicate edits?
+#' Detect simple redundancies such as duplicates or edits of the form \code{0 < 1} or \code{0 == 0}.
+#' For categorical edits, simple redundancies are edits that define an empty subregion
+#' of the space of all possible records (no record can ever be contained in such a region).
+#'
+#' @param E An \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{editarray}}, 
+#'      \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}}
+#' @param duplicates \code{logical}: check for duplicate edits? For an \code{\link{editset}}, 
+#'      \code{\link[=duplicated]{editlist}} or \code{\link[=duplicated]{editenv}} this should be a logical
+#'      2-vector indicating which of the numerical or categorical edits should be checked for duplicates.
 #' @param ... parameters to be passed to or from other methods. 
 #' 
 #' @return logical vector indicating which edits are (obviously) redundant
-#'
+#' @seealso \code{\link{isObviouslyInfeasible}}, \code{\link{isSubset}}
 #' @export 
 isObviouslyRedundant <- function(E, duplicates=TRUE, ...){
     UseMethod("isObviouslyRedundant")
 }
 
 
-#' Redundancy check, \code{matrix} method
-#'
-#' 
-#' Lower-level method, to be called directly from internal functions of the editrules package.
-#'
-#' @method isObviouslyRedundant matrix
-#'
-#' @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
-#' @param tol tolerance to check for zeros.
-#'
-#' @rdname isObviouslyRedundant
-#' @keywords internal
-#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
+# @method isObviouslyRedundant matrix
+#
+# @param operators character vecor of comparison operators in \code{<, <=, ==} of length \code{nrow(E)}
+# @param tol tolerance to check for zeros.
+#
+# @rdname isObviouslyRedundant
+# @keywords internal
+# @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
 isObviouslyRedundant.matrix <- function(
     E, 
     operators, 
@@ -42,12 +42,6 @@ isObviouslyRedundant.matrix <- function(
 }
 
 
-#' Redundancy check for \code{editmatrix}
-#'
-#' Normalizes the editmatrix if necessary, converts it and passes it to the \code{matrix} method. All options
-#' of the \code{matrix} method may be passed. Obvious redundancies, amounting
-#' to statements as 0==0 or 0 < 1 will be detected, as well as duplicates.
-#'
 #' @method isObviouslyRedundant editmatrix
 #' @rdname isObviouslyRedundant
 #' 
@@ -60,11 +54,6 @@ isObviouslyRedundant.editmatrix <- function(E, duplicates=TRUE, ...){
 }
 
 
-#' Redundancy check for \code{editarray}
-#'
-#' For an \code{\link{editarray}}, it checks if any of the variables has 
-#' \code{FALSE} for each category (a record can never be contained in such a set).
-#'
 #' @method isObviouslyRedundant editarray
 #' @rdname isObviouslyRedundant
 #' @export
@@ -78,9 +67,9 @@ isObviouslyRedundant.editarray <- function(E, duplicates=TRUE, ...){
 }
 
 
-#' Check redundancy in editarray after disection
-#'
-#' @keywords internal
+# Check redundancy in editarray after disection
+#
+# @keywords internal
 isRedundant.boolmat <- function(A, ind){
     if ( nrow(A) == 1 ) return(any(vapply(ind,function(i) sum(A[,i])==0,FUN.VALUE=TRUE)))
     apply(
@@ -89,12 +78,13 @@ isRedundant.boolmat <- function(A, ind){
     )
 }
 
-#'
-#' For an \code{\link{editset}} it checks for obvious redundancies in the numerical
-#' and categorical/mixed parts separately. Arguments \code{duplicates} must be a
-#' logical 2-vector, the first element corresponding to the numeric part, the second 
-#' element to the conditional part.
-#'
+#
+# For an \code{\link{editset}} it checks for obvious redundancies in the numerical
+# and categorical/mixed parts separately. Arguments \code{duplicates} must be a
+# logical 2-vector, the first element corresponding to the numeric part, the second 
+# element to the conditional part.
+#
+
 #' @method isObviouslyRedundant editset
 #' @rdname isObviouslyRedundant
 #' @export
@@ -107,11 +97,11 @@ isObviouslyRedundant.editset <- function(E, duplicates=rep(TRUE,2), ...){
 
 
 
-#'
-#' 
-#' For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
-#' a list of logical vectors is returned.
-#'
+#
+# 
+# For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
+# a list of logical vectors is returned.
+#
 #' @method isObviouslyRedundant editlist
 #' @rdname isObviouslyRedundant
 #' @export
@@ -120,10 +110,11 @@ isObviouslyRedundant.editlist <- function(E, duplicates=rep(TRUE,2), ...){
 }
 
 
-#' 
-#' For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
-#' a list of logical vectors is returned.
-#'
+# 
+# For an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}},
+# a list of logical vectors is returned.
+#
+
 #' @method isObviouslyRedundant editenv
 #' @rdname isObviouslyRedundant
 #' @export

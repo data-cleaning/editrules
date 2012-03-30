@@ -53,8 +53,8 @@ c.editarray <- function(...){
 }
 
 
-#' @rdname editset
 #' @method c editset
+#' @rdname editset
 #' @export
 #' 
 c.editset <- function(...){
