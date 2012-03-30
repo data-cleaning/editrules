@@ -18,8 +18,9 @@ checkDatamodel <- function(E, dat,weight=rep(1,ncol(dat)), ...){
 
 # 
 #
-# @method checkDatamodel editmatrix
-#
+#' @method checkDatamodel editmatrix
+#' @export 
+#' @keywords internal
 checkDatamodel.editmatrix <- function(E, dat, weight=rep(1,ncol(dat)), call=sys.call(), ...){
     if (nrow(E)==0) return(emptyerrorlocation(dat ,method="checkDatamodel",call=call,... ))
     I <- rowSums( abs(getA(E)) > 1e-8 ) == 1
@@ -29,9 +30,10 @@ checkDatamodel.editmatrix <- function(E, dat, weight=rep(1,ncol(dat)), call=sys.
 # Check categorical data against datamodel
 #
 #
-# @method checkDatamodel editarray
-# @keywords internal
-#
+
+#' @method checkDatamodel editarray
+#' @keywords internal
+#' @export 
 checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
     if (any(! (getVars(E) %in% names(dat)) ) ){ 
             vr <- paste(getVars(E)[!getVars(E) %in% names(dat)],collapse=', ')
@@ -68,8 +70,10 @@ checkDatamodel.editarray <- function(E, dat, weight=rep(1,ncol(dat)), ...){
 # the categorical datamodel.
 #
 #
-# @method checkDatamodel editset
-# @rdname checkDatamodel
+
+#' @method checkDatamodel editset
+#' @export
+#' @keywords internal
 checkDatamodel.editset <- function(E, dat, weight=rep(1,length(getVars(E))), ...){
     if ( is.null(names(weight)) ) names(weight) <- getVars(E)
     et <- editType(E)
