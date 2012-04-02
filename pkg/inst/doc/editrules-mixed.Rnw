@@ -133,9 +133,9 @@ National Statistics Institutes spend up to 40\% of their resources on this
 process \citep{waal:2011}. For this reason, considerable attention is paid to
 the development of data editing methods that can be automated. 
 
-In the practive of (official) statistics, data records are often required to obey 
+In the practice of (official) statistics, data records are often required to obey 
 various restrictions, including sum rules, positivity demands or other linear
-inequalities, and categorical restictions which exclude certain value combinations.
+inequalities, and categorical restrictions which exclude certain value combinations.
 In literature on data editing, such restrictions are often called {\em edit rules}
 or {\em edits}, in short.
 
@@ -178,7 +178,7 @@ Fellegi-Holt assumption \cite{fellegi:1976} is provided as well. Error
 localization has been implemented based on two computational methods. One based
 on a branch-and-bound algorithm and one based on a mixed-integer formulation.
 Here, the branch-and-bound formulation will be discussed, leaving treatment of
-the mixed-integer approach to a seperate paper \citep{jonge:2012}.
+the mixed-integer approach to a separate paper \citep{jonge:2012}.
 
 The rest of this paper is structured as follows. In Section \ref{smixeddata}
 we describe which restrictions can be handled by the package, and introduce
@@ -289,9 +289,9 @@ E = \langle E_{\sf num}, E_{\sf mixnum}, E_{\sf mixcat}\rangle.
 \end{equation}
 Here, $E_{\sf num}$ is an {\sf editmatrix} object holding numerical edits
 not connected to any edits with nonnumerical variables. The object
-$E_{\sf mixnum}$ is an {\sf editmatrix}, holding numerical edits occuring
+$E_{\sf mixnum}$ is an {\sf editmatrix}, holding numerical edits occurring
 in conditional edits. The rownames of {\bf mixnum} correspond to 
-dummy variables, occuring in the categorical edits stored as 
+dummy variables, occurring in the categorical edits stored as 
 an {\sf editarray} in $E_{\sf mixcat}$. The $E_{\sf mixcat}$ object stores
 ``pure categorical'' edits, as well as conditional edits containing
 dummy variables referring to edits in $E_{\sf mixnum}$.
@@ -309,7 +309,7 @@ exported from the {\sf R} environment.
 As described in our previous papers on {\sf editrules}, edits can be read from
 the commandline in {\sf character} form, or from a {\sf data.frame}. However it
 is now also possible to read edits from {\sf R} {\sf expression} vectors or,
-most conveniently, from a free-form textfile.
+most conveniently, from a free-form text file.
 %
 \begin{figure}
 \begin{Verbatim}[frame=single]
@@ -402,7 +402,7 @@ set membership of categorical variables, such {\tt A \%in\% c("a","b")}. See
 To export edits, the most convenient way is to use either {\sf as.character} to
 convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
 2-column {\sf data.frame}. One can then use {\sf R}'s standard I/O
-functionality to store edits as a structured textfile, or use one of the
+functionality to store edits as a structured text file, or use one of the
 database interfaces to send edits to a database. When edits are read into
 {\sf R}, the function {\sf editset} is capable of converting textual edits
 to an {\sf editset} object. See Table \ref{tabcoercion} for an overview of
@@ -534,7 +534,7 @@ The above example is generalized by the recursive procedure shown in Algorithm
 generating all possible assumptions about the truth values of linear
 edits that occur in the premise or consequent of a conditional edit. Each
 leave of the tree corresponds to one complete set of assumptions about the
-truth values of the linear restrictions occuring in conditional edits.
+truth values of the linear restrictions occurring in conditional edits.
 
 Here, making an assumption about such a truth value amounts to substituting a
 dummy variable in the $E_{\sf mixnum}$ part of an {\sf editset}, copying the
@@ -683,14 +683,14 @@ object called $E_{\sf num}$.  To substitute a value in an editset, four cases
 are distinguised.
 
 The first two cases are the simplest and concern variables which are either
-numerical and not occuring in $E_{\sf mixnum}$ or categorical variables. These
+numerical and not occurring in $E_{\sf mixnum}$ or categorical variables. These
 cases are handled by dispatching the appropriate {\sf substValue} methods for
 $E_{\sf num}$ or $E_{\sf mixcat}$ ({\sf editmatrix} and {\sf editarray}
 respectively) which have been described in \cite{jonge:2011} and
 \cite{loo:2011b}.
 
 The third case occurs when the substituted variable is a numerical variable,
-occuring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following steps
+occurring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following steps
 must be performed.
 %
 \begin{enumerate}
