@@ -13,7 +13,7 @@ test_that("localizeError_mip",{
   
   x <- c(p=755,c=125,t=200)
   
-  sol <- localize_mip_rec(Et, x)
+  sol <- errorLocalizer.mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
   expect_equivalent(sol$x_feasible, c(75, 125, 200))
@@ -158,7 +158,7 @@ test_that("localizeError_mip editset",{
   
   x <- c(p=755,c=125,t=200)
   
-  sol <- localize_mip_rec(Et, x)
+  sol <- errorLocalizer.mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
   expect_equivalent(sol$x_feasible, c(75, 125, 200))

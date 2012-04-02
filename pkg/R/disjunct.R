@@ -12,7 +12,7 @@
 #' @return An object of class \code{editlist} (\code{editenv}), which is nothing more than a \code{list} (\code{environment}) of 
 #'  \code{editsets} with a class attribute. Each element has an attribute 'condition' showing which conditions 
 #'  were assumed to derive the editset.
-#' @seealso \code{\link{separate}}, \code{\link{condition}}
+#' @seealso \code{\link{separate}}, \code{\link{condition}}, \code{\link{blocks}}
 #' @example ../examples/dnf.R
 #' @export
 disjunct <- function(E, type=c('list','env')){
@@ -56,13 +56,24 @@ dnf <- function(E, env){
 
 #' Separate an editset into its disconnected blocks and simplify
 #'
-#' @param E an editset
+#' The input edits are separated into disjunct blocks, and simplified to
+#' \code{editmatrix} or \code{\link{editarray}} where possible. Remaining
+#' \code{\link[=editset]{editsets}} are separated into \code{\link{disjunct}}  
+#' \code{\link[=disjunct]{editlists}}.
+#'
+#' @param E An \code{\link{editset}}
 #' @return A \code{list} where each element is either an \code{\link{editmatrix}}, an \code{\link{editarray}}
 #' or an object of class \code{\link[=disjunct]{editlist}} which cannot be simplified further.
 #' 
 #' @example ../examples/separate.R
-#' @export
 #' @seealso \code{\link{blocks}}, \code{\link{disjunct}}, \code{\link{condition}}
+#' 
+#' @references
+#'  M. van der Loo and De Jonge, E. (2012). Manipulation of conditional restrictions and error localization
+#'  with the editrules package. Discussion paper 2012xx, Statistics Netherlands, The Hague 
+#'  (included with the package).
+#'
+#' @export
 separate <- function(E){
     B <- blocks(E)
     B <- lapply(B, function(b){

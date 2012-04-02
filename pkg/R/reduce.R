@@ -1,16 +1,15 @@
 
-#' Remove empty rows and variables from set of edits
+#' Remove redundant variables and edits.
 #'
-#' If \code{E} is an \code{\link{editmatrix}} all rows and columns containing only zeros are removed.
-#' If \code{E} is an \code{\link{editarray}} all variables not contained in any edit are removed. 
-#' rows which have \code{FALSE} in every category of any variable are removed as well (these rows have
-#' \code{\link{isObviouslyRedundant}} equal to \code{TRUE}).
-#'
+#' Remove variables which are not contained in any edit and remove edits which are 
+#' \code{\link[=isObviouslyRedundant]{obviously redundant}}.
 #'
 #' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param ... arguments to pass to other methods
 #'
 #' @export
+#' @seealso \code{\link{contains}}, \code{\link{eliminate}}, \code{\link{substValue}}
+#'
 reduce <- function(E,...){
     UseMethod('reduce')
 }

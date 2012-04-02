@@ -37,6 +37,9 @@ getA <- function(E){
 
 #' Returns augmented matrix representation of edit set.
 #'
+#' For a system of linear (in)equations of the form \eqn{Ax \odot b}, \eqn{\odot\in\{<,\leq,=\}},
+#' the matrix \eqn{A|b} is called the augmented matrix.
+#'
 #' @example ../examples/editmatrixAttr.R
 #' @seealso \code{\link{editmatrix}} \code{\link{as.matrix.editmatrix}}
 #'
@@ -71,11 +74,9 @@ getOps <- function(E){
 #' @export
 #' @seealso \code{\link{editmatrix}}
 #'
-#' @example ../examples/editmatrixAttr.R
-#' 
 #' @param E \code{\link{editmatrix}}
 #'
-#' @return TRUE if editmatrix was normalized or created with \code{normalize=TRUE} 
+#' @return TRUE when all comparison operators of \code{E} are in \{\code{<,<=,==}\}
 isNormalized <- function(E){
   if (!is.editmatrix(E)){
      stop("Argument not of class editmatrix")

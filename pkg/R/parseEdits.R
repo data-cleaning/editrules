@@ -9,7 +9,7 @@
 #' \code{"cat"} or \code{"mix"}
 #' @return The edits in \code{E} parsed to R expressions.
 #'
-#' @export
+#' @keywords internal
 parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
      if (is.expression(E)){
        edits <- E

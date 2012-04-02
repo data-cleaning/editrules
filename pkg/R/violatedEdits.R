@@ -1,23 +1,17 @@
 
-#' Retrieve which rows of \code{data.frame dat} violate which constraints
+#' Check data against constraints
 #'
-#' This is an S3 generic function for checking rows of a \code{data.frame} against
-#' a number of edit restrictions. The edits can be entered either in \code{character}
-#' \code{data.frame} or \code{editmatrix} format. The returned value is a logical matrix
-#' with dimension (number of records )\eqn{times}(number of edits), indicating which
-#' record violates (\code{TRUE}) which edit.
+#' Determine which record violates which edits. Returns \code{NA} when edits
+#' cannot be checked because of missing values in the data. 
 #'
-#' This function can be used as an input for automatic corrections methods.
-#' This method will fail if \code{E} contains variables that are not available in \code{dat}
-#' 
-#' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
 #' @example ../examples/violatedEdits.R
 #' @export
 #' @seealso \code{\link{checkDatamodel}}
-#' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
-#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a data.frame
+#' @param E \code{\link{character}} vector with constraintsm, \code{\link{editset}}, \code{\link{editmatrix}} or \code{\link{editarray}}.
+#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a \code{data.frame}
 #' @param ... further arguments that can be used by methods implementing this generic function
-#' @return a logical matrix where each row indicates which contraints are violated
+#' @return An object of class \code{violatedEdits}, which is a logical \code{nrow(dat)Xnedits(E)} matrix with an extra \code{class} attribute
+#'  for overloading purposes. 
 violatedEdits <- function(E, dat, ...){
     if (nedits(E)==0){
         v <- matrix( logical(0)
@@ -95,9 +89,9 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     newviolatedEdits(v)
 }
 
-#' @rdname violatedEdits
-#' @method violatedEdits data.frame
-#' @export
+# @rdname violatedEdits
+# @method violatedEdits data.frame
+# @export
 violatedEdits.data.frame <- function(E, dat, ...){
     if ( !all(c("name","edit","description") %in% names(E)) ){
         stop("Invalid input data.frame see ?editmatrix for valid input format")
@@ -203,7 +197,6 @@ plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
   par(oldpar)
 }
 
-#' Summary statistics on violatedEdits
 #'
 #' @method summary violatedEdits
 #' @param object \code{violatedEdits} object

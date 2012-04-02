@@ -1,16 +1,19 @@
-#' Localize errors in a record based on Fellegi and Holt's paradigm
+#' Create a backtracker object for error localization
 #' 
 #' Generate a \code{\link{backtracker}} object for error localization in numerical, categorical, or mixed data.
+#' This function generates the workhorse program, called by \code{\link{localizeErrors}} with \code{method=localizer}.
 #'
-#' The returned backtracker contains methods to search depth-first to the least weighted
-#' number of variables that need to be adapted so that all restrictions in \code{E} can be 
-#' satisfied. (Generalized principle of Fellegi and Holt (1976)).
+#' The returned \code{\link{backtracker}} can be used to run a branch-and-bound algorithm which finds
+#' the least (weighted) number of variables in \code{x} that need to be adapted so that all restrictions 
+#' in \code{E} can be satisfied. (Generalized principle of Fellegi and Holt (1976)).
 #'
-#' The search is excecuted with a branch-and-bound algorithm, where in the left branche,
-#' a variable is assumed correct and its value subsituted in \code{E}, while in the right
-#' branche a variable is assumed incorrect and eliminated from \code{E} with Fourier-Motzkin
-#' elimination. See De Waal (2003), chapter 8 or De Waal, Pannekoek and Scholtus (2011) for 
-#' a concise description.
+#' The B&B tree is set up so that in in one branche,
+#' a variable is assumed correct and its value subsituted in \code{E}, while in the other
+#' branche a variable is assumed incorrect and \code{\link[=eliminate]{eliminated}} from \code{E}. 
+#' See De Waal (2003), chapter 8 or De Waal, Pannekoek and Scholtus (2011) for 
+#' a concise description of the B&B algorithm. 
+#'
+#' 
 #'
 #' Every call to \code{<backtracker>$searchNext()} returns one solution \code{list}, consisting of
 #' \itemize{
@@ -32,7 +35,11 @@
 #' not in the datamodel specified by \code{E}. The more user-friendly function \code{\link{localizeErrors}}
 #' circumvents this. See also \code{\link{checkDatamodel}}.
 #'
-#' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
+#' @note This method is potentially very slow for objects of class \code{\link{editset}} that contain 
+#'  many conditional restrictions.  Consider using \code{\link{localizeErrors}} with the option 
+#'  \code{method="mip"} in such cases.
+#'
+#'
 #'
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
 #' @param x a named numerical \code{vector} or \code{list} (if E is an editmatrix), a named character \code{vector} or \code{list} (if E is an editarray), 
@@ -45,7 +52,8 @@
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example ../examples/errorLocalizer.R
-#' @seealso \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}
+#' @seealso \code{\link{errorLocalizer.mip}}, \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}, 
+#'      
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
 #' Journal of the American Statistical Association 71, pp 17-25
@@ -62,8 +70,18 @@ errorLocalizer <- function(E, x, ...){
     UseMethod("errorLocalizer")
 }
 
+#'
+#' @method errorLocalizer editset
+#' @rdname errorLocalizer
+#' @export
+#'
+errorLocalizer.editset <- function(E, x, ...){
+    D <- disjunct(E)
+    errorLocalizer.editlist(E,x,...)
+}
 
-#' Localize errors in numerical data
+
+# Localize errors in numerical data
 #'
 #' @method errorLocalizer editmatrix
 #' @param weight a \code{lengt(x)} positive weight vector. The weights are assumed to be in the same order as the variables in \code{x}.
@@ -172,7 +190,7 @@ errorLocalizer.editmatrix <- function(
 }
 
 
-#' Localize errors in categorical data
+# Localize errors in categorical data
 #'
 #' @method errorLocalizer editarray
 #' @rdname errorLocalizer
@@ -398,18 +416,5 @@ errorLocalizer.editlist <- function(
         }
     })
     bt
-}
-
-#'
-#' When \code{E} is an \code{\link{editset}}, it is converted to an \code{\link[=disjunct]{editlist}}
-#' by \code{\link{disjunct}} and the method for \code{\link[=disjunct]{editlist}} is called.
-#'
-#' @method errorLocalizer editset
-#' @rdname errorLocalizer
-#' @export
-#'
-errorLocalizer.editset <- function(E, x, ...){
-    D <- disjunct(E)
-    errorLocalizer.editlist(E,x,...)
 }
 

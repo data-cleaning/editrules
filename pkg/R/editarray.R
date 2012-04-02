@@ -22,11 +22,18 @@
 #'
 #' @example ../examples/editarray.R
 #'
-#' @seealso \code{\link{editfile}}, \code{\link{blocks}}, \code{\link{eliminate}}, \code{\link{substValue}}, 
-#'    \code{\link{checkDatamodel}}, \code{\link{localizeErrors}}
+#' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
+#'    \code{\link{editfile}}, \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{getVars}},
+#'    \code{\link{blocks}}, \code{\link{eliminate}}, \code{\link{substValue}}, \code{\link{isFeasible}} 
+#'    \code{\link{generateEdits}}, \code{\link{contains}}, \code{\link{is.editarray}}, \code{\link{isSubset}}
+#'    
 #' @export
 editarray <- function(editrules, sep=":", env=parent.frame()){
     if (length(editrules) == 0 ) return(neweditarray(array(numeric(0),dim=c(0,0)),ind=list(),sep=sep))
+    if ( is.data.frame(editrules) ){
+        stopifnot("edit" %in% names(editrules))
+        editrules <- editrules$edit
+    }
 
     e <- parseEdits(editrules)
     v <- lapply(e,parseCat,sep=sep,env=env)
@@ -231,15 +238,6 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
 }
 
 
-#' return vector with number of categories for each variable in editarray
-#' 
-#' @param E object of class \code{\link{editarray}}
-#' @return a vector of \code{length(getVar(E))} with the number of categories for every variable in E.
-#' @export
-numcat <- function(E){
-    if ( !is.editarray(E) ) stop('Argument not of class editarray')
-    sapply(getInd(E),length)
-}
 
 
 

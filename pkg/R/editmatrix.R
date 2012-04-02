@@ -1,43 +1,30 @@
-#' Transforms a list of R (in)equalities into an edit matrix.
+#' An \code{editmatrix} is a numerical matrix and a set of comparison operators representing
+#' a linear system of (in)equations.  
 #'
-#' Transforms a list of R (in)equalities into an edit matrix with coefficients (\code{A}) for each variable, and a constant (\code{b})
-#' and operator (\code{ops}) for each edit rule.
+#' The function \code{editmatrix} generates an editmatrix from a \code{character} vector, an \code{expression}
+#' vector or a \code{data.frame} with at least the column \code{edit}. The function \code{\link{editfile}} 
+#' reads edits from a free-form textfile, function \code{\link{as.editmatrix}} converts a matrix, a vector of
+#' constants and a vector of operators to an \code{editmatrix}
 #'
-#' Each row in the resulting editmatrix represents an linear (in) equality.
-#' Each column in the resulting editmatrix represents a variable.
+#' By default, the \code{editmatrix} is normalized, meaning that all comparison operators are converted
+#' to one of \code{<}, \code{<=}, or \code{==}. Users may specify edits using any of the operators
+#' \code{<, <=, ==, >=, >} (see examples below). However it is highly recommended to let \code{editmatrix} parse them into normal
+#' form as all functions operating on editmatrices expect or convert it to normal form anyway.
 #'
-#' There are four ways to create an editmatrix:
-#' \enumerate{ 
-#'    \item Read from free-form textfile with \code{\link{editfile}}
-#'    \item a \code{character} vector with (in)equalities written in R syntax
-#'    \item a \code{expression} vector with (in)equalities written in R syntax
-#'    \item a \code{data.frame} with three columns:
-#'       \itemize{
-#'            \item name = a \code{character} with the name of each rule
-#'            \item edit = a \code{character} with (in)equalities written in R syntax
-#'            \item description = a \code{character} describing the intention of the rule
-#'       }
-#'      Typically these rules are stored in a external csv file (or database). 
-#' }
-#' 
-#'
-#' The matrix is created by retrieving the coefficients of the variables in the equalities.
-#' i.e. \code{x == y}   results in  \code{c(x=1, y=-1)}
-#' and \code{x == y + w} results in \code{c(x=1, y=-1, w=-1)}
-#'
-#' By default the editmatrix is created using the comparison operators (\code{==,<=,>=,<,>}) in the edits. If option \code{normalize=TRUE} is used all 
-#' edits are transformed into an A == b, A < b or A <= b form, so that in the specification of the edit rules all inequalities can be mixed, 
-#' but the resulting matrix has similar sign.
 #' @title Create an editmatrix
-#' @seealso \code{editrules.plotting}, \code{\link{as.editmatrix}}, \code{\link{getA}}, \code{\link{getAb}}, \code{\link{getb}}, \code{\link{getVars}}
+#' @seealso 
+#'      \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
+#'      \code{\link{normalize}}, \code{\link{contains}}, \code{\link{is.editmatrix}},
+#'      \code{\link{getA}}, \code{\link{getAb}}, \code{\link{getb}}, \code{\link{getOps}} \code{\link{getVars}},
+#'      \code{\link{eliminate}}, \code{\link{substValue}}, \code{\link{isFeasible}}
 #' @export
 #' @example ../examples/editmatrix.R
 #'
 #' @param editrules  A \code{character} or \code{expression} vecotr with (in)equalities written in R syntax.
-#'      Alternatively, a \code{data.frame} with an column named \code{edits}, see details.
+#'      Alternatively, a \code{data.frame} with a column named \code{edits}, see details.
 #' @param normalize \code{logical} specifying if all edits should be transformed (see description)
 #'
-#' @return an object of class "editmatrix" which is a \code{matrix} with extra attributes
+#' @return \code{editmatrix} : An object of class \code{editmatrix} 
 editmatrix <- function( editrules
                       , normalize = TRUE
 					       ){   
@@ -102,6 +89,7 @@ editmatrix <- function( editrules
 #' @param normalized \code{logical} TRUE or FALSE
 #' @param ... optional attributes
 #' @return an S3 object of class \code{editmatrix} 
+#' @keywords internal
 neweditmatrix <- function(A, ops, normalized=FALSE,...){
    structure( A
             , class="editmatrix"
@@ -159,19 +147,18 @@ as.editmatrix <- function( A
     E
 }
 
-#' Coerce an editmatrix to a \code{data.frame}
 #'
-#' Coerces an editmatrix to a \code{data.frame}. Useful for storing manipulated edits.
-#' @note since version 2.0-0, the behaviour of this function changed to be more symmetrical 
+#' @note since version 2.0-0, the behaviour of \code{as.data.frame.editmatrix} changed to be more symmetrical 
 #' with \code{editmatrix.data.frame} and \code{as.data.frame.editarray}. 
-#' Use \code{\link{toDataFrame}} for the old behaviour.
+#' Use \code{editrules:::toDataFrame} (unsupported) for the old behaviour.
 #'
 #' @export 
 #' @rdname editmatrix
 #' @method as.data.frame editmatrix
 #' @param x editmatrix object
 #'
-#' @return data.frame which can be converted to an editmatrix with \code{\link{editmatrix}}
+#' @return \code{as.data.frame} a 3-column \code{data.frame} with columns 'name' and 'edit'. 
+#' If the input editmatrix has a \code{description} attribute a third column is returned.
 as.data.frame.editmatrix <- function(x,...){
     edts <- as.character(x,...)
     d <- data.frame(
@@ -185,14 +172,14 @@ as.data.frame.editmatrix <- function(x,...){
 }
 
 
-#' Coerce an editmatrix to a \code{data.frame}
-#'
-#' Coerces an editmatrix to a \code{data.frame}. Useful for viewing the matrix representation of editrules.
-#' @export 
-#' 
-#' @param x \code{\link{editmatrix}} object
-#'
-#' @return data.frame with the coefficient matrix representation of \code{x}, an operator column and CONSTANT column.
+# Coerce an editmatrix to a \code{data.frame}
+#
+# Coerces an editmatrix to a \code{data.frame}. Useful for viewing the matrix representation of editrules.
+# 
+# 
+# @param x \code{\link{editmatrix}} object
+#
+# @return data.frame with the coefficient matrix representation of \code{x}, an operator column and CONSTANT column.
 toDataFrame <- function(x){
    if (!is.editmatrix(x)) stop('x must be an editmatrix')
    dat <- as.data.frame(getA(x))
@@ -207,9 +194,7 @@ toDataFrame <- function(x){
 
 
 
-#' Coerce an editmatrix to a \code{character} vector
 #'
-#' Derives readable editrules from an editmatrix.
 #' @rdname editmatrix
 #' @export
 #' @method as.character editmatrix
@@ -253,9 +238,7 @@ as.character.editmatrix <- function(x, ...){
    txt
 }
 
-#' Coerce an editmatrix to R expressions
 #'
-#' Generates an R \code{expression} vector that can be used to check data using \code{eval}.
 #' @export
 #' @rdname editmatrix
 #' @method as.expression editmatrix

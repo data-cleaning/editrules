@@ -64,9 +64,6 @@ summary.editarray <- function(object, useBlocks=TRUE, ...){
         type ='editarray')
 }
 
-#' Summary of editset
-#'
-#'
 #' @param object an R object
 #' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editset
@@ -114,12 +111,10 @@ print.editsummary <- function(x,...){
 
 }
 
-#' Summarize error location
 #' 
-#' Generates an object of class 'locationsummary' for which a print method is implemented.
 #' @param object an R object
 #' @method summary errorLocation
-#' @rdname localizeErrors
+#' @rdname errorLocation
 #' @export
 #' @example ../examples/localizeErrors.R
 summary.errorLocation <- function(object,...){

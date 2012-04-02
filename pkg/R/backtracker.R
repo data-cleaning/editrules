@@ -182,11 +182,13 @@ print.backtracker <- function(x, ..., VERBOSE=FALSE){
 #' This method is identical to calling \code{$searchNext} on a \code{backtracker}. Please note that iterating
 #' a backtracker changes the state of a backtracker.
 #'
-#' @export
+#' 
 #' @param x \code{\link{backtracker}} object
 #' @param ... extra parameters that will given to the \code{searchNext()} function
 #' @return backtracker iterator
 #' @seealso \code{iter} from the package iterators
+#' @keywords internal
+#' @export
 iter.backtracker <- function(x, ...){
    # TODO add stop iteration
    

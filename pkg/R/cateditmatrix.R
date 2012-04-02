@@ -8,7 +8,7 @@
 #' @param sep seperator to be used in naming categories within variables.
 #' @param env environment in which \code{x} will be evaluated.
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
-#' @export
+#' @keywords internal
 cateditmatrix <- function(x, sep=":", env=parent.frame()){
     if (is.editarray(x)) {
       x <- as.character(x)

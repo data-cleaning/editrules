@@ -1,9 +1,9 @@
 
 #' get names of variables in a set of edits
 #'
-#' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param E \code{\link{editset}}, \code{\link{editmatrix}}, or \code{\link{editarray}}
 #' @param ... Arguments to be passed to or from other methods
-#' @seealso \code{\link{getA}}, \code{\link{getb}}, \code{\link{getOps}}
+#' @seealso \code{\link{getA}}, \code{\link{getb}}, \code{\link{getAb}}, \code{\link{getOps}}
 #' @example ../examples/getVars.R
 #' @return \code{character} vector with the names of the variables. 
 #' @export
@@ -50,7 +50,7 @@ getVars.editarray <- function(E,...) names(attr(E,"ind"))
 #'
 #'
 #' @method getVars editset
-#' @param type (editset- or list only) which variables? \code{all} means all (except dummies), \code{num} means 
+#' @param type (editset- or list only) select which variables to return. \code{all} means all (except dummies), \code{num} means 
 #'      all numericals, \code{cat} means all categoricals, \code{mix} means those numericals appearing in a logical 
 #'      constraint and \code{dummy} means dummy variables connecting the logical with numerical constraints.
 #' @export

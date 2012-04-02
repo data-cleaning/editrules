@@ -1,8 +1,14 @@
 
-#' Check if any edit rule is a subset of another one
+#' Check which edits are dominated by other ones.
 #'
-#' @param E editarray
-#' @return \code{logical} vector
+#' An edit defines a subregion of the space of all possible value combinations 
+#' of a record. Records in this region are interpreted as invalid. An edit rule
+#' which defines a region equal to or contained in the region defined by another
+#' edit is redundant. (In data editing literature, this is often referred to as 
+#' a \emph{domination} relation.)
+#'
+#' @param E \code{\link{editarray}} 
+#' @return \code{logical} vector indicating if an edit is a subset of at least one other edit.
 #' @export
 isSubset <- function(E){
     if ( !is.editarray(E) ) stop('argument is not an editarray')
