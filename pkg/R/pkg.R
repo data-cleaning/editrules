@@ -20,7 +20,7 @@
 #' correction. For some types of error, such as sign flips, typing errors or
 #' rounding errors, this assumption does not hold. These errors can be detected
 #' and are closely related to their resolution. The reader is referred to the
-#' \code{deducorrect} package for treating such errors. 
+#' \pkg{deducorrect} package for treating such errors. 
 #'
 #' @section I. Define edits:
 #'
@@ -49,13 +49,13 @@
 #' \tabular{ll}{
 #'   \code{\link{substValue}} \tab Substitute a value in a set of rules \cr
 #'   \code{\link{eliminate}} \tab Derive implied rules by variable elimination \cr
+#'   \code{\link{reduce}} \tab Remove unconstraint variables \cr
 #'   \code{\link{isFeasible}} \tab Check for contradictions \cr
 #'   \code{\link{duplicated}} \tab Find duplicated rules \cr
-#'   \code{\link{blocks}} \tab Separate a rule set in unconnected subsets \cr
-#'   \code{\link{reduce}} \tab Remove variables not occuring in any rule \cr
-#'   \code{\link{disjunct}} \tab Split an editset in disjunct edit sets, not containing mixed edits\cr
-#'   \code{\link{separate}} \tab Block separation, apply disjunct to appropriate blocks \cr
-#'   \code{\link{generateEdits}} \tab Generate every nonredundant implicit edit (\code{\link{editarray}} only) \cr
+#'   \code{\link{blocks}} \tab Decompose rules into independent blocks \cr
+#'   \code{\link{disjunct}} \tab Decouple conditional edits into disjunct edit sets\cr
+#'   \code{\link{separate}} \tab Decompose rules in blocks and decouple conditinal edits \cr
+#'   \code{\link{generateEdits}} \tab Generate all nonredundant implicit edits (\code{\link{editarray}} only) \cr
 #' }
 #'
 #' @section V. Plot and coerce edits:

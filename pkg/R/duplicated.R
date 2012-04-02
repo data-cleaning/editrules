@@ -1,4 +1,3 @@
-
 #' Check for duplicate edit rules
 #'
 #' @method duplicated editarray

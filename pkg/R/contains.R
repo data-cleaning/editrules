@@ -1,4 +1,4 @@
-#' determine which edits contain which variable(s)
+#' Determine which edits contain which variable(s)
 #'
 #' For an \code{\link{editmatrix}}, variables with coefficients smaller than
 #' \code{tol} are considered not to be contained in an edit.
@@ -68,7 +68,7 @@ contains.editarray <- function(E,var=NULL,...){
     contains.boolmat(getArr(E),ind,var)
 }
 
-#' determine if a boolean matrix contains var
+#' Determine if a boolean matrix contains \code{var}
 #'
 #' @param A array
 #' @param ind index

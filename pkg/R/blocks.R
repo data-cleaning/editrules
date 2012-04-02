@@ -1,9 +1,7 @@
-#' Decompose matrix or edits into independent blocks
+#' Decompose a matrix or edits into independent blocks
 #'
 #' \code{blocks} returns a \code{list} of independent blocks \eqn{M_i} such that
 #' \eqn{M=M_1\oplus M_2\oplus\cdots\oplus M_n}. 
-#'
-#'
 #'
 #' @param M \code{matrix}, \code{\link{editmatrix}}, editarray or editset to be decomposed into independent blocks
 #' @return list of independent subobjects of \code{M}.
@@ -70,12 +68,3 @@ blockIndex <- function(D){
     }
     lapply(blocks,function(b) {names(b)<-orignames[b]; b})
 }
-
-
-
-
-
-
-
-
-
