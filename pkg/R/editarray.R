@@ -1,6 +1,5 @@
 #' Parse textual, categorical edit rules to an editarray
 #'
-#'
 #' An \code{editarray} is a boolean array (with some extra attributes) 
 #' where each row contains an edit restriction on purely categorical data. 
 #' 

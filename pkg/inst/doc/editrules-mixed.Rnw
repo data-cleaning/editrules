@@ -426,7 +426,7 @@ environment.
 To export edits, the most convenient way is to use either {\sf as.character} to
 convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
 2-column {\sf data.frame}. One can then use {\sf R}'s standard I/O
-functionality to store edits as a structured textfile, or use one of the
+functionality to store edits as a structured text file, or use one of the
 database interfaces to send edits to a database. When edits are read into
 {\sf R}, the function {\sf editset} is capable of converting textual edits
 to an {\sf editset} object. See Table \ref{tabcoercion} for an overview of

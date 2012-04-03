@@ -1,4 +1,4 @@
-#' get upperbounds of edits, given the boundaries of all variables
+#' Get upperbounds of edits, given the boundaries of all variables
 #' @param E \code{editmatrix}
 #' @param xlim \code{matrix} with columns lower and upper, and rows are variables (in same order as E)
 #' @return matrix with upperbounds per edit and a possible value

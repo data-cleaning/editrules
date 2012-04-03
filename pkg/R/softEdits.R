@@ -32,6 +32,27 @@ softEdits <- function(E, xlim, prefix=".se."){
   seE
 }
 
+#' Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for 
+#' constructing a mip/lp problem.
+#' @param E normalized \code{editmatrix}
+#' @param prefix \code{character} used for naming dummy variables in matrix.
+#' @keywords internal
+softEdits.cateditmatrix <- function(E, prefix=".se."){
+  if (!nrow(E)){
+    return(E)
+  }
+  eq <- getOps(E) == "=="
+  
+  dummies <- paste(prefix, rownames(E), sep="")
+  
+  seA <- diag(ifelse(eq, 1, -1))
+  colnames(seA) <- dummies
+  seA <- cbind(getA(E), seA)
+  
+  binvars <- sapply(colnames(seA), is.character)
+  seE <- as.editmatrix(seA, getb(E), getOps(E), binvars=binvars)
+  seE
+}
 
 #quick tests
 # 

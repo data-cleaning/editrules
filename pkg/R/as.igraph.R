@@ -11,7 +11,7 @@ checkigraph <- function(){
 
 #' Convert a collection of edits to an igraph object
 #' 
-#' graph.editmatrix derives adjacency matrix of \code{E} and converts it to an undirected igraph object.
+#' graph.editmatrix derives adjacency matrix of \code{E} and converts it to an undirected \pkg{igraph} object.
 #'
 #' @param weighted Should the number of variables connecting two edits be counted as weight? 
 #'      Passed as \code{weighted} argument to \code{igraph::graph.adjacency}
@@ -72,7 +72,4 @@ as.igraph.editset <- function(E, nodetype=c("all", "rules","vars"), rules=editna
     V(g)$type <- V(g)$vars <- attr(a, "vars")
     g
 }
-
-
-
 
