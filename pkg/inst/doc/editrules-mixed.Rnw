@@ -89,32 +89,33 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-
-{\em This vignette is far from finished. Version 3.0 of the package will have the
-full vignette.}
-
-
-Analyses of categorical data are often hindered by the occurrence of
-inconsistent or incomplete raw data. Although {\sf R} has many features for
-analyzing categorical data, the functionality for error localization and error
-correction are currently limited.  The {\sf editrules} package is designed to
+The quality of statistical statements strongly depends on the quality of the
+underlying data. As raw data is often inconsistent or incomplete, data editing
+often consumes a substantial amount of the resources available for statistical
+analyses. Although {\sf R} has many features for analyzing data, the
+functionality for data checking and  error localization based on data
+restrictions is currently limited.  The {\sf editrules} package is designed to
 offer a user-friendly toolbox for edit definition, manipulation, and error
 localization based on the generalized paradigm of Fellegi and Holt.  
+
+In this paper we describe new functionality pertaining to conditional
+restrictions and restrictions on mixed data. Some of the particularities of
+handling such restrictions are discussed in some detail. Other enhancements
+include the ability to read edits from free-form text files and faster
+error localization in certain cases.
 
 This is the third paper describing functionalities of the {\sf R} {\sf
 editrules} package and marks the completion of {\sf editrules} version $3.0$.
 The first paper \citep{jonge:2011} describes methods and implementation for
-handling numerical data, the second paper \citep{loo:2011b} describes methods and implementation
-for handling categorical data, while this paper is concerned with mixed 
-data and conditional restrictions. A fourth paper \citep{jonge:2012} is dedicated
-to error localization as a mixed integer problem.
-
+handling numerical data, the second paper \citep{loo:2011b} describes methods
+and implementation for handling categorical data. A fourth paper
+\citep{jonge:2012} is dedicated to error localization as a mixed integer
+problem.
 
 %{\em For package version 3.0-0, this vignette is a near literal 
 %    transcript of \cite{loo:2011b}. Please refer to that paper
 %    when referencing categorical data handling with {\sf editrules}.
 %    This vignette will be updated with the package if necessary.}
-
 \end{abstract}
 
 \newpage
@@ -126,38 +127,42 @@ to error localization as a mixed integer problem.
 
 \section{Introduction}
 \label{sIntroduction}
-Analyses of categorical data are often hindered by occurrences of incomplete or
-inconsistent raw data records.  The process of locating and correcting such
-errors is referred to as {\em data editing}, and it has been estimated that
-National Statistics Institutes spend up to 40\% of their resources on this
-process \citep{waal:2011}. For this reason, considerable attention is paid to
-the development of data editing methods that can be automated. 
+The quality of raw (survey) data is only rarely sufficient to allow for
+straightforward statistical analyses. Statisticians often have to spend a
+substantial amount of time checking and editing datasets prior to the actual
+analyses. It has been estimated that National Statistics Offices may devote as
+much as 40\% of their resources to data editing activities \cite{waal:2011}.
+For reasons of efficiency and reproducibility it is therefore highly desirable
+to automate data editing processes. 
 
-In the practive of (official) statistics, data records are often required to obey 
-various restrictions, including sum rules, positivity demands or other linear
-inequalities, and categorical restictions which exclude certain value combinations.
-In literature on data editing, such restrictions are often called {\em edit rules}
-or {\em edits}, in short.
+In the practice of (official) statistics, data records are often required to
+obey various restrictions, including sum rules, positivity demands or other
+linear inequalities and categorical restrictions which exclude certain value
+combinations.  Such rules are called {\em edit rules} or {\em edits} in short,
+and a data record is called {\em inconsistent} when it violates one or more
+edits. One goal of data editing is to adapt reported values such that no
+edits are violated anymore.
 
-Data editing is severely complicated by the fact that the fact that these rules
+Data editing is severely complicated by the fact that that edit rules
 are often interrelated: a variable can occur in more than one restriction, and
-a restriction can contain more than a single variable. Sets of restrictions on
+a restriction can contain multiple variables. Sets of restrictions on
 purely numerical or purely categorical data have been treated in our previous
-papers on the editrules package \citep{jonge:2011,loo:2011b}. Here, we extend
+papers on the {\sf editrules} package \citep{jonge:2011,loo:2011b}. Here, we extend
 our treatment to restrictions which are related by conditional statements. An
-example of such a statement, connecting a categorical variable {\em legal
-form} with a numerical variable ({\em number of employees}), is
+example of such a statement, connecting a categorical variable {\em legal form}
+with a numerical variable ({\em number of employees}), is 
+%
 \begin{quote}
 If the legal form (of a business) is self-employed, the number of employees must be zero.
 \end{quote}
-\cite{waal:2003} and \cite{waal:2003a} showed that every edit containing catorical as
-well as numerical data can be written in such a form. That is, all
-restrictions on categorical data occur in the predicate and numerical restrictions
-occur in the consequent expression. The formulation is general enough to encompass
-purely numerical restrictions (the predicate becomes {\sc true}) as well as purely
-categorical rules (the consequent becomes {\sc false}).
-However, rules connecting numerical restrictions are not uncommon, as shown by
-the following example, which is commonly applied to business surveys.
+\cite{waal:2003} and \cite{waal:2003a} showed that every edit containing
+categorical as well as numerical data can be written in such a form. That is,
+all restrictions on categorical data occur in the predicate and numerical
+restrictions occur in the consequent expression. The formulation is general
+enough to encompass purely numerical restrictions (the predicate becomes {\sc
+true}) as well as purely categorical rules (the consequent becomes {\sc
+false}). However, rules connecting numerical restrictions are not uncommon, as
+shown by the following example. 
 \begin{quote}
 If the number of employees is positive, the amount of salary payed must be
 positive.
@@ -165,28 +170,28 @@ positive.
 
 The purpose of this paper is to present version 3.0 of the {\sf R} extension
 package {\sf editrules}. This package extends the functionality of the previous
-versions by introducing the ability to parse, manipulate conditional
-restrictions and to apply them to data. The package can handle restrictions
+versions by introducing the ability to parse and manipulate conditional
+restrictions and to apply them to data. The package can now handle restrictions
 where numerical restrictions occur in the predicate as well as in the
-consequent, and extends the methodology described by \cite{waal:2003}.  The
-basic manipulations on edits which were introduced in the previous versions for
-numerical or categorical data are extended here to include conditional
-restrictions. These manipulations include, but are not limited to, redundancy
-checking, block decomposition, variable elimination and value substitution.
-Error localization for data under conditional edits based the generalized
-Fellegi-Holt assumption \cite{fellegi:1976} is provided as well. Error
-localization has been implemented based on two computational methods. One based
-on a branch-and-bound algorithm and one based on a mixed-integer formulation.
-Here, the branch-and-bound formulation will be discussed, leaving treatment of
-the mixed-integer approach to a seperate paper \citep{jonge:2012}.
+consequent of conditional restrictions.  The basic manipulations on edits which
+were introduced in the previous versions for numerical or categorical data are
+extended here to include conditional restrictions. These manipulations include,
+but are not limited to, redundancy checking, block decomposition, variable
+elimination and value substitution.  Error localization for data under
+conditional edits based the generalized Fellegi-Holt assumption
+\cite{fellegi:1976} is provided as well. Error localization has been
+implemented using two computational methods. The first based on a
+branch-and-bound algorithm and the second on a mixed-integer formulation of the
+problem.  This paper discusses the branch-and-bound algorithm, leaving
+treatment of the mixed-integer approach to a separate paper \citep{jonge:2012}.
 
-The rest of this paper is structured as follows. In Section \ref{smixeddata}
-we describe which restrictions can be handled by the package, and introduce
-the central object for handling conditional restrictions: the {\sf editset}
-object. In Section \ref{smanipulation} we provide details on the most important 
-edit manipulations that the package provides and Section \ref{serrorlocalization}
-is devoted to error localization. Examples in {\sf R} code are given throughout
-to aide new users getting started with this functionality.
+The rest of this paper is structured as follows. In Section \ref{smixeddata} we
+describe which restrictions can be handled by the package, and introduce the
+central object for handling conditional restrictions: the {\sf editset} object.
+In Section \ref{smanipulation} we provide details on the most important edit
+manipulations that the package provides and Section \ref{serrorlocalization} is
+devoted to error localization. Examples in {\sf R} code are given throughout to
+help new users getting started with this functionality.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -196,8 +201,8 @@ to aide new users getting started with this functionality.
 \label{smixeddata}
 The term ``mixed data'' is used here to indicate data containing both numerical
 and categorical data. We do not distinguish between integer and real numbers
-here: currently, both are handled as real numbers by editrules. We also do not
-distinguish between logical and categorical data: under the hood, editrules
+here: currently, both are handled as real numbers by {\sf editrules}. We also do not
+distinguish between logical and categorical data: under the hood, {\sf editrules}
 handles these data types as {\sf character}, although a user need not consider
 this when specifying types (see also \cite{loo:2011b}).
 
@@ -246,9 +251,12 @@ allowed in this formulation, neither in the premise, nor in the consequent. The
 nonlinear edit which prohibits certain operations such as variable elimination
 by the Fourier-Motzkin procedure. Under the hood, negations of the premise or
 consequents of conditional restrictions are often necessary to perform edit
-manipulations.
+manipulations. In practice, the lack of the {\tt ==} operator in conditional
+edits poses no real restriction since any equality can be written as two
+inequations.
 
-Internally, such conditional edits are represented by replacing each linear condition
+
+Internally, conditional edits are represented by replacing each linear condition
 with a dummy variable $t$, which is defined as
 \begin{equation}
 \label{eqdummy}
@@ -273,7 +281,7 @@ Similary, Eq.\ \eqref{eqedit2} may be rewritten as
 where $t$ corresponds to the linear restriction of Eq. \eqref{eqedit2}.
 The restrictions of Eqs.\ \eqref{eqdummyedit1} and \eqref{eqdummyedit2}
 are of a form that can be stored in a boolean representation  as described 
-in \cite{loo:2011b} for the case of categorical variables. The editrules
+in \cite{loo:2011b} for the case of categorical variables. The {\sf editrules}
 package uses an object class called {\sf editarray} to store such a
 representation.
 
@@ -285,16 +293,22 @@ with pure numerical and pure categorical edits, we implemented the
 class {\sf editset}, which can be denoted as
 \begin{equation}
 \label{eqeditset}
-E = \langle E_{\sf num}, E_{\sf mixnum}, E_{\sf mixcat}\rangle.
+E = \langle E_{\sf num}, E_{\sf mixnum}, E_{\sf mixcat};{\sf condition}\rangle.
 \end{equation}
-Here, $E_{\sf num}$ is an {\sf editmatrix} object holding numerical edits
-not connected to any edits with nonnumerical variables. The object
-$E_{\sf mixnum}$ is an {\sf editmatrix}, holding numerical edits occuring
-in conditional edits. The rownames of {\bf mixnum} correspond to 
-dummy variables, occuring in the categorical edits stored as 
-an {\sf editarray} in $E_{\sf mixcat}$. The $E_{\sf mixcat}$ object stores
-``pure categorical'' edits, as well as conditional edits containing
-dummy variables referring to edits in $E_{\sf mixnum}$.
+Here, $E_{\sf num}$ is an {\sf editmatrix} object holding numerical edits not
+connected to any edits with nonnumerical variables. The object $E_{\sf mixnum}$
+is an {\sf editmatrix}, holding numerical edits occurring in conditional edits.
+The row names of $E_{\sf mixnum}$ correspond to dummy variables, occurring in the
+categorical edits stored as an {\sf editarray} in $E_{\sf mixcat}$. The $E_{\sf
+mixcat}$ object stores ``pure categorical'' edits, as well as conditional edits
+containing dummy variables referring to edits in $E_{\sf mixnum}$. Finally, the
+optional {\sf condition} attribute is an extra {\sf editmatrix} holding a
+number of extra conditions (assumptions) under which the edits in $E_{\sf
+num}$, $E_{\sf mixnum}$ and $E_{\sf mixcat}$ must hold. It will be discussed in
+detail in Section \ref{sseditlist}. Under normal circumstances ({\em i.e.} if only
+editrules built-in functions are used to build and manipulate {\sf editsets})
+the {\sf condition} attribute will be present only when $E_{\sf mixnum}$
+is empty.
 
 The functionality of {\sf editrules} is implemented such that the user can
 remain agnostic of the internal representation of edit sets. There is however a
@@ -305,11 +319,6 @@ of an {\sf editlist} or {\sf editenv} will be described in Section
 exported from the {\sf R} environment.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Reading and writing edits}
-As described in our previous papers on {\sf editrules}, edits can be read from
-the commandline in {\sf character} form, or from a {\sf data.frame}. However it
-is now also possible to read edits from {\sf R} {\sf expression} vectors or,
-most conveniently, from a free-form textfile.
 %
 \begin{figure}
 \begin{Verbatim}[frame=single]
@@ -341,42 +350,22 @@ most conveniently, from a free-form textfile.
 edits. The edits can be read into {\sf R} with the {\sf editfile} function.}
 \label{figeditfile}
 \end{figure}
+%
 
-For example, in Figure \ref{figeditfile} the contents of an example textfile is
-printed. Note that it is possible to define the domains of categories
-separately from the edits themselves, which is convenient for domains which are
-reused over several variables. Comments are allowed as well, and will be ignored
-by the parser. If the file is stored in a file called {\sf myedits.txt}, the
-file can be read as follows:
-<<>>=
-myfile <- system.file("script/edits/myedits.txt",package="editrules")
-(E <- editfile(myfile))
-@
-Here, {\sf E} is an object of class {\sf editset}. When printed to screen,
-the datamodel for categorical variables, as well as the textual representation
-of the edits are shown. For convenience, edits are named according to their type.
-Pure numerical edits are numbered with prefix {\sf num}, pure categorical with
-prefix {\sf cat} and conditional edits are prefixed with {\sf mix}. Edits
-can be selected with the bracket operator, using integer or logical indices,
-for example:
-<<>>=
-E[c(7,10),]
-@
-By default, the full datamodel is retained. The {\sf reduce} function removes
-all variables not occurring in any edit and all categorical
-variables not occurring in a multivariate edit.
+\subsection{Reading and writing edits}
+As described in our previous papers on {\sf editrules}, edits can be read from
+the commandline in {\sf character} form, or from a {\sf data.frame}. However it
+is now also possible to read edits from {\sf R} {\sf expression} vectors or,
+most conveniently, from a free-form text file.
 
-The function {\sf editfile} has an optional {\sf type} argument, allowing for
-extracting only the numerical ({\sf type="num"}), categorical ({\sf
-type="cat"}) or conditional edits ({\sf type="mix"}) from the textfile.  When
-{\sf type="num"} or {\sf type="cat"}, an {\sf editmatrix} or {\sf editarray}
-are returned respectively. Under the hood, {\sf editfile} parses the file,
-looks for assignments (by {\sf <-} or {\sf =}) and evaluates them in a separate
-{\sf R} {\sf environment}. Next, the edits are generated within that
-environment.
-
-In summary, each conditional edit definition is of the form, indicated by the
-following syntax diagram.
+As an example, Figure \ref{figeditfile} shows the contents of an example text file
+that is included with the package. Observe that category domains may be defined
+separately from the edits themselves. This is convenient for domains which are
+reused over several variables or for large domains that need to be read from file. 
+Numerical and categorical edits can be submitted as they would for objects
+of class {\sf editmatrix} or {\sf editarray} respectively, while conditional
+edits must follow the following syntax diagram.
+%
 \begin{syntdiag}
 if ( 
 \begin{rep}
@@ -395,9 +384,44 @@ if (
 \begin{stack}   "|"\\"||"\end{stack}
 \end{rep}
 \end{syntdiag}
-Here, a $\langle\textrm{\em set expression}\rangle$ is an expression indicating
-set membership of categorical variables, such {\tt A \%in\% c("a","b")}. See
-\cite{loo:2011b} for a syntax diagram of possible set expressions.
+Here, \verb+&+ and \verb+&&+ and \verb+|+ and \verb+||+ are synonyms. The
+symbol $\langle\textrm{\em set expression}\rangle$ is an expression indicating
+set membership for categorical values, for example {\tt A \%in\% c("a","b")}. See
+\cite{loo:2011b} for a syntax diagram of possible set expressions.  Comments
+are allowed as well, and will be ignored by the parser. 
+
+The example file of Figure \ref{figeditfile} can be read as follows:
+<<>>=
+myfile <- system.file("script/edits/myedits.txt",
+    package="editrules")
+(E <- editfile(myfile))
+@
+Here, {\sf E} is an object of class
+{\sf editset}. When printed to screen, the datamodel for categorical variables,
+as well as the textual representation of the edits are shown. For convenience,
+edits are named according to their type.  Pure numerical edits are numbered
+with prefix {\sf num}, pure categorical with prefix {\sf cat} and conditional
+edits are prefixed with {\sf mix}. 
+
+
+
+Edits can be selected with the bracket operator, using integer or logical indices,
+for example:
+<<>>=
+E[c(7,10),]
+@
+By default, the full datamodel is retained when selecting a subset of edits.
+Use the {\sf reduce} function to remove variables not occurring in any edit.
+
+The function {\sf editfile} has an optional {\sf type} argument, allowing for
+extracting only the numerical ({\sf type="num"}), categorical ({\sf
+type="cat"}) or conditional edits ({\sf type="mix"}) from the textfile.  When
+{\sf type="num"} or {\sf type="cat"}, an {\sf editmatrix} or {\sf editarray}
+are returned respectively. Under the hood, {\sf editfile} parses the file,
+looks for assignments (by {\sf <-} or {\sf =}) and evaluates them in a separate
+{\sf R} {\sf environment}. Next, the edits are generated within that
+environment.
+
 
 To export edits, the most convenient way is to use either {\sf as.character} to
 convert an {\sf editset} to text or {\sf as.data.frame} to convert it to a
@@ -441,8 +465,8 @@ plot(E)
 {\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
 indicates that a variable occurs in an edit. The {\sf blocks} function
 separates an {\sf editset} into the independent editsets corresponding to the
-independent graphs shown here. This graph is displayed using the {\sf igraph}
-package of \cite{csardi:2006}.}
+independent graphs shown here. (Displayed using the {\sf igraph}
+package of \cite{csardi:2006}.)}
 \label{figgraph}
 \end{figure}
 %
@@ -452,8 +476,8 @@ contain multiple variables and each variable can occur in multiple edits.  The
 function {\sf contains} returns a boolean matrix, indicating which variables
 occur in each edit. The default {\sf plot} function has been overloaded for
 objects of class {\sf editset} (and {\sf editmatrix} and {\sf editarray}) to
-generate a graphical display of this connectivity. Figure \ref{figgraph} shows
-the connectivity graph between the variables and edits of Figure
+generate a graphical display of such relations. Figure \ref{figgraph} shows
+the dependency graph between the variables and edits of Figure
 \ref{figeditfile}.
 
 The set of edits clearly consists of three independent blocks. The function
@@ -462,10 +486,13 @@ and returns a {\sf list} of independent {\sf editset} objects. The {\sf blocks}
 function has been introduced before in \cite{jonge:2011} and \cite{loo:2011b}
 for {\sf editmatrix} and {\sf editarray} objects respectively.
 
-To be able to manipulate conditional edits, it is convenient to separate them
-by eliminating the dummy variables. This is possible by making assumptions
-about their truth values and processing the consequences. As an example,
-consider the following set of edits.
+To manipulate conditional edits, we first separate them by generating
+combinations of truth values for the premise and consequent expressions.  This
+way, all connections between numerical and categorical variables disappear at
+the cost of generating multiple disjunct {\sf editsets} which may be treated
+separately.
+
+As an example, consider the following set of edits.
 %
 \begin{equation}
 E = \left\{\begin{array}{l}
@@ -533,20 +560,19 @@ The above example is generalized by the recursive procedure shown in Algorithm
 \ref{algeditlist}. The algorithm runs depth-first through a binary tree,
 generating all possible assumptions about the truth values of linear
 edits that occur in the premise or consequent of a conditional edit. Each
-leave of the tree corresponds to one complete set of assumptions about the
-truth values of the linear restrictions occuring in conditional edits.
+leaf of the tree corresponds to one complete set of assumptions about the
+truth values of the linear restrictions occurring in conditional edits.
 
-Here, making an assumption about such a truth value amounts to substituting a
-dummy variable in the $E_{\sf mixnum}$ part of an {\sf editset}, copying the
-assumption to a separate conditional {\sf editmatrix} attribute of the {\sf
-editset}, and updating $E_{\sf mixcat}$ and $E_{\sf mixnum}$ accordingly.  The
-{\sf substValue} function, which will be discussed in more detail in Section
-\ref{sssubstitution}, is equipped to do this. The assumptions which have become
-an attribute of the resulting {\sf editset}, are returned by {\sf condition}.
+Assumping a truth value for a premiss or consequent amounts to substituting a
+the value of a dummy variable in the $E_{\sf mixnum}$ part of an {\sf editset},
+copying the assumption to the {\sf condition}  attribute of the {\sf editset},
+and updating $E_{\sf mixcat}$ and $E_{\sf mixnum}$ accordingly.  The {\sf
+substValue} function, which will be discussed in more detail in Section
+\ref{sssubstitution}, is equipped to do this. 
 
 To save computational time, the tree is pruned whenever an inconsistent set of
 edits arises, so no spurious edit sets are generated. The procedure uses the
-functions {\sf isFeasible} on objects of class {\sf editmatrix} and {\sf
+function {\sf isFeasible} on objects of class {\sf editmatrix} and {\sf
 editarray} which have been discussed in \cite{jonge:2011} and \cite{loo:2011b}
 respectively.  Note that in the pruning conditions in lines \ref{algp1} and
 \ref{algp2}, the feasibility of the union of $E_{\sf num}$ with the generated
@@ -555,8 +581,8 @@ can arise that contradict the pure numerical edits. This can only happen when
 the {\sf editset} contains internal contradictions, and implementing it this
 way will help idendifying infeasible sets of conditional edits, to be discussed
 in Section \ref{sselimination}. Feasibility checks can be computationally
-expensive, so some short-circuiting is done in the implementation of lines
-\ref{algp1} and \ref{algp2} to avoid unnecessary computations.
+expensive, so some short-circuiting is done in the implementation {\sf R} of
+lines \ref{algp1} and \ref{algp2} to avoid unnecessary computations.
 
 
 The {\sf editrules} function {\sf disjunct} implements the procedure of
@@ -650,7 +676,7 @@ numerical or categorical edits, refer to \cite{jonge:2011} and
 \cite{loo:2011b}.
 
 The {\sf S3} methods of {\sf isObviouslyInfeasible} for objects of class {\sf
-editset} and {\sf editlist} work the methods previously implemented for objects
+editset} and {\sf editlist} use the methods previously implemented for objects
 of class {\sf editarray} and {\sf editmatrix}. For an {\sf editset}, {\sf
 isObviouslyInfeasible} returns \true if either the $E_{\sf num}$ or the $E_{\sf
 mixcat}$ [See Eq. \eqref{eqeditset}] part contains an obvious contradiction. For
@@ -676,22 +702,21 @@ be detailed in the next two subsections.
 
 \subsection{Value substitution}
 \label{sssubstitution}
-Recall that conditional edits in an editset are stored as a combination of
-categorical edits with dummy variables ($E_{\sf mixnum}$), referring to linear
-edits in $E_{\sf mixnum}$. Purely numerical edits are stored in a seperate
-object called $E_{\sf num}$.  To substitute a value in an editset, four cases
-are distinguised.
+Recall that conditional edits in an {\sf editset} are stored as a combination of
+categorical edits on dummy variables, that to linear edits in $E_{\sf mixnum}$.
+Purely numerical edits are stored in a separate subobject called $E_{\sf num}$.
+To substitute a value in an {\sf editset}, four cases are distinguished.
 
 The first two cases are the simplest and concern variables which are either
-numerical and not occuring in $E_{\sf mixnum}$ or categorical variables. These
+numerical and not occurring in $E_{\sf mixnum}$ or categorical variables. These
 cases are handled by dispatching the appropriate {\sf substValue} methods for
 $E_{\sf num}$ or $E_{\sf mixcat}$ ({\sf editmatrix} and {\sf editarray}
 respectively) which have been described in \cite{jonge:2011} and
 \cite{loo:2011b}.
 
 The third case occurs when the substituted variable is a numerical variable,
-occuring in $E_{\sf mixnum}$ (and possibly $E_{\sf num}$), the following steps
-must be performed.
+occurring in the premise or consequent of a conditional edit. In that case
+the following actions are performed.
 %
 \begin{enumerate}
 \item If the variable occurs in $E_{\sf num}$ substitute its value there.
@@ -701,8 +726,8 @@ obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \f
 the corresponding dummy variables in $E_{\sf mixcat}$.
 \item Remove all edits of the form $\textrm{\sf if } \true \textrm{ \sf then  } t$
 from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit2}).
-\item If the dummy variable $t$ does not occur anywhere $E_{\sf mixcat}$ anymore, move the 
-corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
+\item If the dummy variables $t$ of step 4 do not occur anywhere in $E_{\sf
+mixcat}$ anymore, move the corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
 \item Remove all edits of the form $\textrm{\sf if } \false \textrm{ \sf then  } t$.
 
 \end{enumerate}
@@ -716,7 +741,7 @@ if ( x > 0 ) y > 0))
 substValue(F,"x",3)
 @
 Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then } y>0$, so the 
-consequent $y>0$ may be added the numerical edits (here: $x+y=z$). 
+consequent $y>0$ may be added to the numerical edits (here: $x+y=z$). 
 On the other hand, substituting $x = -3$ gives $\textrm{\sf  if } -3 > 0 \textrm{ \sf  then } y>0$,
 yielding a false premise and the conditional edit can be deleted:
 <<>>=
@@ -728,46 +753,15 @@ that dummy variables are used to code linear inequalities that occur in
 conditional edits. Filling in \true or \false for a dummy variable is not the
 same substituting a value for a variable that is subject to the edit rules.
 Rather, it is equivalent to asserting that a linear relationship on one or more
-variables holds.  If a dummy variable is substituted, the {\sf substValue}
-moves the corresponding numerical edit from $E_{\sf mixnum}$ to the {\sf
-condition} attribute of the {\sf editset}. Next, $E_{\sf mixcat}$ is updated
-accordingly. Substituting dummy variables explicitly is not normally done by
-end users, as the names and values of dummy variables remain hidden to them.
-The {\sf condition} attribute is stored as an {\sf editmatrix} and can be
-requested with {\sf condition}.
-
-
-\subsection{Variable elimination and satisfiability}
-\label{sselimination}
-Variable elimination on an editset is executed by first separating the edits in
-disjunct sets where no numerical edits appear in conditional edits anymore (See
-Section \ref{sseditlist}).  Next, since in each element of the resulting
-editlist, the dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable
-elimination takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$ of the {\sf
-editlist} for numerical or categorical variables respectively. The methods used
-for variable elimination in an {\sf editmatrix} are described in {\sf
-jonge:2011} while the methods for variable elimination from an editarray are
-described in \cite{loo:2011b} and \cite{loo:2012}. Consequently, the result of
-an {\sf eliminate} operation is an object of class {\sf editlist}. 
-
-As an example, consider again the set of edits of
-Eqs.~\eqref{eqedits} and~\eqref{eqeditlist}. In Figure~\ref{figprojections},
-the valid regions are indicated as grey areas. 
-Geometrically, eliminating variable $y$ amounts to projecting along the
-$y$-axis when $y$ is eliminated or along the $x$-axis when $x$ is eliminated.
-In Figure \ref{figprojections} the projections are indicated with bold lines.
-Algebraically, we need to apply Fourier-Motzkin elimination on the second set
-of linear edits of each element of Eq.~\eqref{eqeditlist} to obtain
-\begin{displaymath}
-E = \left(
-x\geq0 \land  \varnothing
-,
-x < 0 \land x < -2\right).
-\end{displaymath}
-The first edit element says that if $x\geq 0$, there are no further restrictions.
-The second element says that when $x<0$, it must be smaller than $-2$. Figure
-\ref{figelimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
-
+variables holds.  If a dummy variable is substituted, {\sf substValue} moves
+the corresponding numerical edit from $E_{\sf mixnum}$ to the {\sf condition}
+attribute of the {\sf editset}. Next, $E_{\sf mixcat}$ is updated accordingly.
+Substituting dummy variables explicitly is not normally done by end users, as
+the names and values of dummy variables remain hidden to them.  It is used
+internally by {\sf disjunct}. The {\sf condition} attribute is stored as an
+{\sf editmatrix} and can be requested with the {\sf condition} function.
+%
+%
 \setkeys{Gin}{width=0.5\textwidth}
 \begin{figure}
 \centering
@@ -798,8 +792,41 @@ along the $y$-axis.
 \label{figprojections}
 \end{figure}
 
+
+\subsection{Variable elimination and satisfiability}
+\label{sselimination}
+Variable elimination on an editset is executed by first separating the edits in
+disjunct sets where no numerical edits appear in conditional edits anymore (See
+Section \ref{sseditlist}).  Next, since in each element of the resulting
+editlist, the dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable
+elimination takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$ of the {\sf
+editlist} for numerical or categorical variables respectively. The methods used
+for variable elimination in an {\sf editmatrix} are described in {\sf
+jonge:2011} while the methods for variable elimination from an editarray are
+described in \cite{loo:2012}. Consequently, the result of
+an {\sf eliminate} operation is an object of class {\sf editlist}. 
+
+As an example, consider again the set of edits of Eqs.~\eqref{eqedits}
+and~\eqref{eqeditlist}. In Figure~\ref{figprojections}, the valid regions are
+indicated as grey areas.  Geometrically, eliminating variable $y$ amounts to a
+projection along the $y$-axis (or along the $x$-axis when $x$ is eliminated).
+Figure \ref{figprojections}  shows the result of projecting out the $y$
+variable (in bold lines).  Algebraically, we need to apply Fourier-Motzkin
+elimination on the second set of linear edits of each element of
+Eq.~\eqref{eqeditlist} to obtain
+\begin{displaymath}
+E = \left(
+x\geq0 \land  \varnothing
+,
+x < 0 \land x < -2\right).
+\end{displaymath}
+The first edit element says that if $x\geq 0$, there are no further restrictions.
+The second element says that when $x<0$, it must be smaller than $-2$. Figure
+\ref{figelimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
+
+
 \setcounter{Rcode}{\value{figure}}
-\begin{Rcode}[htbp]
+\begin{Rcode}[t!]
 <<>>=
 E <- editset(expression(
     if ( x >= 0 ) y >= 0,
@@ -821,7 +848,7 @@ eliminate(E,"y")
 
 \subsection{A branch-and-bound algorithm}
 The error localization problem consists of finding the least (weighted) amount
-of fields in a records that can be adpted or imputed, such that no edits are
+of fields in a record that can be adapted or imputed, such that no edits are
 violated anymore. For purely categorical or purely numerical edit sets, the
 feasible space of records is convex, and each solution can be determined by a
 sequence of variable substitutions or eliminations.  For objects of class {\sf
@@ -832,49 +859,49 @@ When conditional edits are present, as in the example of Figure
 solving it for each convex subregion separately and selecting the lowest-weight
 solution afterwards. 
 
-In {\sf editrules} error localization with conditional edits (in an {\sf
-editset}) starts by first separating the edits into blocks and disjunct sets
+In {\sf editrules}, error localization with conditional edits (in an {\sf
+editset}) starts by separating the edits into blocks and disjunct sets
 using the {\sf separate} function discussed in Section \ref{sseditlist}.
 Separate blocks share no variables and are treated indepenently. Blocks
 consisting of {\sf editmatrix} or {\sf editarray} objects are treated as
 described in the references mentioned before. Blocks consisting of {\sf
-editlists} have to be treated differently. Remember that an editlist is a set
+editlists} have to be treated differently. Remember that an {\sf editlist} is a set
 of {\sf editsets}, each describing a convex region of the record domain. An
 {\sf editlist} enters a similar branch-and-bound algorithm as {\sf
-editmatrices} and -{\sf arrays}, however the difference is that each
+editmatrices} and -{\sf arrays}, with the difference is that each
 elimination and subsitution step is performed separately on each element of an
 {\sf editlist}.  Whenever one of the elements of an {\sf editlist} becomes
-unfeasible it is removed from the list. When no feasible regions are left and
+infeasible it is removed from the list. When no feasible regions are left and
 not all variables have been treated, a bound condition is hit and the branch is
 pruned. If all variables have been treated, and no inconsistencies were
 encountered, a (list of) solutions is found. When all solution (lists) are
 found, the lowest weight solution can be selected.
 
 The process is accelerated by detecting whenever the current weight of partial
-solutions equals the weight of previous solutions. At that point, all other
+solutions equals the weight of previous solutions. At that point, all remaining
 values are substituted to check whether the branch can lead to an actual
 solution. If so, the solution is stored; if not, a bound condition is hit. 
 
 
 \subsection{Acceleration by datamodel checking}
 Observe that the number of nodes of the branch-and-bound tree grows as $2^n$,
-with $n$ the number of variables and depth of the tree. However, in some cases
-the tree depth can be reduced by noting that variables which violate simple,
-single-variable range edits will always be part of the error localization
-solution. These single-range edits are easily checked (in a vectorized manner)
-and variables violating such edits can be removed from the multivariate
-localization problem causing a considerable speedup in some cases.
+with $n$ the number of variables (and hence the depth of the tree).  In some
+cases the tree depth can be reduced by noting that variables which violate
+simple, single-variable range edits will always be part of the error
+localization solution. These single-variable edits are easily checked (in a
+vectorized manner) and variables violating such edits can be removed from the
+multivariate localization problem. 
 
 The solution to an error localization problem for a number of records in a
 dataset with $n$ variables can be represented as matrix ${\bf M}$ where
 $M_{ij}>0$ if variable $j$ in record $i$ must be changed and $0$ otherwise.  To
-construct such a matrix, we assume a set of single-valued range edits, and
+construct such a matrix, we assume a set of single-variable edits, and
 proceed as follows.  Suppose that ${\bf V}$ is a matrix where $V_{ik}=1$ if
 record $i$ violates edit $k$ and $0$ otherwise.  To account for missing values,
 we also set $V_{ik}=1$ when edit violation cannot be established because the
 value of the variable to which range edit $k$ pertains is missing.  Also,
 suppose that ${\bf C}$ is a matrix where $C_{kj}=1$ if edit $k$ contains
-variable $j$ and $0$ otherwise. The matrix $M$ is then given by
+variable $j$ and $0$ otherwise. The matrix ${\bf M}$ is then given by
 \begin{equation}
 {\bf M} = {\bf V}{\bf C}.
 \end{equation} 
@@ -904,8 +931,8 @@ The interfaces of {\sf localizeErrors} and {\sf errorLocalizer} for objects
 of class {\sf editset} are similar to those of {\sf editmatrix} and {\sf editarray}.
 They will therefore not be described extensively here, in stead we refer the
 reader to \cite{jonge:2011a} and \cite{loo:2011b}. In short, function {\sf localizeErrors}
-accepts an editset and a {\sf data.frame} along with some optional arguments and
-returns an object of class {\sf errorLocation}. The funciton {\sf errorLocalizer} returns
+accepts an {\sf editset} and a {\sf data.frame} along with some optional arguments and
+returns an object of class {\sf errorLocation}. The function {\sf errorLocalizer} returns
 a {\sf backtracker} object that allows fine control over the branch-and-bound search
 algorithm.
 
@@ -916,8 +943,8 @@ sets, especially those with many conditionals edits, the branch-and-bound
 algorithm may take a long time to complete. For this reason a second backend
 algorithm has been implemented, that uses a mixed-integer programming
 formulation of the localization problem. It can be accessed by providing the
-optional parameter {\sf method="mip"} to {\sf localizeErrors}. For a comparison between the two algorithms refer to
-\cite{jonge:2012}.
+optional parameter {\sf method="mip"} to {\sf localizeErrors}. For a comparison
+between the two algorithms refer to \cite{jonge:2012}.
 
 \section{Conclusions}
 We have described new functionality of the {\sf editrules} package, pertaining
