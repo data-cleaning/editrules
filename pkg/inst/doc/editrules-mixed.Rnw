@@ -253,7 +253,7 @@ by the Fourier-Motzkin procedure. Under the hood, negations of the premise or
 consequents of conditional restrictions are often necessary to perform edit
 manipulations. In practice, the lack of the {\tt ==} operator in conditional
 edits poses no real restriction since any equality can be written as two
-inequations.
+inequalities.
 
 
 Internally, conditional edits are represented by replacing each linear condition
@@ -346,7 +346,7 @@ exported from the {\sf R} environment.
     if ( !C == TRUE) D %in% c('e','f')
 \end{Verbatim}
 \vspace{-0.8cm}
-\caption{Example of a free-form textfile defining numerical, categorical and conditional 
+\caption{Example of a free-form text file defining numerical, categorical and conditional 
 edits. The edits can be read into {\sf R} with the {\sf editfile} function.}
 \label{figeditfile}
 \end{figure}
@@ -397,7 +397,7 @@ myfile <- system.file("script/edits/myedits.txt",
 (E <- editfile(myfile))
 @
 Here, {\sf E} is an object of class
-{\sf editset}. When printed to screen, the datamodel for categorical variables,
+{\sf editset}. When printed to screen, the data model for categorical variables,
 as well as the textual representation of the edits are shown. For convenience,
 edits are named according to their type.  Pure numerical edits are numbered
 with prefix {\sf num}, pure categorical with prefix {\sf cat} and conditional
@@ -410,12 +410,12 @@ for example:
 <<>>=
 E[c(7,10),]
 @
-By default, the full datamodel is retained when selecting a subset of edits.
+By default, the full data model is retained when selecting a subset of edits.
 Use the {\sf reduce} function to remove variables not occurring in any edit.
 
 The function {\sf editfile} has an optional {\sf type} argument, allowing for
 extracting only the numerical ({\sf type="num"}), categorical ({\sf
-type="cat"}) or conditional edits ({\sf type="mix"}) from the textfile.  When
+type="cat"}) or conditional edits ({\sf type="mix"}) from the text file.  When
 {\sf type="num"} or {\sf type="cat"}, an {\sf editmatrix} or {\sf editarray}
 are returned respectively. Under the hood, {\sf editfile} parses the file,
 looks for assignments (by {\sf <-} or {\sf =}) and evaluates them in a separate
@@ -504,10 +504,10 @@ E = \left\{\begin{array}{l}
 \label{eqedits}
 \end{equation}
 These edits are all connected, since all of them contain both $x$ and $y$.
-Figure \ref{figprojections} (page \pageref{figprojections}) shows (in grey) the
+Figure \ref{figprojections} (page \pageref{figprojections}) shows (in gray) the
 valid areas in the $x$-$y$ plane, defined by these edits. From the sketch it is
 clear that the edits can be separated in two purely linear edit sets, and that
-a record must obey the rules defining either the left, or the right grey area.
+a record must obey the rules defining either the left, or the right gray area.
 Algebraically, this can be done by working out the assumptions $x\leq 0$ is
 $\true$ ($\false$) and consequently $x<0$ is $\false$ ($\true$). We obtain
 \begin{equation}
@@ -563,7 +563,7 @@ edits that occur in the premise or consequent of a conditional edit. Each
 leaf of the tree corresponds to one complete set of assumptions about the
 truth values of the linear restrictions occurring in conditional edits.
 
-Assumping a truth value for a premiss or consequent amounts to substituting a
+Assuming a truth value for a premise or consequent amounts to substituting a
 the value of a dummy variable in the $E_{\sf mixnum}$ part of an {\sf editset},
 copying the assumption to the {\sf condition}  attribute of the {\sf editset},
 and updating $E_{\sf mixcat}$ and $E_{\sf mixnum}$ accordingly.  The {\sf
@@ -579,7 +579,7 @@ respectively.  Note that in the pruning conditions in lines \ref{algp1} and
 numerical conditions is checked. This is done to make sure that no conditions
 can arise that contradict the pure numerical edits. This can only happen when
 the {\sf editset} contains internal contradictions, and implementing it this
-way will help idendifying infeasible sets of conditional edits, to be discussed
+way will help identifying infeasible sets of conditional edits, to be discussed
 in Section \ref{sselimination}. Feasibility checks can be computationally
 expensive, so some short-circuiting is done in the implementation {\sf R} of
 lines \ref{algp1} and \ref{algp2} to avoid unnecessary computations.
@@ -784,9 +784,9 @@ internally by {\sf disjunct}. The {\sf condition} attribute is stored as an
     text(4,-0.2,expression(x),cex=2)
     text(-0.2,3,expression(y),cex=2)
 @
-\caption{Graphical representation (in grey) of the valid areas defined by the
+\caption{Graphical representation (in gray) of the valid areas defined by the
 edits of Eq.\ \eqref{eqedits}. Depicted are sections of the bordering lines
-$y=x$ and $y=x+2$.  The bold lines indicate the projections of the grey areas
+$y=x$ and $y=x+2$.  The bold lines indicate the projections of the gray areas
 along the $y$-axis.
 }
 \label{figprojections}
@@ -862,14 +862,14 @@ solution afterwards.
 In {\sf editrules}, error localization with conditional edits (in an {\sf
 editset}) starts by separating the edits into blocks and disjunct sets
 using the {\sf separate} function discussed in Section \ref{sseditlist}.
-Separate blocks share no variables and are treated indepenently. Blocks
+Separate blocks share no variables and are treated independently. Blocks
 consisting of {\sf editmatrix} or {\sf editarray} objects are treated as
 described in the references mentioned before. Blocks consisting of {\sf
 editlists} have to be treated differently. Remember that an {\sf editlist} is a set
 of {\sf editsets}, each describing a convex region of the record domain. An
 {\sf editlist} enters a similar branch-and-bound algorithm as {\sf
 editmatrices} and -{\sf arrays}, with the difference is that each
-elimination and subsitution step is performed separately on each element of an
+elimination and substitution step is performed separately on each element of an
 {\sf editlist}.  Whenever one of the elements of an {\sf editlist} becomes
 infeasible it is removed from the list. When no feasible regions are left and
 not all variables have been treated, a bound condition is hit and the branch is
@@ -883,7 +883,7 @@ values are substituted to check whether the branch can lead to an actual
 solution. If so, the solution is stored; if not, a bound condition is hit. 
 
 
-\subsection{Acceleration by datamodel checking}
+\subsection{Acceleration by data model checking}
 Observe that the number of nodes of the branch-and-bound tree grows as $2^n$,
 with $n$ the number of variables (and hence the depth of the tree).  In some
 cases the tree depth can be reduced by noting that variables which violate
