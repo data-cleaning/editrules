@@ -222,7 +222,7 @@ be written canonically as:
 \begin{eqnarray}
 \label{eqedit1}
 \lefteqn{
-\textrm{\sf if } {\bf v}\in F \Land {\bf Ax}\boldsymbol{\odot}{\bf b} \textrm{ \sf then FALSE} 
+\textrm{\sf if } {\bf v}\in F \Land {\bf Ax}\boldsymbol{\odot}{\bf b} \textrm{ \sf then \false} 
 \textrm{, where }}\\
 &&\begin{array}{l}
     F \subset D_1 \times D_2 \times\cdots\times D_p \textrm{ and}\\
@@ -249,15 +249,15 @@ with a dummy variable $t_k$, which is defined as
 \begin{equation}
 \label{eqdummy}
 t_k = \left\{\begin{array}{l}
-\true\textrm{ when } {\bf a_k\cdot x}\odot b_k\\
-\false\textrm{ when }{\bf a_k\cdot x}\notodot b_k.
+\true\textrm{ when } {\bf a}_k{\bf \cdot x}\odot b}_k\\
+\false\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b}_k.
 \end{array}\right.
 \end{equation}
 %
 This way, the edits of Eq.\ \eqref{eqedit1} may be written as
 \begin{equation}
 \label{eqdummyedit1}
-\textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then FALSE},
+\textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then \false},
 \end{equation}
 where $t_1\cdots t_m$ correspond to the $m$ linear restrictions of $\bf A$ in Eq.\ \eqref{eqedit1}.
 Eq.\ \eqref{eqdummyedit1} can be stored in a boolean representation  as described 
@@ -266,9 +266,11 @@ package uses an object class called {\sf editarray} to store such a
 representation.
 
 The linear restrictions $\bf Ax \odot b$ for all conditional edits can be
-gathered in one matrix $\bf \hat{A}$ and can be stored as described in \cite{jonge:2011}. 
-In {\sf editrules} such a representation is stored in an object of 
-class {\sf editmatrix}. To store conditional edits, along
+gathered in one matrix and stored as described in \cite{jonge:2011}. 
+In {\sf editrules} linear restrictations are stored in an object of 
+class {\sf editmatrix}. 
+
+To store conditional edits, along
 with pure numerical and pure categorical edits, we implemented the 
 class {\sf editset}, which can be denoted as
 \begin{equation}
@@ -286,7 +288,7 @@ number of extra conditions (assumptions) under which the edits in $E_{\sf
 num}$, $E_{\sf mixnum}$ and $E_{\sf mixcat}$ must hold. It will be discussed in
 detail in Section \ref{sseditlist}. Under normal circumstances ({\em i.e.} if only
 editrules built-in functions are used to build and manipulate {\sf editsets})
-the {\sf condition} attribute and $E_{\sf mixnum}$ exclude each other.
+either the {\sf condition} attribute or $E_{\sf mixnum}$ will be empty.
 
 The functionality of {\sf editrules} is implemented such that the user can
 remain agnostic of the internal representation of edit sets. There is however a
