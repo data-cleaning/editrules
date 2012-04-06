@@ -249,30 +249,25 @@ with a dummy variable $t_k$, which is defined as
 \begin{equation}
 \label{eqdummy}
 t_k = \left\{\begin{array}{l}
-\true\textrm{ when } {\bf a}_k{\bf \cdot x}\odot b}_k\\
-\false\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b}_k.
+\true\textrm{ when } {\bf a}_k{\bf \cdot x}\odot b_k\\
+\false\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b_k,
 \end{array}\right.
 \end{equation}
-%
+where each ${\bf a}_k$ is a row of {\bf A}.
 This way, the edits of Eq.\ \eqref{eqedit1} may be written as
 \begin{equation}
 \label{eqdummyedit1}
 \textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then \false},
 \end{equation}
-where $t_1\cdots t_m$ correspond to the $m$ linear restrictions of $\bf A$ in Eq.\ \eqref{eqedit1}.
-Eq.\ \eqref{eqdummyedit1} can be stored in a boolean representation  as described 
-in \cite{loo:2011b} for the case of categorical variables. The {\sf editrules}
-package uses an object class called {\sf editarray} to store such a
-representation.
+where $t_1\cdots t_m$ correspond to the $m$ linear restrictions of $\bf A$ in
+Eq.\ \eqref{eqedit1}.  Eq.\ \eqref{eqdummyedit1} can be stored in a boolean
+representation as described in \cite{loo:2011b}. The {\sf editrules} package
+uses an object class called {\sf editarray} to store such a representation.
+The linear restrictions $\bf Ax \odot b$ for all conditional edits are gathered
+in an {\sf editmatrix} object \citep{jonge:2011}. 
 
-The linear restrictions $\bf Ax \odot b$ for all conditional edits can be
-gathered in one matrix and stored as described in \cite{jonge:2011}. 
-In {\sf editrules} linear restrictations are stored in an object of 
-class {\sf editmatrix}. 
-
-To store conditional edits, along
-with pure numerical and pure categorical edits, we implemented the 
-class {\sf editset}, which can be denoted as
+To store conditional edits, along with pure numerical and pure categorical
+edits, we implemented the class {\sf editset}, which can be denoted as
 \begin{equation}
 \label{eqeditset}
 E = \langle E_{\sf num}, E_{\sf mixcat}, E_{\sf mixnum};{\sf condition}\rangle.
