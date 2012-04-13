@@ -46,14 +46,12 @@ errorLocalizer.mip <- function( E
    E <- as.editset(E)
 
     # perturb weights for randomized selection from equivalent solutions
-    we <- perturbWeights(weight)
-   
+    wp <- perturbWeights(as.vector(weight))
    t.start <- proc.time()
-   elm <- buildELMatrix(E=E, x=x, weight=we, ...)
+   elm <- buildELMatrix(E=E, x=x, weight=wp, ...)
    
    Ee <- elm$E
    objfn <- elm$objfn
-  
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
    # TODO move this code into as.lp.editmatrix
