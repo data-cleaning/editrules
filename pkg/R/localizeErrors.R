@@ -87,7 +87,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
-    if ( is.editset(E) ){
+    if ( is.editset(E) && !method=="mip"){
         B <- separate(E)
     } else {
         B  <- blocks(E)
@@ -95,7 +95,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     
     # detect singletons 
     st <- sapply(B,function(b) length(getVars(b)) == 1)
-    n <- sum(st)
+    n <- max(sum(st),1)
     i <- 0
     err <- checkDatamodel(E,dat,weight)
     # values not in datamodel are set to NA

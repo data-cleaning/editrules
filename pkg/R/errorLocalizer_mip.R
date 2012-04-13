@@ -43,11 +43,13 @@ errorLocalizer.mip <- function( E
                             ){
 
    vars <- getVars(E)
-   
    E <- as.editset(E)
+
+    # perturb weights for randomized selection from equivalent solutions
+    we <- perturbWeights(weight)
    
    t.start <- proc.time()
-   elm <- buildELMatrix(E=E, x=x, weight=weight, ...)
+   elm <- buildELMatrix(E=E, x=x, weight=we, ...)
    
    Ee <- elm$E
    objfn <- elm$objfn
@@ -78,8 +80,8 @@ errorLocalizer.mip <- function( E
    sol <- get.variables(lps)
    # lps may have optimized and removed redundant adapt.variables, so retrieve names of variable...
    names(sol) <- colnames(lps)
-   w <- get.objective(lps)
-   
+   ## weights are perturbed so objective function is recalculated as sum(weights[adapt])
+   # w <- get.objective(lps)
    # get the positions of the adapt.variables
    aidx <- grepl("^adapt\\.", names(sol))
    # split solution in a value and a adapt part
@@ -112,9 +114,10 @@ errorLocalizer.mip <- function( E
 #      x_feasible[idx] <- sol.values
 #    }
    
+
    t.stop <- proc.time()
    duration <- t.stop - t.start
-   list( w=w
+   list( w=sum(weight[adapt])
        , adapt = adapt
        , x_feasible = x_feasible
        , duration = duration
