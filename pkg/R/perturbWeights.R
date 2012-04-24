@@ -11,7 +11,7 @@ perturbWeights <- function(x){
     ndup = sum(idup)
     nx <- length(x)
     if ( ndup == 0 ) return(x)
-    if ( ndup == (nx-1) ) return(runif(nx,0.5,1)*)
+    if ( ndup == (nx-1) ) return(runif(nx,0.5,1))
     y <- sort(x)
     d <- abs(diff(y))
     

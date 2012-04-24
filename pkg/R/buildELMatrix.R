@@ -36,7 +36,6 @@ buildELMatrix <- function( E
     
   # num part
   num.vars <- getVars(E, type="num")
-  #TODO check NA values...
   
   if (!is.null(num.vars)){
     num.idx <- match(num.vars, names(x))
@@ -45,7 +44,7 @@ buildELMatrix <- function( E
     num.x0 <- unlist(x[num.idx])
     num.xlim <- xlim[num.idx,,drop=FALSE]
     # create an editmatrix x_i == x^0_i
-    num.E <- as.editmatrix(num.x, num.x0, "==")
+    num.E <- as.editmatrix(num.x, num.x0)
     num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
     el.E <- c(num.se, E$num, el.E)
   }
@@ -172,5 +171,5 @@ checkXlim <- function(xlim, x, maxvalue=1e8){
 # # # cateditmatrix(e)
 # # checkXlim(list(age=c(0,200)), x)
 # # 
-# buildELMatrix(E, x, editweight=c(Inf, 1))# -> B
-# # errorLocalizer.mip(E, x=x)
+# buildELMatrix(E, x, editweight=c(Inf, 1), xlim=list(age=c(0,200)))# -> B
+# errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
