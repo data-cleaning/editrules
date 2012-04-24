@@ -42,7 +42,7 @@
 #' @param nodetype \code{'rules'}, \code{'vars'} or \code{'all'}.
 #' @param rules selection of edits
 #' @param vars selection of variables
-#' @param violated A named \code{logical} vector of \code{nrow(E)}. Ingnored when \code{nodetype='vars'}
+#' @param violated A named \code{logical} vector of length \code{nrow(E)}. Ingnored when \code{nodetype='vars'}
 #' @param adapt A named \code{logical} vector of \code{length(getVars(E))}. Ignored when \code{nodetype='rules'}
 #' @param nabbreviate \code{integer} To how many characters should variable and edit names be abbreviated?
 #' @param layout an \code{igraph} layout function. See \code{?igraph::layout}
