@@ -1,10 +1,10 @@
 # test for presence of igraph package.
 checkigraph <- function(){
     noigraph <- paste(
-        "The igraph package is required for this function.", 
+        "The igraph0 package is required for this function.", 
         "If you have access to an internet connection it can be installed",
-        "with install.packages('igraph')",sep="\n")
-    require(igraph) || stop(noigraph)
+        "with install.packages('igraph0')",sep="\n")
+    require(igraph0) || stop(noigraph)
 }
 
 
