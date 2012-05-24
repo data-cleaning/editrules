@@ -144,8 +144,8 @@ obey various restrictions, including sum rules, positivity demands or other
 linear inequalities and categorical restrictions which exclude certain value
 combinations.  Such rules are called {\em edit rules} or {\em edits} in short,
 and a data record is called {\em inconsistent} when it violates one or more
-edits. One goal of data editing is to adapt reported values such that no
-edits are violated.
+edits. The goal of data editing is to remove inconsistencies while leaving the 
+reported data intact as much as possible.
 
 Data editing is severely complicated by the fact that edit rules
 are often interrelated: a variable can occur in more than one restriction, and
@@ -160,35 +160,31 @@ with a numerical variable ({\em number of employees}), is
 If the {\em legal form} (of a business) is self-employed, the {\em number of employees} must be zero.
 \end{quote}
 \cite{waal:2003} and \cite{waal:2003a} showed that every edit containing
-categorical as well as numerical data can be written in such a form. That is,
-all restrictions on categorical data occur in the predicate and numerical
-restrictions occur in the consequent expression. The formulation is general
-enough to encompass purely numerical restrictions (the predicate becomes {\sc
-true}) as well as purely categorical rules (the consequent becomes {\sc
-false}). However, rules connecting numerical restrictions are not uncommon, as
-shown by the following example. 
+categorical as well as numerical restrictions can be written in such a form.
+That is, all restrictions on categorical data occur in the predicate and
+numerical restrictions occur in the consequent expression. The formulation is
+also general enough to encompass purely numerical or purely categorical rules.
+On the other hand, conditional rules connecting two (or more) numerical
+restrictions exist as well, as shown by the following example. 
 \begin{quote}
 If the {\em number of employees} is positive, the {\em amount of salary} payed must be
 positive.
 \end{quote}
 
-The purpose of this paper is to present version 3.0 of the {\sf R} extension
+The purpose of this paper is to present version 2.5 of the {\sf R} extension
 package {\sf editrules}. This package extends the functionality of the previous
 versions by introducing the ability to parse and manipulate conditional
-restrictions and to apply them to data. The package can now handle restrictions
-where numerical restrictions occur in the predicate as well as in the
-consequent of conditional restrictions.  The basic manipulations on edits which
-were introduced in the previous versions for numerical or categorical data are
-extended here to include conditional restrictions. These manipulations include,
-but are not limited to, redundancy checking, block decomposition, variable
-elimination and value substitution.  Error localization for data under
-conditional edits based the generalized Fellegi-Holt assumption
-\cite{fellegi:1976} is provided as well. Error localization has been
-implemented using two computational methods. The implementation first uses a
-branch-and-bound algorithm while the second implementation depends on a
-mixed-integer formulation of the problem.  This paper discusses the
-branch-and-bound algorithm, leaving treatment of the mixed-integer approach to
-a separate paper \citep{jonge:2012}.
+restrictions and to apply them to data. The basic manipulations on edits which
+were introduced in the previous versions are extended here to include these
+conditional restrictions. These manipulations include, but are not limited to,
+redundancy checking, block decomposition, variable elimination and value
+substitution.  Error localization, based on the generalized Fellegi-Holt
+assumption \cite{fellegi:1976} has been implemented as well.  Error
+localization has been implemented using two computational methods. The first
+implementation is based on a branch-and-bound algorithm while the second
+implementation depends on a mixed-integer formulation of the problem.  This
+paper discusses the branch-and-bound algorithm, leaving treatment of the
+mixed-integer approach to a separate paper \citep{jonge:2012}.
 
 The rest of this paper is structured as follows. In Section \ref{smixeddata} we
 describe which restrictions can be handled by the package, and introduce the
@@ -373,28 +369,41 @@ In mathematical notation, the most general form is given by
     F \subset D_1 \times D_2 \times\cdots\times D_p \textrm{ and}\\
 {\bf A} \in \mathbb{R}^{m\times q} \textrm{, }  
     {\bf b} \in \mathbb{R}^{m}\textrm{, }   
-    \boldsymbol{\odot}\in\{<,\leq,\geq, >\}^m \nonumber
+    \boldsymbol{\odot}\in\{<,\leq,\geq, >\}^m. \nonumber
 \end{array}
 \end{eqnarray}
-Here, it is understood that every linear inequation in the premisse must be
-obeyed for a record to be valid.  Also, $F$ is used to denote a (set of)
-categorical edit(s), as defined in \cite{loo:2011b}. This formulation includes
-all types of conditional edits as used in \cite{waal:2003}. This form is
-canonical, in the sense that any condition in the premisse can be moved to the
-consequent in negated form. This is also the reason that no linear {\em
-equalities} are allowed in either premisse or consequent: a negated equality
-yields a nonlinear numerical edit.
+Here, it is understood that when both the categorical data is in a subdomain
+$F$ {\em and} every linear inequation in the predicate is obeyed, then the record
+is invalid. Observe that $F$ may be a set of categorical restrictions, since the
+record-wise union of two categorical edits is also a categorical restriction. 
 
-In practice, one will define simpler edits, with one rule in the premisse and one
+This formulation includes all types of conditional edits as discussed by
+\cite{waal:2003}. However, since any condition in the predicate can be moved to
+the consequent in negated form this formulation is slightly more general,
+allowing numerical and categorical restrictions in both the predicate and the
+consequent. The consequence of this flexibility is that that no linear
+{\em equalities} are allowed in either predicate or consequent because negated
+equalities are nonlinear.
+
+In practice, one will define simpler edits, with one rule in the predicate and one
 rule in the consequent, for example:
 \begin{equation}
 \textrm{\sf if } v\in e \textrm{ \sf then } {\bf a}\cdot{\bf x}\odot b,
 \end{equation}
-where $e$ is a categorical edit, {\bf a} is a real vector and $b$ is a constant.
-More examples are given in Figure \ref{fig:editfile}.
+where $e$ is a categorical edit, {\bf a} is a real vector and $b$ is a
+constant.  Here, the linear restriction in the consequent has to be obeyed for
+a record to be {\em valid}. As an example of an edit with two numerical
+restrictions, consider
+\begin{equation}
+\textrm{\sf if } {\bf a}\cdot {\bf x} \odot b \textrm{ \sf then } {\bf c}\cdot{\bf x} \odot' d.
+\end{equation}
+Here, the restriction in the consequent ($ {\bf c}\cdot{\bf x} \odot' d$) only
+needs to be obeyed when ${\bf x}$ obeys the restriction in the predicate for a record to
+be valid.
 
-Internally, conditional edits are represented by representing each (numerical)
-linear condition $k$ with a dummy variable $t_k$, which is defined as
+
+Internally, conditional edits are stored by assigning to each
+linear condition $k$ a dummy variable $t_k$, which is defined as
 \begin{equation}
 \label{eqdummy}
 t_k = \left\{\begin{array}{l}
@@ -402,14 +411,14 @@ t_k = \left\{\begin{array}{l}
 \false\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b_k,
 \end{array}\right.
 \end{equation}
-where each ${\bf a}_k$ is a row of {\bf A}.
+where each ${\bf a}_k$ is a row of {\bf A} [Eq.\ \eqref{eqedit1}].
 This way, the edits of Eq.\ \eqref{eqedit1} may be written as
 \begin{equation}
 \label{eqdummyedit1}
 \textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then \false},
 \end{equation}
 where $t_1\cdots t_m$ correspond to the $m$ linear restrictions of $\bf A$ in
-Eq.\ \eqref{eqedit1}.  Eq.\ \eqref{eqdummyedit1} can be stored in a boolean
+Eq.\ \eqref{eqedit1}.  Equation \eqref{eqdummyedit1} can be stored in a boolean
 representation as described in \cite{loo:2011b}. The {\sf editrules} package
 uses an object class called {\sf editarray} to store such a representation.
 The linear restrictions $\bf Ax \odot b$ for all conditional edits are gathered
@@ -447,6 +456,31 @@ of an {\sf editlist} or {\sf editenv} will be described in Section
 \subsection{Untangling condtional edits}
 \label{ss:editlist}
 %
+%
+\begin{table}[t]
+\caption{Edit separation functions. Each function accepts an {\sf editset} as input.}
+\label{tab:separators}
+\begin{tabular}{lp{0.8\textwidth}}
+\hline
+Function & Description\\
+\hline
+{\sf contains}  & Detects which edit contains which variable\\
+{\sf plot}      & Plot the dependency graph\\
+{\sf blocks}   & Splits an {\sf editset} in independent edits not sharing any variables\\
+{\sf disjunct} & Splits an {\sf editset} in disjunct sets, not containing mixed edits\\
+{\sf condition} & Returns the {\sf editmatrix} holding the conditions for an {\sf editset} generated by {\sf disjunct}\\
+{\sf separate} & Uses {\sf blocks}, simplifies the results, and calls {\sf disjunct} on the remaining {\sf editset}s\\
+\hline
+\end{tabular}
+\end{table}
+
+As mentioned in the introduction, (conditional) edits are often interrelated by
+shared variables, which complicates important manipulations like variable
+elimination or value substitution. To make such manipulations more tractable
+for conditional edits, the {\sf editrules} package has several methods to
+analyse dependencies and to disentangle edit sets. An overview of available
+functions is given in Table \ref{tab:separators}.
+%
 \begin{figure}[t]
 <<fig=TRUE,echo=FALSE>>=
 par(oma=c(0,0,0,0),mar=c(0,0,1.5,0))
@@ -457,26 +491,29 @@ plot(E)
 {\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
 indicates that a variable occurs in an edit. The {\sf blocks} function
 separates an {\sf editset} into the independent editsets corresponding to the
-independent graphs shown here. (Displayed using the {\sf igraph0}
-package of \cite{csardi:2006}.)}
-\label{figgraph}
+independent graphs shown here. Positioning of nodes is based on an optimization
+with random starting values and may therefore differ between repeated plots.
+}
+\label{fig:graph}
 \end{figure}
 %
-%
-As mentioned in the introduction, edits often are interrelated because an edit may
-contain multiple variables and each variable can occur in multiple edits.  The
-function {\sf contains} returns a boolean matrix, indicating which variables
-occur in each edit. The default {\sf plot} function has been overloaded for
-objects of class {\sf editset} (and {\sf editmatrix} and {\sf editarray}) to
-generate a graphical display of such relations. Figure \ref{figgraph} shows
-the dependency graph between the variables and edits of Figure
-\ref{fig:editfile}.
 
-The set of edits clearly consists of three independent blocks. The function
-{\sf blocks} separates an {\sf editset} into its constituting independent edits
-and returns a {\sf list} of independent {\sf editset} objects. The {\sf blocks}
-function has been introduced before in \cite{jonge:2011} and \cite{loo:2011b}
-for {\sf editmatrix} and {\sf editarray} objects respectively.
+The function {\sf contains} returns a boolean matrix, indicating which
+variables (columns) occur in which edit (rows). This connectivity matrix can be
+represented as a graph, and in {\sf editrules}, the default {\sf plot} function
+has been overloaded for {\sf editset} (and {\sf editmatrix} and {\sf
+editarray}) to plot the dependency graph of a set of edits. The {\sf igraph0} package
+of \cite{csardi:2006} is used to build the graphical representation. As an example,
+the dependency graph of the edits in Figure \ref{fig:editfile} is plotted in
+Figure \ref{fig:graph}.
+
+
+The set of edits clearly consists of three unconnected blocks, not sharing any
+variable.  The function {\sf blocks} separates an {\sf editset} into its
+constituting independent edits and returns a {\sf list} of independent {\sf
+editset} objects. The {\sf blocks} function has been introduced before in
+\cite{jonge:2011} and \cite{loo:2011b} for {\sf editmatrix} and {\sf editarray}
+objects respectively.
 
 To manipulate conditional edits, we first separate them by generating all valid
 combinations of truth values for the dummy variables described in the previous
@@ -619,21 +656,6 @@ $x>y=\true$, $x>0=\false$ and $y>0=\true$ contradict.  Note that contrary to
 Figure \ref{figgraph}, there are no paths connecting numerical variables
 ($x$,$y$,$z$,$u$,$v$,$w$) to categorical variables ($A$, $B$, $C$, $D$) in any
 of the dependency graphs.
-%
-\begin{table}[t]
-\caption{Edit separation functions. Each function accepts an {\sf editset} as input.}
-\label{tabseparators}
-\begin{tabular}{lp{0.8\textwidth}}
-\hline
-Function & Description\\
-\hline
-{\sf blocks}   & Splits an {\sf editset} in independent edits not sharing any variables.\\
-{\sf disjunct} & Splits an {\sf editset} in disjunct sets, not containing mixed edits.\\
-{\sf condition} & Returns the {\sf editmatrix} holding the conditions for an {\sf editset} generated by {\sf disjunct}.\\
-{\sf separate} & Uses {\sf blocks}, simplifies the results, and calls {\sf disjunct} on the remaining {\sf editset}s.\\
-\hline
-\end{tabular}
-\end{table}
 
 Finally, we note the {\sf separate} function that combines {\sf blocks} and
 {\sf disjunct}. Function {\sf separate} blocks an editset based on variable
@@ -735,7 +757,7 @@ substValue(F,"x",3)
 Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then } y>0$, so the 
 consequent $y>0$ may be added to the numerical edits (here: $x+y=z$). 
 On the other hand, substituting $x = -3$ gives $\textrm{\sf  if } -3 > 0 \textrm{ \sf  then } y>0$,
-yielding a false premise and the conditional edit can be deleted:
+yielding a false predicate and the conditional edit can be deleted:
 <<>>=
 substValue(F,"x",-3)
 @
