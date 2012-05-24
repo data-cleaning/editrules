@@ -440,7 +440,7 @@ used in $E_{\sf mixcat}$. Finally, the
 optional {\sf condition} attribute is an {\sf editmatrix} holding a
 number of extra conditions (assumptions) under which the edits in $E_{\sf
 num}$, $E_{\sf mixnum}$ and $E_{\sf mixcat}$ must hold. It will be discussed in
-detail in Section \ref{sseditlist}. Under normal circumstances ({\em i.e.} if only
+detail in Section \ref{ss:editlist}. Under normal circumstances ({\em i.e.} if only
 editrules built-in functions are used to build and manipulate {\sf editsets})
 either the {\sf condition} attribute or $E_{\sf mixnum}$ will be empty.
 
@@ -724,8 +724,7 @@ Finally, we note the {\sf separate} function that combines {\sf blocks} and
 occurrence and simplifies the blocks to objects of class {\sf editmatrix} or
 {\sf editarray} where possible. After this, the remaining {\sf editset} objects
 are split into an {\sf editlist} using {\sf disjunct}. The result is returned
-as an {\sf R} {\sf list}. Table \ref{tabseparators} summarizes the edit
-separation functions.
+as an {\sf R} {\sf list}. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -853,37 +852,40 @@ methods for variable elimination from an {\sf editarray} are described in
 \cite{loo:2012}. Consequently, the result of an {\sf eliminate} operation is an
 object of class {\sf editlist}. 
 
-As an example, consider again the set of edits of Eqs.~\eqref{eqedits}
-and~\eqref{eqeditlist}. In Figure~\ref{figprojections}, the valid regions are
+As an example, consider again the set of edits of Eqs.~\eqref{eq:edits}
+and~\eqref{eq:editlist}. In Figure~\ref{figprojections}, the valid regions are
 indicated as grey areas.  Geometrically, eliminating variable $y$ amounts to a
 projection along the $y$-axis.  Figure \ref{figprojections}  shows the result
-of projecting out the $y$ variable (in bold lines).  Algebraically, we need to
-apply Fourier-Motzkin elimination on the second set of linear edits of each
-element of Eq.~\eqref{eqeditlist} to obtain
+of projecting out the $y$ variable in bold lines.  Algebraically, we need to
+apply Fourier-Motzkin elimination to the edits in the consequents of
+Eq.~\eqref{eq:editlist} to obtain
+(remember that $\veebar$ stands for exclusive or)
 \begin{displaymath}
-E = \left(
-x\geq0 \land  \varnothing
-,
-x < 0 \land x < -2\right).
+\left(
+\textrm{\sf if } x\geq0 \textrm{ \sf then }  \varnothing
+\right)
+\veebar
+\left(
+\textrm{\sf if } x < 0 \textrm{ \sf then } x < -2\right).
 \end{displaymath}
-The first edit element says that if $x\geq 0$, there are no further restrictions.
+The first term says that when $x\geq 0$, there are no further restrictions.
 The second element says that when $x<0$, $x$ must actually be smaller than $-2$. Figure
-\ref{figelimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
+\ref{fig:elimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
 
 
 \setcounter{Rcode}{\value{figure}}
 \begin{Rcode}[t!]
 <<>>=
-E <- editset(expression(
+G <- editset(expression(
     if ( x >= 0 ) y >= 0,
     if ( x >= 0 ) x <= y,
     if ( x < 0 ) y < 0,
     if ( x < 0 ) x - y < -2
 ))
-eliminate(E,"y")
+eliminate(G,"y")
 @
 \caption{Eliminating a variable from an object of class {\sf editset} results in an {\sf editlist}.}
-\label{figelimination}
+\label{fig:elimination}
 \end{Rcode}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -907,7 +909,7 @@ solution afterwards.
 
 In {\sf editrules}, error localization with conditional edits (in an {\sf
 editset}) starts by separating the edits into blocks and disjunct sets
-using the {\sf separate} function discussed in Section \ref{sseditlist}.
+using the {\sf separate} function discussed in Section \ref{ss:editlist}.
 Separate blocks share no variables and are treated independently. Blocks
 consisting of {\sf editmatrix} or {\sf editarray} objects are treated as
 described in the references mentioned before. Blocks consisting of {\sf
