@@ -91,11 +91,11 @@ print.editset <- function(x, ...){
     v <- as.character(x,datamodel=TRUE)
     cnd <- attr(x,'condition')
     if ( nedits(cnd) > 0 ){
-        cat('Conditions:\n')
-        cat(paste(cnd,collapse=', '),'\n\n')
+        cat('conditions:\n')
+        cat(paste(cnd,collapse=', '),'\n')
     }
-    cat("Data model:\n")
     v <- v[! v%in% u]
+    if ( length(v) > 0 ) cat("\nData model:\n")
     if ( length(v)>0 ){
         nm <- names(v)
         cat(paste(format(nm,width=max(nchar(nm))),':',v,collapse='\n'),'\n')
@@ -115,9 +115,9 @@ print.editset <- function(x, ...){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 print.editlist <- function(x, ...){
-    cat("Conditional edit sets :\n")
+    cat("editsets:\n")
     j <- 0
-    lapply(x,function(i) {j <<- j+1;cat("set",j,"\n");print(i)}, ...)
+    lapply(x,function(i) {j <<- j+1;cat("\nSet",j," ");print(i)}, ...)
 }
 
 
