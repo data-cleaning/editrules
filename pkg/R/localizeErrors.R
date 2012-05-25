@@ -5,7 +5,7 @@
 #' 
 #' For performance purposes, the edits are split in independent \code{\link{blocks}} which are processed
 #' separately. Also, a quick vectorized check with \code{\link{checkDatamodel}} is performed first to
-#' exclude variables violating their bounds from further calculations. 
+#' exclude variables violating their one-dimensional bounds from further calculations. 
 #'
 #' By default, all weights are set equal to one (each variable is considered equally reliable). If a vector 
 #' of weights is passed, the weights are assumed to be in the same order as the columns of \code{dat}. By passing
@@ -83,7 +83,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         ),
         stringsAsFactors=FALSE
     )
-    # cchek for lpSolveApi 
+    # check for lpSolveApi 
     if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
@@ -95,7 +95,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     
     # detect singletons 
     st <- sapply(B,function(b) length(getVars(b)) == 1)
-    n <- max(sum(st),1)
+    n <- max(sum(!st),1)
     i <- 0
     err <- checkDatamodel(E,dat,weight)
     # values not in datamodel are set to NA
