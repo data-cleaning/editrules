@@ -1,4 +1,5 @@
 version 2.5-0
+- discussion papers are no longer vignettes, but included in inst/doc.
 - complete documentation overhaul
 - overloaded 'c' for editset
 - localizeErrors uses vectorized method for single-variable, single-edit blocks ('singleton' method)

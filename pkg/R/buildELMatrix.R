@@ -125,8 +125,9 @@ createXlim <- function(x, factor=1, offset=c(-1000,1000), na.rm = FALSE, maxvalu
   if (any(is.na(x))){
     return(c(minvalue, maxvalue))
   }
-  
-  factor*c(min(x), max(x)) + offset
+ m <- max(abs(x)+1)
+ c(max(-m*100,minvalue ),min(m*100,maxvalue)) 
+#  factor*c(min(x), max(x)) + offset
 }
 
 generateXlims <- function(x, xlim=list(), create=createXlim, ...){

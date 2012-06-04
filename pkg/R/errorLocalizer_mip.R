@@ -73,6 +73,8 @@ errorLocalizer.mip <- function( E
              , epsint = 1e-8
              )
    #print(lps)
+
+    
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
    
