@@ -11,7 +11,6 @@ version 2.5-0
 - Option 'useBlocks' in function 'localizeErrors' is now ignored (always TRUE) and will be removed
 - errorLocalizer (b&b) for conditional restrictions (editlist/editset)
 - isObviouslyInfeasible for editlist/editenv/editset
-- bugfix in substValue.editarray (and therefore) substValue.editset. In certain cases the wrong edits resulted.
 - bugfix in localizeErrors: logical columns caused crashes when both TRUE and FALSE present
 - bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein)
 - bugfix en parser: editset() crashed at numberless mixed expressions as 'if (A=="a") x > y
