@@ -94,6 +94,7 @@ substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
             ind <- indFromArray(A, sep)
         } else {
             A[,J] <- TRUE
+            A[,-J] <- !A[,-J]
         }
     }
     neweditarray(
@@ -158,7 +159,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
         if ( any(id) ){
             dvar <- rownames(E$mixnum) %in% var[id]
             v <- as.character(E$mixnum[dvar,])
-            v[!value[id]] <- invert(v[!value[id]])
+            v[value[id]] <- invert(v[value[id]])
             attr(E,"condition") <- c(editmatrix(v),attr(E,"condition"))
             E$mixnum <- E$mixnum[!dvar,]
         }
