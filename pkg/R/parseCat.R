@@ -15,7 +15,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
        if (is.logical(x)){
          if (val == x) { return(edit)
          }else { 
-           # if this happens the statements is always true, so delete it...
+           # if this happens the statement is always true, so delete it...
            return (logical())
          }
        }
@@ -34,8 +34,12 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
         cat <- eval(x[[3]], envir=env)
         if ( is.na(val) && op == "==" ) val <- TRUE
         if (is.logical(cat) && useLogical){
+            if (length(cat) > 1){
+              val <- NA
+            } else {
+              if (!cat) val <- !val              
+            }
             var <- as.character(x[[2]])
-            if (!cat) val <- !val
         } else {
             var <- paste(x[[2]],cat,sep=sep)
         }

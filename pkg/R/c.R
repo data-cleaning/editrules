@@ -1,16 +1,18 @@
-#' concatenate editmatrix
+
 #' @method c editmatrix
+#' @rdname editmatrix
 #' @export
-#' @param ... \code{editmatrix} objects to be concatenated.
-#' @return \code{editmatrix}
+#' 
 c.editmatrix <- function(...){
   ems <- list(...)
+  ems <- ems[!sapply(ems,is.null)]
+
   ems <- lapply(ems, as.editmatrix)
   vars <- sort(unique(unlist(lapply(ems, getVars.editmatrix))))
   
   A <- lapply(ems, function(E){
     a <- matrix(0, nrow=nrow(E), ncol=length(vars), dimnames=list(NULL, vars))
-    a[, getVars(E)] <- getA(E)
+    a[, getVars(E, type="colnames")] <- getA(E)
     a
   })
   A <- do.call(rbind, A)
@@ -21,13 +23,14 @@ c.editmatrix <- function(...){
   as.editmatrix(A=A, ops=ops, b=b)
 }
 
-#' concatenate editarray
+#' 
+#' @rdname editarray
 #' @method c editarray
 #' @export
-#' @param ... \code{editarray} objects to be concatenated.
-#' @return \code{editarray}
+#' 
 c.editarray <- function(...){
   ems <- list(...)
+  ems <- ems[!sapply(ems,is.null)]
   
   lvls <- sort(unique(unlist(lapply(ems, getlevels))))
   seps <- unlist(sapply(ems, getSep))
@@ -49,4 +52,12 @@ c.editarray <- function(...){
   neweditarray(B, ind, names=rownames(B), sep=":")
 }
 
+
+#' @method c editset
+#' @rdname editset
+#' @export
+#' 
+c.editset <- function(...){
+    editset( unlist(lapply(list(...), as.character)) )
+}
 

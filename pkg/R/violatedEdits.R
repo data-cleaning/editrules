@@ -1,25 +1,18 @@
 
-#' Retrieve which rows of \code{data.frame dat} violate which constraints
+#' Check data against constraints
 #'
-#' This is an S3 generic function for checking rows of a \code{data.frame} against
-#' a number of edit restrictions. The edits can be entered either in \code{character}
-#' \code{data.frame} or \code{editmatrix} format. The returned value is a logical matrix
-#' with dimension (number of records )\eqn{times}(number of edits), indicating which
-#' record violates (\code{TRUE}) which edit.
+#' Determine which record violates which edits. Returns \code{NA} when edits
+#' cannot be checked because of missing values in the data. 
 #'
-#' This function can be used as an input for automatic corrections methods.
-#' This method will fail if \code{E} contains variables that are not available in \code{dat}
-#' 
-#' @aliases violatedEdits.character violatedEdits.data.frame violatedEdits.editmatrix
 #' @example ../examples/violatedEdits.R
 #' @export
-#' @seealso \code{\link{listViolatedEdits}}, \code{\link{checkRows}}
-#' @param E \code{\link{editmatrix}} containing the constraints for \code{dat}
-#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a data.frame
+#' @seealso \code{\link{checkDatamodel}}
+#' @param E \code{\link{character}} vector with constraintsm, \code{\link{editset}}, \code{\link{editmatrix}} or \code{\link{editarray}}.
+#' @param dat \code{data.frame} with data that should be checked, if a named vector is supplied it will converted internally to a \code{data.frame}
 #' @param ... further arguments that can be used by methods implementing this generic function
-#' @return a logical matrix where each row indicates which contraints are violated
+#' @return An object of class \code{violatedEdits}, which is a logical \code{nrow(dat)Xnedits(E)} matrix with an extra \code{class} attribute
+#'  for overloading purposes. 
 violatedEdits <- function(E, dat, ...){
-    if (any(!getVars(E) %in% names(dat))) stop("E contains variables not in dat")
     if (nedits(E)==0){
         v <- matrix( logical(0)
                    , nrow=ifelse(is.vector(dat),1,nrow(dat))
@@ -65,14 +58,6 @@ violatedEdits.character <- function(E, dat, name=NULL, ...){
 #' @export
 violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     if (tol < 0 ) stop("Argument tol must be nonnegative")
-#    if (nrow(E)==0){
-#        v <- matrix( logical(0)
-#                   , nrow=ifelse(is.vector(dat),1,nrow(dat))
-#                   , ncol=0
-#                   )
-#        dimnames(v) <- list(record=rownames(dat),edit=NULL)
-#        return(newviolatedEdits(v))
-#    }
     if (tol==0) return(violatedEdits.character(as.character(E),dat))
     if ( !isNormalized(E) ) E <- normalize(E)
 
@@ -104,9 +89,9 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     newviolatedEdits(v)
 }
 
-#' @rdname violatedEdits
-#' @method violatedEdits data.frame
-#' @export
+# @rdname violatedEdits
+# @method violatedEdits data.frame
+# @export
 violatedEdits.data.frame <- function(E, dat, ...){
     if ( !all(c("name","edit","description") %in% names(E)) ){
         stop("Invalid input data.frame see ?editmatrix for valid input format")
@@ -130,25 +115,25 @@ violatedEdits.editarray <- function(E, dat, datamodel=TRUE,...){
 #' @method violatedEdits editset
 #' @rdname violatedEdits
 #' @export
-violatedEdits.editset <- function(E, dat,datamodel=TRUE,...){
-    v1 <- violatedEdits.editarray(E$num,dat,...)
+violatedEdits.editset <- function(E, dat, datamodel=TRUE, ...){
+    v1 <- violatedEdits(E$num,dat,...)
     E$num <- editmatrix(expression())
     u <- as.character(E,datamodel=datamodel,useIf=FALSE)
-    v2 <- violatedEdits.character(u,dat)
+    v2 <- violatedEdits(u,dat)
     newviolatedEdits(cbind(v1,v2))
 }
 
 
 
-#' Lists which rows of \code{data.frame dat} violate which constraints
-#'
-#' This function can be used as an input for automatic corrections methods.
-#' @example ../examples/listViolatedEdits.R
-#' @export
-#' @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
-#' @param dat \code{data.frame} with data that should be checked
-#' @seealso \code{\link{violatedEdits}} \code{\link{checkRows}}
-#' @return a list with per row a \code{integer} vector of the constraints that are violated 
+# Lists which rows of \code{data.frame dat} violate which constraints
+#
+# This function can be used as an input for automatic corrections methods.
+# @example ../examples/listViolatedEdits.R
+# 
+# @param E a number of edit restrictions, represented as \code{character} vector, \code{\link{editmatrix}} or \code{data.frame}.
+# @param dat \code{data.frame} with data that should be checked
+# 
+# @return a list with per row a \code{integer} vector of the constraints that are violated 
 listViolatedEdits <- function(E, dat){    
     errors <- violatedEdits(E, dat)
     errorlist <- apply(errors, 1, which)
@@ -164,7 +149,8 @@ newviolatedEdits <- function(x){
 #' @method plot violatedEdits
 #' @param x \code{violatedEdits} object.
 #' @param topn Top \code{n} edits to be plotted.
-#' @param ... parameters passed to \code{barplot} method.
+#' 
+#' @rdname violatedEdits
 #' @export
 plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
   N <- nrow(x)
@@ -211,13 +197,11 @@ plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
   par(oldpar)
 }
 
-#' Summary statistics on violatedEdits
 #'
 #' @method summary violatedEdits
 #' @param object \code{violatedEdits} object
-#' @param E optional \code{editmatrix} or \code{editarray}
 #' @param minfreq minimum freq for edit to be printed
-#' @param ... (not used)
+#' @rdname violatedEdits
 #' @export
 summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
   N <- nrow(object)
@@ -248,16 +232,15 @@ summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
 #' Print violatedEdits
 #' @method print violatedEdits
 #' @param x violatedEdits
-#' @param ... not used
 #' @export
+#' @keywords internal
 print.violatedEdits <- function(x,...){
   print(unclass(x))
 }
 
 #' as.data.frame violatedEdits
 #' @method as.data.frame violatedEdits
-#' @param x violatedEdits
-#' @param ... not used
+#' @rdname violatedEdits 
 #' @export
 as.data.frame.violatedEdits <- function(x, ...){
   as.data.frame(unclass(x),...)

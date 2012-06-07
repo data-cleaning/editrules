@@ -1,7 +1,7 @@
 
 #' Derive adjecency matrix from collection of edits
 #'
-#' A set of edits can be represented in a graph where every vertex is
+#' A set of edits can be represented as a graph where every vertex is
 #' an edit. Two vertices are connected if they have at least one variable
 #' in \code{vars} in common.
 #' 

@@ -21,6 +21,25 @@
     E
 }
 
+
+#' Row index operator for \code{cateditmatrix}
+#'
+#' @method [ editarray
+#' @rdname subsetting
+#' @keywords internal
+#'
+`[.cateditmatrix` <- function(x, i, j, ...){
+    if (!missing(i) && is.character(i) ) i <- match(i,rownames(x),nomatch=0)
+    E <- as.editmatrix( 
+        getA(x)[i,,drop=FALSE], 
+        getb(x)[i],
+        getOps(x)[i],
+        binvars=attr(x,'binvars')
+    )
+    class(E) <- c("cateditmatrix","editmatrix")
+    E
+}
+
 #' Row index operator for \code{editarray}
 #'
 #' @method [ editarray
@@ -67,6 +86,16 @@
     )
 }
 
+
+#' Index operator for \code{editlist}
+#' @method [ editlist
+#' @rdname subsetting
+#' @export
+`[.editlist` <- function(x,i,j, ...){
+    x <- unclass(x)[i]
+    class(x) <- 'editlist'
+    x
+}
 
 
 

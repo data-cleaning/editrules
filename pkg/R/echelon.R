@@ -1,14 +1,16 @@
 #' Bring an (edit) matrix to reduced row echelon form.
 #'
-#' If E is a matrix, a matrix in reduced row echelon form is returned.
-#' If E is an \code{\link{editmatrix}} the equality part of E is transformed
-#' to reduced row echelon form.
+#' If \code{E} is a matrix, a matrix in reduced row echelon form is returned.
+#' If \code{E} is an \code{\link{editmatrix}} the equality part of \code{E} is transformed
+#' to reduced row echelon form. For an \code{\link{editset}}, the numerical part is
+#' transformed to reduced row echelon form.
 #'
 #' @aliases echelon.editmatrix echelon.matrix
 #'
 #' @param E a matrix or editmatrix
 #' @param ... options to pass on to further methods.
 #' @export
+#' @seealso \code{\link{eliminate}}, \code{\link{substValue}}
 echelon <- function(E,...){
     UseMethod("echelon")
 }
@@ -32,8 +34,6 @@ echelon.editmatrix <- function(E,...){
 
 }
 
-#' Write a system of equations in reduced row echelon form
-#'
 #' @rdname echelon
 #' @method echelon matrix
 #' @param tol tolerance that will be used to determine if a coefficient equals zero.

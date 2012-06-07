@@ -1,7 +1,24 @@
-version 2.2-1
-- bugfix in localizeErrors: logical columns caused crashes when both TRUE and FALSE present.
-- bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein).
+version 2.5-0
+- discussion papers are no longer vignettes, but included in inst/doc.
+- complete documentation overhaul
+- overloaded 'c' for editset
+- localizeErrors uses vectorized method for single-variable, single-edit blocks ('singleton' method)
+- error localization based on lpSolveApi uses block-wise processing for enhanced numerical stability
+- function editType exported: lists edit categorie for 'editset' ('num', 'cat', 'mix')
+- duplicated dummyvariables in an editset are removed (making 'disjunct' much more efficient)
+- localizeErrors for conditional restrictions (editset)
+- errorLocalizer.-functions now accept a named list as records (as well as named vector)
+- Option 'useBlocks' in function 'localizeErrors' is now ignored (always TRUE) and will be removed
+- errorLocalizer (b&b) for conditional restrictions (editlist/editset)
+- isObviouslyInfeasible for editlist/editenv/editset
+- bugfix in localizeErrors: logical columns caused crashes when both TRUE and FALSE present
+- bugfix in violatedEdits.editarray: crashed when 0 columns were present (Thanks to Elmar Wein)
+- bugfix en parser: editset() crashed at numberless mixed expressions as 'if (A=="a") x > y
+- bugfix in violatedEdits.editset: wrong handling of numerical edits.
 - Better printing of cateditmatrix.
+- BREAKING CHANGE: listViolatededits and checkRows are deprecated. Use violatedEdits in stead.
+- BREAKING CHANGE: violatedEdits.data.frame, toDataFrame and iter.backtracker are now editrules internal and no longer supported
+- BREAKING CHANGE: argument fancynames of eliminate.editmatrix is removed
 
 version 2.2-0
 - Added function 'disjunct' decoupling conditional numeric/categorical edit sets

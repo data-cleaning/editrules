@@ -1,6 +1,5 @@
 
 context("Editset")
-
 test_that("editset parses categorical edits",{
     
     v <- expression(
@@ -31,6 +30,7 @@ test_that("editset parses conditional numeric edits",{
     expect_equivalent(getArr(E$mixcat),array(c(F,T,F,T),dim=c(1,4)))
 
     # test 2: with equality in if-statement
+
     v <- expression( if ( x == 0 ) y >= 0)
     E <- editset(v)
     expect_equal(E$num, editmatrix(expression()))
@@ -86,8 +86,21 @@ test_that("contains finds the right variables in an editset",{
 
 })
 
+test_that("as.editset for cateditmatrix works",{
+    E <- cateditmatrix(expression(
+         gender %in% c("male", "female")
+        , if (pregnant) gender == "female"
+    ))
+  
+  as.editset(E)
+})
 
 
+test_that("simple mixed edit without coefficients is recognized",{
+    E <- editset(expression(if ( A %in% c('a','b') ) x > 0 ))
+    expect_equal(nedits(E),1)
+    expect_equal(length(getVars(E,type="dummy")),1)
+})
 
 
 

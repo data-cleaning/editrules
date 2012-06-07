@@ -1,22 +1,28 @@
 #' Create an editmatrix with categorical variables
 #'
 #' \code{cateditmatrix} is an alternative representation of a categorial edit. 
-#' The default representation in editrules is \code{editarray}, but cateditmatrix is useful for
+#' The default representation in editrules is \code{\link{editarray}}, but cateditmatrix is useful for
 #' transforming and solving categorical edit into a mixed integer programming problem
 #'
 #' @param x \code{character or expression} with categorical edits
 #' @param sep seperator to be used in naming categories within variables.
 #' @param env environment in which \code{x} will be evaluated.
 #' @return cateditmatrix object, which is a specialized \code{\link{editmatrix}}
-#' @export
+#' @keywords internal
 cateditmatrix <- function(x, sep=":", env=parent.frame()){
     if (is.editarray(x)) {
-      x <- as.character(x,datamodel=FALSE)
+      x <- as.character(x)
     }
     edts <- parseEdits(x)
     
     catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE, env=env)
     catedits <- lapply(catedits, parseCatEdit)
+    
+    # remove empty rules...
+    empty <- sapply(catedits, is.null)
+    
+    catedits <- catedits[!empty]
+    edts <- edts[!empty]
     
     categories <- sort(unique(names(unlist(catedits))))
     categories <- c(categories[categories!="b"],"b")
@@ -58,7 +64,7 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #' @param x cateditmatrix object to be printed
 #' @param asIfStatement if \code{TRUE} the representation will be an \code{if} statement.
 #' @param ... further arguments passed to or from other methods.
-#' @export
+#' @keywords internal
 as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
   if (isTRUE(asIfStatement)){
     A <- getA(x)
@@ -103,7 +109,8 @@ as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
       }
     }
     names(catedits) <- rownames(x)
-    catedits
+    log <- sapply(which(cats == "TRUE"), function(v){paste(vars[v]," %in% c(TRUE,FALSE)",sep="")})
+    c(catedits, log)
   } else {
     class(x) <- "editmatrix"
     as.character(x)
@@ -125,8 +132,11 @@ toCat <- function(categories, sep=":"){
 parseCatEdit <- function(el){
   #el <- parseCat(e, useLogical=TRUE)
   if (any(is.na(el))){
+    if (length(el) == 1) return(NULL)
+    #browser(expr={length(el) == 1})
     val <- rep(1, length(el)+1)
-    names(val) <- c(names(el), "b")
+    names(val) <- c(names(el), "b")    
+    #print(el)
   } else {
     vars <- gsub(":.+","",names(el))
     # coefficients in form 

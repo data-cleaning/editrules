@@ -36,12 +36,13 @@
 #' function.
 #'
 #' @method plot editmatrix 
-#'
+#' @aliases plot.editmatrix plot.editset plot.editarray
+#' @name editrules.plotting
 #' @param x object of class \code{\link{editmatrix}}
 #' @param nodetype \code{'rules'}, \code{'vars'} or \code{'all'}.
 #' @param rules selection of edits
 #' @param vars selection of variables
-#' @param violated A named \code{logical} vector of \code{nrow(E)}. Ingnored when \code{nodetype='vars'}
+#' @param violated A named \code{logical} vector of length \code{nrow(E)}. Ingnored when \code{nodetype='vars'}
 #' @param adapt A named \code{logical} vector of \code{length(getVars(E))}. Ignored when \code{nodetype='rules'}
 #' @param nabbreviate \code{integer} To how many characters should variable and edit names be abbreviated?
 #' @param layout an \code{igraph} layout function. See \code{?igraph::layout}
@@ -59,7 +60,7 @@
 #' @references
 #'  Csardi G, Nepusz T: The igraph software package for complex network
 #'  research, InterJournal, Complex Systems 1695. 2006. http://igraph.sf.net
-#'
+#' @rdname editrules.plotting
 #' @export
 plot.editmatrix <- function(x,
     nodetype="all", 
@@ -95,7 +96,7 @@ plot.editmatrix <- function(x,
 
 #' plot method for editarray
 #'
-#' @rdname plot.editmatrix
+#' @rdname editrules.plotting
 #' @method plot editarray
 #' @export
 plot.editarray <- function(
@@ -133,7 +134,7 @@ plot.editarray <- function(
 
 #' plot method for editset
 #'
-#' @rdname plot.editmatrix
+#' @rdname editrules.plotting
 #' @method plot editset
 #' @export
 plot.editset <- function(

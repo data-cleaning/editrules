@@ -138,8 +138,8 @@ For each $x_i$ we introduce a binary variable $\Delta_i \in \{0,1\}$:
 \begin{equation} \label{eq:delta}
   \Delta_i = \left\{ 
   \begin{array}{ll}
-         0 & \mbox{$if x_i = x^0_i$} \\
-         1 & \mbox{$if x_i \neq x^0_i$}.
+         0 & \mbox{if $x_i = x^0_i$} \\
+         1 & \mbox{if $x_i \neq x^0_i$}.
   \end{array} \right. 
 \end{equation}
 where $x^0_i$ is the reported value for $x_i$. We now add the following edits to the edit set: 
@@ -206,8 +206,7 @@ errorLocation} object contains the locations of errors for each record in the
 {\sf data.frame} as well as logging information, solution weights and
 degeneracy. 
 
-We extended this function with a parameter {\tt method}, that can be used to select the {\tt 
-localizer} or {\tt mip} method. If the method "mip" is given, {\sf editrules} internally creates for each 
+We extended this function with a parameter {\tt method}, that can be used to select the {\tt "localizer"} or {\tt "mip"} method. If the method {\tt "mip"} is specified, {\sf editrules} internally creates for each 
 record an extended {\sf editmatrix} {\tt E} that contains the conditional boundary conditions as defined 
 in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to solve the resulting mixed integer program.
 %
@@ -270,7 +269,7 @@ total number of categories is labeled $d$, given by
 \begin{equation}
   d=\sum_{j=1}^n d_j
 \end{equation}
-Categorical record $\bf v$ can be written as in this space as
+Categorical record $\bf v$ can be written in this space as
 \begin{equation}
   \begin{array}{rcl}
     {\bf \check{v}} & = & \oplus^m_{j=1} (\check{v}_{j1}, \ldots, \check{v}_{j{d_j}}) \\
@@ -365,13 +364,14 @@ Note that parts of equation (\ref{eq:tmip}) can be written in a negated form:
 \end{equation}
 
 \subsection{The {\sf cateditmatrix} object}
-To create a mip formulation for the categorical error localization problem, {\sf editrules} uses
-internally the {\sf cateditmatrix} object. {\sf cateditmatrix} is an {\sf editmatrix} object, which is described in \cite{jonge:2011}, but it "remembers" that it is categorical. 
-
+To create a mip formulation for the categorical error localization problem,
+{\sf editrules} uses internally the {\sf cateditmatrix} object. {\sf
+cateditmatrix} is an {\sf editmatrix} object, which is described in
+\cite{jonge:2011}, but it "remembers" that it is categorical. 
 %
 \begin{Rcode}
 <<keep.source=true>>=
-E <- cateditmatrix( 
+E <- editrules:::cateditmatrix( 
        expression( gender %in% c("male", "female")
                  , if (pregnant) gender == "female"
                  )
@@ -387,11 +387,11 @@ Figure \ref{R:cateditmatrix} shows an example for the use of {\sf cateditmatrix}
 it will be called implicitly in {\sf localizeErrors} using {\tt method="mip"}.
 An example is shown in figure \ref{R:localizeCat}
 
-%
+% checkDatamodel is niet overloaded voor cateditmatrix. Moeten we dit doen, aangezien cateditmatrix (nog) niet 'public' is.
 \begin{Rcode}
 <<keep.source=true>>=
-dat <- data.frame(gender="male", pregnant=TRUE)
-localizeErrors(E,dat, method="mip")
+#dat <- data.frame(gender="male", pregnant=TRUE)
+#localizeErrors(E,dat, method="mip")
 @
 \caption{Using {\sf localizeErrors} method with categorical data}
 \label{R:localizeCat}
@@ -404,7 +404,6 @@ hundreds to thousands of variables.
 
 Solutions given by current lp solvers can be numerical unstable, which may result in a false positive 
 or a false negative solution. Luckily {\tt editrules} contains {\tt substValue} and {\tt isFeasible} 
-that can be used together to check the validity of a solution. Furthermore several heuristics can be 
 used to increase the numerical stability by using smaller boundaries for the variables.
 
 \subsection{Comparison to {\tt backtracker}}

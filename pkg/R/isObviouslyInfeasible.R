@@ -1,20 +1,24 @@
 
-#' Check for obviously infeasible edit rules
+#' Check for obvious contradictions in a set of edits
+#' 
+#' Obvious contradictions are edits of the form \eqn{1 < 0}, or categorical
+#' edits defining that a record fails for any value combination If
+#' this function evaluates to \code{TRUE}, the set of edits is guaranteed
+#' infeasible. If it evaluates to \code{FALSE} this does not garuantee feasibility.
+#' See \code{\link{isFeasible}} for a complete test.
 #'
-#' Find any obviously contradictory edit rules.
-#'
-#' @param E An \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param E An \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{editarray}}, \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}}
 #' @param ... Arguments to be passed to or from other methods.
-#' @return a boolean vector of indicating which edits are obviously infeasible
+#' @return A \code{logical} for objects of class \code{\link{editset}}, \code{\link{editarray}} or \code{\link{editmatrix}}. 
+#'  A \code{logical}  vector in the case of an \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editset}}.
+#'
 #' @export
+#' @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isFeasible}}
 isObviouslyInfeasible <- function(E,...){
     UseMethod("isObviouslyInfeasible")
 }
 
 
-#' Check for obvious contradictions in set of (in)equalities
-#' 
-#' Check for obvious infeasible rows, equivalent to 0 < -1.
 #'
 #' @method isObviouslyInfeasible editmatrix
 #' @param tol Tolerance for checking against zero.
@@ -35,10 +39,6 @@ isObviouslyInfeasible.editmatrix <- function(E, tol=sqrt(.Machine$double.eps), .
     return(FALSE)
 }
 
-#' Check for obvious infeasibility
-#' 
-#' Check for edits wich have TRUE in all columns of the representation.
-#' This corresponds to an espression stating that every possible value combination is erroneous.
 #'
 #' @method isObviouslyInfeasible editarray
 #' @rdname isObviouslyInfeasible
@@ -47,6 +47,46 @@ isObviouslyInfeasible.editmatrix <- function(E, tol=sqrt(.Machine$double.eps), .
 isObviouslyInfeasible.editarray <- function(E,...){
     any(rowSums(E)==ncol(E))
 }
+
+ 
+isObviouslyInfeasible.NULL <- function(E,...){
+    FALSE
+}
+
+
+#'
+#' @method isObviouslyInfeasible editset
+#' @rdname isObviouslyInfeasible
+#' @export
+#' 
+isObviouslyInfeasible.editset <- function(E,...){
+    isObviouslyInfeasible(E$num) || isObviouslyInfeasible(E$mixcat)
+}
+
+#'
+#' @method isObviouslyInfeasible editlist
+#' @rdname isObviouslyInfeasible
+#' @export
+#' 
+isObviouslyInfeasible.editlist <- function(E,...){
+    vapply(E,isObviouslyInfeasible, FUN.VALUE=FALSE)
+}
+
+#'
+#'
+#'
+#' @method isObviouslyInfeasible editenv
+#' @rdname isObviouslyInfeasible
+#' @export
+#'
+#'
+isObviouslyInfeasible.editenv <- function(E,...){
+    # note: environments are coerced to lists by lapply
+    vapply(E,isObviouslyInfeasible, FUN.VALUE=FALSE)
+}
+
+
+
 
 
 

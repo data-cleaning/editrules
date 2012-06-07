@@ -1,14 +1,19 @@
-#' Localize errors in a record based on Fellegi and Holt's paradigm
+#' Create a backtracker object for error localization
 #' 
-#' Returns a \code{\link{backtracker}} object for error localization in numerical data.
-#' The returned backtracker containts methods to search depth-first to the least weighted
-#' number of variables that need to be adapted so that all restrictions in E can be 
-#' satisfied. (Generalized principle of Fellegi and Holt (1976)).
+#' Generate a \code{\link{backtracker}} object for error localization in numerical, categorical, or mixed data.
+#' This function generates the workhorse program, called by \code{\link{localizeErrors}} with \code{method=localizer}.
 #'
-#' The search is excecuted with a branch-and-bound algorithm, where in the left branche,
-#' a variable is assumed correct and its value subsituted in \code{E}, while in the right
-#' branche a variable is assumed incorrect and eliminated from \code{E} with Fourier-Motzkin
-#' elimination. See De Waal (2003), chapter 8 for a consice description.
+#' The returned \code{\link{backtracker}} can be used to run a branch-and-bound algorithm which finds
+#' the least (weighted) number of variables in \code{x} that need to be adapted so that all restrictions 
+#' in \code{E} can be satisfied. (Generalized principle of Fellegi and Holt (1976)).
+#'
+#' The B&B tree is set up so that in in one branche,
+#' a variable is assumed correct and its value subsituted in \code{E}, while in the other
+#' branche a variable is assumed incorrect and \code{\link[=eliminate]{eliminated}} from \code{E}. 
+#' See De Waal (2003), chapter 8 or De Waal, Pannekoek and Scholtus (2011) for 
+#' a concise description of the B&B algorithm. 
+#'
+#' 
 #'
 #' Every call to \code{<backtracker>$searchNext()} returns one solution \code{list}, consisting of
 #' \itemize{
@@ -30,10 +35,15 @@
 #' not in the datamodel specified by \code{E}. The more user-friendly function \code{\link{localizeErrors}}
 #' circumvents this. See also \code{\link{checkDatamodel}}.
 #'
-#' @title Localize errors in numerical data based on the paradigm of Fellegi and Holt.
+#' @note This method is potentially very slow for objects of class \code{\link{editset}} that contain 
+#'  many conditional restrictions.  Consider using \code{\link{localizeErrors}} with the option 
+#'  \code{method="mip"} in such cases.
+#'
+#'
 #'
 #' @param E an \code{\link{editmatrix}} or an \code{\link{editarray}}
-#' @param x a named numerical vecor (if E is an editmatrix) or a named character vector (if E is an editarray). 
+#' @param x a named numerical \code{vector} or \code{list} (if E is an editmatrix), a named character \code{vector} or \code{list} (if E is an editarray), 
+#'   or a named \code{list} if E is an \code{\link[=disjunct]{editlist}} or \code{\link{editset}}.
 #'    This is the record for which errors will be localized.
 #' @param ... Arguments to be passed to other methods (e.g. reliability weights)
 #'
@@ -42,7 +52,8 @@
 #'      When multiple solotions with the same weight are found, \code{$searchBest()} picks one at random.
 #'
 #' @example ../examples/errorLocalizer.R
-#' @seealso \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}
+#' @seealso \code{\link{errorLocalizer.mip}}, \code{\link{localizeErrors}}, \code{\link{checkDatamodel}}, \code{\link{violatedEdits}}, 
+#'      
 #' @references 
 #' I.P. Fellegi and D. Holt (1976). A systematic approach to automatic edit and imputation. 
 #' Journal of the American Statistical Association 71, pp 17-25
@@ -51,13 +62,26 @@
 #' of management, Erasmus university Rotterdam. 
 #' http://www.cbs.nl/nl-NL/menu/methoden/onderzoek-methoden/onderzoeksrapporten/proefschriften/2008-proefschrift-de-waal.htm
 #' 
+#' T. De Waal, Pannekoek, J. and Scholtus, S. (2011) Handbook of Statistical Data Editing. Wiley Handbooks
+#' on Survey Methodology.
+#'
 #' @export
 errorLocalizer <- function(E, x, ...){
     UseMethod("errorLocalizer")
 }
 
+#'
+#' @method errorLocalizer editset
+#' @rdname errorLocalizer
+#' @export
+#'
+errorLocalizer.editset <- function(E, x, ...){
+    D <- disjunct(E)
+    errorLocalizer.editlist(E,x,...)
+}
 
-#' Localize errors in numerical data
+
+# Localize errors in numerical data
 #'
 #' @method errorLocalizer editmatrix
 #' @param weight a \code{lengt(x)} positive weight vector. The weights are assumed to be in the same order as the variables in \code{x}.
@@ -114,9 +138,11 @@ errorLocalizer.editmatrix <- function(
               || isObviouslyInfeasible.editmatrix(.E)
                ) return(FALSE)
 
-            if ( w == wsol && isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat])) ) 
-                    return(FALSE)
-            # TODO report status
+            # shortcut: can this ever lead to a solution?
+            if ( w == wsol && 
+                isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat]))
+            ) return(FALSE)
+
             if (length(totreat) == 0){
                 wsol <<- w
                 adapt <- adapt 
@@ -126,7 +152,7 @@ errorLocalizer.editmatrix <- function(
         },
         choiceLeft = {
             .var <- totreat[1]
-            .E <- substValue.editmatrix(.E, .var , x[.var])
+            .E <- substValue.editmatrix(.E, .var , x[[.var]])
             adapt[.var] <- FALSE
             totreat <- totreat[-1]
         },
@@ -146,7 +172,7 @@ errorLocalizer.editmatrix <- function(
         wsol = wsol
     )
     
-    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    # add a searchBest function, currently returns random solution in the case of multiple optima
     with(cp,{
         degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
@@ -164,7 +190,7 @@ errorLocalizer.editmatrix <- function(
 }
 
 
-#' Localize errors in categorical data
+# Localize errors in categorical data
 #'
 #' @method errorLocalizer editarray
 #' @rdname errorLocalizer
@@ -186,7 +212,6 @@ errorLocalizer.editarray <- function(
     )
     adapt <- is.na(x)
 
-
     vars <- getVars.editarray(E)
     cont <- names(x)[!adapt] %in% vars    
     if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
@@ -204,7 +229,7 @@ errorLocalizer.editarray <- function(
             if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
-            .I <- unique(do.call(c, c(ind[.totreat],ind[adapt])))
+            .I <- unique(do.call(c, c(ind[.totreat],ind[names(adapt)[adapt]])))
             if ( length(.totreat) > 0 &&  any(rowSums(.E[,.I,drop=FALSE]) == length(.I)) ) return(FALSE)
             
             if ( length(.totreat) == 0 ){
@@ -222,7 +247,7 @@ errorLocalizer.editarray <- function(
         },
         choiceLeft = {
             .var <- .totreat[1]
-            .E <- substValue.editarray(.E, .var , x[.var], reduce=FALSE)
+            .E <- substValue.editarray(.E, .var , x[[.var]], reduce=FALSE)
             adapt[.var] <- FALSE
             .totreat <- .totreat[-1]
         },
@@ -242,7 +267,7 @@ errorLocalizer.editarray <- function(
         wsol    = wsol,
         ind     = ind
     )
-    # add a searchBest function, currently returns last solution (which has the lowest weight)
+    # add a searchBest function, currently returns random solution in the case of multiple optima
     with(bt,{
         degeneracy <- NA
         searchBest <- function(maxduration=600, VERBOSE=FALSE){
@@ -259,7 +284,137 @@ errorLocalizer.editarray <- function(
     bt
 }
 
+#'
+#' @method errorLocalizer editlist
+#' @rdname errorLocalizer
+#' @export
+errorLocalizer.editlist <- function(
+    E, 
+    x, 
+    weight=rep(1,length(x)), 
+    maxadapt=length(x),
+    maxweight=sum(weight),
+    maxduration=600,
+    ...){
+    
+    stopifnot(
+        is.numeric(weight), 
+        all(!is.na(weight)), 
+        all(weight>=0), 
+        length(weight)==length(x) 
+    )
+    adapt <- is.na(x)
+
+    vars <- getVars.editlist(E)
+    cont <- names(x)[!adapt] %in% vars    
+    if (!all(vars %in% names(x)) ) stop('E contains variables not in record')
+
+    o <- order(weight[!adapt], decreasing=TRUE)[cont]
+    totreat <- names(x)[!adapt][o]
+
+    catvar <- getVars.editlist(E,type='cat')
+    icat <- logical(length(adapt))
+    names(icat) <- names(adapt)
+    icat[catvar] <- TRUE
+    for (v in vars[adapt & names(x) %in% vars]) E <- eliminate.editlist(E,v)
+    wsol <- min(sum(weight[vars %in% totreat | adapt[vars]]),maxweight)
+    # index may be read like this, since the datamodel is constant over all elements of an editlist
+    ind <- getInd(E[[1]]$mixcat)
+    bt <- backtracker(
+        isSolution = {
+            w <- sum(weight[adapt])
+
+            if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
+
+            # check feasibility 
+#            .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
+            .inf <- isObviouslyInfeasible(.E)
+            if ( all(.inf) ) return(FALSE)
+            if ( any(.inf) ) .E <- .E[!.inf]
+            # shortcut 1: 
+#            if (all(.infNum)) return(FALSE)
+            # shortcut 2: bound if numerical part cannot lead to a solution     
+            .catvar <- .catvar
+            if ( w == wsol ){
+                .subvar <- .totreat[!.totreat %in% .catvar]
+                if (isObviouslyInfeasible(.E$num, .subvar,x[.subvar])) return(FALSE)
+            }
 
 
+            # categorical variables
+            .icat <- .icat
+            .infCat <- logical(length(.E))
+            .catadapt <- names(adapt)[adapt & .icat]
+            if ( length(.catadapt) > 0 ){
+                .trcat <- .totreat[.totreat %in% .catvar]
+                if ( length(.totreat) > 0 ){
+                    .I <- unique( unlist(c(ind[.totreat],ind[.catadapt])) )
+                } else  { # nothing to treat...
+                    .I <- do.call(c,ind[.catadapt])
+                }
+                if ( length(.I) > 0 ) {
+                    .infCat <- sapply(.E, function(e){
+                            any(rowSums(e$mixcat[,.I,drop=FALSE]) == length(.I)) 
+                    })
+                } #else { # corner case: check that the record is invalid
+                  #  .infCat <- sapply(.E, function(e){
+                  #      nrow(e$mixcat) > 0 && any(apply(e$mixcat[,,drop=FALSE],1,all)) 
+                  #  })
+                  #}
+            }
+            # No feasible region left: bound
+            if ( all( .infCat) ) return(FALSE)
 
+            # remove infeasible regions
+            .E <- .E[!.infCat]
+            
+            # at leaf:
+            if ( length(.totreat) == 0 ){
+                
+                # prepare output
+                wsol <<- w
+                adapt <- adapt 
+                return(TRUE)
+            } 
+        },
+        choiceLeft = {
+            .var <- .totreat[1]
+            .E <- substValue.editlist(.E, .var , x[[.var]], simplify=FALSE, reduce=FALSE)
+            adapt[.var] <- FALSE
+            .totreat <- .totreat[-1]
+        },
+        choiceRight = {
+            .var <- .totreat[1]
+            .E <- eliminate.editlist(.E, .var)
+            adapt[.var] <- TRUE
+            .totreat <- .totreat[-1]
+        },
+        .E          = E,
+        x           = x,
+        maxadapt    = maxadapt,
+        maxweight   = maxweight,
+        .totreat    = totreat,
+        adapt       = adapt,
+        weight      = weight,
+        wsol        = wsol,
+        ind         = ind,
+        .icat       = icat,
+        .catvar     = catvar
+    )
+    # add a searchBest function, returns random solution when multiple weights are encountered.
+    with(bt,{
+        degeneracy <- NA
+        searchBest <- function(maxduration=600, VERBOSE=FALSE){
+            l <- searchAll(maxduration=maxduration,VERBOSE=VERBOSE)
+            if (length(l)>0){ 
+                ws <- sapply(l,function(s) s$w)
+                iwmin <- which(ws==min(ws))
+                degeneracy <<- length(iwmin)
+                if (length(iwmin) == 1) return(l[[iwmin]])
+                return(l[[sample(iwmin,1)]])
+            }
+        }
+    })
+    bt
+}
 

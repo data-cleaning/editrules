@@ -1,51 +1,38 @@
 #' Parse textual, categorical edit rules to an editarray
 #'
-#' Transforms a list of categorical edit rules to a boolean array representation.
-#' An editarry is used to store demands on purely categorical data.
-#'
-#' The purpose of this function is to turn human-readable demands on categorical data
-#' to a boolean array. Categorical edit rules state demands on a dataset in the form of a
-#' quoted R expression. Allowed statements include \code{if}, operators 
-#' \code{\%in\%}, \code{==}, \code{!=}, \code{||}, \code{&&} and brackets \code{()} and \code{\{\}}.
-#'
-#' The datamodel is derived from the edit set. A data model can be defined by simply adding 
-#' univariate edits of the form
-#'
-#' \itemize{
-#' \item{\code{"<variable> \%in\% c('<cat1>','<cat2>',...,'<catN>')"}}
-#' }
-#'
-#' Note the double quotes around the whole statement, and the single quotes around the category levels.
-#' The right hand side is evaluated when the editarray is generated, so it may also be the name of a
-#' previously defined variable. Also see the examples section.
-#'
-#' Relations between variables can be written in the form
-#'
-#' \itemize{
-#' \item{\code{"if( <logical expression involving categorical variables> ) <logical expression involving categorical variables>"}}
-#' }
-#' See the example section for some coded examples.
-#'
-#' The result is an object of class \code{editarray}, which contains a \eqn{m\times n} boolean array, representing
-#' the multivariate edits. The columns are labeled with \code{<variable><sep><category>}, for example \code{gender:Male}.
-#' The column names represent the data model for the data  to be treated, the entries represent the edit rules. For example.
-#' if the datamodel is \code{"gender \%in\% c('male','female')"} and \code{"pregnant \%in\% c(TRUE,FALSE)"}, the edit
-#' \code{"if(gender == 'male') pregnant == FALSE"} is represented by the boolean array 
-#' \code{c(gender:male=TRUE, gender:female=FALSE, pregnant:TRUE=TRUE, pregnant:FALSE=FALSE)}.
+#' An \code{editarray} is a boolean array (with some extra attributes) 
+#' where each row contains an edit restriction on purely categorical data. 
+#' 
+#' The function \code{editarray} converts (a vector of) edit(s)
+#' in \code{character} or \code{expression} from to an \code{editarray} object. 
+#' Edits may also be read from a \code{\link{data.frame}}, in which case it must have at least
+#' a \code{character} column  with the name \code{edit}. It is not 
+#' strictly necessary, but hightly recommended that the datamodel (i.e. the possible levels
+#' for a variable) is included explicitly in the edits using an \code{\%in\%} statement, as shown
+#' in the examples below. The function \code{\link{editfile}} can read categorical edits from a 
+#' free-form text file.
+#' 
 #'
 #'
-#'
-#' @param editrules \code{character} vector 
+#' @param editrules \code{character} or \code{expression} vector.
 #' @param sep textual separator, to be used internally for separating variable from category names. 
 #' @param env environment to evaluate the rhs of '==' or '\%in\%' in. 
-#' @return editarray
+#' @return \code{editarray} : An object of class \code{editarray}
 #'
 #' @example ../examples/editarray.R
 #'
-#' @seealso \code{\link{editfile}}
+#' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
+#'    \code{\link{editfile}}, \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{getVars}},
+#'    \code{\link{blocks}}, \code{\link{eliminate}}, \code{\link{substValue}}, \code{\link{isFeasible}} 
+#'    \code{\link{generateEdits}}, \code{\link{contains}}, \code{\link{is.editarray}}, \code{\link{isSubset}}
+#'    
 #' @export
 editarray <- function(editrules, sep=":", env=parent.frame()){
     if (length(editrules) == 0 ) return(neweditarray(array(numeric(0),dim=c(0,0)),ind=list(),sep=sep))
+    if ( is.data.frame(editrules) ){
+        stopifnot("edit" %in% names(editrules))
+        editrules <- editrules$edit
+    }
 
     e <- parseEdits(editrules)
     v <- lapply(e,parseCat,sep=sep,env=env)
@@ -118,7 +105,7 @@ editarray <- function(editrules, sep=":", env=parent.frame()){
 #'      is a statement of the form \code{"<var> \%in\% c('<cat1>',...,'<catN>')" or "<var> == '<catt>'"}
 #'      if invert==TRUE. If invert==FALSE, the negation of the above statements is returned.
 #'
-#' @seealso as.character.editarray
+#' 
 #'
 #' @keywords internal
 ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
@@ -141,19 +128,13 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
 }
 
 
-#' Coerce an editarray to \code{character}
-#'
-#' Coerces an editarray to a \code{data.frame}. The resulting character vector can be reparsed 
-#' to an editarray with \code{\link{editarray}}. The datamodel (the set of categories for every variable)
-#' is represented in the 'ind' attribute of an editarray. The character representation will contain
-#' a number of entries, named \code{d}\eqn{i}, of the form \code{"<variable> \%in\% c('<cat1>',...,'<catN>')"}. 
 #'
 #' @method as.character editarray
 #' @param x editarray object
 #' @param useIf \code{logical}. Use if( <condition> ) <statement> or !<condition> | <statement> ? 
 #' @param datamodel \code{logical}. Include datamodel explicitly?
 #' @param ... further arguments passed to or from other methods
-#'
+#' @rdname editarray
 #' @export
 as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
     A <- getArr(x)
@@ -204,16 +185,12 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 }
 
 
-#' Coerce an editarray to a \code{data.frame}
-#'
-#' Coerces an editarray to a \code{data.frame}. 
 #'
 #' @method as.data.frame editarray
-#' @param x \code{\link{editarray}} object
-#' @param ... further arguments passed to or from other methods.
-#' @seealso \code{\link{as.character.editarray}}
-#' @return data.frame with columns 'name', 'edit' and 'description'.
 #'
+#' 
+#' @return \code{as.data.frame}: \code{data.frame} with columns 'name', 'edit' and 'description'.
+#' @rdname editarray
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x, ...)
@@ -227,14 +204,12 @@ as.data.frame.editarray <- function(x, ...){
     d
 }
 
-#' Coerce an editarray to R expressions
+#' 
 #'
-#' Generates an R \code{expression} vector that can be used to check data using \code{\link{eval}}.
+#' 
 #' @export
 #' @method as.expression editarray
-#'
-#' @param x editarray object to be parsed
-#' @param ... further arguments passed to or from other methods.
+#' @rdname editarray
 as.expression.editarray <- function(x, ...){
   return(
     tryCatch(parse(text=as.character(x, ...)), 
@@ -262,15 +237,6 @@ neweditarray <- function(E, ind, sep, names=NULL, levels=colnames(E),...){
 }
 
 
-#' return vector with number of categories for each variable in editarray
-#' 
-#' @param E object of class \code{\link{editarray}}
-#' @return a vector of \code{length(getVar(E))} with the number of categories for every variable in E.
-#' @export
-numcat <- function(E){
-    if ( !is.editarray(E) ) stop('Argument not of class editarray')
-    sapply(getInd(E),length)
-}
 
 
 

@@ -90,12 +90,12 @@ print.editset <- function(x, ...){
     u <- as.character(x,datamodel=FALSE)
     v <- as.character(x,datamodel=TRUE)
     cnd <- attr(x,'condition')
-    if (!is.null(cnd)){
-        cat('Conditions:\n')
-        cat(paste(cnd,collapse=', '),'\n\n')
+    if ( nedits(cnd) > 0 ){
+        cat('conditions:\n')
+        cat(paste(cnd,collapse=', '),'\n')
     }
-    cat("Data model:\n")
     v <- v[! v%in% u]
+    if ( length(v) > 0 ) cat("\nData model:\n")
     if ( length(v)>0 ){
         nm <- names(v)
         cat(paste(format(nm,width=max(nchar(nm))),':',v,collapse='\n'),'\n')
@@ -108,14 +108,18 @@ print.editset <- function(x, ...){
 
 #' print editset
 #'
-#' 
-#' @method print dnf
+#' @export
+#' @method print editlist
 #'
 #' @param x editset object to be printed
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
-print.dnf <- function(x, ...){
-    cat("Editset in Disjunctive Normal Form:\n\n")
-    lapply(x,function(i) {cat("\n");print(i)}, ...)
+print.editlist <- function(x, ...){
+    cat("editsets:\n")
+    j <- 0
+    lapply(x,function(i) {j <<- j+1;cat("\nSet",j," ");print(i)}, ...)
 }
+
+
+
 

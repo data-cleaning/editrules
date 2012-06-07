@@ -1,16 +1,15 @@
 
-#' Remove empty rows and variables from set of edits
+#' Remove redundant variables and edits.
 #'
-#' If \code{E} is an \code{\link{editmatrix}} all rows and columns containing only zeros are removed.
-#' If \code{E} is an \code{\link{editarray}} all variables not contained in any edit are removed. 
-#' rows which have \code{FALSE} in every category of any variable are removed as well (these rows have
-#' \code{\link{isObviouslyRedundant}} equal to \code{TRUE}).
-#'
+#' Remove variables which are not contained in any edit and remove edits which are 
+#' \code{\link[=isObviouslyRedundant]{obviously redundant}}.
 #'
 #' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
 #' @param ... arguments to pass to other methods
 #'
 #' @export
+#' @seealso \code{\link{contains}}, \code{\link{eliminate}}, \code{\link{substValue}}
+#'
 reduce <- function(E,...){
     UseMethod('reduce')
 }
@@ -44,7 +43,7 @@ reduce.editarray <- function(E,...){
     m <- as.matrix(E)
     ind <- getInd(E)
     H <- getH(E)
-    b <- sapply(ind,function(ind) all(m[,ind])) 
+    b <- sapply(ind,function(ind) all(m[,ind,drop=FALSE])) 
     if ( any(b) ){
         J <- logical(0)   
         for ( j in ind[b] ) J <- c(J,j)
@@ -69,11 +68,16 @@ reduce.editset <- function(E,...){
 
     num <- reduce(E$num)
     mixcat <- reduce(E$mixcat)
-    mixnum <- reduce(E$mixnum[rownames(E$mixnum) %in% getVars(mixcat),])
+    v <- getVars(mixcat)
+    mixnum <- reduce(E$mixnum[rownames(E$mixnum) %in% v,])
 
-    # TODO better naming (not all should be 'mix')
-    if (nrow(mixcat) > 0 ) rownames(mixcat) <- paste("mix",1:nrow(mixcat),sep="")
-
+    imix <- grepl("^.num",v)
+    if ( nrow(mixcat) > 0 ){
+        m <- logical(nedits(mixcat)) 
+        if ( any(imix) ) m <- apply(contains(mixcat, v[imix]), 1, any)
+        pref <- ifelse(m,"mix","cat")
+        rownames(mixcat) <- paste(pref, 1:nrow(mixcat), sep="")
+    }
     simplify(neweditset(
         num = num,
         mixnum = mixnum,

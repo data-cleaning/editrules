@@ -3,21 +3,22 @@
 #'
 #' This utility function allows for free editrule definition in a file. One can extract
 #' only the numerical (\code{type='num'}), only the categorical (\code{type='cat'}) or all
-#' editas (default) in which case a list is returned. 
-#' The function first parses all assignments in the file. Every other statement is considered to be an edit. 
-#'
+#' edits (default) in which case an \code{\link{editset}} is returned. 
+#' The function first parses all assignments in the file, so it is possible to compute or read
+#' a list of categories defining a datamodel for example.
 #'
 #' @param file name of text file to read in
 #' @param type type of edits to extract. Currently, only 'num' (numerical), 'cat' (categorical)  and 'all' are implemented.
-#' @param expandEdits should edits be expanded with \code{\link{expandEdits}}? (currently ignored)
-#' @param ... extra parameters that will be passed to \code{expandEdits}
+#' 
+#' @param ... extra parameters that are currently ignored 
 #'
-#' @return \code{editset} with all edits if \code{type=all}, \code{\link{editarray}} if \code{type='cat'}, 
+#' @return \code{\link{editset}} with all edits if \code{type=all}, \code{\link{editarray}} if \code{type='cat'}, 
 #'      \code{\link{editmatrix}} if \code{type='num'}, \code{\link{editset}} with conditional edits if \code{type='mix'}. 
 #'   If the return value is a \code{list}, the elements are named \code{numedits} and \code{catedits}.
 #'
 #' @export
-editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ...){
+editfile <- function(file,type=c("all","num","cat","mix"), ...){
+# TODO: include expandEdits?
     type <- match.arg(type)
     if (!type %in% c('num','cat','all')) stop(paste("type",type,"invalid or not implemented yet"))
     p <- parse(file=file)
@@ -25,12 +26,6 @@ editfile <- function(file,type=c("all","num","cat","mix"), expandEdits=FALSE, ..
     e <- new.env()
     lapply(p[ass],eval,envir=e)
     edits <- p[!ass]
-    
-    if (expandEdits){
-        warning('expandEdits is currently ignored')
- #      l <- c(list(s=edits), as.list(e), list(...))
- #     edits <- do.call("expandEdits", l)
-    }
     
     et <- editTypes(edits)
     numedits <- edits[et == 'num']

@@ -1,15 +1,13 @@
-#' Decompose matrix or edits in independent blocks
+#' Decompose a matrix or edits into independent blocks
 #'
-#' For matrices, a list of matrices is returned which direct sum to the original matrix.
-#' For objects of class \code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}, 
-#' lists of corresponding objects not sharing any variable are returned.
+#' \code{blocks} returns a \code{list} of independent blocks \eqn{M_i} such that
+#' \eqn{M=M_1\oplus M_2\oplus\cdots\oplus M_n}. 
 #'
-#' @param M Object to be decomposed into 
-#' @param ... Arguments to be passed to or from other functions/
+#' @param M \code{matrix}, \code{\link{editmatrix}}, editarray or editset to be decomposed into independent blocks
 #' @return list of independent subobjects of \code{M}.
 #' @example ../examples/blocks.R
 #' @export
-blocks <- function(M,...){
+blocks <- function(M){
     blocks <- blockIndex(contains(M))
     lapply( blocks, 
         function(b){
@@ -19,14 +17,14 @@ blocks <- function(M,...){
 }
 
 
-#' Determine list of indices indicating blocks in logical matrix
+#' \code{blockIndex} returns a list of row indices in a \code{logical} matrix \code{D} designating independent blocks.
 #' 
-#' 
+#'  
 #' @param D matrix of type \code{logical}
 #' @return \code{list} of row indices in \code{D} indicating independent blocks.
 #'      Empty rows (i.e. every column \code{FALSE}) are ignored.
-#' @example ../examples/blocks.R
 #' 
+#' @rdname blocks
 #' @export
 blockIndex <- function(D){
 
@@ -70,12 +68,3 @@ blockIndex <- function(D){
     }
     lapply(blocks,function(b) {names(b)<-orignames[b]; b})
 }
-
-
-
-
-
-
-
-
-

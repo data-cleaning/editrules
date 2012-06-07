@@ -1,6 +1,10 @@
 #' Replace a variable by a value in a set of edits.
 #'
-#' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @note At the moment, objects of class \code{\link[=disjunct]{editenv}} are converted to \code{list}
+#'  prior to processing (so no performance is gained there) and reconverted afterwards.
+#'
+#' @param E \code{\link{editset}}, \code{\link{editmatrix}}, \code{\link{editarray}}, 
+#'      \code{\link[=disjunct]{editlist}} or \code{\link[=disjunct]{editenv}}
 #' @param var \code{character} with name(s) of variable(s) to substitute
 #' @param value vector with value(s) of variable(s)
 #' @param ... arguments to be passed to or from other methods
@@ -8,25 +12,29 @@
 #' @example ../examples/substValue.R
 #' @seealso \code{\link{eliminate}}
 #' @export
+#' @references
+#'  Value substitution is extensively described in the package vignettes.
 substValue <- function(E, var, value, ...){ 
     UseMethod("substValue")
 }
 
 
-#' Reduce an editmatrix by substituting a variable
-#'
-#' Given a set of linear restrictions \eqn{E: {\bf Ax}\odot {\bf b}} with \eqn{\odot\in\{<,\leq,==\}},
-#' and matrix \eqn{{\bf A}} with columns \eqn{{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_n}.
-#' Substituting variable \eqn{x_j} with a value \eqn{\tilde{\bf x}_j} means setting \eqn{{\bf a}_j=0}
-#' and \eqn{{\bf b}={\bf a}_j\tilde{x}_j}.
-#'
-#' Note that the resulting \code{\link{editmatrix}} may be inconsistent because of inconsistencies in
-#' \eqn{\tilde{\bf x}}.
+# Reduce an editmatrix by substituting a variable
+#
+# Given a set of linear restrictions \eqn{E: {\bf Ax}\odot {\bf b}} with \eqn{\odot\in\{<,\leq,==\}},
+# and matrix \eqn{{\bf A}} with columns \eqn{{\bf a}_1,{\bf a}_2,\ldots,{\bf a}_n}.
+# Substituting variable \eqn{x_j} with a value \eqn{\tilde{\bf x}_j} means setting \eqn{{\bf a}_j=0}
+# and \eqn{{\bf b}={\bf a}_j\tilde{x}_j}.
+#
+# Note that the resulting \code{\link{editmatrix}} may be inconsistent because of inconsistencies in
+# \eqn{\tilde{\bf x}}.
 #'
 #' @method substValue editmatrix
-#' @param reduce \code{logical} should substituted variables  be removed?
-#' @param removeredundant \code{logical} should empty rows be removed? 
-#"
+#' @param reduce \code{logical} should the result be simplified? For \code{\link{editmatrix}} this has the same effect
+#'  as calling the function \code{\link{reduce}}. For \code{\link{editarray}}, the datamodel of the substituted variable
+#'  is reduced to a single value, and the variable itself is not removed. 
+#' @param removeredundant \code{logical}. Should empty rows be removed?
+#'
 #' @rdname substValue 
 #' @export
 substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=TRUE, ...){
@@ -36,7 +44,8 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=T
     }
     v <- v[v != 0]
     ib <- ncol(E)
-    E[,ib] <- E[ ,ib] - E[ ,v]%*%value
+   # typecast of 'value' so it may be passed as list (usefull in error localization).
+    E[,ib] <- E[ ,ib] - E[ ,v]%*%as.numeric(value)
 
     if (reduce)
         E <- E[,-v, drop=FALSE]
@@ -51,14 +60,14 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=T
 
 
 
-#' Substitute a value in an editarray
-#'
-#' For editarrays, only rows with \code{<var>:<value>==TRUE} are kept.
-#' In the kept rows, categories not equal to <value> are set to \code{FALSE}
-#' If \code{reduce=TRUE}, columns corresponding to categories which are set
-#' to \code{FALSE} will be removed. Note that the function \code{\link{reduce}}
-#' has a different effect (it removes complete variables).
-#'
+# Substitute a value in an editarray
+#
+# For an \code{\link{editarray}}, only rows with \code{<var>:<value>==TRUE} are kept.
+# In the kept rows, categories not equal to <value> are set to \code{FALSE}
+# If \code{reduce=TRUE}, columns corresponding to categories which are set
+# to \code{FALSE} will be removed. Note that the function \code{\link{reduce}}
+# has a different effect (it removes complete variables).
+#
 #' @method substValue editarray
 #'
 #'
@@ -117,24 +126,25 @@ indFromArray <- function(A,sep){
 
 
 
-#' Substitute values in an \code{\link{editset}}
-#'
-#' For an \code{\link{editset}}, purely numerical variables are
-#' substitutes as in an \code{\link{editmatrix}} and categorical
-#' as in an \code{\link{editarray}}. Numerical variables appearing
-#' logical constraints are substituted and if truth values can
-#' be derived these are substituted in the logical constraint.
-#' 
-#' @param simplify Simplify editset by moving logical edits containing a simple 
-#'      numerical statement to the pure numerical part?
+# Substitute values in an \code{\link{editset}}
+#
+# For an \code{\link{editset}}, purely numerical variables are
+# substitutes as in an \code{\link{editmatrix}} and categorical
+# as in an \code{\link{editarray}}. Numerical variables appearing
+# logical constraints are substituted and if truth values can
+# be derived these are substituted in the logical constraint.
+# 
+#' @param simplify Simplify editset by moving logical edits containing a single
+#'      numerical statement to the pure numerical part? (This is mostly for internal purposes
+#'      and overwriting the default should normally not be necessary for package users).
 #'
 #' @method substValue editset
-#'
+#' 
 #' @rdname substValue 
 #' @export
 substValue.editset <- function(E, var, value, simplify=TRUE, ...){
-# Techical note (for internal use only). Substituting a dummy variable
-# (e.g. .num.1) with TRUE or FALSE amounts to making an assumption about the validity
+# Techical note. Substituting a dummy variable (e.g. .num.1) with TRUE or 
+# FALSE amounts to making an assumption about the validity
 # of the condition stated in that dummy. As such, it should not be added
 # to the numerical editmatrix (since that editmatrix is only relevant when the
 # assumed condition is already fulfilled). Instead, the condition is 
@@ -149,7 +159,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
             dvar <- rownames(E$mixnum) %in% var[id]
             v <- as.character(E$mixnum[dvar,])
             v[!value[id]] <- invert(v[!value[id]])
-            attr(E,"condition") <- c(attr(E,"condition"),v)
+            attr(E,"condition") <- c(editmatrix(v),attr(E,"condition"))
             E$mixnum <- E$mixnum[!dvar,]
         }
         if ( simplify ) E <- simplify(E)
@@ -164,6 +174,10 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
         if ( any(innum) ) 
             E$num <- substValue(E$num, numvar[innum], numval[innum])
     }
+    # substitute in condition 
+    cnd <- condition(E)
+    if ( var %in% getVars(cnd) ) condition(E) <- substValue(cnd,var,value,...)
+    # substitute in then-clauses
     i1 <- var %in% getVars(E$mixnum)
     if ( any (i1) ){ # time-saving condition
         mixvar <- var[i1]
@@ -191,7 +205,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
         }
     }
     if ( simplify ) E <- simplify(E)
-    E
+    removeRedundantDummies(E)
 }
 
 
@@ -237,12 +251,33 @@ isTautology <- function(E, tol=sqrt(.Machine$double.eps)){
 
 
 
+#'
+#' @method substValue editlist
+#' @rdname substValue
+#' @export
+substValue.editlist <- function(E, var, value, ...){
+    L <- varTypeAndOccurrence(E,var)
+    if ( length(L) == 1 && is.na(L) ){
+        return(E)      
+    }
+    type = L$type
+    iRemove <- logical(length(E))
+    for ( i in which(L$occurs) ){
+        E[[i]] <- substValue(E[[i]],var,value,...)
+        if ( !isFeasible(condition(E[[i]])) ) iRemove[i] <- TRUE
+    }
+    E[!iRemove]
+}
 
 
-
-
-
-
+#' @method substValue editenv
+#' @rdname substValue
+#' @export
+substValue.editenv <- function(E,var,value,...){
+    L <- as.list(E)
+    L <- substValue.editlist(E)
+    list2env(L)
+}
 
 
 

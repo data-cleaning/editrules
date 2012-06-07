@@ -1,6 +1,6 @@
 #' Parse a character vector of edits
 #'
-#' This function wraps the native \code{\link{parse}} function in a \code{\link{tryCatch}}.
+#' This function wraps the native \code{parse} function in a \code{tryCatch}.
 #' The function is \code{editrules} internal. It tries to give a meaningfull error message when
 #' parsing fails for some reason.
 #'
@@ -9,7 +9,7 @@
 #' \code{"cat"} or \code{"mix"}
 #' @return The edits in \code{E} parsed to R expressions.
 #'
-#' @export
+#' @keywords internal
 parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
      if (is.expression(E)){
        edits <- E
@@ -39,9 +39,9 @@ parseTree <- function(expr,prefix=NULL){
    }
 }
 
-#' basic test for type of edit
-#' @param edts \code{expression}
-#  @keywords internal
+# basic test for type of edit
+# edts \code{expression}
+# 
 editTypes <- function(edts){
   ops <- sapply(edts, function(e){deparse(e[[1]])})
   

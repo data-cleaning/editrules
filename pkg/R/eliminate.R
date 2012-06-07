@@ -1,36 +1,40 @@
 
-#' eliminate a variable from a set of edit rules
+#' Eliminate a variable from a set of edit rules
 #' 
-#' 
-#'
+#' Eliminating a variable amounts to deriving all (non-redundant) edits not containing
+#' that variable. Geometrically, it can be seen as a projection of the solution space
+#' (records obeying all edits) along the eliminated variable's axis. If the solution space
+#' is non-concex (as is the usually case when conditional edits are involved), multiple
+#' projections of convex subregions are performed.
 #'
 #' @param E \code{\link{editmatrix}} or \code{\link{editarray}} 
 #' @param var name of variable to be eliminated
 #' @param ... argumemts to be passed to or from other methods
 #' @export
-#' @seealso \code{\link{substValue}}
+#' @seealso \code{\link{substValue}}, \code{\link{isObviouslyInfeasible}}, \code{\link{isObviouslyRedundant}},
+#'  \code{\link{generateEdits}}
+#'
+#' @return If \code{E} is an \code{\link{editmatrix}} or \code{\link{editarray}}, an object of the same class
+#'   is returned. A returned \code{\link{editmatrix}} contains an extra \code{history} attribute which is used
+#'   to reduce the number of generated edits in consecutive eliminations (see \code{\link{getH}}). If \code{E} is an \code{\link{editset}},
+#'   an object of class \code{\link[=disjunct]{editlist}} is returned. 
 eliminate <- function(E, var, ...){
     UseMethod("eliminate")
 }
 
 
-#' Eliminate a variable from an editmatrix
-#'
-#' Uses Fourier-Motzkin elimination to eliminate a variable from a set
-#' of linear (in)equality restrictions, represented as an \code{\link{editmatrix}}.
+#' For objects of class \code{\link{editmatrix}}, Fourier-Motzkin elimination 
+#' is used to eliminate a variable from the of linear (in)equality restrictions.
 #' An observation of Kohler (1967) is used to reduce the number of implied 
 #' restrictions. Obvious redundancies of the type 0 < 1 are removed as well. 
 #'
 #' @method eliminate editmatrix
-#' @param fancynames \code{logical} If true, the derived restrictions have rownames derived from the original restrictions (slower).
+#' 
 #'
-#' @return An editmatrix with an extra (hidden) attributes describing how the new restrictions were derived from the original ones.
-#'    These attributes are used to remove redundancies when variables are repeatedly eliminated.
 #'
 #' @rdname eliminate 
 #' @example ../examples/eliminate.R
 #'
-#' @seealso \code{\link{editmatrix}} \code{\link{isObviouslyInfeasible}}
 #' @references
 #' D.A. Kohler (1967) Projections of convex polyhedral sets, Operational Research
 #' Center Report , ORC 67-29, University of California, Berkely.
@@ -38,7 +42,7 @@ eliminate <- function(E, var, ...){
 #' H.P. Williams (1986) Fourier's method of linear programming and its dual,
 #' The American Mathematical Monthly 93, 681-695
 #' @export
-eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
+eliminate.editmatrix <- function(E, var, ...){
     if (!isNormalized(E)) E <- normalize(E)
     vars <- getVars(E)
 
@@ -116,11 +120,11 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
     m <- m[!redundant,,drop=FALSE]
     d <- d[!redundant,,drop=FALSE]
     if ( nrow(m) > 0 ){
-        if ( fancynames ){
-            rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
-        } else {
+#        if ( fancynames ){
+#            rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
+#        } else {
             rownames(m) <- paste("num",1:nrow(m),sep="")
-        }
+#        }
     }
     neweditmatrix(
           m
@@ -134,12 +138,17 @@ eliminate.editmatrix <- function(E, var, fancynames=FALSE, ...){
 
 
 
-#' Eliminate variable from editarray.
-#' 
-#' The elimination method is based on repeated logical reduction on categories.
+#' For categorical edits in an \code{\link{editarray}}, the elimination 
+#' method is based on repeated logical reduction on categories. See Van der Loo (2012) for 
+#' a description. 
 #'
 #' @method eliminate editarray
 #' @rdname eliminate
+#' @references
+#'
+#' M.P.J. van der Loo (2012) Variable elimination and edit generation with a flavour of 
+#'  semigroup algebra (submitted).
+#'
 #' @export
 eliminate.editarray <- function(E, var, ...){
     # do not bother with edits not containing var
@@ -181,6 +190,43 @@ eliminate.editarray <- function(E, var, ...){
     }
 
     neweditarray(At,ind=ind,sep=getSep(E),levels=getlevels(E))
+}
+
+#'
+#' For an \code{\link{editset}}, \code{E} is transformed to an \code{\link[=disjunct]{editlist}}.
+#' Each element of an \code{\link[=disjunct]{editlist}} describes a convex subregion of the 
+#' total solution space of the \code{\link{editset}}. After this, the elimination method for 
+#' \code{\link[=disjunct]{editlist}} is called.
+#'
+#' @export 
+#' @rdname eliminate
+#' @method eliminate editset
+eliminate.editset <- function(E,var,...){
+    D <- disjunct(E)
+    eliminate.editlist(D,var,...)
+}
+
+
+#'
+#' For an \code{\link[=disjunct]{editlist}}, the variable is eliminated from each
+#' consituting \code{\link{editset}}. 
+#'
+#' @export
+#' @rdname eliminate
+#' @method eliminate editlist
+#'
+eliminate.editlist <- function(E, var, ...){
+    # determine variable type (num or cat)
+    L <- varTypeAndOccurrence(E,var)
+    if ( length(L) == 1 && is.na(L) ){
+        return(E)
+    } else {
+        type <- L$type
+        for ( i in which(L$occurs) ){
+            E[[i]][[type]] <- eliminate(E[[i]][[type]],var)
+        }
+    }
+    E
 }
 
 

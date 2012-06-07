@@ -167,6 +167,7 @@ backtracker <- function(isSolution, choiceLeft, choiceRight, list=NULL, maxdepth
 #' print a backtracker
 #'
 #' @export
+#' @keywords internal
 #' @method print backtracker
 #' @param x backtracker object to be printed
 #' @param ... other parameters passed to print method
@@ -181,11 +182,13 @@ print.backtracker <- function(x, ..., VERBOSE=FALSE){
 #' This method is identical to calling \code{$searchNext} on a \code{backtracker}. Please note that iterating
 #' a backtracker changes the state of a backtracker.
 #'
-#' @export
+#' 
 #' @param x \code{\link{backtracker}} object
 #' @param ... extra parameters that will given to the \code{searchNext()} function
 #' @return backtracker iterator
 #' @seealso \code{iter} from the package iterators
+#' @keywords internal
+#' @export
 iter.backtracker <- function(x, ...){
    # TODO add stop iteration
    

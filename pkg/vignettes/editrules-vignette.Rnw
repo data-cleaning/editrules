@@ -1,0 +1,19 @@
+%\VignetteIndexEntry{editrules-vignette}
+\documentclass[11pt, fleqn, a4paper]{article}
+
+\title{The editrules Vignette\\
+{\small Package version \Sexpr{packageVersion("editrules")}}
+}
+\date{\today}
+
+\author{Edwin de Jonge and Mark van der Loo}
+
+\begin{document}
+\maketitle
+At the moment, this is only a stub of a vignette. Please refer to the
+working papers included in the package's {\tt inst/doc} directory for
+theory and examples.
+
+
+\end{document}
+

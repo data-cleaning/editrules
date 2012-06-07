@@ -37,9 +37,10 @@ getnames <- function(E) rownames(E)
 
 #' Summarize data model of an editarray in a data.frame
 #'
-#' @param E editarray
+#' @param E \code{\link{editarray}}
 #' @return \code{data.frame} describing the categorical variables and their levels.
 #' @example ../examples/datamodel.R
+#' @seealso \code{\link{checkDatamodel}}
 #' @export
 datamodel <- function(E){
     if (ncol(E) == 0 ) return(data.frame(variable=character(0),value=character(0)))

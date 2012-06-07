@@ -1,14 +1,29 @@
-#' Create an editset which can contain a mix of categorical, numerical and mixededits
+#' Read general edits
 #' 
-#' Mixed edits are most conveniently read from a free-format textfile, using \code{\link{editfile}}.
+#' An \code{editset} combines numerical (linear), categorical and conditional restrictions
+#' in a single object. Internally, it consists of two \code{\link[=editmatrix]{editmatrices}} 
+#' and an \code{\link{editarray}}.
 #'
-#' NOTE: at the moment, functionality for mixed edit sets is limited and somewhat experimental.
+#' The function \code{editset} converts a \code{character} or \code{expression} vector to an editset.
+#' Alternatively, a \code{data.frame} with a column called \code{edit} can be supplied. Function
+#' \code{\link{editfile}} reads edits from a free-form textfile.
 #'
-#' @param editrules \code{data.frame} with (in)equalities written in R syntax, or alternatively 
-#'        a \code{character} or \code{expression} with (in)equalities written in R syntax
-#' @param env environment to parse categorical edits in
+#' 
+#'
+#' @param editrules \code{character} vector, \code{expression} vector or \code{data.frame} (see details) containing edits.
+#' @param env environment to parse categorical edits in (normally, users need not specify this)
+#'
+#' @seealso \code{\link{editrules.plotting}}, \code{\link{violatedEdits}}, \code{\link{localizeErrors}},
+#'  \code{\link{getVars}}, \code{\link{disjunct}}, \code{\link{eliminate}}, \code{\link{substValue}}, 
+#'  \code{\link{isFeasible}}, \code{\link{contains}}, \code{\link{is.editset}}
+#' @example ../examples/editset.R
+#' @return \code{editset}: An object of class \code{editset}
 #' @export
 editset <- function(editrules, env=new.env()){
+    if (is.data.frame(editrules)){
+        stopifnot("edit" %in% names(editrules))
+        editrules <- editrules$edit
+    }
     
     # detect edit types
     num <- parseEdits(editrules, type="num")
@@ -20,7 +35,7 @@ editset <- function(editrules, env=new.env()){
     num <- editmatrix(num)
     nnum <- nrow(num)
     # pure categorical edits    
-    cat <- editarray(cat)
+    cat <- editarray(cat,env=env)
     ncat <- nrow(cat)
     if ( ncat > 0 ) rownames(cat) <- paste("cat",(nnum+1):(nnum+ncat),sep="")
 
@@ -63,28 +78,45 @@ editset <- function(editrules, env=new.env()){
     nms <- names(mixnum)
     mixnum <- editmatrix(as.character(mixnum))
     rownames(mixnum) <- nms
-  
-    neweditset(
-        num=num,
-        mixcat=mixcat,
-        mixnum=mixnum
+
+    removeRedundantDummies( 
+        neweditset(
+            num=num,
+            mixcat=mixcat,
+            mixnum=mixnum
+        )
     )
 }
 
 #
 #
 #
-neweditset <- function(num, mixcat, mixnum,...){
+neweditset <- function(num, mixcat, mixnum, condition=editmatrix(expression()), ...){
 
   structure(
       list( num = num
           , mixnum = mixnum
           , mixcat = mixcat
-          )
-    , class="editset" 
-    , ...
+          ),
+    class="editset", 
+    condition=condition,
+    ...
   )
 
+}
+
+#' Get condition matrix from an editset. 
+#'
+#' @param E an \code{\link{editset}}
+#' @return an \code{\link{editmatrix}}, holding conditions under which the editset is relevant.
+#' @export
+#' @seealso \code{\link{disjunct}}, \code{\link{separate}}, \code{\link{editset}}
+condition <- function(E) attr(E,'condition')
+
+`condition<-` <- function(x, value){
+    if (!is.editset(x) ) stop("only for editset")
+    attr(x,'condition') <- value
+    x
 }
 
 
@@ -101,7 +133,6 @@ adddummies <- function(E, dat){
 
 
 
-#' Convert an editset to character
 #' @method as.character editset
 #'
 #' @param x an \code{\link{editset}}
@@ -109,6 +140,7 @@ adddummies <- function(E, dat){
 #' @param useIf return vectorized version?
 #' @param dummies return datamodel for dummy variables?
 #' @param ... arguments to be passed to or from other methods
+#' @rdname editset
 #' @export
 as.character.editset <- function(x, datamodel=TRUE, useIf=TRUE, dummies=FALSE, ...){
     num <-  as.character(x$num)
@@ -144,17 +176,12 @@ invert <- function(e){
 
 
 
-#' Coerce an editarset to a \code{data.frame}
-#'
-#' Coerces an editset to a \code{data.frame}. 
 #'
 #' @method as.data.frame editset
-#' @param x \code{\link{editset}} object
-#' @param ... further arguments passed to or from other methods.
-#' @seealso \code{\link{as.character.editarray}}
-#' @return data.frame with columns 'name', 'edit' and 'description'.
-#'
+#' @rdname editset
 #' @export 
+#' @return \code{as.data.frame}: a \code{data.frame} with columns 'name' and 'edit'. 
+#   If the editset has a \code{description} attribute, a third column named 'description' is added.
 as.data.frame.editset <- function(x, ...){
     edts <- as.character(x, datamodel=TRUE,...)
     d <- data.frame(
@@ -174,11 +201,11 @@ as.data.frame.editset <- function(x, ...){
 #'
 #' Determines edittypes based on the variables they contain (not on names of edits).
 #'
-#' @param E: editset
-#' @param m: if you happen to have contains(E) handy, it needs not be recalculated.
-#' @keywords internal
+#' @param E editset
+#' @param m if you happen to have \code{contains(E)} handy, it needs not be recalculated.
+#' @seealso \code{\link{contains}}
+#' @export
 editType <- function(E, m=NULL){
-    # NOTE: might be interesting for @export
     if ( !is.editset(E) ) stop('Argument is not of class editset')
     type <- vector(length=nedits(E),mode='character')
     nnum <- nrow(E$num)
@@ -196,6 +223,35 @@ editType <- function(E, m=NULL){
     type[which(imix) + nnum] <- 'mix'
     type[which(icat&!imix) + nnum] <- 'cat'
     type
+}
+
+
+#' Coerce x to an editset
+#'
+#' \code{x} may be an editset, editmatrix, editarray or character vector
+#' @param x object or vector to be coerced to an editset
+#' @param ... extra parameters that will be passed to \code{as.character}, if necessary
+#' @export
+as.editset <- function(x, ...){
+  if (is.editset(x))
+    return(x)
+  
+  if (is.cateditmatrix(x)){
+    return (editset(as.character(x, asIfStatement=TRUE)))
+  }
+  
+  if (is.editmatrix(x)){
+    E <- editset(expression())
+    E$num <- x
+    return(E)
+  }
+  
+  if (is.editarray(x)){
+    E <- editset(expression())
+    E$mixcat <- x
+  }
+  
+  editset(as.character(x, ...))
 }
 
 
@@ -233,11 +289,60 @@ simplify <- function(E, m=NULL){
 }   
 
 
+#' Remove redundant dummy variables
+#'
+#' Remove duplicated dummy variables from an editset.
+#'
+#' @param E \code{\link{editset}}
+#' @param tol positive number
+#' @keywords internal
+#'
+removeRedundantDummies <- function(E, tol=1e-8){
+    if ( is.null(E$mixnum) || nrow(E$mixnum) < 2) return(E)
+    if (!isNormalized(E$mixnum)) E$mixnum <- normalize(E$mixnum)
+    
+    op2num <- c("<" = 1, "<=" = 2, "==" = 3, ">=" = 4, ">" = 5)
 
+    d <- dist(cbind(getAb(E$mixnum), op2num[getOps(E$mixnum)]))
+    id <- d < tol
+    if ( !any( id ) ) return(E)
+    m <- nrow(E$mixnum)
+    dupnames <- rownames(E$mixnum)[2:m]
+    orgnames <- rownames(E$mixnum)[1:(m-1)]
+    v <- matrix(FALSE,nrow=m-1, ncol=m-1, dimnames=list(dupnames,orgnames))
+    v[lower.tri(v,1)] <- d < tol
+    v <- v[apply(v,1,any),,drop=FALSE]
+    v <- v[,!apply(!v,2,all),drop=FALSE]
+    v <- v[,!colnames(v) %in% rownames(v),drop=FALSE]
 
+    # remove duplicates from mixnum
+    dupvars <- rownames(v)
+    w <- rownames(E$mixnum)
+    E$mixnum <- E$mixnum[!w %in% dupvars,]
 
+    # replace original values by duplicates in mixcat; remove duplicates
+    A <- getArr(E$mixcat)
+    ind <- getInd(E$mixcat)
+    sep <- getSep(E$mixcat)
 
+    w <- which(v,arr.ind=TRUE)
+    dups <- rownames(v)[w[,1]]
+    names(dups) <- colnames(v)[w[,2]]
+    while( length(dups) > 0 ){
+        dup <- dups[1]
+        org <- names(dup)
+        iM <- contains.boolmat(A, ind, dup)
+        A[iM,ind[[org]]] <- A[iM,ind[[dup]],drop=FALSE]
+        dups <- dups[-1]
+    }
 
+    idup <- unlist(ind[dupvars])
+    A <- A[,-idup,drop=FALSE]
+    ind <- indFromArray(A,sep)
+    E$mixcat <- neweditarray(A,ind=ind,names=rownames(A),sep=sep)
+
+    E
+}
 
 
 

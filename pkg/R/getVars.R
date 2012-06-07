@@ -1,9 +1,9 @@
 
 #' get names of variables in a set of edits
 #'
-#' @param E \code{\link{editmatrix}} or \code{\link{editarray}}
+#' @param E \code{\link{editset}}, \code{\link{editmatrix}}, or \code{\link{editarray}}
 #' @param ... Arguments to be passed to or from other methods
-#' @seealso \code{\link{getA}}, \code{\link{getb}}, \code{\link{getOps}}
+#' @seealso \code{\link{getA}}, \code{\link{getb}}, \code{\link{getAb}}, \code{\link{getOps}}
 #' @example ../examples/getVars.R
 #' @return \code{character} vector with the names of the variables. 
 #' @export
@@ -47,15 +47,14 @@ getVars.cateditmatrix <- function(E, type=c("uniquevar", "colnames","var", "cat"
 #' @keywords internal
 getVars.editarray <- function(E,...) names(attr(E,"ind"))
 
-#' get variable names in editset
 #'
-#' @param type which variables? \code{all} means all (except dummies), \code{num} means 
+#'
+#' @method getVars editset
+#' @param type (editset- or list only) select which variables to return. \code{all} means all (except dummies), \code{num} means 
 #'      all numericals, \code{cat} means all categoricals, \code{mix} means those numericals appearing in a logical 
 #'      constraint and \code{dummy} means dummy variables connecting the logical with numerical constraints.
-#' @param dummies Also return dummy variables used in \code{E$mixcat} (only if \code{type} is \code{all} or \code{cat})
 #' @export
-#' @method getVars editset
-#' @keywords internal
+#' @rdname getVars
 getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
     type <- match.arg(type)
     numvars <- c()
@@ -73,6 +72,24 @@ getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
         catvars <- rownames(E$mixnum)
     }
     c(numvars, catvars)
+}
+
+#'
+#' @method getVars NULL
+#' @export
+#' @rdname getVars
+getVars.NULL <- function(E,...){
+    NULL
+}
+
+#'
+#' @export
+#' @method getVars editlist
+#' @keywords internal
+getVars.editlist <- function(E,...){
+# under normal circumstances, each part of an editlist has the same variables
+    if ( length(E) == 0 ) return(NULL)
+    getVars.editset(E[[1]], ...)
 }
 
 

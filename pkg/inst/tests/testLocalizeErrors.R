@@ -1,7 +1,6 @@
 
 context("Error localization: numerical data.frames")
 
-
 test_that('localizeErrors works without specified weight',{
     
     expect_equivalent(localizeErrors(
