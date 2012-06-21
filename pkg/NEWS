@@ -1,5 +1,7 @@
 version 2.5-1
+- bugfix in substValue.editset (processing of dummy variables failed in certain cases)
 - exported nedits
+
 
 version 2.5-0
 - discussion papers are no longer vignettes, but included in inst/doc.

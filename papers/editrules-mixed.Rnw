@@ -569,7 +569,7 @@ Observe that the original edit, stating $\textrm{\sf if } x > 0 \textrm{ \sf the
 has disappeared from the mixed edits, and that in stead the numerical edit
 $y>0$ has appeared, as is to be expected.
 <<>>=
-substValue(F,'y',10)
+substValue(F,'y',20)
 @
 
 

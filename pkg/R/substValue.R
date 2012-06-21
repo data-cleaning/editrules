@@ -180,6 +180,7 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
     # substitute in then-clauses
     i1 <- var %in% getVars(E$mixnum)
     if ( any (i1) ){ # time-saving condition
+print('foob')
         mixvar <- var[i1]
         mixval <- value[i1]
         u <- contains(E$mixnum, mixvar)
@@ -225,7 +226,7 @@ isContradiction <- function(E){
     lt <- ops=='<'
     le <- !eq & !lt
     I[eq] <- nil[eq] & abs(b[eq]) > tol
-    I[lt] <- nil[lt] & b[lt] <= -tol 
+    I[lt] <- nil[lt] & b[lt] <= tol 
     I[le] <- nil[le] & b[le] < tol
     I
 }
