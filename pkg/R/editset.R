@@ -275,8 +275,13 @@ simplify <- function(E, m=NULL){
     # move pure numerical edits to $num
     g <- contains(E$mixcat)
     r <- rowSums(g[,dummies,drop=FALSE]) == 1 & rowSums(g[,catvar,drop=FALSE]) == 0
+
     if ( any(r) ){ 
-        v <- invert(as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE))
+        # this is damned ugly, but: convert to character
+        v <- as.character(E[which(r)+nrow(E$num),,drop=FALSE],datamodel=FALSE)
+        # strip if ( ) FALSE to make parsing to editmatrix possible
+        v <- sub("\\).+$", '',sub("^.+\\(",'',v))  
+        v <- invert(v)
         E$mixcat <- reduce(E$mixcat[!r,,drop=FALSE])
         E$num <- c(E$num,editmatrix(v))
         E$mixnum <- reduce(E$mixnum[dummies[dummies %in% getVars(E$mixcat)],])

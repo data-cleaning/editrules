@@ -162,7 +162,7 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
         if ( length(ivd) == 0 ){
             edts[i] <- FALSE
         } else if ( length(ivd) == 1 ){
-            edts[i] <- paste(" if ( ",ind2char(ivd, ind),") FALSE")
+            edts[i] <- paste("if (",ind2char(ivd, ind),") FALSE")
         } else {
             
             n <- length(ivd)

@@ -225,7 +225,7 @@ isContradiction <- function(E){
     lt <- ops=='<'
     le <- !eq & !lt
     I[eq] <- nil[eq] & abs(b[eq]) > tol
-    I[lt] <- nil[lt] & b[lt] <= tol 
+    I[lt] <- nil[lt] & b[lt] <= 0 
     I[le] <- nil[le] & b[le] < tol
     I
 }
