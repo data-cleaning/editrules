@@ -388,6 +388,63 @@ occurrence and simplifies the blocks to objects of class {\sf editmatrix} or
 are split into an {\sf editlist} using {\sf disjunct}. The result is returned
 as an {\sf R} {\sf list}. 
 
+\subsection{Value substitution}
+Recall that conditional edits in an {\sf editset} are stored as a combination of
+categorical edits on dummy variables pertaining to linear edits in $E_{\sf mixnum}$.
+Purely numerical edits are stored in a separate subobject called $E_{\sf num}$.
+To substitute a value in an {\sf editset}, four cases are distinguished.
+
+The first two cases are the simplest and concern variables which are either
+numerical variables not occurring in $E_{\sf mixnum}$ or categorical variables. These
+cases are handled by dispatching the appropriate {\sf substValue} methods for
+$E_{\sf num}$ or $E_{\sf mixcat}$ ({\sf editmatrix} and {\sf editarray}
+respectively) which have been described in \cite{jonge:2011} and
+\cite{loo:2011b}.
+
+The third case occurs when the substituted variable is a numerical variable,
+occurring in a conditional edit. In that case
+the following actions are performed.
+%
+\begin{enumerate}
+\item If the variable occurs in $E_{\sf num}$ substitute its value there.
+\item Substitute the variable in $E_{\sf mixnum}$.
+\item If any edits in $E_{\sf mixnum}$ have become obviously redundant ({\em e.g.} $0 < 1$) or
+obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \false for
+the corresponding dummy variables in $E_{\sf mixcat}$.
+\item Remove all edits of the form $\textrm{\sf if } \true \textrm{ \sf then  } t$
+from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit1}).
+\item If the dummy variables $t$ of step 4 do not occur anywhere in $E_{\sf
+mixcat}$ anymore, move the corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
+\item Remove all edits of the form $\textrm{\sf if } \false \textrm{ \sf then  } t$.
+
+\end{enumerate}
+%
+%
+As an example, consider the code below.
+<<>>=
+F <- editset(expression(
+x + y == z,
+if ( x > 0 ) y > 0))
+substValue(F,"x",3)
+@
+Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then }
+y>0$, so the consequent $y>0$ may be added to the numerical edits (here:
+$x+y=z$).  In case we substitute $x$ with $-3$ we obtain $\textrm{\sf  if } -3
+> 0 \textrm{ \sf  then } y>0$, yielding a false predicate and the conditional
+> edit can be deleted:
+<<>>=
+substValue(F,"x",-3)
+@
+
+The fourth and final case concerns substitution of dummy variables, which was
+discussed in Section \ref{ss:editlist}.  Recall that dummy variables are used
+to code linear inequalities that occur in conditional edits. If a dummy
+variable is substituted, {\sf substValue} moves the corresponding numerical
+edit from $E_{\sf mixnum}$ to the {\sf condition} attribute of the {\sf
+editset}. Next, $E_{\sf mixcat}$ is updated accordingly.  Substituting dummy
+variables explicitly is not normally done by end users, as the names and values
+of dummy variables remain hidden to them.  It is used internally by {\sf
+disjunct}. 
 
 \end{document}
 

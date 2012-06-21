@@ -373,7 +373,7 @@ The dependency graph clearly shows that our example set can be split into three
 unrelated blocks. These blocks (corresponding to columns of data) can be
 treated separately if statistical correlations between the variables can be
 ignored. The higher-level error localization function that will be discussed in
-section \ref{ss:errorlocalization}, detects and exploitthis block structure, so
+section \ref{ss:errorlocalization}, detects and exploits this block structure, so
 users need not concern themselves with it directly. However, to facilitate edit
 rule investigation and maintenance, the lower-level {\sf blocks} function is
 exported to user space. This function returns a {\sf list} of the independent
@@ -385,14 +385,13 @@ Here, {\sf nedits} counts the number of edits in an editset. Clearly, the three
 independent blocks with 8, 3 and 1 edits (Figure \ref{fig:graph}) have been
 found.
 
-The largest cluster of edits in Figure \ref{fig:graph} connects numerical variables with
-categorical variables. For example, via the edit labeled \verb"mix11". Operations such
-as variable elimination are difficult to implement for such edit sets. However, it is
-possible to split up such a set further by working out what happens when we assume
-statements in the premise or consequent to be {\sc true} or {\sc false}. 
+The largest cluster of edits in Figure \ref{fig:graph} connects numerical
+variables with categorical variables. Operations such as variable elimination
+are difficult to implement for such edit sets. However, it is possible to split
+up such a set further by working out what happens when we assume statements in
+the premise or consequent to be {\sc true} or {\sc false}. 
 
-
-
+% according to Yihui, God kills a little kitten here :'(
 \setkeys{Gin}{width=0.7\textwidth}
 \begin{figure}
 \centering
@@ -401,10 +400,9 @@ set.seed(3)
 par(oma=c(0,0,0,0),mar=c(0,0,0,0))
 plot(E)
 @
-\caption{Dependency graph of edits defined in Figure \ref{fig:editfile}. The squares represent 
-edit rules, and the circles represent variables. An edge indicates that a variable occurs in an
-edit.
-}
+\caption{Dependency graph of edits defined in Figure \ref{fig:editfile}. The
+squares represent edit rules, and the circles represent variables. An edge
+indicates that a variable occurs in an edit.  }
 \label{fig:graph}
 \label{fig:graph}
 \end{figure}
@@ -412,16 +410,17 @@ Consider again the edits on page \pageref{code:editfile}.  As an example,
 assume that $x>0$ in \verb"mix9". We then know that $y>0$ must hold. This means
 that \verb"num5" becomes redundant and \verb"mix11" reduces to $y>0$ and
 becomes therefore redundant.  On the other hand, when we assume $x\leq0$, then
-\verb"mix9" can be dropped, since the value of $y$ does not matter anymore.
-Combined with \verb"num4", assuming that $x\leq0$ this means that $x=0$.  These
-two assumptions exclude each other (they cannot both hold) and yield two
-different edit sets. If we continue making assumptions for the numerical
-statements in conditional edits recursively and work out their consequences, we
-get a list of {\em conditional} {\sf editsets} where for each {\sf editset},
-the dependences between categorical and numerical edits have been severed.
+\verb"mix9" can be dropped, since the value of $y$ has become unimportant for
+that edit.  Combined with \verb"num4", assuming that $x\leq0$ this means that
+$x=0$.  These two assumptions exclude each other (they cannot both be valid)
+and yield two different edit sets. If we continue making assumptions for the
+numerical statements in conditional edits recursively and work out their
+consequences, we get a list of {\em conditional} {\sf editsets} where for each
+{\sf editset}, the dependencies between categorical and numerical edits have
+been severed.
 
-The function {\sf disjunct} does exactly this. It speeds up computation by
-detecting whenever contradictory assumptions have been made. The function
+The function {\sf disjunct} implements this procedure. It speeds up computation
+by detecting whenever contradictory assumptions have been made. The function
 returns a {\sf list} of conditional {\sf editsets} (optionally, they can be
 returned as an {\sf R} {\sf environment}). The conditions pertaining to each
 {\sf editset} can be retrieved using the {\sf condition} function.  Figure
@@ -429,16 +428,34 @@ returned as an {\sf R} {\sf environment}). The conditions pertaining to each
 editsets} resulting after calling {\sf disjunct}. The conditional {\sf
 editsets} form an equivalent representation of the original set and have the
 advantage that operations such as variable elimination (and therefore error
-localization) are can be performed with  standard methods for numerical or
-categorical data.  The downside is that for large, strongly connected edit
-sets, separating them into disjunct sets can be a computationally daunting
-task, growing exponentially in the number of edits. For this reason, we have
-implemented an error localization method not requiring variable elimination
-explicitly on which we will report in a separate paper \citep{jonge:2012}.
+localization) are can be performed separately for each set.  The downside is
+that for large, strongly connected edit sets, separating them into disjunct
+sets can be a computationally daunting task, growing exponentially in the
+number of edits. For this reason, we have implemented an error localization
+method not that does not require variable elimination. This method, which is
+based on a mixed-integer formulation of the problem will be discussed in a
+separate paper \citep{jonge:2012}.
 
-Finally, we note that the utility function {\sf separate} performs both the block 
-decomposition based on variable occurrence and calls, when appropriate, the
-{\sf disjunct} function on conditional edits. The results are simplified as
+In Figure \ref{fig:disjunct} the dependency graphs of the conditional editsets
+in {\sf disjunct(E)} are shown. The restrictions in the title are conditions
+under which all restrictions in the graph below them must be obeyed. Note that
+the names of edits cannot be compared across the subplots. These names are
+generated automatically and are unrelated to content of the edit, other than
+stating the type of variables to which the edit pertains. In the original
+editset there are three conditional edits containing numerical restrictions,
+namely
+<<>>=
+E[9:11,]
+@
+Four different numerical restrictions occur in these edits, so we can make
+$2^4$ assumptions about their truth values. However, some assumptions will
+contradict each other. For example, the demands $x\leq0$, $y>0$ and $y<x$
+cannot all be true at the same time. The result is that only four out of
+sixteen possible edit sets are feasible, as shown in Figure \ref{fig:disjunct}.
+
+Finally, we note that the utility function {\sf separate} performs both the
+block decomposition based on variable occurrence and calls, when appropriate,
+the {\sf disjunct} function on conditional edits. The results are simplified as
 much as possible and returned in a {\sf list}.
 
 <<echo=false>>=
@@ -462,7 +479,10 @@ for ( i in 1:length(v) ){
 generated from the edits of Figure \ref{fig:editfile}. There are no paths from
 numerical variables ($x$, $y$, $z$, $u$, $v$, $w$) to categorical 
 variables ($A$, $B$, $C$, $D$) anymore. The titles of the subplots indicate
-the predicates for each {\sf editset}.}
+the predicates for each {\sf editset}. Edits with the same name contain the
+same variables but not necessarily the same condition on those variables across
+subplots.
+}
 \label{fig:disjunct}
 \end{figure}
 
@@ -491,7 +511,7 @@ Function & Description\\
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Edit checking, obvious redundancy and (in)feasibility}
+\subsection{Edit checking, obvious redundancy and obvious infeasibility}
 \label{ss:checking}
 Data can be checked against edits in an editset with the {\sf violatedEdits}
 function. This function accepts an {\sf editset} and a {\sf data.frame} and
@@ -508,10 +528,10 @@ another edit or when it has an easily recognizable form such as $0 < 1$. Such
 redundancies may arise after edit manipulations (value substitution, variable
 elimination).  The {\sf isObviouslyRedundant} method for {\sf editset} returns
 a logical vector indicating which edit in an editset is redundant (\true) or
-not ({\sc false}). For an {\sf editlist} ({\sf editenv}) a list of boolean vectors
-is returned. For a detailed description of detecting obvious redundancies in
-numerical or categorical edits, we refer to \cite{jonge:2011} and
-\cite{loo:2011b}.
+not ({\sc false}). If the {\sf editset} was separated in independent
+conditional {\sf editsets} by {\sf disjunct}, a list of boolean vectors is returned.
+For a detailed description of detecting obvious redundancies in numerical or
+categorical edits, we refer to \cite{jonge:2011} and \cite{loo:2011b}.
 
 An edit in an {\sf editset} is obviously infeasible when it contains an easily
 recognizable self-contradicting edit, such as $0>1$. The function {\sf
@@ -530,70 +550,30 @@ in Section \ref{ss:elimination}.
 \section{Manipulation of conditional edits}
 \label{smanipulation}
 The two basic operations on any set of restrictions, either numerical,
-categorical, or mixed/conditional consist of value substitution and variable
-elimination. Methods for the pure numerical and pure categorical situations are
-fairly straightforward and have been implemented in the {\sf editrules} package
-before. Operations on conditional edits require a bit more care, which will
-be detailed in the next two subsections.
+categorical, or conditional, are value substitution and variable elimination.
+Methods for the pure numerical and pure categorical situations are fairly
+straightforward and have been implemented in the {\sf editrules} package
+before. Operations on conditional edits require a bit more care, which will be
+detailed in the next two subsections.
 
 \subsection{Value substitution}
 \label{sssubstitution}
-Recall that conditional edits in an {\sf editset} are stored as a combination of
-categorical edits on dummy variables pertaining to linear edits in $E_{\sf mixnum}$.
-Purely numerical edits are stored in a separate subobject called $E_{\sf num}$.
-To substitute a value in an {\sf editset}, four cases are distinguished.
-
-The first two cases are the simplest and concern variables which are either
-numerical variables not occurring in $E_{\sf mixnum}$ or categorical variables. These
-cases are handled by dispatching the appropriate {\sf substValue} methods for
-$E_{\sf num}$ or $E_{\sf mixcat}$ ({\sf editmatrix} and {\sf editarray}
-respectively) which have been described in \cite{jonge:2011} and
-\cite{loo:2011b}.
-
-The third case occurs when the substituted variable is a numerical variable,
-occurring in a conditional edit. In that case
-the following actions are performed.
-%
-\begin{enumerate}
-\item If the variable occurs in $E_{\sf num}$ substitute its value there.
-\item Substitute the variable in $E_{\sf mixnum}$.
-\item If any edits in $E_{\sf mixnum}$ have become obviously redundant ({\em e.g.} $0 < 1$) or
-obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \false for
-the corresponding dummy variables in $E_{\sf mixcat}$.
-\item Remove all edits of the form $\textrm{\sf if } \true \textrm{ \sf then  } t$
-from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit1}).
-\item If the dummy variables $t$ of step 4 do not occur anywhere in $E_{\sf
-mixcat}$ anymore, move the corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
-\item Remove all edits of the form $\textrm{\sf if } \false \textrm{ \sf then  } t$.
-
-\end{enumerate}
-%
-%
-As an example, consider the code below.
+Assigning a value to a variable occurring in an {\sf editset} can be done with
+the {\sf substValue} function. For example, substituting $x=10$ in the
+edits of Figure \ref{fig:editfile} gives 
 <<>>=
-F <- editset(expression(
-x + y == z,
-if ( x > 0 ) y > 0))
-substValue(F,"x",3)
-@
-Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then }
-y>0$, so the consequent $y>0$ may be added to the numerical edits (here:
-$x+y=z$).  In case we substitute $x$ with $-3$ we obtain $\textrm{\sf  if } -3
-> 0 \textrm{ \sf  then } y>0$, yielding a false predicate and the conditional
-> edit can be deleted:
+(F <- substValue(E,'x',10))
+@ 
+Compare this result with the edits displayed on page \pageref{code:editfile}.
+Observe that the original edit, stating $\textrm{\sf if } x > 0 \textrm{ \sf then } y>0$
+has disappeared from the mixed edits, and that in stead the numerical edit
+$y>0$ has appeared, as is to be expected.
 <<>>=
-substValue(F,"x",-3)
+substValue(F,'y',10)
 @
 
-The fourth and final case concerns substitution of dummy variables, which was
-discussed in Section \ref{ss:editlist}.  Recall that dummy variables are used
-to code linear inequalities that occur in conditional edits. If a dummy
-variable is substituted, {\sf substValue} moves the corresponding numerical
-edit from $E_{\sf mixnum}$ to the {\sf condition} attribute of the {\sf
-editset}. Next, $E_{\sf mixcat}$ is updated accordingly.  Substituting dummy
-variables explicitly is not normally done by end users, as the names and values
-of dummy variables remain hidden to them.  It is used internally by {\sf
-disjunct}. 
+
+
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
