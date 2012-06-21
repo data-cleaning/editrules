@@ -1,3 +1,6 @@
+version 2.5-1
+- exported nedits
+
 version 2.5-0
 - discussion papers are no longer vignettes, but included in inst/doc.
 - complete documentation overhaul

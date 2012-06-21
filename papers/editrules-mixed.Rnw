@@ -372,15 +372,18 @@ overview and examples.
 The dependency graph clearly shows that our example set can be split into three
 unrelated blocks. These blocks (corresponding to columns of data) can be
 treated separately if statistical correlations between the variables can be
-ignored. The high-level error localization detects and exploits this block
-structure, so users need not concern themselves with it directly. However, to
-facilitate edit rule investigation and maintenance, the lower-level {\sf
-blocks} function is exported to user space. This function returns a {\sf list}
-of the independent {\sf editsets}, as illustrated by the following example.
+ignored. The higher-level error localization function that will be discussed in
+section \ref{ss:errorlocalization}, detects and exploitthis block structure, so
+users need not concern themselves with it directly. However, to facilitate edit
+rule investigation and maintenance, the lower-level {\sf blocks} function is
+exported to user space. This function returns a {\sf list} of the independent
+{\sf editsets}, as illustrated by the following example.
 <<>>=
-length(blocks(E))
+sapply(blocks(E),nedits)
 @
-Clearly, the three independent graphs from Figure \ref{fig:graph} have been recognized.
+Here, {\sf nedits} counts the number of edits in an editset. Clearly, the three
+independent blocks with 8, 3 and 1 edits (Figure \ref{fig:graph}) have been
+found.
 
 The largest cluster of edits in Figure \ref{fig:graph} connects numerical variables with
 categorical variables. For example, via the edit labeled \verb"mix11". Operations such
@@ -737,8 +740,9 @@ the edit $x>0$.
 \label{R:checkdatamodel}
 \end{Rcode}
 
-\subsection{Error localization with {\sf localizeErrors} and {\sf
-errorLocalizer}} The interfaces of {\sf localizeErrors} and {\sf
+\subsection{Error localization with {\sf localizeErrors} and {\sf errorLocalizer}} 
+\label{ss:errorlocalization}
+The interfaces of {\sf localizeErrors} and {\sf
 errorLocalizer} for objects of class {\sf editset} are similar to those of {\sf
 editmatrix} and {\sf editarray}.  They will therefore not be described
 extensively here, instead we refer the reader to \cite{jonge:2011} and
