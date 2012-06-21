@@ -157,13 +157,12 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
         involved <- sapply(ind, function(J) sum(a[J]) < length(J))
         # corner case: every record fails the edit (all categories TRUE).
         #if (!any(involved)) involved <- !involved
-        
         ivd <- ind[involved]
         ivd <- lapply(ivd, function(J) J[a[J]])
         if ( length(ivd) == 0 ){
             edts[i] <- FALSE
         } else if ( length(ivd) == 1 ){
-            edts[i] <- ind2char(ivd, ind)
+            edts[i] <- paste(" if ( ",ind2char(ivd, ind),") FALSE")
         } else {
             
             n <- length(ivd)
@@ -174,8 +173,11 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
             ch <- ind2char(ivd, ind, invert=inv)
             if ( useIf ){
                 edts[i] <- paste("if(", paste(ch[1:(n-1)],collapse=" & "), ")",ch[n])
+# ALT:                edts[i] <- paste("if(", paste(ch,collapse=" & "), ") FALSE")
+                
             } else {
                 edts[i] <- paste("!(", paste(ch[1:(n-1)],collapse=" & "), ") |",ch[n])
+# ALT:               edts[i] <- paste("!(", paste(ch,collapse=" & "), ") | FALSE")
             }
         }
     }

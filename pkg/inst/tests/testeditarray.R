@@ -31,6 +31,12 @@ test_that("parse editarray to character and back",{
         "p %in% c(FALSE,TRUE)",
         "if (p) !g=='m'")
     expect_equivalent(editarray(edts), editarray(as.character(editarray(edts))))
+    # cornercase found in version 2.5-1
+    edts <- expression(
+       A %in% letters[1:3],
+       if ( A %in% c('a','b') ) FALSE 
+    )
+    expect_equivalent(editarray(edts), editarray(as.character(editarray(edts))))
 })
 
 test_that("parse editarray to expression and back",{

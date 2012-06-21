@@ -180,7 +180,6 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
     # substitute in then-clauses
     i1 <- var %in% getVars(E$mixnum)
     if ( any (i1) ){ # time-saving condition
-print('foob')
         mixvar <- var[i1]
         mixval <- value[i1]
         u <- contains(E$mixnum, mixvar)
