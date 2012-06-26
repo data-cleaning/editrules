@@ -559,19 +559,50 @@ detailed in the next two subsections.
 \subsection{Value substitution}
 \label{sssubstitution}
 Assigning a value to a variable occurring in an {\sf editset} can be done with
-the {\sf substValue} function. For example, substituting $x=10$ in the
-edits of Figure \ref{fig:editfile} gives 
-<<>>=
-(F <- substValue(E,'x',10))
-@ 
-Compare this result with the edits displayed on page \pageref{code:editfile}.
-Observe that the original edit, stating $\textrm{\sf if } x > 0 \textrm{ \sf then } y>0$
-has disappeared from the mixed edits, and that in stead the numerical edit
-$y>0$ has appeared, as is to be expected.
-<<>>=
-substValue(F,'y',20)
-@
+the {\sf substValue} function. The consequences of substituting a value in
+conditional edits require a bit more care than for simple linear or categorical
+edits. Recall the truth table for implication $p\rightarrow q$:
+\begin{displaymath}
+\begin{array}{ccc}
+p      & q       & p\rightarrow q\\
+\hline
+\true  & \true   & \true \\
+\true  & \false  & \false \\
+\false & \true   & \true\\
+\false & \false  & \true\\
+\end{array}
+\end{displaymath}
+When either premise or consequent of a conditional edit resolves to 
+a truth value after substituting a variable, the remaining edits must
+be processed according to this table.
 
+As a demonstration, consider the following simple 
+{\sf editset}, consisting of a single conditional edit.
+<<>>=
+X <- editset("if ( x > 0 )  y > 0")
+@
+Substituting a value for $x$ so that the premise holds, obviously yields 
+a numerical edit.
+<<>>=
+substValue(X,'x',1)
+@
+Substituting a value so that the premise does not hold yields an empty {\sf editset}
+since the condition in the consequent only has to be obeyed when the premise holds.
+<<>>=
+substValue(X,'x',-1)
+@
+The same happens when we enter a value for $y$ so that the consequent holds
+<<>>=
+substValue(X,'y',1)
+@
+since in that case, the value of the premise is unimportant. On the other hand,
+when the restriction in the consequent resolves to \false, the premise cannot
+be \true and must be inverted.
+<<>>=
+substValue(X,'y',-1)
+@
+Observe that the {\sf substValue} function recognizes that the remaining edits
+are purely numerical.
 
 
 %
@@ -583,35 +614,62 @@ Variable elimination is the mechanism by which edits, logically implied by a
 set of (user-defined) edits, are derived.  Variable elimination amounts to
 deriving all implicit edit rules from a set of edits which do not contain the
 eliminated variable anymore.  For an {\sf editset} object, it is executed by
-first separating the edits in disjunct sets as described in Section
-\ref{ss:editlist}.  Next, since in each element of the resulting {\sf editlist}
-the dummy {\sf editmatrix} $E_{\sf mixnum}$ is empty, variable elimination
-takes place on each $E_{\sf num}$ or $E_{\sf mixcat}$ of the {\sf editlist} for
-numerical or categorical variables respectively. The methods used for variable
-elimination in an {\sf editmatrix} are described in \cite{jonge:2011} while the
-methods for variable elimination from an {\sf editarray} are described in
-\cite{loo:2012}. Consequently, the result of an {\sf eliminate} operation is an
-object of class {\sf editlist}. 
+first separating the edits in disconnected sets as described in Section
+\ref{ss:disentangling}.  Next, variables are eliminated from the separate
+numerical or categorical parts of every separate {\sf editset}.
 
-As an example, consider again the set of edits of Eqs.~\eqref{eq:edits}
-and~\eqref{eq:editlist}. In Figure~\ref{figprojections}, the valid regions are
-indicated as grey areas.  Geometrically, eliminating variable $y$ amounts to a
-projection along the $y$-axis.  Figure \ref{figprojections}  shows the result
-of projecting out the $y$ variable in bold lines.  Algebraically, we need to
-apply Fourier-Motzkin elimination to the edits in the consequents of
-Eq.~\eqref{eq:editlist} to obtain
-(remember that $\veebar$ stands for exclusive or)
-\begin{displaymath}
-\left(
-\textrm{\sf if } x\geq0 \textrm{ \sf then }  \varnothing
-\right)
-\veebar
-\left(
-\textrm{\sf if } x < 0 \textrm{ \sf then } x < -2\right).
-\end{displaymath}
-The first term says that when $x\geq 0$, there are no further restrictions.
-The second element says that when $x<0$, $x$ must actually be smaller than $-2$. Figure
-\ref{fig:elimination} shows how the results are displayed in {\sf R} by {\sf editrules}.
+As an example, we will eliminate variable $y$ from the following set of edits.
+\begin{equation}
+G = \left\{\begin{array}{l}
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } y\geq 0\\
+\textrm{\sf if } x \geq 0 \textrm{ \sf then } x \leq y\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } y < 0\\
+\textrm{\sf if } x < 0 \textrm{ \sf then } x - y < -2. \\
+\end{array}\right.
+\label{eq:edits}
+\end{equation}
+Observe that these edits are all connected, since all of them contain both $x$
+and $y$.  In Figure \ref{fig:projections}, the valid areas of the $x$-$y$ plane
+defined by these edits are shown in grey. Because of their conditional
+structure, the edits define two disjunct subregions. Informally, if $x<0$, a
+record $(x,y)$ must be in the left grey region and if $x\geq0$, it must be in
+the right grey region.
+
+%
+\setkeys{Gin}{width=0.5\textwidth}
+\begin{figure}
+\centering
+<<fig=true,echo=false>>=
+    par(mar=rep(0,4),oma=rep(0,4))
+    lwd=2
+    pcol <- "#E3E3E3" 
+    x <- c(0,4)
+    plot(x,x,"l",axes=FALSE,xlab="",ylab="",xlim=c(-4,4),ylim=c(-2,3),lwd=lwd)
+    polygon(c(0,3.9,3.9),c(0,3.9,0),border=NA,col=pcol)
+    polygon(c(-2,-3.9,-3.9),c(0,0,-1.9),border=NA,col=pcol)
+    lines(x,x,lwd=lwd)
+    abline(v=0,lwd=lwd)
+    abline(h=0,lwd=lwd)
+    x2 <- c(-2,-4)
+    lines(x2,x2+2,lwd=lwd)
+    lines(c(0,5),c(0,0),lwd=5)
+    points(0,0,pch=16,cex=2)
+    lines(c(-2,-5),c(0,0),lwd=5)
+    text(4,-0.2,expression(x),cex=2)
+    text(-0.2,3,expression(y),cex=2)
+@
+\caption{Graphical representation (in gray) of the valid areas defined by the
+edits of Eq.\ \eqref{eq:edits}. Depicted are sections of the bordering lines
+$y=x$ and $y=x+2$.  The bold lines indicate the projections of the gray areas
+along the $y$-axis.
+}
+\label{fig:projections}
+\end{figure}
+
+Recall that geometrically, eliminating a variable from a set of linear (in)equalities
+amounts to a projection along the corresponding axis. Here, eliminating $y$ amounts to 
+projecting the grey areas along the $y$-axis, yielding two separate line segments, shown
+in bold in the Figure \ref{fig:projections}.
 
 
 \setcounter{Rcode}{\value{figure}}
@@ -625,9 +683,21 @@ G <- editset(expression(
 ))
 eliminate(G,"y")
 @
-\caption{Eliminating a variable from an object of class {\sf editset} results in an {\sf editlist}.}
+\caption{Eliminating a variable from an object of class {\sf editset} results in a number
+of {\sf editsets} which are stored in an {\sf editlist} object.}
 \label{fig:elimination}
 \end{Rcode}
+
+Figure \ref{fig:elimination} shows how to perform the elimination with the {\sf
+editrules} package.  In the first line, the edits are defined, using an {\sf
+expression} vector as input. In the second line, variable $y$ is eliminated by
+calling {\sf eliminate}. The result is an object of class {\sf editlist},
+containing two {\sf editsets}. The first {\sf editset} holds when $x\geq0$ and
+holds no further restrictions: the restriction $x\geq0$ corresponds exactly
+with the projection of the right grey area of Figure \ref{fig:projections} on
+the $x$-axis. The second editset holds when $x<0$, and imposes that in that
+case $x < -2$.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
@@ -638,39 +708,48 @@ eliminate(G,"y")
 \subsection{A branch-and-bound algorithm}
 The error localization problem consists of finding the least (weighted) number
 of fields in a record that can be adapted or imputed, such that no edits are
-violated anymore. For purely categorical or purely numerical edit sets, the
-feasible space of records is convex, and each solution can be determined by a
-sequence of variable substitutions or eliminations.  For objects of class {\sf
-editmatrix} and class {\sf editarray} a branch-and-bound algorithm generating
-such sequences has been implemented before \citep{jonge:2011,loo:2011b}.  When
-conditional edits are present, as in the example of Figure
-\ref{figprojections}, solving an error localization problem is equivalent to
-solving it for each convex subregion separately and selecting the lowest-weight
-solution afterwards. 
+violated anymore. Given a record violating a (subset of) edits from an {\sf
+editset}. For each field, we may assume that it's value is either right and
+should be kept, or wrong and should therefore be altered. The consequences of
+such assumptions on the remaining edits can be worked out: assuming that a
+field holds a correct value corresponds to substituting the variable in the
+editset with that value. Assuming that a field should be altered corresponds to
+eliminating that variable. Indeed, eliminating a variable corresponds to
+deriving all nonredundant edits not pertaining to the eliminated variable.
 
-In {\sf editrules}, error localization with conditional edits (in an {\sf
-editset}) starts by separating the edits into blocks and disjunct sets
-using the {\sf separate} function discussed in Section \ref{ss:editlist}.
-Separate blocks share no variables and are treated independently. Blocks
-consisting of {\sf editmatrix} or {\sf editarray} objects are treated as
-described in the references mentioned before. Blocks consisting of {\sf
-editlists} have to be treated differently. Remember that an {\sf editlist} is a set
-of disjunct {\sf editsets}, each describing a convex region of the record domain. An
-{\sf editlist} enters a similar branch-and-bound algorithm as {\sf
-editmatrices} and -{\sf arrays}, with the difference is that each
-elimination and substitution step is performed separately on each element of an
-{\sf editlist}.  Whenever one of the elements of an {\sf editlist} becomes
-infeasible it is removed from the list. When no feasible regions are left and
-not all variables have been treated, a bound condition is hit and the branch is
-pruned. If all variables have been treated, and no inconsistencies were
-encountered, a (list of) solutions is found. When all solutions are
-found, the lowest weight solution can be selected.
+The solution to an error localization problem corresponds to a sequence of
+variable substitutions and eliminations on a set of edits. \cite{waal:2003}
+devised a branch-and-bound algorithm to efficiently generate such sequences
+in a binary tree while pruning branches which yield infeasible solutions.
+The function {\sf localizeErrors} uses a variant of De Waal's algorithm to
+solve the error localization problem. 
 
-The process is accelerated by detecting whenever the current weight of partial
-solutions equals the weight of previous solutions. At that point, all remaining
-values are substituted to check whether the branch can lead to an actual
-solution. If so, the solution is stored; if not, a bound condition is hit. 
+In some cases, especially when many equivalent solutions exist, the
+branch-and-bound algorithm can be slow. Therefore, in {\sf editrules}, error
+localization starts by separating edits into blocks using the {\sf blocks}
+function discussed in Section \ref{ss:disentangling}. Separate blocks share no
+variables and are treated independently. Blocks consisting of only numerical or
+only categorical edits are treated as described in \cite{loo:2011b} and
+\cite{jonge:2011}.
 
+Blocks consisting of conditional edits have to be treated differently.  
+
+
+They are split up in independent sets, using the {\sf disjunct} function,
+described in \ref{ss:disentangling}. 
+
+
+The resulting list of {\sf editsets} is
+treated by the branch-and-bound algorithm simultaneously. Whenever one of the
+{\sf editsets} becomes unfeasible, it is removed. If the last editset has
+become infeasible, a branch is pruned.  The process is accelerated by detecting
+whenever the current weight of partial solutions equals the weight of previous
+solutions. At that point, all remaining values are substituted to check whether
+the branch can lead to an actual solution. If so, the solution is stored; if
+not, a bound condition is hit. 
+
+Finally, a third optimization is performed prior to entering the branch-and-bound
+algorithm
 
 \subsection{Acceleration by data model checking}
 Observe that the number of nodes of the branch-and-bound tree grows as $2^n$,
