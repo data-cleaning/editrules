@@ -776,8 +776,8 @@ functions have been overloaded to handle the new {\sf editset} object.
 
 Several new edit manipulation features have been added, most notably the
 possibility to split sets of edits in disjunct sets that do not contain any
-mixed data edits anymore. Also, the branch-and-bound error localization methods
-have been accelerated by taking care of range edit violations prior to
+conditional edits anymore. Also, the branch-and-bound error localization
+methods have been accelerated by taking care of range edit violations prior to
 multivariate error localization.
 
 Future work on the package may include the extension to {\em soft edits}, where
