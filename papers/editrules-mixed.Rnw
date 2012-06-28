@@ -591,12 +591,12 @@ since the condition in the consequent only has to be obeyed when the premise hol
 <<>>=
 substValue(X,'x',-1)
 @
-The same happens when we enter a value for $y$ so that the consequent holds
+The same happens when we enter a value for $y$ so that the consequent holds:
 <<>>=
 substValue(X,'y',1)
 @
 since in that case, the value of the premise is unimportant. On the other hand,
-when the restriction in the consequent resolves to \false, the premise cannot
+when the restriction in the consequent resolves to {\sc false}, the premise cannot
 be \true and must be inverted.
 <<>>=
 substValue(X,'y',-1)
@@ -618,7 +618,8 @@ first separating the edits in disconnected sets as described in Section
 \ref{ss:disentangling}.  Next, variables are eliminated from the separate
 numerical or categorical parts of every separate {\sf editset}.
 
-As an example, we will eliminate variable $y$ from the following set of edits.
+As an example, we will eliminate variable $y$ from the following set of
+conditional edits.
 \begin{equation}
 G = \left\{\begin{array}{l}
 \textrm{\sf if } x \geq 0 \textrm{ \sf then } y\geq 0\\
@@ -705,123 +706,70 @@ case $x < -2$.
 \section{Error localization in mixed data}
 \label{serrorlocalization}
 
-\subsection{A branch-and-bound algorithm}
-The error localization problem consists of finding the least (weighted) number
-of fields in a record that can be adapted or imputed, such that no edits are
-violated anymore. Given a record violating a (subset of) edits from an {\sf
-editset}. For each field, we may assume that it's value is either right and
-should be kept, or wrong and should therefore be altered. The consequences of
-such assumptions on the remaining edits can be worked out: assuming that a
-field holds a correct value corresponds to substituting the variable in the
-editset with that value. Assuming that a field should be altered corresponds to
-eliminating that variable. Indeed, eliminating a variable corresponds to
-deriving all nonredundant edits not pertaining to the eliminated variable.
+Given that a record violates a number of edit rules, the problem remains to
+point out which fields cause the error. When there is no clear evidence
+pointing out which variables cause the violations, one can resort to adapting
+as few variables as possible. Adapting as few variables as possible, without
+violating any new, implied rules is referred to as the principle of
+\cite{fellegi:1976}, who described the first systematic approach to error
+localization.
 
-The solution to an error localization problem corresponds to a sequence of
-variable substitutions and eliminations on a set of edits. \cite{waal:2003}
-devised a branch-and-bound algorithm to efficiently generate such sequences
-in a binary tree while pruning branches which yield infeasible solutions.
-The function {\sf localizeErrors} uses a variant of De Waal's algorithm to
-solve the error localization problem. 
-
-In some cases, especially when many equivalent solutions exist, the
-branch-and-bound algorithm can be slow. Therefore, in {\sf editrules}, error
-localization starts by separating edits into blocks using the {\sf blocks}
-function discussed in Section \ref{ss:disentangling}. Separate blocks share no
-variables and are treated independently. Blocks consisting of only numerical or
-only categorical edits are treated as described in \cite{loo:2011b} and
-\cite{jonge:2011}.
-
-Blocks consisting of conditional edits have to be treated differently.  
-
-
-They are split up in independent sets, using the {\sf disjunct} function,
-described in \ref{ss:disentangling}. 
-
-
-The resulting list of {\sf editsets} is
-treated by the branch-and-bound algorithm simultaneously. Whenever one of the
-{\sf editsets} becomes unfeasible, it is removed. If the last editset has
-become infeasible, a branch is pruned.  The process is accelerated by detecting
-whenever the current weight of partial solutions equals the weight of previous
-solutions. At that point, all remaining values are substituted to check whether
-the branch can lead to an actual solution. If so, the solution is stored; if
-not, a bound condition is hit. 
-
-Finally, a third optimization is performed prior to entering the branch-and-bound
-algorithm
-
-\subsection{Acceleration by data model checking}
-Observe that the number of nodes of the branch-and-bound tree grows as $2^n$,
-with $n$ the number of variables (and hence the depth of the tree).  In some
-cases the tree depth can be reduced by noting that variables which violate
-simple, single-variable range edits will always be part of the error
-localization solution. These single-variable edits are easily checked (in a
-vectorized manner) and variables violating such edits can be removed from the
-multivariate localization problem. 
-
-The solution to an error localization problem for a number of records in a
-dataset with $n$ variables can be represented as matrix ${\bf M}$ where
-$M_{ij}>0$ if variable $j$ in record $i$ must be changed and $0$ otherwise.  To
-construct such a matrix, we assume a set of single-variable edits, and
-proceed as follows.  Define ${\bf V}$ as the matrix where $V_{ik}=1$ if
-record $i$ violates edit $k$ and $0$ otherwise.  To account for missing values,
-we also set $V_{ik}=1$ when edit violation cannot be established because the
-value of the variable to which range edit $k$ pertains is missing.  Also,
-define ${\bf C}$ as the matrix with $C_{kj}=1$ if edit $k$ contains
-variable $j$ and $0$ otherwise. The matrix ${\bf M}$ is then given by
-\begin{equation}
-{\bf M} = {\bf V}{\bf C}.
-\end{equation} 
-
-In {\sf editrules}, this operation has been implemented in the function {\sf checkDatamodel}.
-This function returns an object of class {\sf errorLocation}, but does not yield a full solution,
-as demonstrated by the example of Figure \ref{R:checkdatamodel}.
-
-\addtocounter{figure}{1}
-\begin{Rcode}
-<<>>=
-E <- editmatrix(expression(
-    x > 0,
-    x + y == 2
-))
-(dat <- data.frame(x=c(-1,2),y=c(3,0)))
-checkDatamodel(E,dat)$adapt
-localizeErrors(E,dat)$adapt
-@
-\caption{An example of {\sf checkDatamodel}, which only detects violation of range edits,
-while {\sf localizeErrors} finds the full solution. The result of both functions is an
-object of class {\sf errorLocation} which contains (amongst other things) for each record
-which variables should be adapted. Clearly, in the first record $(x=-1,y=3)$ both $x$ and $y$
-must be adapted. However, {\sf checkDatamodel} only checks the one-dimensional edits, {\em i.c.}
-the edit $x>0$.
-}
-\label{R:checkdatamodel}
-\end{Rcode}
 
 \subsection{Error localization with {\sf localizeErrors} and {\sf errorLocalizer}} 
 \label{ss:errorlocalization}
-The interfaces of {\sf localizeErrors} and {\sf
-errorLocalizer} for objects of class {\sf editset} are similar to those of {\sf
-editmatrix} and {\sf editarray}.  They will therefore not be described
-extensively here, instead we refer the reader to \cite{jonge:2011} and
-\cite{loo:2011b}. In short, function {\sf localizeErrors} accepts an {\sf
-editset} and a {\sf data.frame} along with some optional arguments and returns
-an object of class {\sf errorLocation}. The function {\sf errorLocalizer}
-returns a {\sf backtracker} object that allows fine control over the
-branch-and-bound search algorithm.
+In {\sf editrules}, errors can be localized according to Felligi and Holt's
+principle using the {\sf localizeErrors} function. This function has been
+introduced earlier for purely numerical data \citep{jonge:2011a} and for
+purely categorical data \citep{loo:2011c}, and has now been extended to 
+handle conditional edits.
 
-New to version {\sf 2.5} of the package is that {\sf localizeErrors} uses {\sf
-checkDatamodel} to identify fields that fail range edits prior to entering the
-branch-and-bound algorithm.  We note that for large, highly entangled edit
-sets, especially those with many conditional edits, the branch-and-bound
-algorithm may take a long time to complete. For this reason a second backend
-algorithm has been implemented, that uses a mixed-integer programming
-formulation of the localization problem. It can be accessed by providing the
-optional parameter {\sf method="mip"} to {\sf localizeErrors}. For a comparison
-between the two algorithms refer to \cite{jonge:2012}.
+The interface of {\sf localizeErrors} is exactly the same as described
+in the reference above. The minimal input is an {\sf editset} and a
+{\sf data.frame} and the output is an object of class {\sf errorLocalizer},
+which holds error locations as well as some logging info. Below we give
+a simple demonstration.
+
+<<>>=
+E <- editset(expression(
+    if ( x > 0 ) y > 0,
+    x + y == 10
+))
+dat <- data.frame(x = 1, y = -5)
+el <- localizeErrors(E,dat)
+el$adapt
+el$status
+@
+In the first line we define an edit set demanding that when $x>0$, then $y>0$
+and that $x$ and $y$ must add up to 10. The second line defines a record where
+$(x=1,y=-5)$. Obviously, this record violates both restrictions. The errors may
+be resolved by either adapting $y$ or $x$ and $y$. The former solution is the
+minimal case and this is what {\sf localizeErrors} returns in line 3: the array {\sf
+el\$adapt} indicates with a boolean value which variable in which record must be
+changed. The {\sf data.frame} {\sf el\$status} gives information on the total
+solution weight, the number of equivalent solutions (degeneracy) and the
+amount of time it took to compute the solution.
+
+
+\subsection{Some details on implementation}
+The error localization problem consists of finding the least (weighted) number
+of fields in a record that can be adapted or imputed, such that no edits are
+violated anymore. \cite{waal:2003} developed a branch-and-bound algorithm which
+computes answers to the localization problem by systematically building and
+testing partial solutions. The computational time necessary for the algorithm
+to complete is exponential in the number of variables. Therefore, partial
+solutions which cannot lead to a solution are abandoned (pruning). To decrease
+the number of variables entering the branch-and-bound algorithm, edits sets are
+separated in independent blocks.  Since version {\sf 2.5-0} of {\sf editrules},
+error localization is accelerated further by adding variables which violate
+univariate constraints to the solution set prior to entering the
+branch-and-bound algorithm.  Finally, we note that a second algorithm,
+based on a mixed-integer formulation of the problem is implemented
+as well. This algorithm will be reported upon in a forthcoming paper
+\citep{jonge:2012}.
+
 
 \section{Conclusions}
+\label{sconclusions}
 We described new functionality of the {\sf editrules} package, pertaining to
 conditional restrictions and mixed data edits. All existing edit manipulation
 functions have been overloaded to handle the new {\sf editset} object.
@@ -836,8 +784,6 @@ Future work on the package may include the extension to {\em soft edits}, where
 not only the violation of an edit is weighed in the process of error
 localization but also the {\em amount} of violation can be taken into account.
 
-
-\label{sconclusions}
 
 \clearpage
 \bibliographystyle{chicago}

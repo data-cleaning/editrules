@@ -446,6 +446,58 @@ variables explicitly is not normally done by end users, as the names and values
 of dummy variables remain hidden to them.  It is used internally by {\sf
 disjunct}. 
 
+
+
+\subsection{Acceleration by data model checking}
+Observe that the number of nodes of the branch-and-bound tree grows as $2^n$,
+with $n$ the number of variables (and hence the depth of the tree).  In some
+cases the tree depth can be reduced by noting that variables which violate
+simple, single-variable range edits will always be part of the error
+localization solution. These single-variable edits are easily checked (in a
+vectorized manner) and variables violating such edits can be removed from the
+multivariate localization problem. 
+
+The solution to an error localization problem for a number of records in a
+dataset with $n$ variables can be represented as matrix ${\bf M}$ where
+$M_{ij}>0$ if variable $j$ in record $i$ must be changed and $0$ otherwise.  To
+construct such a matrix, we assume a set of single-variable edits, and
+proceed as follows.  Define ${\bf V}$ as the matrix where $V_{ik}=1$ if
+record $i$ violates edit $k$ and $0$ otherwise.  To account for missing values,
+we also set $V_{ik}=1$ when edit violation cannot be established because the
+value of the variable to which range edit $k$ pertains is missing.  Also,
+define ${\bf C}$ as the matrix with $C_{kj}=1$ if edit $k$ contains
+variable $j$ and $0$ otherwise. The matrix ${\bf M}$ is then given by
+\begin{equation}
+{\bf M} = {\bf V}{\bf C}.
+\end{equation} 
+
+In {\sf editrules}, this operation has been implemented in the function {\sf checkDatamodel}.
+This function returns an object of class {\sf errorLocation}, but does not yield a full solution,
+as demonstrated by the example of Figure \ref{R:checkdatamodel}.
+
+\addtocounter{figure}{1}
+\begin{Rcode}
+<<>>=
+E <- editmatrix(expression(
+    x > 0,
+    x + y == 2
+))
+(dat <- data.frame(x=c(-1,2),y=c(3,0)))
+checkDatamodel(E,dat)$adapt
+localizeErrors(E,dat)$adapt
+@
+\caption{An example of {\sf checkDatamodel}, which only detects violation of range edits,
+while {\sf localizeErrors} finds the full solution. The result of both functions is an
+object of class {\sf errorLocation} which contains (amongst other things) for each record
+which variables should be adapted. Clearly, in the first record $(x=-1,y=3)$ both $x$ and $y$
+must be adapted. However, {\sf checkDatamodel} only checks the one-dimensional edits, {\em i.c.}
+the edit $x>0$.
+}
+\label{R:checkdatamodel}
+\end{Rcode}
+
+
+
 \end{document}
 
 
