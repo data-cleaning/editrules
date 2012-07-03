@@ -800,11 +800,11 @@ substitution and will be reported upon in a separate paper \citep{jonge:2012}.
 \label{sconclusions}
 We described new functionality of the {\sf editrules} package, pertaining to
 conditional restrictions and mixed data edits. All existing edit manipulation
-functions have been overloaded to handle the new {\sf editset} object and
-several new edit manipulation features have been added.  Most notably the
-possibility to read edits from a free-form textfile and the option to split
-sets of edits in disjunct sets that do not contain any mixed data edits
-anymore. Also, the branch-and-bound error localization methods have been
+functions have been extended (overloaded) to handle the new {\sf editset}
+object and several new edit manipulation features have been added.  Most
+notably the possibility to read edits from a free-form textfile and the option
+to split sets of edits in disjunct sets that do not contain any mixed data
+edits anymore. Also, the branch-and-bound error localization methods have been
 accelerated by taking care of range edit violations prior to multivariate error
 localization.
 

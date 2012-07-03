@@ -1,12 +1,51 @@
 \documentclass[11pt,fleqn,a4paper]{article}
+\usepackage{amsmath,amssymb}
 
+\usepackage{natbib}
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\usepackage{mySweave}
 
-\title{Methods for processing conditional edits}
+\DeclareMathOperator*{\Lor}{\lor}
+\DeclareMathOperator*{\Land}{\land}
+\newcommand{\notodot}{\odot\kern-0.85em/\:\,}
+\title{Algorithms of the editrules package}
 
-\author{x and y}
+\author{Mark van der Loo and Edwin de Jonge}
 
 \begin{document}
 \maketitle
+Preparing data prior to statistical analysis can be a time-consuming
+and costly task. At National Statistics Institutes (NSI's), such
+preperatory steps (``data editing'') can consume up to 40\% of the resources
+dedicated to a statistical publication \citep{waal:2011}. It is therefore highly desireble to
+automate these processes as much as possible.
+
+At the core of automated data editing, are so-called {\em edit rules} or {\em
+edits}, in short, which represent record-wise restrictions that data must obey.
+Examples include range restrictions, sum rules, excluded value combinations for
+categorical data and the more complicated {\em conditional edits}. Conditional
+edits are restrictions which are written in {\sf if-then-else} form.
+
+We have recently released version {\sf 2.5} of our {\sf R} extension package
+{\sf editrules}, (see \cite{loo:2012a} and references therein), which
+implements automated rule-based data editing methods. The {\sf editrules}
+package serves as a toolbox for rule manipulation, data checking and error
+localization. In this paper we give details on some of the core algorithms
+pertaining especially to the handling of conditional restrictions. This paper
+supplements the papers describing how numerical \citep{jonge:2011}
+or categorical \citep{loo:2012} edits are handled  by the package.
+
+
+
+\clearpage
+\bibliographystyle{chicago}
+\bibliography{editrules}
+
+\end{document}
+
 
 \subsection{The {\sf editset} object}
 \label{ss:editset}
@@ -70,15 +109,15 @@ linear condition $k$ a dummy variable $t_k$, which is defined as
 \begin{equation}
 \label{eqdummy}
 t_k = \left\{\begin{array}{l}
-\true\textrm{ when } {\bf a}_k{\bf \cdot x}\odot b_k\\
-\false\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b_k,
+\textrm{\sf true}\textrm{ when } {\bf a}_k{\bf \cdot x}\odot b_k\\
+\textrm{\sf false}\textrm{ when }{\bf a}_k{\bf \cdot x}\notodot b_k,
 \end{array}\right.
 \end{equation}
 where each ${\bf a}_k$ is a row of {\bf A} [Eq.\ \eqref{eqedit1}].
 This way, the edits of Eq.\ \eqref{eqedit1} may be written as
 \begin{equation}
 \label{eqdummyedit1}
-\textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then \false},
+\textrm{\sf if } {\bf v} \in F \land t_1\land t_2\land\cdots\land t_m \textrm{ \sf then false},
 \end{equation}
 where $t_1\cdots t_m$ correspond to the $m$ linear restrictions of $\bf A$ in
 Eq.\ \eqref{eqedit1}.  Equation \eqref{eqdummyedit1} can be stored in a boolean
@@ -144,21 +183,21 @@ for conditional edits, the {\sf editrules} package has several methods to
 analyse dependencies and to disentangle edit sets. An overview of available
 functions is given in Table \ref{tab:separators}.
 %
-\begin{figure}[t]
-<<fig=TRUE,echo=FALSE>>=
-par(oma=c(0,0,0,0),mar=c(0,0,1.5,0))
-set.seed(2)
-plot(E)
-@
-\caption{A graph view of the edits of Figure \ref{fig:editfile}, generated  with
-{\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
-indicates that a variable occurs in an edit. The {\sf blocks} function
-separates an {\sf editset} into the independent editsets corresponding to the
-independent graphs shown here. Positioning of nodes is based on an optimization
-with random starting values and may therefore differ between repeated plots.
-}
-\label{fig:graph}
-\end{figure}
+%\begin{figure}[t]
+%<<fig=TRUE,echo=FALSE>>=
+%par(oma=c(0,0,0,0),mar=c(0,0,1.5,0))
+%set.seed(2)
+%plot(E)
+%@
+%\caption{A graph view of the edits of Figure \ref{fig:editfile}, generated  with
+%{\sf plot(E)}.  Squares represent edits, circles represent variables. An edge
+%indicates that a variable occurs in an edit. The {\sf blocks} function
+%separates an {\sf editset} into the independent editsets corresponding to the
+%independent graphs shown here. Positioning of nodes is based on an optimization
+%with random starting values and may therefore differ between repeated plots.
+%}
+%\label{fig:graph}
+%\end{figure}
 %
 
 The function {\sf contains} returns a boolean matrix, indicating which
@@ -205,38 +244,38 @@ defined by these edits. From the sketch it is clear that the edits can be
 separated in two purely linear edit sets, and that a record must obey the rules
 defining either the left or the right gray area.
 %
-\setkeys{Gin}{width=0.5\textwidth}
-\begin{figure}
-\centering
-<<fig=true,echo=false>>=
-    par(mar=rep(0,4),oma=rep(0,4))
-    lwd=2
-    pcol <- "#E3E3E3" 
-    x <- c(0,4)
-    plot(x,x,"l",axes=FALSE,xlab="",ylab="",xlim=c(-4,4),ylim=c(-2,3),lwd=lwd)
-    polygon(c(0,3.9,3.9),c(0,3.9,0),border=NA,col=pcol)
-    polygon(c(-2,-3.9,-3.9),c(0,0,-1.9),border=NA,col=pcol)
-    lines(x,x,lwd=lwd)
-    abline(v=0,lwd=lwd)
-    abline(h=0,lwd=lwd)
-    x2 <- c(-2,-4)
-    lines(x2,x2+2,lwd=lwd)
-    lines(c(0,5),c(0,0),lwd=5)
-    points(0,0,pch=16,cex=2)
-    lines(c(-2,-5),c(0,0),lwd=5)
-    text(4,-0.2,expression(x),cex=2)
-    text(-0.2,3,expression(y),cex=2)
-@
-\caption{Graphical representation (in gray) of the valid areas defined by the
-edits of Eq.\ \eqref{eq:edits}. Depicted are sections of the bordering lines
-$y=x$ and $y=x+2$.  The bold lines indicate the projections of the gray areas
-along the $y$-axis.
-}
-\label{figprojections}
-\end{figure}
+%\setkeys{Gin}{width=0.5\textwidth}
+%\begin{figure}
+%\centering
+%<<fig=true,echo=false>>=
+%    par(mar=rep(0,4),oma=rep(0,4))
+%    lwd=2
+%    pcol <- "#E3E3E3" 
+%    x <- c(0,4)
+%    plot(x,x,"l",axes=FALSE,xlab="",ylab="",xlim=c(-4,4),ylim=c(-2,3),lwd=lwd)
+%    polygon(c(0,3.9,3.9),c(0,3.9,0),border=NA,col=pcol)
+%    polygon(c(-2,-3.9,-3.9),c(0,0,-1.9),border=NA,col=pcol)
+%    lines(x,x,lwd=lwd)
+%    abline(v=0,lwd=lwd)
+%    abline(h=0,lwd=lwd)
+%    x2 <- c(-2,-4)
+%    lines(x2,x2+2,lwd=lwd)
+%    lines(c(0,5),c(0,0),lwd=5)
+%    points(0,0,pch=16,cex=2)
+%    lines(c(-2,-5),c(0,0),lwd=5)
+%    text(4,-0.2,expression(x),cex=2)
+%    text(-0.2,3,expression(y),cex=2)
+%@
+%\caption{Graphical representation (in gray) of the valid areas defined by the
+%edits of Eq.\ \eqref{eq:edits}. Depicted are sections of the bordering lines
+%$y=x$ and $y=x+2$.  The bold lines indicate the projections of the gray areas
+%along the $y$-axis.
+%}
+%\label{figprojections}
+%\end{figure}
 
 Algebraically, this can be done by working out the assumptions $x\geq 0$ is
-$\true$ ($\false$) and consequently $x<0$ is $\false$ ($\true$). We obtain
+$\textrm{\sf true}$ ($\textrm{\sf false}$) and consequently $x<0$ is $\textrm{\sf false}$ ($\textrm{\sf true}$). We obtain
 \begin{equation}
 G = 
 \left(
@@ -274,12 +313,12 @@ of variable elimination in Section \ref{ss:elimination}.
         \State {\bf return}
     \EndIf
         \State Choose a $t$ from $T$
-        \State $E\leftarrow \textrm{\sf substValue}(E,t,\true)$
+        \State $E\leftarrow \textrm{\sf substValue}(E,t,\textrm{\sf true})$
         \If { ${\textrm{\sf isFeasible}\left(E_{\sf num}\cup \textrm{\sf condition}(E)\right)} \land \textrm{\sf isFeasible}(E_{\sf mixnum})$ }
 \label{algp1}  
         \State $\textrm{\sc disjunct}(E)$
         \EndIf
-        \State $E\leftarrow \textrm{\sf substValue}(E,t,\false)$
+        \State $E\leftarrow \textrm{\sf substValue}(E,t,false)$
         \If { ${\textrm{\sf isFeasible}\left(E_{\sf num}\cup \textrm{\sf condition}(E)\right)} \land \textrm{\sf isFeasible}(E_{\sf mixnum})$ }
 \label{algp2} 
         %\If { $E_{\sf num}$, {\sf condition($E$)} and $E_{\sf mixnum}$ all feasible }
@@ -325,17 +364,17 @@ set of {\sf editset} objects.  Every editset gains an extra attribute called
 {\sf condition}, which holds the predicates  pertaining to that {\sf editset}.
 As an example, consider the output of calling {\sf disjunct} on the edits defined in
 Eq.\ \eqref{eq:edits}, and compare with Eq.\ \eqref{eq:editlist}.
-<<echo=false>>=
-G <- editset(expression(
-    if ( x >= 0 ) y >= 0,
-    if ( x >= 0 ) x <= y,
-    if ( x < 0 ) y < 0,
-    if ( x < 0 ) x - y < -2
-))
-@
-<<>>=
-disjunct(G)
-@
+%<<echo=false>>=
+%G <- editset(expression(
+%    if ( x >= 0 ) y >= 0,
+%    if ( x >= 0 ) x <= y,
+%    if ( x < 0 ) y < 0,
+%    if ( x < 0 ) x - y < -2
+%))
+%@
+%<<>>=
+%disjunct(G)
+%@
 The function {\sf condition} retrieves the predicate restrictions of an {\sf editset},
 in the form of an {\sf editmatrix}.
 
@@ -348,26 +387,26 @@ avoid unnecessary copying. To allow overloading of functions such as {\sf
 eliminate} and {\sf localizeErrors}, the result of {\sf disjunct} is of class
 {\sf editlist} or {\sf editenv}. 
 
-\begin{figure}
-\setkeys{Gin}{width=0.9\textwidth}
-<<fig=true,echo=false>>=
-v <- disjunct(E)
-par(oma=c(0,0,0,0),mar=c(0,0,1.5,0),mfrow=c(2,2),pty='m')
-for ( i in 1:length(v) ){
-    set.seed(1)
-    plot(
-        v[[i]],
-        main=paste(as.character(editrules:::condition(v[[i]])),collapse=', ')
-    )
-}
-@
-\caption{Connectivity graphs of the disjunct edit sets
-generated from the edits of Figure \ref{fig:editfile}. There are no paths from
-numerical variables ($x$, $y$, $z$, $u$, $v$, $w$) to categorical 
-variables ($A$, $B$, $C$, $D$) anymore. The titles of the subplots indicate
-the predicates for each {\sf editset}.}
-\label{figdisjunct}
-\end{figure}
+%\begin{figure}
+%\setkeys{Gin}{width=0.9\textwidth}
+%<<fig=true,echo=false>>=
+%v <- disjunct(E)
+%par(oma=c(0,0,0,0),mar=c(0,0,1.5,0),mfrow=c(2,2),pty='m')
+%for ( i in 1:length(v) ){
+%    set.seed(1)
+%    plot(
+%        v[[i]],
+%        main=paste(as.character(editrules:::condition(v[[i]])),collapse=', ')
+%    )
+%}
+%@
+%\caption{Connectivity graphs of the disjunct edit sets
+%generated from the edits of Figure \ref{fig:editfile}. There are no paths from
+%numerical variables ($x$, $y$, $z$, $u$, $v$, $w$) to categorical 
+%variables ($A$, $B$, $C$, $D$) anymore. The titles of the subplots indicate
+%the predicates for each {\sf editset}.}
+%\label{figdisjunct}
+%\end{figure}
 %
 %
 As an example of how {\sf disjunct} separates numerical from categorical
@@ -376,7 +415,7 @@ variables, the four editsets, resulting from passing the edits of Figure
 The original editset has three dummy variables, corresponding to $x>0$, $y>0$,
 and $x>y$, yielding eight disjunct spaces. Four of these are empty, because not
 all combinations of truth values are valid. For example, the conditions
-$x>y=\true$, $x>0=\false$ and $y>0=\true$ contradict.  Note that contrary to
+$x>y=\textrm{\sf true}$, $x>0=\textrm{\sf false}$ and $y>0=\textrm{\sf  true}$ contradict.  Note that contrary to
 Figure \ref{fig:graph}, there are no paths connecting numerical variables
 ($x$,$y$,$z$,$u$,$v$,$w$) to categorical variables ($A$, $B$, $C$, $D$) in any
 of the dependency graphs.
@@ -409,32 +448,32 @@ the following actions are performed.
 \item If the variable occurs in $E_{\sf num}$ substitute its value there.
 \item Substitute the variable in $E_{\sf mixnum}$.
 \item If any edits in $E_{\sf mixnum}$ have become obviously redundant ({\em e.g.} $0 < 1$) or
-obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \true or \false for
+obvious contradictions ({\em e.g.} $1 < 0$), substitute respectively \textrm{\sf true} or \textrm{\sf false} for
 the corresponding dummy variables in $E_{\sf mixcat}$.
-\item Remove all edits of the form $\textrm{\sf if } \true \textrm{ \sf then  } t$
+\item Remove all edits of the form $\textrm{\sf if } \textrm{\sf true} \textrm{ \sf then  } t$
 from $E_{\sf mixcat}$. (Recall that $t$ is a dummy variable, see Eqs.\ \eqref{eqdummy}-\eqref{eqdummyedit1}).
 \item If the dummy variables $t$ of step 4 do not occur anywhere in $E_{\sf
 mixcat}$ anymore, move the corresponding linear inequality from $E_{\sf mixnum}$ to $E_{\sf num}$.
-\item Remove all edits of the form $\textrm{\sf if } \false \textrm{ \sf then  } t$.
+\item Remove all edits of the form $\textrm{\sf if } \textrm{\sf false} \textrm{ \sf then  } t$.
 
 \end{enumerate}
 %
 %
 As an example, consider the code below.
-<<>>=
-F <- editset(expression(
-x + y == z,
-if ( x > 0 ) y > 0))
-substValue(F,"x",3)
-@
-Here, substituting $x=3$, yields $\textrm{\sf  if } \true \textrm{ \sf  then }
-y>0$, so the consequent $y>0$ may be added to the numerical edits (here:
-$x+y=z$).  In case we substitute $x$ with $-3$ we obtain $\textrm{\sf  if } -3
-> 0 \textrm{ \sf  then } y>0$, yielding a false predicate and the conditional
-> edit can be deleted:
-<<>>=
-substValue(F,"x",-3)
-@
+%<<>>=
+%F <- editset(expression(
+%x + y == z,
+%if ( x > 0 ) y > 0))
+%substValue(F,"x",3)
+%@
+%Here, substituting $x=3$, yields $\textrm{\sf  if } \textrm{\sf true} \textrm{ \sf  then }
+%y>0$, so the consequent $y>0$ may be added to the numerical edits (here:
+%$x+y=z$).  In case we substitute $x$ with $-3$ we obtain $\textrm{\sf  if } -3
+%> 0 \textrm{ \sf  then } y>0$, yielding a false predicate and the conditional
+% edit can be deleted:
+%<<>>=
+%substValue(F,"x",-3)
+%@
 
 The fourth and final case concerns substitution of dummy variables, which was
 discussed in Section \ref{ss:editlist}.  Recall that dummy variables are used
@@ -475,26 +514,26 @@ In {\sf editrules}, this operation has been implemented in the function {\sf che
 This function returns an object of class {\sf errorLocation}, but does not yield a full solution,
 as demonstrated by the example of Figure \ref{R:checkdatamodel}.
 
-\addtocounter{figure}{1}
-\begin{Rcode}
-<<>>=
-E <- editmatrix(expression(
-    x > 0,
-    x + y == 2
-))
-(dat <- data.frame(x=c(-1,2),y=c(3,0)))
-checkDatamodel(E,dat)$adapt
-localizeErrors(E,dat)$adapt
-@
-\caption{An example of {\sf checkDatamodel}, which only detects violation of range edits,
-while {\sf localizeErrors} finds the full solution. The result of both functions is an
-object of class {\sf errorLocation} which contains (amongst other things) for each record
-which variables should be adapted. Clearly, in the first record $(x=-1,y=3)$ both $x$ and $y$
-must be adapted. However, {\sf checkDatamodel} only checks the one-dimensional edits, {\em i.c.}
-the edit $x>0$.
-}
-\label{R:checkdatamodel}
-\end{Rcode}
+%\addtocounter{figure}{1}
+%\begin{Rcode}
+%<<>>=
+%E <- editmatrix(expression(
+%    x > 0,
+%    x + y == 2
+%))
+%(dat <- data.frame(x=c(-1,2),y=c(3,0)))
+%checkDatamodel(E,dat)$adapt
+%localizeErrors(E,dat)$adapt
+%@
+%\caption{An example of {\sf checkDatamodel}, which only detects violation of range edits,
+%while {\sf localizeErrors} finds the full solution. The result of both functions is an
+%object of class {\sf errorLocation} which contains (amongst other things) for each record
+%which variables should be adapted. Clearly, in the first record $(x=-1,y=3)$ both $x$ and $y$
+%must be adapted. However, {\sf checkDatamodel} only checks the one-dimensional edits, {\em i.c.}
+%the edit $x>0$.
+%}
+%\label{R:checkdatamodel}
+%\end{Rcode}
 
 
 
