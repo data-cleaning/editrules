@@ -201,6 +201,10 @@ plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
 #' @method summary violatedEdits
 #' @param object \code{violatedEdits} object
 #' @param minfreq minimum freq for edit to be printed
+#'
+#' @note When summarizing an object of class \code{violatedEdits}, every 
+#' empty value is counted as one edit violation when counting violations per record.
+#'
 #' @rdname violatedEdits
 #' @export
 summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
