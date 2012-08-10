@@ -15,6 +15,23 @@ test_that("errorLocalizer for numerical data",{
     expect_that(errorLocalizer(editmatrix("x+y==z"),c(x=1,y=NA,z=3),weight=c(1,NA,1))$searchNext(),throws_error())
 })
 
+test_that("weight calculation when checkDatamodel is activated",{
+   expect_equal(
+      localizeErrors(
+         editmatrix(expression(x+y+z==w,x>0)),
+         data.frame(x=-1,y=1,z=0,w=0)
+      )$status$weight, 2
+   )
+   expect_equal(
+      localizeErrors(
+         editmatrix(expression(x+y+z==w,x>0)),
+         data.frame(x=-1,y=1,z=0,w=0),
+         method='mip'
+      )$status$weight, 2
+   )
+
+})
+
 
 
 #d <- "../../../pkg/R"
@@ -60,6 +77,7 @@ test_that("errorlocalizer.editarray runs when blocks reduces the datamodel",{
     dat.diag=data.frame(ageGrps,genderIndex,icdIndex,diagnosisIndex)
     err=localizeErrors(e.diag,dat.diag)
 })
+
 
 
 

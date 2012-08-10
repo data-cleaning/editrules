@@ -3,7 +3,7 @@ library(lpSolveAPI)
 
 context("Localize errors using MIP")
 
-test_that("localizeError_mip",{
+test_that("localizeError.mip",{
   Et <- editmatrix(expression( p + c == t
                              , c - 0.6*t >= 0
                              , c>=0
@@ -352,4 +352,54 @@ test_that("Records of range 1-1e9",{
    expect_equal(errorLocalizer.mip(e,x)$w,3)
 
 })
+
+
+test_that("Consistency with B&B algorithm",{
+#
+   r <- c(
+      x1 = -0.556503362667066,
+      x2 = -0.0839342133749159,
+      x3 = 0.775427129507229,
+      x4 = -1.94883105542653,
+      x5 = 1.11931659004076,
+      x6 = -1.453437500466,
+      x7 = 0.47278745357947
+   )
+   e <- editmatrix(expression(
+      x1 + x2 == x3
+      ,x3 + x4 == x5
+      ,x3 + x5 == x7
+      ,0 <= x1
+      ,0 <= x2
+      ,0 <= x3
+      ,0 <= x4
+      ,0 <= x5
+      ,0 <= x6
+      ,0 <= x7
+   ))
+
+   expect_equal(
+      errorLocalizer(e,r)$searchBest()$w, 
+      errorLocalizer.mip(e,r)$w
+   )
+   X <- as.data.frame(t(r))
+   expect_equal(
+      localizeErrors(e,X)$status$weight[1],
+      localizeErrors(e,X,method="mip")$status$weight[1]
+   )
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
