@@ -5,7 +5,7 @@ source_dir <- function(d){
 }
 
 
-source_dir("../editrules/pkg/R")
+source_dir("../pkg/R")
 
 # n : number of variables
 # m : number of blocks (< (n-3)/2)
@@ -54,12 +54,14 @@ smoke_test <-function(N, nvar, nblocks, all.positive=TRUE, ...){
 
 ## this shows that even a well-scaled problem may give different results between
 ## B&B and MIP 
-S <- smoke_test(100,nvar=7,2, distr=rnorm)
+S <- smoke_test(2,nvar=7,2, distr=rnorm)
 all(S[[1]]$status$weight == S[[2]]$status$weight)
-
 all(rowSums(S[[1]]$adapt) ==rowSums(S[[2]]$adapt) ) 
 all(rowSums(S[[1]]$adapt) == S[[1]]$status$weight)
 all(rowSums(S[[2]]$adapt) == S[[2]]$status$weight)
+q()
+
+
 
 # derive test:
 write(as.character(S[[4]]),file="testedits.txt")
@@ -76,8 +78,15 @@ errorLocalizer(S[[4]],x)$searchBest()$w
 
 
 
-e <- editmatrix(expression("x+y+z==w",x>0))
-localizeErrors(e,data.frame(x=-1,y=1,z=0,w=0))
+e <- editmatrix(expression(x+y+z==w,x>0))
+localizeErrors(e,data.frame(x=-1,y=1,z=0,w=0),method='mip')
+
+X <- data.frame(x=NA,y=1,z=0,w=0)
+source_dir("../editrules/pkg/R")
+localizeErrors(e,X)
+
+
+errorLocalizer(e,c(x=NA,y=1,z=0,w=0))$searchBest()
 
 
 
