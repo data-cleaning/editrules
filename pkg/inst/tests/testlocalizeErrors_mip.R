@@ -348,14 +348,17 @@ test_that("Records of range 1-1e9",{
       x4 + x5 + x6 == x7,
       x7 + x3 + x8 == x9
    ))
-   # if no scaling is applied, this yields 4
-   expect_equal(errorLocalizer.mip(e,x)$w,3)
+   # MIP is sensitive to (very) large values (mvdl 10.08.2012)
+   expect_equal(
+      errorLocalizer.mip(e,x)$w,
+      errorLocalizer(e,x)$searchBest()$w
+   )
 
 })
 
 
 test_that("Consistency with B&B algorithm",{
-#
+# generated from smoketest. Used to generate bug in weight count.
    r <- c(
       x1 = -0.556503362667066,
       x2 = -0.0839342133749159,
@@ -387,6 +390,11 @@ test_that("Consistency with B&B algorithm",{
       localizeErrors(e,X)$status$weight[1],
       localizeErrors(e,X,method="mip")$status$weight[1]
    )
+
+
+
+
+
 })
 
 

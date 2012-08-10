@@ -1,5 +1,6 @@
 
 source_dir <- function(d){
+   stopifnot(file.exists(d))
    fs <- dir(d,full.names=TRUE)
    for ( f in fs ) source(f)
 }
@@ -54,39 +55,36 @@ smoke_test <-function(N, nvar, nblocks, all.positive=TRUE, ...){
 
 ## this shows that even a well-scaled problem may give different results between
 ## B&B and MIP 
-S <- smoke_test(2,nvar=7,2, distr=rnorm)
+S <- smoke_test(100,nvar=7,2, distr=rnorm)
 all(S[[1]]$status$weight == S[[2]]$status$weight)
-all(rowSums(S[[1]]$adapt) ==rowSums(S[[2]]$adapt) ) 
-all(rowSums(S[[1]]$adapt) == S[[1]]$status$weight)
-all(rowSums(S[[2]]$adapt) == S[[2]]$status$weight)
-q()
+i <- which(S[[1]]$status$weight != S[[2]]$status$weight)
+
+d <- S[[3]][1,]
+e <- S[[4]]
+load("test.Rdata")
+
+save(e,d,file="test.Rdata")
 
 
 
-# derive test:
-write(as.character(S[[4]]),file="testedits.txt")
-i <- which(S[[1]]$statu$weight != S[[2]]$status$weight)[1]
-x <- do.call(c,S[[3]][i,])
-write.csv(x,file="testrecord.csv")
+rec <- do.call(c,S[[3]])
+errorLocalizer.mip(S[[4]],rec)
+errorLocalizer(S[[4]],rec)$searchBest()
 
-localizeErrors(S[[4]],as.data.frame(t(x)))
-localizeErrors(S[[4]],as.data.frame(t(x)),method='mip')
+localizeErrors(S[[4]],S[[3]])
 
-
-editrules:::errorLocalizer.mip(S[[4]],x)
-errorLocalizer(S[[4]],x)$searchBest()$w
-
-
-
-e <- editmatrix(expression(x+y+z==w,x>0))
-localizeErrors(e,data.frame(x=-1,y=1,z=0,w=0),method='mip')
-
-X <- data.frame(x=NA,y=1,z=0,w=0)
 source_dir("../editrules/pkg/R")
-localizeErrors(e,X)
+localizeErrors(S[[4]],S[[3]],method='mip')
 
 
-errorLocalizer(e,c(x=NA,y=1,z=0,w=0))$searchBest()
+
+write.csv(x,file="testrecord.csv")
+write(as.character(S[[4]]),file="testedits.txt")
+
+e <- editmatrix(expression(x + y == z, x>0,y>0,z>0,w>0))
+d <- data.frame(x = -1, y=2,z=4,w=-1)
+localizeErrors(e,d,method='mip',verbose=TRUE)
+
 
 
 

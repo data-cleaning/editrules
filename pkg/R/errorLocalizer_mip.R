@@ -48,12 +48,6 @@ errorLocalizer.mip <- function( E
 
    vars <- getVars(E)
    E <- as.editset(E)
-   sc <- 1
-   if ( is.numeric(x) ){ 
-      sc <- scale_fac(x)
-      x <- x*sc
-   }
-   
 
     # perturb weights for randomized selection from equivalent solutions
    wp <- perturbWeights(as.vector(weight))
@@ -114,7 +108,7 @@ errorLocalizer.mip <- function( E
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
    
-   x_feasible[names(sol.num)] <- sol.num / sc
+   x_feasible[names(sol.num)] <- sol.num 
    
    if (length(sol.cat))
       x_feasible[names(sol.cat)] <- sol.cat
