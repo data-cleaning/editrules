@@ -31,7 +31,7 @@ isObviouslyInfeasible.editmatrix <- function(E, tol=sqrt(.Machine$double.eps), .
     A <- getAb(E)
     operators <- getOps(E)
     ib <- ncol(A)
-    zeroCoef <- rowSums(abs(A[,-ib,drop=FALSE])) < tol  
+    zeroCoef <- rowSums(abs(A[,-ib,drop=FALSE])) <= tol  
     b <- round(A[,ib],ceiling(-log10(tol)))    
     if ( any(zeroCoef & operators == "<"    &  b <= 0) || 
          any(zeroCoef & operators == "<="   &  b <  0) || 

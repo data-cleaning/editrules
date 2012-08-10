@@ -1,4 +1,6 @@
 version 2.5-1
+- errorLocalizer.editarray gains 'tol' argument for feasibility checks
+- records with large maximum absolute value now pre-scaled when localizing errors with MIP
 - bugfix in as.character.editarray: failure when edit excludes subset of datamodel
 - bugfix in substValue.editset (processing of dummy variables failed in certain cases)
 - exported nedits

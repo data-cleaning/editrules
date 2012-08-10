@@ -120,11 +120,7 @@ eliminate.editmatrix <- function(E, var, ...){
     m <- m[!redundant,,drop=FALSE]
     d <- d[!redundant,,drop=FALSE]
     if ( nrow(m) > 0 ){
-#        if ( fancynames ){
-#            rownames(m) <- paste("e",sapply(lapply(1:nrow(d),function(i) which(d[i,]) ),paste,collapse="."),sep="")
-#        } else {
-            rownames(m) <- paste("num",1:nrow(m),sep="")
-#        }
+      rownames(m) <- paste("num",1:nrow(m),sep="")
     }
     neweditmatrix(
           m

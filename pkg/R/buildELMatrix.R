@@ -11,8 +11,6 @@ buildELMatrix <- function( E
                          , weight = rep(1, length(x))
                          , xlim = generateXlims(x)
                          , maxvalue = 1e8
-#                          , editweight = rep(Inf, nedits(E))
-#                          , lambda = if(any(is.finite(editweight))) 0.5 else 1
                          , ...
                          ){
   xlim <- checkXlim(xlim, x)

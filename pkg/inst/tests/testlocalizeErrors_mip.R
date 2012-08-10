@@ -335,4 +335,21 @@ test_that("localizeErrors works with TRUE/FALSE",{
 })
 
 
+context("MIP-based error localization numerical stability tests")
+
+test_that("Records of range 1-1e9",{
+
+   p <- 1:9
+   x <- 10^p
+   names(x) <- paste("x",p,sep="")
+
+   e <- editmatrix(expression(
+      x1 + x2 == x3,
+      x4 + x5 + x6 == x7,
+      x7 + x3 + x8 == x9
+   ))
+   # if no scaling is applied, this yields 4
+   expect_equal(errorLocalizer.mip(e,x)$w,3)
+
+})
 

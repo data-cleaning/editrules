@@ -9,11 +9,15 @@ checklpSolveAPI <- function(){
 
 #' Localize errors using a MIP approach.
 #' 
+#' @section Details:
 #' \code{errorLocalizer.mip} uses \code{E} and \code{x} to define a mixed integer problem
 #' and solves this problem using \code{lpSolveApi}. This function can be much faster then \code{\link{errorLocalizer}} 
 #' but does not return the degeneracy of a solution. However it does return an bonus: 
 #' \code{x_feasible}, a feasible solution.
 #'
+#' @section Note:
+#' If the maximim absolute value of \eqn{x\geq 10^9} 1E9, it is pre-scaled with
+#' a factor of \eqn{\sqrt{\max(|x|)}}.
 #'
 #' @param E an \code{\link{editset}}, \code{\link{editmatrix}}, or \code{\link{editarray}}
 #' @param x named \code{numeric} with data
@@ -44,6 +48,12 @@ errorLocalizer.mip <- function( E
 
    vars <- getVars(E)
    E <- as.editset(E)
+   sc <- 1
+   if ( is.numeric(x) ){ 
+      sc <- scale_fac(x)
+      x <- x*sc
+   }
+   
 
     # perturb weights for randomized selection from equivalent solutions
    wp <- perturbWeights(as.vector(weight))
@@ -72,7 +82,6 @@ errorLocalizer.mip <- function( E
              , timeout = maxduration
              , epsint = 1e-8
              )
-   #print(lps)
 
     
    statuscode <- solve(lps)
@@ -105,7 +114,7 @@ errorLocalizer.mip <- function( E
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
    
-   x_feasible[names(sol.num)] <- sol.num
+   x_feasible[names(sol.num)] <- sol.num / sc
    
    if (length(sol.cat))
       x_feasible[names(sol.cat)] <- sol.cat
@@ -128,6 +137,16 @@ errorLocalizer.mip <- function( E
        , lp=lps
        )
 }
+
+
+# scale a numeric vector
+scale_fac <- function(x){
+   sc <- 1
+   m <- max(abs(x),na.rm=TRUE)
+   if (is.finite(m) && m >= 1E9 ) sc <- 1/sqrt(m)
+   sc   
+}
+   
 
 # assumes that E is normalized!
 as.lp.editmatrix <- function(E, obj, xlim, type){
@@ -152,13 +171,10 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    rangeA <- range(Ab[Ab>0])
    m <- rangeA[1]/rangeA[2]
    
-   #print(epsb/m)
-   #print(range(Ab[Ab>0]))
-   # adjust boundaries for less than 
    
    b[lt] <- (b[lt] - m)
    set.constr.value(lps, b)
-   #print(list(maxA=maxA, lps=lps))
+   
    lps
 }
 
@@ -182,7 +198,7 @@ asLevels <- function(x){
   names(lvls) <- vars
   lvls[x > 0 | logicals]
 }
-   
+
 #testing...
 
 # Et <- editmatrix(expression(

@@ -1,5 +1,6 @@
 #' Create a backtracker object for error localization
 #' 
+#' @section Details:
 #' Generate a \code{\link{backtracker}} object for error localization in numerical, categorical, or mixed data.
 #' This function generates the workhorse program, called by \code{\link{localizeErrors}} with \code{method=localizer}.
 #'
@@ -14,7 +15,6 @@
 #' a concise description of the B&B algorithm. 
 #'
 #' 
-#'
 #' Every call to \code{<backtracker>$searchNext()} returns one solution \code{list}, consisting of
 #' \itemize{
 #' \item{w: The solution weight.} 
@@ -34,6 +34,12 @@
 #' The backtracker will crash when \code{E} is an \code{\link{editarray}} and one or more values are
 #' not in the datamodel specified by \code{E}. The more user-friendly function \code{\link{localizeErrors}}
 #' circumvents this. See also \code{\link{checkDatamodel}}.
+#'
+#' @section Numerical stability issues:
+#' For records with a large numerical range (\emph{eg} 1-1E9), the error locations represent solutions that
+#' will allow repairing the record to within roundoff errors. We highly recommend that you round near-zero 
+#' values (for example, everything \code{<= sqrt(.Machine$double.eps)}) and scale a record with values larger
+#' than or equal to 1E9 with a constant factor.
 #'
 #' @note This method is potentially very slow for objects of class \code{\link{editset}} that contain 
 #'  many conditional restrictions.  Consider using \code{\link{localizeErrors}} with the option 
@@ -90,6 +96,7 @@ errorLocalizer.editset <- function(E, x, ...){
 #' maximum number of variables to adapt. 
 #' @param maxduration maximum time (in seconds), for \code{$searchNext()}, \code{$searchAll()} (not for \code{$searchBest}, use 
 #'  \code{$searchBest(maxdration=<duration>)} in stead) 
+#' @param tol tolerance passed to \code{link{isObviouslyInfeasible}} (used to check for bound conditions).
 #'
 #' @rdname errorLocalizer
 #' @export
@@ -100,6 +107,7 @@ errorLocalizer.editmatrix <- function(
             maxadapt=length(x), 
             maxweight=sum(weight),
             maxduration=600,
+            tol = sqrt(.Machine$double.eps),
             ...){
     stopifnot(
         is.numeric(weight), 
@@ -135,12 +143,12 @@ errorLocalizer.editmatrix <- function(
 
             if ( w > min(wsol,maxweight) 
               || sum(adapt) > maxadapt
-              || isObviouslyInfeasible.editmatrix(.E)
+              || isObviouslyInfeasible.editmatrix(.E,tol=tol)
                ) return(FALSE)
 
             # shortcut: can this ever lead to a solution?
             if ( w == wsol && 
-                isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat]))
+                isObviouslyInfeasible.editmatrix(substValue(.E,totreat,x[totreat]),tol=tol)
             ) return(FALSE)
 
             if (length(totreat) == 0){
@@ -169,7 +177,8 @@ errorLocalizer.editmatrix <- function(
         totreat = totreat,
         adapt = adapt,
         weight = weight,
-        wsol = wsol
+        wsol = wsol,
+        tol  = tol
     )
     
     # add a searchBest function, currently returns random solution in the case of multiple optima
