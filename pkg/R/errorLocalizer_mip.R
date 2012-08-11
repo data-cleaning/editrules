@@ -49,6 +49,7 @@ errorLocalizer.mip <- function( E
    vars <- getVars(E)
    E <- as.editset(E)
    sc <- 1
+   
    if ( is.numeric(x) ){ 
       sc <- scale_fac(x)
       x <- x*sc
@@ -59,12 +60,14 @@ errorLocalizer.mip <- function( E
    wp <- perturbWeights(as.vector(weight))
    
    t.start <- proc.time()
+   
    elm <- buildELMatrix(E=E, x=x, weight=wp, ...)
    
    Ee <- elm$E
    objfn <- elm$objfn
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
+   write.lp(lps, "test1.lp")
    # TODO move this code into as.lp.editmatrix
     ## the following code...
     #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
@@ -76,6 +79,7 @@ errorLocalizer.mip <- function( E
    set.bounds(lps, lower=lo, upper=up, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
+   write.lp(lps, "test2.lp")
    # end TODO
    lp.control( lps
              , presolve = "rows"    # move univariate constraints into bounds
@@ -83,7 +87,8 @@ errorLocalizer.mip <- function( E
              , epsint = 1e-8
              )
 
-    
+   write.lp(lps, "test3.lp")
+   
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
    
@@ -106,7 +111,7 @@ errorLocalizer.mip <- function( E
    
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   #write.lp(lps, "test.lp")
+   write.lp(lps, "test.lp")
    #print(list(idx=idx, sol=sol))
    adapt <- sapply(x, function(i) FALSE)
    adapt[names(sol.adapt)] <- (sol.adapt > 0)

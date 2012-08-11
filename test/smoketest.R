@@ -46,16 +46,15 @@ smoke_test <-function(N, nvar, nblocks, all.positive=TRUE, ...){
 
 ## this shows that even a well-scaled problem may give different results between
 ## B&B and MIP 
-S <- smoke_test(100,nvar=7,2,distr=rnorm)
-all(S[[1]]$status$weight == S[[2]]$status$weight)
+S <- smoke_test(10,nvar=7,2,distr=rnorm)
+diff <- S[[1]]$status$weight == S[[2]]$status$weight
+all(diff)
+w <- which(!diff)
 
+BB <- S[[1]]$adapt[w,]
+MIP <- S[[2]]$adapt[w,]
+dat <- S[[3]][w,]
+E <- S[[4]]
 
-
-
-
-
-
-
-
-
+x <- t(dat[1,])
 
