@@ -59,13 +59,9 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
 
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
         stop("Weight must be vector or array with dimensions equal to argument 'dat'")
+    # TODO: does not produce right weight vector ico vector of unequal weights.
 
-    weight <- array(weight,
-        dim=c(
-            ifelse(is.vector(weight),1,nrow(dat)),
-            ncol(dat)
-        )
-    )
+   if ( is.vector(weight) )  weight  <- t(array(weight,dim=dim(dat)[2:1]))
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
     # convert logical and factor to character (except for complete NA-columns)
@@ -101,6 +97,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     # values not in datamodel are set to NA
     dat[err$adapt] <- NA
     for ( b in B[!st] ){
+
         if ( verbose ){
             i <- i + 1
             blockCount <- paste('Processing block ',format(i,width=nchar(n)), ' of ',n,',',sep="")
@@ -117,6 +114,8 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             method=method, ...)
     }
     if (verbose) cat('\n')
+    # weights for checkdatamodel cannot be added naively with those of errorLocalizer
+    err$status$weight <- rowSums(weight*err$adapt)
     err
 }
 
@@ -128,17 +127,15 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
 #' @param dat \code{data.frame}
 #' @param verbose \code{logical} print progress report during run?
 #' @param pretext \code{character} text to print before progress report
-#' @param weight either \code{1xncol(dat)} or \code{nrow(dat)xncol(dat)} array of weights
+#' @param weight a \code{nrow(dat)xncol(dat)} array of weights
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
 #' @param call call to include in \code{\link{errorLocation}} object
 #' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
 localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
-
     vars <- getVars(E)
-    wt <- weight[,vars,drop=FALSE]
-    weightperrecord <- nrow(weight) > 1    
+    weight <- weight[,vars,drop=FALSE]
 
     n <- nrow(dat)
     m <- ncol(dat)
@@ -168,7 +165,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
               flush.console() 
           }
           r <- as.list(dat[i,vars,drop=FALSE])
-          if (weightperrecord) wt <- weight[i,]
+          wt <- weight[i, ]
           bt <- errorLocalizer(E, r, weight=wt, ...)
           e <- bt$searchBest(maxduration=maxduration)
           if (!is.null(e) && !bt$maxdurationExceeded){
@@ -187,7 +184,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
           flush.console() 
         }
         r <- as.list(dat[i,vars,drop=FALSE])
-        if (weightperrecord) wt <- weight[i,]
+        wt <- weight[i,]
         le <- errorLocalizer.mip(E, r, weight=wt, xlim=xlim, ...)
         if (!le$maxdurationExceeded){
           err[i,vars] <- le$adapt
