@@ -48,9 +48,13 @@ errorLocalizer.mip <- function( E
 
    vars <- getVars(E)
    E <- as.editset(E)
-
-    # perturb weights for randomized selection from equivalent solutions
+   
+   DUMP <- FALSE
+   # perturb weights for randomized selection from equivalent solutions
    wp <- perturbWeights(as.vector(weight))
+#    #alternatively, just add uniform small pertubation of 1e-5
+#    wp <- as.vector(weight)
+#    wp <- wp + runif(length(wp), 0, 1e-5)
    
    t.start <- proc.time()
    
@@ -60,7 +64,7 @@ errorLocalizer.mip <- function( E
    objfn <- elm$objfn
    ops <- getOps(Ee)
    lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
-   write.lp(lps, "test1.lp")
+   if (DUMP) write.lp(lps, "test1.lp")
    # TODO move this code into as.lp.editmatrix
     ## the following code...
     #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
@@ -68,19 +72,23 @@ errorLocalizer.mip <- function( E
     ## this is better solved in buildELMatrix (mvdl)
    icol <- match(rownames(elm$xlim),colnames(lps),nomatch=0)
    lo <- elm$xlim[icol>0,1]
-   up <- elm$xlim[icol>0,2]
-   set.bounds(lps, lower=lo, upper=up, columns=icol[icol>0]) 
+#    up <- elm$xlim[icol>0,2]
+   lo <- rep(-Inf, length(lo))
+   set.bounds(lps, lower=lo, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
-   write.lp(lps, "test2.lp")
+   if (DUMP) write.lp(lps, "test2.lp")
    # end TODO
    lp.control( lps
              , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
-             , epsint = 1e-8
+             , epsint = 1e-15
+             , epsb = 1e-15
+             , epsd = 1e-15
+             , epspivot = 1e-15
              )
 
-   write.lp(lps, "test3.lp")
+   if (DUMP) write.lp(lps, "test3.lp")
    
    statuscode <- solve(lps)
    degeneracy <- get.solutioncount(lps)
@@ -104,7 +112,7 @@ errorLocalizer.mip <- function( E
    
    names(sol.adapt) <- sub("^adapt\\.","",names(sol.adapt))
    
-   write.lp(lps, "test.lp")
+   if (DUMP) write.lp(lps, "test4.lp")
    #print(list(idx=idx, sol=sol))
    adapt <- sapply(x, function(i) FALSE)
    adapt[names(sol.adapt)] <- (sol.adapt > 0)

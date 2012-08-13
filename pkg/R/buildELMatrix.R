@@ -10,7 +10,7 @@ buildELMatrix <- function( E
                          , x
                          , weight = rep(1, length(x))
                          , xlim = generateXlims(x)
-                         , maxvalue = 1e8
+                         , maxvalue = 1e15
                          , ...
                          ){
   xlim <- checkXlim(xlim, x)
@@ -111,7 +111,7 @@ buildELMatrix <- function( E
 #' @param ... not used
 #' @return a lower and upper boundary of \code{x}
 #' @keywords internal
-createXlim <- function(x, factor=1, offset=c(-1000,1000), na.rm = FALSE, maxvalue=1e8, minvalue=-maxvalue, ...){
+createXlim <- function(x, factor=1, offset=c(-1000,1000), na.rm = FALSE, maxvalue=1e15, minvalue=-maxvalue, ...){
   if (!is.numeric(x)){
     return(c(0,1))
   }
@@ -136,7 +136,7 @@ generateXlims <- function(x, xlim=list(), create=createXlim, ...){
   t(sapply(boundaries, c))
 }
 
-checkXlim <- function(xlim, x, maxvalue=1e8){
+checkXlim <- function(xlim, x, maxvalue=1e15){
   # expand list
   if (is.list(xlim)){
     xlims <- generateXlims(x, xlim, maxvalue=maxvalue)
