@@ -157,21 +157,21 @@ checkXlim <- function(xlim, x, maxvalue=1e15){
 
 #testing...
 
-E <- editset(expression(
-         if (x>0) y > 0
-      ,  maritalstatus %in% c("married", "single")
-      ,  if (maritalstatus == "married") age >= 17
-      ))
-# 
-x <- list(x = 1, y = -1, age=16, maritalstatus="married")
-# #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
-# # e <- expression( pregnant %in% c(TRUE, FALSE)
-# #                , gender %in% c("male", "female")
-# #                , if (pregnant) gender == "female"
-# #                )
+# E <- editset(expression(
+#          if (x>0) y > 0
+#       ,  maritalstatus %in% c("married", "single")
+#       ,  if (maritalstatus == "married") age >= 17
+#       ))
 # # 
-# # cateditmatrix(e)
-# checkXlim(list(age=c(0,200)), x)
-# 
-buildELMatrix(E, x)# -> B
-#errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
+# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+# # #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
+# # # e <- expression( pregnant %in% c(TRUE, FALSE)
+# # #                , gender %in% c("male", "female")
+# # #                , if (pregnant) gender == "female"
+# # #                )
+# # # 
+# # # cateditmatrix(e)
+# # checkXlim(list(age=c(0,200)), x)
+# # 
+# buildELMatrix(E, x)# -> B
+# #errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))

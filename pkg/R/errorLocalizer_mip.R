@@ -207,17 +207,17 @@ asLevels <- function(x){
 
 #testing...
 
-Et <- editmatrix(expression(
-        p + c == t,
-        c - 0.6*t >= 0,
-        c>=0,
-        p >=0
-        )
-               )
-
-x <- c(p=755,c=125,t=200)
-
-errorLocalizer.mip(Et, x)
+# Et <- editmatrix(expression(
+#         p + c == t,
+#         c - 0.6*t >= 0,
+#         c>=0,
+#         p >=0
+#         )
+#                )
+# 
+# x <- c(p=755,c=125,t=200)
+# 
+# errorLocalizer.mip(Et, x)
 # 
 # Et2 <- editmatrix(expression(
 #   p + c == t    
