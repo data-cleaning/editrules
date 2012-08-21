@@ -56,5 +56,5 @@ MIP <- S[[2]]$adapt[w,]
 dat <- S[[3]][w,]
 E <- S[[4]]
 
-x <- t(dat[1,])
+x <- dat[1,,drop=TRUE]
 

@@ -16,8 +16,8 @@ softEdits <- function(E, xlim, prefix="adapt."){   # TODO change prefix into .de
   eq <- ops == "=="
   
   adapt <- paste(prefix,rownames(E), sep="")
-  delta.plus <- paste(".delta.plus.",rownames(E),sep="")
-  delta.min <- paste(".delta.min.",rownames(E),sep="")
+  delta.plus <- paste("delta.plus.",rownames(E),sep="")
+  delta.min <- paste("delta.min.",rownames(E),sep="")
   
   Ab <- cbind( getA(E)
              , diag(0, n)  # adapt

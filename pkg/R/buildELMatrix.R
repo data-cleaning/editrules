@@ -77,7 +77,7 @@ buildELMatrix <- function( E
   el.vars <- getVars(el.E)
   el.binvars <- sapply(el.vars, is.character)
   el.binvars[el.vars %in% num.vars] <- FALSE
-  g <- grepl(".delta.", el.vars, fixed=TRUE)
+  g <- grepl("delta.", el.vars, fixed=TRUE)
   print(g)
   el.binvars[g] <- FALSE
   
@@ -157,21 +157,21 @@ checkXlim <- function(xlim, x, maxvalue=1e15){
 
 #testing...
 
-# E <- editset(expression(
-#          if (x>0) y > 0
-#       ,  maritalstatus %in% c("married", "single")
-#       ,  if (maritalstatus == "married") age >= 17
-#       ))
+E <- editset(expression(
+         if (x>0) y > 0
+      ,  maritalstatus %in% c("married", "single")
+      ,  if (maritalstatus == "married") age >= 17
+      ))
+# 
+x <- list(x = 1, y = -1, age=16, maritalstatus="married")
+# #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
+# # e <- expression( pregnant %in% c(TRUE, FALSE)
+# #                , gender %in% c("male", "female")
+# #                , if (pregnant) gender == "female"
+# #                )
 # # 
-# x <- list(x = 1, y = -1, age=16, maritalstatus="married")
-# # #x <- list(x = 1, y = -1, age=16, maritalstatus=NA)
-# # # e <- expression( pregnant %in% c(TRUE, FALSE)
-# # #                , gender %in% c("male", "female")
-# # #                , if (pregnant) gender == "female"
-# # #                )
-# # # 
-# # # cateditmatrix(e)
-# # checkXlim(list(age=c(0,200)), x)
-# # 
-# buildELMatrix(E, x, editweight=c(Inf, 1), xlim=list(age=c(0,200)))# -> B
-# #errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
+# # cateditmatrix(e)
+# checkXlim(list(age=c(0,200)), x)
+# 
+buildELMatrix(E, x)# -> B
+#errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
