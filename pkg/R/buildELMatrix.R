@@ -43,7 +43,7 @@ buildELMatrix <- function( E
     num.xlim <- xlim[num.idx,,drop=FALSE]
     # create an editmatrix x_i == x^0_i
     num.E <- as.editmatrix(num.x, num.x0)
-    num.se <- softEdits(num.E, num.xlim, prefix="adapt.")
+    num.se <- softEdits(num.E, num.xlim)
     el.E <- c(num.se, E$num, el.E)
   }
 
@@ -77,6 +77,9 @@ buildELMatrix <- function( E
   el.vars <- getVars(el.E)
   el.binvars <- sapply(el.vars, is.character)
   el.binvars[el.vars %in% num.vars] <- FALSE
+  g <- grepl(".delta.", el.vars, fixed=TRUE)
+  print(g)
+  el.binvars[g] <- FALSE
   
   objfn <- sapply(el.vars, function(v) 0)
   adapt.idx <- grep("^adapt\\.", el.vars)
@@ -171,4 +174,4 @@ checkXlim <- function(xlim, x, maxvalue=1e15){
 # # checkXlim(list(age=c(0,200)), x)
 # # 
 # buildELMatrix(E, x, editweight=c(Inf, 1), xlim=list(age=c(0,200)))# -> B
-# errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
+# #errorLocalizer.mip(E, x=x,, xlim=list(age=c(0,200)))
