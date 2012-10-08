@@ -19,11 +19,14 @@ softEdits <- function(E, xlim, prefix="adapt."){   # TODO change prefix into .de
   delta.plus <- paste("delta.plus.",rownames(E),sep="")
   delta.min <- paste("delta.min.",rownames(E),sep="")
   
+  b <- getb(E)
+  b[is.na(b)] <- getOption("editrules.maxdiff", 1e7)
+  
   Ab <- cbind( getA(E)
              , diag(0, n)  # adapt
              , diag(-1, n)  # delta+
              , diag(ifelse(eq, 1, 0), n)   # delta-
-             , getb(E)
+             , b
              )
   
   colnames(Ab) <- c(getVars(E), adapt, delta.plus, delta.min, "CONSTANT")

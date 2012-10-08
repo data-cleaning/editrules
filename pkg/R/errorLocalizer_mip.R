@@ -49,11 +49,11 @@ errorLocalizer.mip <- function( E
    vars <- getVars(E)
    E <- as.editset(E)
    
-   DUMP <- TRUE
-   # perturb weights for randomized selection from equivalent solutions
-   wp <- perturbWeights(as.vector(weight))
+   DUMP <- FALSE
+#   perturb weights for randomized selection from equivalent solutions
+#    wp <- perturbWeights(as.vector(weight))
 #    #alternatively, just add uniform small pertubation of 1e-5
-#    wp <- as.vector(weight)
+    wp <- as.vector(weight)
 #    wp <- wp + runif(length(wp), 0, 1e-5)
    
    t.start <- proc.time()
@@ -80,13 +80,13 @@ errorLocalizer.mip <- function( E
    if (DUMP) write.lp(lps, "test2.lp")
    # end TODO
    lp.control( lps
-             , presolve = "rows"    # move univariate constraints into bounds
+#             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
              , epsb = 1e-15
              , epsd = 1e-15
              , epspivot = 1e-15
-             )
+   )
 
    if (DUMP) write.lp(lps, "test3.lp")
    
@@ -106,7 +106,9 @@ errorLocalizer.mip <- function( E
    
    cat.idx <- names(sol.values) %in% names(elm$binvars)
    sol.cat <- asLevels(sol.values[cat.idx])
-   sol.num <- sol.values[!cat.idx]
+   
+   delta.idx <- grepl("^delta\\.", names(sol.values))
+   sol.num <- sol.values[!cat.idx & !delta.idx]
    
    #print(list(sol.cat=sol.cat, sol.num=sol.num))
    

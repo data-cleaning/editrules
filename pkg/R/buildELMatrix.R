@@ -78,7 +78,7 @@ buildELMatrix <- function( E
   el.binvars <- sapply(el.vars, is.character)
   el.binvars[el.vars %in% num.vars] <- FALSE
   g <- grepl("delta.", el.vars, fixed=TRUE)
-  print(g)
+  #print(g)
   el.binvars[g] <- FALSE
   
   objfn <- sapply(el.vars, function(v) 0)

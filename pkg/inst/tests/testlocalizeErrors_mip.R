@@ -16,7 +16,7 @@ test_that("localizeError.mip",{
   sol <- errorLocalizer.mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
-  expect_equivalent(sol$x_feasible, c(75, 125, 200))
+  expect_equal(unname(sol$x_feasible[1:3]), c(75, 125, 200), tolerance=1e-10)
 })
 
 test_that('localizeErrors works without specified weight',{
@@ -32,7 +32,7 @@ test_that('localizeErrors works without specified weight',{
                        , method="mip"
                        )
   
-  #print(loc)
+#   print(loc)
   expect_equivalent( loc$adapt
                    , matrix(c(
                       TRUE , FALSE, FALSE,
