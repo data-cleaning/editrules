@@ -64,7 +64,7 @@ errorLocalizer.mip <- function( E
    Ee <- elm$E
    objfn <- elm$objfn
    ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
+   lps <- as.lp.editmatrix(Ee, obj=elm$objfn)
    if (DUMP) write.lp(lps, "test1.lp")
    # TODO move this code into as.lp.editmatrix
     ## the following code...
@@ -158,7 +158,7 @@ scale_fac <- function(x){
    
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E, obj, xlim, type){
+as.lp.editmatrix <- function(E, obj, type){
    require(lpSolveAPI)
    epsb <- 1e-7
    A <- getA(E)

@@ -4,7 +4,7 @@
 #' @param xlim \code{matrix} with columns lower and upper boundary, and rows are variables (in same order as E)
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits <- function(E, xlim, prefix="adapt."){   # TODO change prefix into .delta.
+softEdits <- function(E, prefix="adapt."){   # TODO change prefix into .delta.
   
   if (!nrow(E)){
     return(E)
