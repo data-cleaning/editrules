@@ -51,9 +51,10 @@ errorLocalizer.mip <- function( E
    
    DUMP <- FALSE
 #   perturb weights for randomized selection from equivalent solutions
-#    wp <- perturbWeights(as.vector(weight))
+   
+    wp <- perturbWeights(as.vector(weight))
 #    #alternatively, just add uniform small pertubation of 1e-5
-    wp <- as.vector(weight)
+#    wp <- as.vector(weight)
 #    wp <- wp + runif(length(wp), 0, 1e-5)
    
    t.start <- proc.time()
@@ -162,10 +163,12 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    epsb <- 1e-7
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
+   
    dimnames(lps) <- dimnames(A)   
    for (v in 1:ncol(A)){
      set.column(lps, v, A[,v])
    }
+   
    ops <- getOps(E)
    ops[ops=="=="] <- "="
    lt <- ops == "<"
@@ -178,7 +181,6 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    maxA <- max(Ab)
    rangeA <- range(Ab[Ab>0])
    m <- rangeA[1]/rangeA[2]
-   
    
    b[lt] <- (b[lt] - m)
    set.constr.value(lps, b)
