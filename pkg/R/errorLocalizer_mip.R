@@ -83,9 +83,9 @@ errorLocalizer.mip <- function( E
 #             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
-             , epsb = 1e-15
-             , epsd = 1e-15
-             , epspivot = 1e-15
+#              , epsb = 1e-15
+#              , epsd = 1e-15
+#              , epspivot = 1e-15
    )
 
    if (DUMP) write.lp(lps, "test3.lp")
