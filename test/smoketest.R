@@ -57,4 +57,7 @@ dat <- S[[3]][w,]
 E <- S[[4]]
 
 x <- dat[1,,drop=TRUE]
+el <- errorLocalizer.mip(E,x)
+
+cbind(el$x_feasible, x, el$adapt)
 

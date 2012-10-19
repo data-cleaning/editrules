@@ -52,7 +52,7 @@ errorLocalizer.mip <- function( E
    DUMP <- FALSE
 #   perturb weights for randomized selection from equivalent solutions
    
-    wp <- perturbWeights(as.vector(weight))
+   wp <- perturbWeights(as.vector(weight))
 #    #alternatively, just add uniform small pertubation of 1e-5
 #    wp <- as.vector(weight)
 #    wp <- wp + runif(length(wp), 0, 1e-5)
@@ -86,7 +86,7 @@ errorLocalizer.mip <- function( E
              , epsint = 1e-15
 #              , epsb = 1e-15
 #              , epsd = 1e-15
-#              , epspivot = 1e-15
+             , epspivot = 2e-15
    )
 
    if (DUMP) write.lp(lps, "test3.lp")
