@@ -51,9 +51,10 @@ errorLocalizer.mip <- function( E
    
    DUMP <- FALSE
 #   perturb weights for randomized selection from equivalent solutions
-#    wp <- perturbWeights(as.vector(weight))
+   
+    wp <- perturbWeights(as.vector(weight))
 #    #alternatively, just add uniform small pertubation of 1e-5
-    wp <- as.vector(weight)
+#    wp <- as.vector(weight)
 #    wp <- wp + runif(length(wp), 0, 1e-5)
    
    t.start <- proc.time()
@@ -63,7 +64,7 @@ errorLocalizer.mip <- function( E
    Ee <- elm$E
    objfn <- elm$objfn
    ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
+   lps <- as.lp.editmatrix(Ee, obj=elm$objfn)
    if (DUMP) write.lp(lps, "test1.lp")
    # TODO move this code into as.lp.editmatrix
     ## the following code...
@@ -83,9 +84,9 @@ errorLocalizer.mip <- function( E
 #             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
-             , epsb = 1e-15
-             , epsd = 1e-15
-             , epspivot = 1e-15
+#              , epsb = 1e-15
+#              , epsd = 1e-15
+#              , epspivot = 1e-15
    )
 
    if (DUMP) write.lp(lps, "test3.lp")
@@ -157,15 +158,17 @@ scale_fac <- function(x){
    
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E, obj, xlim, type){
+as.lp.editmatrix <- function(E, obj, type){
    require(lpSolveAPI)
    epsb <- 1e-7
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
+   
    dimnames(lps) <- dimnames(A)   
    for (v in 1:ncol(A)){
      set.column(lps, v, A[,v])
    }
+   
    ops <- getOps(E)
    ops[ops=="=="] <- "="
    lt <- ops == "<"
@@ -178,7 +181,6 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    maxA <- max(Ab)
    rangeA <- range(Ab[Ab>0])
    m <- rangeA[1]/rangeA[2]
-   
    
    b[lt] <- (b[lt] - m)
    set.constr.value(lps, b)

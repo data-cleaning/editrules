@@ -95,7 +95,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     i <- 0
     err <- checkDatamodel(E,dat,weight)
     # values not in datamodel are set to NA
-    if (match.arg(method) == 'localizer') dat[err$adapt] <- NA
+    dat[err$adapt] <- NA
     for ( b in B[!st] ){
 
         if ( verbose ){
