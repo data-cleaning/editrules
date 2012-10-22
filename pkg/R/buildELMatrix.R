@@ -3,17 +3,15 @@
 #' @param E editset
 #' @param x named list with data
 #' @param weight vector with weights of the variable in the same order as x
-#' @param xlim upper and lower boundaries of \code{x}
 #' @return list with extended E, objfn and lower and upper bound
 #' @keywords internal
 buildELMatrix <- function( E
                          , x
                          , weight = rep(1, length(x))
-                         , xlim = generateXlims(x)
                          , maxvalue = 1e15
                          , ...
                          ){
-  xlim <- checkXlim(xlim, x)
+  #xlim <- checkXlim(xlim, x)
   
   el.E <- NULL
     
@@ -92,7 +90,6 @@ buildELMatrix <- function( E
   
   list( E = el.E
       , objfn = objfn #sapply(vars, function(v) grepl("^adapt", v))
-      , xlim = xlim
       , binvars = which(el.binvars)
       )
 }

@@ -24,7 +24,7 @@ checklpSolveAPI <- function(){
 #' @param weight  \code{numeric} with weights
 #' @param maxduration number of seconds that is spent on finding a solution
 #' @param verbose verbosity argument that will be passed on to \code{solve} lpSolveAPI
-#' @param ... other arguments that will be passed on to \code{solve} or to generateXlims.
+#' @param ... other arguments that will be passed on to \code{solve}.
 #' @return list with solution weight \code{w}, \code{logical} \code{adapt} stating what to adapt,  
 #'  \code{x_feasible} and the lp problem (an \code{lpExtPtr} object)
 #'
@@ -71,10 +71,8 @@ errorLocalizer.mip <- function( E
     #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
     ## attempted to set bounds at non-existent columns 
     ## this is better solved in buildELMatrix (mvdl)
-   icol <- match(rownames(elm$xlim),colnames(lps),nomatch=0)
-   lo <- elm$xlim[icol>0,1]
-#    up <- elm$xlim[icol>0,2]
-   lo <- rep(-Inf, length(lo))
+   icol <- match(colnames(E),colnames(lps),nomatch=0)
+   lo <- rep(-Inf, sum(icol > 0))
    set.bounds(lps, lower=lo, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
