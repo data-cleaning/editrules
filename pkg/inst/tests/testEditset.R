@@ -64,6 +64,16 @@ test_that("editset parses conditional categorical/numerical edits",{
     expect_equivalent(getArr(E$mixcat), array(c(F,T,T,T,F,T),dim=c(1,6)))
 })
 
+test_that("editset catches numerical equalities",{
+   expect_error(editset("if ( x == 0 ) y > 0"))
+   expect_error(editset("if ( x < 0 && y == 0 ) z < 0 "))
+   expect_error(editset("if ( x < 0 ) y == 0"))
+   # this should run ok (categorical equality in premise)
+   expect_equal(nedits(editset("if ( x == 'foo' ) y < 0")),1)
+   # this should run ok (categorical equality in consequent)
+   expect_equal(nedits(editset("if (x < 0 ) y == 'foo'")),1)
+})
+
 
 
 ## various editset functionalities

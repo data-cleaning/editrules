@@ -217,9 +217,9 @@ summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
   editperc <- editperc[editfreq >= minfreq]
   editfreq <- editfreq[editfreq >= minfreq]
   
-  editdf <- data.frame(editname=names(editfreq), freq=editfreq, rel=paste(editperc,"%", sep=""))
+  editdf <- data.frame(editname=names(editfreq), freq=editfreq, rel=paste(editperc,"%", sep=""), stringsAsFactors=FALSE)
   if (!is.null(E)){
-     editdf$edit <- as.character(E)[editdf$editname]
+     editdf$edit <- as.character(E)[as.character(editdf$editname)]
   }
   
   cat("Edit violations, ",N," observations, ",Nna," completely missing (",round(100*Nna/N,1),"%):\n\n", sep="")
