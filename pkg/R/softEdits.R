@@ -23,7 +23,7 @@ softEdits <- function(E, prefix="adapt."){   # TODO change prefix into .delta.
   isna <- is.na(b)
     
   Ab <- cbind( getA(E)
-             , diag(1, n)  # adapt
+             , diag(0, n)  # adapt
              , diag(-1, n)  # delta+
              , diag(ifelse(eq, 1, 0), n)   # delta-
              , b
