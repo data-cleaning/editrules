@@ -27,12 +27,6 @@ parseMix <- function(e, editname="", numid=0, negate=TRUE){
     #e[[i]] <- rewriteEq(e[[i]])
     edit <- e[[i]]
     if (isNum(edit)){
-      
-      cmp <- deparse(edit[[1]])
-      if (cmp == "=="){
-        stop("edit '", deparse(e),"' contains '==' which is not allowed, in a mixed edit")
-      }
-      
       numid <<- numid + 1
       numvar <- paste(editname, ".num.",numid,sep="")
       #replace numeric edit with generated dummy boolean edit name and handle normal form
