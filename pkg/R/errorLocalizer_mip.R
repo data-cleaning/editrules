@@ -71,7 +71,7 @@ errorLocalizer.mip <- function( E
     ## attempted to set bounds at non-existent columns 
     ## this is better solved in buildELMatrix (mvdl)
    icol <- match(getVars(E, "num"),colnames(lps),nomatch=0)
-   lo <- rep(-Inf, sum(icol > 0))
+   lo <- rep(-1e7, sum(icol > 0))
    set.bounds(lps, lower=lo, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
