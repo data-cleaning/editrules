@@ -1,4 +1,5 @@
 version 2.5-1
+- print methods for editmatrix and editarray gain textOnly argument (default is FALSE for backward compatibility)
 - bugfix in parseMix: mixed edits containing an numeric equality constraint now generate an error (which is correct, since equality constraints in mixed edits are not supported.) 
 - bugfix in summary.violatedEdits, the "edit" column showing the violated edit was incorrect (the method itself was correct though), thanks to Francesco Pogelli for reporting that error
 - bugfix in weight calculation: weight of variables exceeding range edits was counted twice
