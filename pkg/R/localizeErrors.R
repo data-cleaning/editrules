@@ -32,7 +32,7 @@
 #' @param useBlocks \code{DEPRECATED}. Process error localization seperatly for independent blocks in \code{E} (always \code{TRUE})?
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
-#'      an array of weights with the same dimensions as \code{dat}.
+#'      an \code{array} or \code{data.frame} of weights with the same dimensions as \code{dat}.
 #' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used? 
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
@@ -56,12 +56,12 @@
 localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("localizer", "mip"), useBlocks=TRUE, ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
-
+    if ( is.data.frame(weight) ) weight <- as.matrix(weight)
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
         stop("Weight must be vector or array with dimensions equal to argument 'dat'")
     # TODO: does not produce right weight vector ico vector of unequal weights.
 
-   if ( is.vector(weight) )  weight  <- t(array(weight,dim=dim(dat)[2:1]))
+    if ( is.vector(weight) )  weight  <- t(array(weight,dim=dim(dat)[2:1]))
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
     # convert logical and factor to character (except for complete NA-columns)

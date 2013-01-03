@@ -30,13 +30,13 @@ test_that("editarray separates in blocks",{
 test_that("editset separates in blocks",{
     E <- editset(expression(
         if ( x > 0 ) y > 0,
-        x + y == z,
+        x + y >= z,
         A %in% letters[1:2],
         B %in% letters[2:3],
         if ( A == 'a') B == 'b',
         if ( A == 'b') x >= 0,
-        u + v == w,
-        if ( u == 0 ) w >= 0
+        u + v >= w,
+        if ( u <= 0 ) w >= 0
     ))
     b <- blocks(E)
     expect_equal(length(b),2)

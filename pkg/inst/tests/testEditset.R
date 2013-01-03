@@ -31,10 +31,10 @@ test_that("editset parses conditional numeric edits",{
 
     # test 2: with equality in if-statement
 
-    v <- expression( if ( x == 0 ) y >= 0)
+    v <- expression( if ( x >= 0 ) y >= 0)
     E <- editset(v)
     expect_equal(E$num, editmatrix(expression()))
-    expect_equivalent(E$mixnum,editmatrix(expression(x==0,y<0)))
+    expect_equivalent(E$mixnum,editmatrix(expression(x>=0,y<0)))
     expect_equivalent(getArr(E$mixcat), array(c(F,T,F,T),dim=c(1,4)))
 
 })
@@ -80,7 +80,7 @@ test_that("editset catches numerical equalities",{
 test_that("contains finds the right variables in an editset",{
     E <- editset(expression(
         x + y == z,
-        if ( s + t == 6 ) x < 10,
+        if ( s + t >= 6 ) x < 10,
         A %in% letters[1:2],
         if ( A == 'a' )  x > 3
     ))
