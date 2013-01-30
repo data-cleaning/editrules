@@ -1,7 +1,8 @@
 version 2.5-1
+- getVars method for editarray now returns NULL when type argument is not 'cat' (the default). Thanks to Elmar Wein.
 - print methods for editmatrix and editarray gain textOnly argument (default is FALSE for backward compatibility)
 - bugfix in parseMix: mixed edits containing an numeric equality constraint now generate an error (which is correct, since equality constraints in mixed edits are not supported.) 
-- bugfix in summary.violatedEdits, the "edit" column showing the violated edit was incorrect (the method itself was correct though), thanks to Francesco Pogelli for reporting that error
+- bugfix in summary.violatedEdits, the "edit" column showing the violated edit was incorrect (the method itself was correct though), thanks to Francesca Pogelli for reporting that error
 - bugfix in weight calculation: weight of variables exceeding range edits was counted twice
 - errorLocalizer.editarray gains 'tol' argument for feasibility checks
 - records with large maximum absolute value now pre-scaled when localizing errors with MIP

@@ -9,15 +9,15 @@ test_that("getVars.editmatrix works",{
                 c("x","y","z")
         )
 })
-# E <- editarray(c(
-#     "gender %in% c('male','female')",
-#     "pregnant %in% c(TRUE, FALSE)",
-#     "if( gender == 'male' ) pregnant == FALSE"
-#     )
-# )
-# 
-# getVars(E)
 
+test_that("getVars.editarray conforms to type argument",{
+   expect_true(is.null(
+      getVars(
+         editarray(expression(if ( A == 'a') B %in% letters[1:3])),
+         type='num'
+      )
+   ))
+})
 
 
 

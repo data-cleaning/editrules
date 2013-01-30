@@ -45,7 +45,10 @@ getVars.cateditmatrix <- function(E, type=c("uniquevar", "colnames","var", "cat"
 #' @export
 #' @method getVars editarray
 #' @keywords internal
-getVars.editarray <- function(E,...) names(attr(E,"ind"))
+getVars.editarray <- function(E,type='cat',...){ 
+   if (!type=='cat') return(NULL)
+   names(attr(E,"ind"))
+}
 
 #'
 #'
