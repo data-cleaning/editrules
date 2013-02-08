@@ -17,5 +17,5 @@ Version: 2.7
 Depends: R (>= 2.12.0)
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
-Suggests: lpSolveAPI, iterators, igraph
+Suggests: igraph, lpSolveAPI, iterators
 

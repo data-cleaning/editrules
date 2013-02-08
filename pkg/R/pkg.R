@@ -69,5 +69,6 @@
 #' }
 #'
 #' @name editrules-package 
+#' @importFrom igraph as.igraph
 #' @docType package 
 {}

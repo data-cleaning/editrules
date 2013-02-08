@@ -8,28 +8,14 @@ checkigraph <- function(){
 }
 
 
-
-#' Convert a collection of edits to an igraph object
-#' 
-#' graph.editmatrix derives adjacency matrix of \code{E} and converts it to an undirected \pkg{igraph} object.
-#'
-#' @param weighted Should the number of variables connecting two edits be counted as weight? 
-#'      Passed as \code{weighted} argument to \code{igraph::graph.adjacency}
-#'
-#' @rdname adjacency
-#' @export
-as.igraph <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE,...){
-    stopifnot(all(vars %in% getVars(E)))
-    UseMethod('as.igraph')
-}
-
-#' @rdname adjacency
 #' @method as.igraph editmatrix
+#' @param x An object of class \code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}
 #' @export
-as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
+#' @rdname adjacency
+as.igraph.editmatrix <- function(x, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
-    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    a <- adjacency(E=x, nodetype=nodetype, rules=rules, vars=vars, ...)
     g <- graph.adjacency(
           a, 
           weighted=weighted,
@@ -40,13 +26,13 @@ as.igraph.editmatrix <- function(E, nodetype=c("all", "rules","vars"), rules=edi
     g
 }
 
-#' @rdname adjacency
 #' @method as.igraph editarray
 #' @export
-as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
+#' @rdname adjacency
+as.igraph.editarray <- function(x, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
-    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    a <- adjacency(E=x, nodetype=nodetype, rules=rules, vars=vars, ...)
     g <- graph.adjacency(
           a, 
           weighted=weighted,
@@ -57,13 +43,13 @@ as.igraph.editarray <- function(E, nodetype=c("all", "rules","vars"), rules=edit
 }
 
 
-#' @rdname adjacency
 #' @method as.igraph editset
 #' @export
-as.igraph.editset <- function(E, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
+#' @rdname adjacency
+as.igraph.editset <- function(x, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
-    a <- adjacency(E=E, nodetype=nodetype, rules=rules, vars=vars, ...)
+    a <- adjacency(E=x, nodetype=nodetype, rules=rules, vars=vars, ...)
     g <- graph.adjacency(
           a, 
           weighted=weighted,
