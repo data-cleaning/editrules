@@ -1,3 +1,4 @@
+library(editrules)
 
 # n : number of variables
 # m : number of blocks (< (n-3)/2)
@@ -46,15 +47,20 @@ smoke_test <-function(N, nvar, nblocks, all.positive=TRUE, ...){
 
 ## this shows that even a well-scaled problem may give different results between
 ## B&B and MIP 
-S <- smoke_test(10,nvar=7,2,distr=rnorm)
+S <- smoke_test(1000,nvar=7,2,distr=rnorm)
 diff <- S[[1]]$status$weight == S[[2]]$status$weight
-all(diff)
-w <- which(!diff)
 
-BB <- S[[1]]$adapt[w,]
-MIP <- S[[2]]$adapt[w,]
-dat <- S[[3]][w,]
-E <- S[[4]]
+if ( !all(diff)) {
+  w <- which(!diff)
+  
+  BB <- S[[1]]$adapt[w,]
+  MIP <- S[[2]]$adapt[w,]
+  dat <- S[[3]][w,]
+  E <- S[[4]]
+  
+  x <- dat[1,,drop=TRUE]
+  el <- errorLocalizer.mip(E,x)
+  
+  cbind(el$x_feasible, x, el$adapt)
 
-x <- t(dat[1,])
-
+}

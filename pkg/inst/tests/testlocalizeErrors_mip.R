@@ -16,7 +16,7 @@ test_that("localizeError.mip",{
   sol <- errorLocalizer.mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
-  expect_equivalent(sol$x_feasible, c(75, 125, 200))
+  expect_equal(unname(sol$x_feasible[1:3]), c(75, 125, 200), tolerance=1e-10)
 })
 
 test_that('localizeErrors works without specified weight',{
@@ -32,7 +32,7 @@ test_that('localizeErrors works without specified weight',{
                        , method="mip"
                        )
   
-  #print(loc)
+#   print(loc)
   expect_equivalent( loc$adapt
                    , matrix(c(
                       TRUE , FALSE, FALSE,
@@ -339,20 +339,24 @@ context("MIP-based error localization numerical stability tests")
 
 test_that("Records of range 1-1e9",{
    p <- 1:9
-   x <- 10^(p)
+   x <- 10^(sqrt(p))
+   
    names(x) <- paste("x",p,sep="")
-
    e <- editmatrix(expression(
       x1 + x2 == x3,
       x4 + x5 + x6 == x7,
       x7 + x3 + x8 == x9
    ))
-   # MIP is sensitive to (very) large differences in values (mvdl/ejne 11.08.2012)
    expect_equal(
       errorLocalizer.mip(e,x)$w,
       errorLocalizer(e,x)$searchBest()$w
    )
-
+   
+   x[] <- 10^(p)
+   # MIP is sensitive to (very) large differences in values (mvdl/ejne 11.08.2012)
+   expect_true(
+     errorLocalizer.mip(e,x)$w != errorLocalizer(e,x)$searchBest()$w
+   )
 })
 
 

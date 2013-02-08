@@ -24,7 +24,7 @@ checklpSolveAPI <- function(){
 #' @param weight  \code{numeric} with weights
 #' @param maxduration number of seconds that is spent on finding a solution
 #' @param verbose verbosity argument that will be passed on to \code{solve} lpSolveAPI
-#' @param ... other arguments that will be passed on to \code{solve} or to generateXlims.
+#' @param ... other arguments that will be passed on to \code{solve}.
 #' @return list with solution weight \code{w}, \code{logical} \code{adapt} stating what to adapt,  
 #'  \code{x_feasible} and the lp problem (an \code{lpExtPtr} object)
 #'
@@ -50,7 +50,8 @@ errorLocalizer.mip <- function( E
    E <- as.editset(E)
    
    DUMP <- FALSE
-   # perturb weights for randomized selection from equivalent solutions
+#   perturb weights for randomized selection from equivalent solutions
+   
    wp <- perturbWeights(as.vector(weight))
 #    #alternatively, just add uniform small pertubation of 1e-5
 #    wp <- as.vector(weight)
@@ -63,30 +64,26 @@ errorLocalizer.mip <- function( E
    Ee <- elm$E
    objfn <- elm$objfn
    ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee, obj=elm$objfn, xlim=elm$xlim)
-   if (DUMP) write.lp(lps, "test1.lp")
+   lps <- as.lp.editmatrix(Ee, obj=elm$objfn)
    # TODO move this code into as.lp.editmatrix
     ## the following code...
     #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
     ## attempted to set bounds at non-existent columns 
     ## this is better solved in buildELMatrix (mvdl)
-   icol <- match(rownames(elm$xlim),colnames(lps),nomatch=0)
-   lo <- elm$xlim[icol>0,1]
-#    up <- elm$xlim[icol>0,2]
-   lo <- rep(-Inf, length(lo))
+   icol <- match(getVars(E, "num"),colnames(lps),nomatch=0)
+   lo <- rep(-1e7, sum(icol > 0))
    set.bounds(lps, lower=lo, columns=icol[icol>0]) 
    set.type(lps, columns=elm$binvars , "binary")
    set.objfn(lps, objfn)
-   if (DUMP) write.lp(lps, "test2.lp")
    # end TODO
    lp.control( lps
-             , presolve = "rows"    # move univariate constraints into bounds
+#             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
-             , epsb = 1e-15
-             , epsd = 1e-15
-             , epspivot = 1e-15
-             )
+#              , epsb = 1e-15
+#              , epsd = 1e-15
+             , epspivot = 2e-15
+   )
 
    if (DUMP) write.lp(lps, "test3.lp")
    
@@ -106,7 +103,9 @@ errorLocalizer.mip <- function( E
    
    cat.idx <- names(sol.values) %in% names(elm$binvars)
    sol.cat <- asLevels(sol.values[cat.idx])
-   sol.num <- sol.values[!cat.idx]
+   
+   delta.idx <- grepl("^delta\\.", names(sol.values))
+   sol.num <- sol.values[!cat.idx & !delta.idx]
    
    #print(list(sol.cat=sol.cat, sol.num=sol.num))
    
@@ -155,15 +154,17 @@ scale_fac <- function(x){
    
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E, obj, xlim, type){
+as.lp.editmatrix <- function(E, obj, type){
    require(lpSolveAPI)
    epsb <- 1e-7
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
+   
    dimnames(lps) <- dimnames(A)   
    for (v in 1:ncol(A)){
      set.column(lps, v, A[,v])
    }
+   
    ops <- getOps(E)
    ops[ops=="=="] <- "="
    lt <- ops == "<"
@@ -176,7 +177,6 @@ as.lp.editmatrix <- function(E, obj, xlim, type){
    maxA <- max(Ab)
    rangeA <- range(Ab[Ab>0])
    m <- rangeA[1]/rangeA[2]
-   
    
    b[lt] <- (b[lt] - m)
    set.constr.value(lps, b)
