@@ -1,7 +1,7 @@
 Todo list for friday gehackedday.
 
 
-*(M) Indexing or 'contains' error in editset (cf. Mark)
+*(M) Indexing or 'contains' error in editset (fixed, Mark)
 *(M) Bracket parsing within if-statements (fixed, Edwin):
   e <- editset("if  ((v30  >  0)  &&  (v123 < 0))  v17 < -0.5*v123")
 *(S) duplicated.editset (cf. Elmar)
