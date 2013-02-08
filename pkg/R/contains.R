@@ -137,13 +137,17 @@ contains.editset <- function(E,var=NULL,...){
     catvar <- var[var %in% getVars(E,type='cat')]
     if (length(catvar) > 0){
       T[imix,catvar] <- contains(E$mixcat, catvar) 
-      # contains for numerical variables in mixed edits
-      vnm <- var[var %in% getVars(E$mixnum)]
+    }
+    # contains for numerical variables in mixed edits
+    vnm <- var[var %in% getVars(E$mixnum)]
+    if ( length(vnm) > 0 ){
       vmc <- getVars(E$mixcat)
       emn <- rownames(E$mixnum)
-      X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
+      vmc <- vmc[vmc %in% emn]
+      vmc <- vmc[match(emn,vmc)]
+      X <- contains(E$mixcat)[,vmc,drop=FALSE]
       Y <- contains(E$mixnum,vnm)
-      T[imix,vnm] <- X%*%Y >0
+      T[imix,vnm] <- (X%*%Y) > 0
     }
   }
   T
