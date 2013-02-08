@@ -5,7 +5,7 @@ Todo list for friday gehackedday.
 *(M) Bracket parsing within if-statements (fixed, Edwin):
   e <- editset("if  ((v30  >  0)  &&  (v123 < 0))  v17 < -0.5*v123")
 *(S) duplicated.editset (cf. Elmar)
-*(M) MIP merging and testing on real data (cf. Edwin)
+*(M) MIP merging and testing on real data (cf. Edwin, smoke test works)
 *(M) Change igraph0 to igraph dependency  (fixed, no brainer)
 
 *(C) Improve graphics of plot.violatedEdits

@@ -1,3 +1,4 @@
+library(editrules)
 
 # n : number of variables
 # m : number of blocks (< (n-3)/2)
@@ -46,7 +47,7 @@ smoke_test <-function(N, nvar, nblocks, all.positive=TRUE, ...){
 
 ## this shows that even a well-scaled problem may give different results between
 ## B&B and MIP 
-S <- smoke_test(100,nvar=7,2,distr=rnorm)
+S <- smoke_test(1000,nvar=7,2,distr=rnorm)
 diff <- S[[1]]$status$weight == S[[2]]$status$weight
 
 if ( !all(diff)) {
