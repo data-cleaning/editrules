@@ -26,9 +26,16 @@ parseMix <- function(e, editname="", numid=0, negate=TRUE){
     # rewrite equality as inequalities
     #e[[i]] <- rewriteEq(e[[i]])
     edit <- e[[i]]
+    if (length(edit) ==  1) return()
+    cmp <- deparse(edit[[1]])
+    
+    # remove brackets
+    if (cmp == "("){
+      edit <- edit[[2]]  
+    }
+    
     if (isNum(edit)){
       
-      cmp <- deparse(edit[[1]])
       if (cmp == "=="){
         stop("edit '", deparse(e),"' contains '==' which is not allowed, in a mixed edit")
       }
@@ -52,7 +59,9 @@ parseMix <- function(e, editname="", numid=0, negate=TRUE){
     }  
   }
   
+  # don't negate the premisse (term 2)
   pm(2, neg=ifelse(op == "if", !negate, negate))
+  # negate the consequent (term 3)
   pm(3, neg=negate)
   
   negNums <- nums
@@ -119,3 +128,5 @@ rewriteInEq <- function(e){
 # pm
 # 
 
+#pm <- parseMix(quote(if ((x>0)) A))
+# pm

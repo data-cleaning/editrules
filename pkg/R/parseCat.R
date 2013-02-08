@@ -81,6 +81,11 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
 }
 
 isCat <- function(e){
+  if (length(e)==1) {
+    return(is.symbol(e))
+  }
+  
   cmp <- deparse(e[[1]])
-  return(cmp %in% CATCMP)  
+  return( cmp %in% c(CATCMP,"!"))  
 }
+

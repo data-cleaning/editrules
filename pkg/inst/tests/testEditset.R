@@ -113,6 +113,9 @@ test_that("simple mixed edit without coefficients is recognized",{
 })
 
 
+test_that("Mixed parsing edit containing brackets works",{
+  E <- editset("if  ((x  >  0)  &&  (y < 0))  z < y")
+})
 
 
 

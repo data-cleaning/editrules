@@ -1,4 +1,5 @@
 version 2.5-1
+- bugfix: brackets inside mixed edits were not parsed: if ((x>0 && y>0)) z < 0
 - changed dependency on igraph0 into igraph
 - getVars method for editarray now returns NULL when type argument is not 'cat' (the default). Thanks to Elmar Wein.
 - print methods for editmatrix and editarray gain textOnly argument (default is FALSE for backward compatibility)
