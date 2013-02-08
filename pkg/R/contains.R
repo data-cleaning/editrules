@@ -47,7 +47,12 @@ contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps),...){
 #' @keywords internal
 contains.editmatrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps), ...){
     A <- getA(E)
-    if (is.null(var)) var <- getVars.editmatrix(E)
+    vars <- getVars.editmatrix(E)
+    if (is.null(var)){ 
+      var <- vars
+    } else {
+      stopifnot(all(var %in% vars))
+    }
     
     u <- abs(A[,var,drop=FALSE]) > tol
     dimnames(u) <- list(edit=rownames(E),variable=var) 
@@ -105,39 +110,43 @@ contains.cateditmatrix <- function(E, var=NULL, ...){
 #' @keywords internal
 contains.editset <- function(E,var=NULL,...){
 
-    if ( is.null(var) ) var <- getVars(E)
-    nedits <- nrow(E$num) + nrow(E$mixcat)
-    # create a boolean array holding the answer
-    T <- array(FALSE,
-        dim=c(nedits,length(var)),
-        dimnames=list(
-            edits=c(
-                rownames(E$num),
-                rownames(E$mixcat)
-            ),
-            variables=var
-        )
-    )
-    # contains for numerical variables
-    numvar <- var[var %in% getVars(E$num)]
-    nnum <- nrow(E$num)
-    if ( length(numvar) > 0 && nnum > 0 )  T[1:nrow(E$num),numvar] <- contains(E$num, var[var%in% numvar])
-
-    # contains for categorical variables in conditional edits (mix)
-    nmix <- nrow(E$mixcat)
-    if (nmix>0){
-        imix <- (nnum+1):(nnum+nmix) 
-        catvar <- var[var %in% getVars(E,type='cat')]
-        T[imix,catvar] <- contains(E$mixcat, catvar) 
-        # contains for numerical variables in mixed edits
-        vnm <- var[var %in% getVars(E$mixnum)]
-        vmc <- getVars(E$mixcat)
-        emn <- rownames(E$mixnum)
-        X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
-        Y <- contains(E$mixnum,vnm)
-        T[imix,vnm] <- X%*%Y >0
+  if ( is.null(var) ) var <- getVars(E)
+  nedits <- nrow(E$num) + nrow(E$mixcat)
+  # create a boolean array holding the answer
+  T <- array(FALSE,
+    dim=c(nedits,length(var)),
+      dimnames=list(
+        edits=c(
+          rownames(E$num),
+          rownames(E$mixcat)
+        ),
+        variables=var
+      )
+  )
+  # contains for numerical variables
+  numvar <- var[var %in% getVars(E$num)]
+  nnum <- nrow(E$num)
+  ivr <- var %in% numvar
+  if ( any(ivr) && length(numvar) > 0 && nnum > 0 ){  
+    T[1:nrow(E$num),numvar] <- contains(E$num, var[ivr])
+  }
+  # contains for categorical variables in conditional edits (mix)
+  nmix <- nrow(E$mixcat)
+  if (nmix>0){
+    imix <- (nnum+1):(nnum+nmix) 
+    catvar <- var[var %in% getVars(E,type='cat')]
+    if (length(catvar) > 0){
+      T[imix,catvar] <- contains(E$mixcat, catvar) 
+      # contains for numerical variables in mixed edits
+      vnm <- var[var %in% getVars(E$mixnum)]
+      vmc <- getVars(E$mixcat)
+      emn <- rownames(E$mixnum)
+      X <- contains(E$mixcat)[,vmc[vmc %in% emn],drop=FALSE]
+      Y <- contains(E$mixnum,vnm)
+      T[imix,vnm] <- X%*%Y >0
     }
-    T
+  }
+  T
 }
 
 
