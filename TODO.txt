@@ -6,7 +6,7 @@ Todo list for friday gehackedday.
   e <- editset("if  ((v30  >  0)  &&  (v123 < 0))  v17 < -0.5*v123")
 *(S) duplicated.editset (cf. Elmar)
 *(M) MIP merging and testing on real data (cf. Edwin)
-*(M) Change igraph0 to igraph dependency 
+*(M) Change igraph0 to igraph dependency  (fixed)
 
 *(C) Improve graphics of plot.violatedEdits
 *(C) Naming/documenting of edits [really needs a new branch]

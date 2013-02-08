@@ -1,4 +1,5 @@
 version 2.5-1
+- changed dependency on igraph0 into igraph
 - getVars method for editarray now returns NULL when type argument is not 'cat' (the default). Thanks to Elmar Wein.
 - print methods for editmatrix and editarray gain textOnly argument (default is FALSE for backward compatibility)
 - bugfix in parseMix: mixed edits containing an numeric equality constraint now generate an error (which is correct, since equality constraints in mixed edits are not supported.) 
