@@ -3,18 +3,21 @@
 #'
 #' @method print editarray
 #' @param x an \code{\link{editarray}}
+#' @param textOnly If \code{FALSE}, also print internal structure
 #' @param ... arguments to be passed to or from other methods.
 #' @keywords internal
 #' @export
-print.editarray <- function(x, ...){
+print.editarray <- function(x, textOnly=FALSE, ...){
     d <- datamodel(x)
     A <- getArr(x)
     if ( ncol(A) > 0 ){
         cn <- paste(abbreviate(d$variable),":",abbreviate(d$value),sep="")
         colnames(A) <- cn
     }
-    cat("Edit array:\n")
-    print(A)
+    if( !textOnly ){ 
+      print(A)
+      cat("Edit array:\n")
+    }
     cat("\nEdit rules:\n")
     desc <- attr(x,'description')
     if ( is.null(desc) ){ 
@@ -36,11 +39,14 @@ print.editarray <- function(x, ...){
 #' @method print editmatrix
 #'
 #' @param x editmatrix object to be printed
+#' @param textOnly If \code{FALSE}, also print internal structure
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
-print.editmatrix <- function(x, ...){
-    cat("Edit matrix:\n")
-    print(toDataFrame(x), ...)
+print.editmatrix <- function(x, textOnly=FALSE, ...){
+    if (!textOnly){
+       print(toDataFrame(x), ...)
+       cat("Edit matrix:\n")
+    }
     cat("\nEdit rules:\n")
     desc <- attr(x,'description')
     if ( is.null(desc) ){ 

@@ -1,0 +1,14 @@
+Todo list for friday gehackedday.
+
+
+*(M) Indexing or 'contains' error in editset (cf. Mark)
+*(M) Bracket parsing within if-statements:
+  e <- editset("if  ((v30  >  0)  &&  (v123 < 0))  v17 < -0.5*v123")
+*(S) duplicated.editset (cf. Elmar)
+*(M) MIP merging and testing on real data (cf. Edwin)
+*(M) Change igraph0 to igraph dependency 
+
+*(C) Improve graphics of plot.violatedEdits
+*(C) Naming/documenting of edits [really needs a new branch]
+
+
