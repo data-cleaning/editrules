@@ -14,8 +14,8 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
     on Fellegi and Holt's generalized principle. Rules dependencies can be visualized with 
     using the igraph package.
 Version: 2.7
-Depends: R (>= 2.12.0)
+Depends: R (>= 2.12.0),igraph
 URL: http://code.google.com/p/editrules/
 Date: 2011-09-25
-Suggests: igraph, lpSolveAPI, iterators
+Suggests: lpSolveAPI, iterators
 

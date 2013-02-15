@@ -8,7 +8,7 @@ E <- editset(expression(
     if ( A == 'a') B == 'b',
     if ( A == 'b') x >= 0,
     u + v == w,
-    if ( u == 0 ) w >= 0
+    if ( u >= 0 ) w >= 0
 ))
 E
 summary(E)
