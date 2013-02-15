@@ -41,7 +41,7 @@ editmatrix <- function( editrules
       edit <- as.character(editrules$edit)
       description <- editrules$description
     } else {
-      stop("Invalid input, please use a character vector or a data.frame.\n See ?editmatrix for a valid input specification")
+      stop("Invalid input, please use a character vector, expression vector, or a data.frame.\n See ?editmatrix for a valid input specification")
     }
     if ( length(edit) == 0 ) return(neweditmatrix(matrix(numeric(0)),ops=character(0),normalized=TRUE))
     edts <- parseEdits(edit, type="num")   

@@ -1,5 +1,6 @@
 require(testthat)
 
+
 context("Parsing")
 
 test_that("parseEdits all works",{
@@ -55,3 +56,11 @@ test_that("parseEdits mix works",{
                , label=deparse(e)
                )
 })
+
+context("editfile")
+test_that("assignments are parsed by editfile",{
+  e <- editfile("edit_test_1.txt",type='num')
+  expect_equivalent(getA(e),array(c(-10,1),dim=c(1,2)))
+})
+
+

@@ -1,4 +1,5 @@
 version 2.7-0
+- bugfix: numeric edits now include constants assigned in editfile (thanks to Jeroen Pannekoek)
 - BREAKING CHANGE: first argument in as.igraph is now called 'x' to comply with new generic from igraph package
 - bugfix in contains.editset: in some cases not all edits were found
 - contains now gives more meaningfull error msg when nonexistent variable names are passed
