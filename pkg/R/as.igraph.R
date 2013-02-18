@@ -10,9 +10,10 @@ checkigraph <- function(){
 
 #' @method as.igraph editmatrix
 #' @param x An object of class \code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}
+#' @param weighted see \code{\link[igraph]{graph.adjacency}}
 #' @export
 #' @rdname adjacency
-as.igraph.editmatrix <- function(x, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E),weighted=TRUE, ...){
+as.igraph.editmatrix <- function(x, nodetype=c("all", "rules","vars"), rules=editnames(E), vars=getVars(E), weighted=TRUE, ...){
     checkigraph()
     nodetype <- match.arg(nodetype)
     a <- adjacency(E=x, nodetype=nodetype, rules=rules, vars=vars, ...)
