@@ -1,18 +1,21 @@
-#' Extend an editset with extra constraints needed for error
-#' localization
-#' @param E editset
-#' @param x named list with data
+#' Rewrite an editset and reported values into the components needed for a mip solver
+#' 
+#' @param E \code{\link{editset}} or any object that is coercable to an editset.
+#' @param x named \code{list} or \code{vector} with data
 #' @param weight vector with weights of the variable in the same order as x
-#' @return list with extended E, objfn and lower and upper bound
+#' @param M maximum allowed difference between reported value and corrected value
+#' @param epsilon offset needed for writing a strict inequality into a an inequality 
+#' @return list with an editmatrix, objfn, binvars, numvars, M and epsilon 
 #' @keywords internal
-buildELMatrix <- function( E
-                         , x
-                         , weight = rep(1, length(x))
-                         , maxvalue = 1e15
-                         , ...
-                         ){
-  #xlim <- checkXlim(xlim, x)
-  
+writeELAsMip <- function( E
+                      , x
+                      , weight = rep(1, length(x))
+                      , maxvalue = 1e15
+                      , M = 1e7
+                      , epsilon = 1e-7
+                      , ...
+                      ){
+  E <- as.editset(E)
   el.E <- NULL
     
 #   soft <- is.finite(editweight)
@@ -87,12 +90,19 @@ buildELMatrix <- function( E
 #      soft.idx <- grep("^\\.soft", el.vars)
 #      objfn[soft.idx] <- (1-lambda) * soft.weights
 #   }
-  
-  list( E = el.E
-      , objfn = objfn #sapply(vars, function(v) grepl("^adapt", v))
-      , binvars = which(el.binvars)
-      )
+  structure(
+    list( E = el.E
+        , objfn = objfn
+        , binvars = which(el.binvars)
+        , numvars = match(num.vars, el.vars)
+        , M = M
+        , epsilon = epsilon
+        ),
+    class="mip"
+  )
 }
+
+buildELMatrix <- writeELAsMip
 
 #testing...
 

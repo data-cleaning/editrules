@@ -50,38 +50,21 @@ errorLocalizer.mip <- function( E
    E <- as.editset(E)
    
    DUMP <- FALSE
-#   perturb weights for randomized selection from equivalent solutions
    
    wp <- perturbWeights(as.vector(weight))
-#    #alternatively, just add uniform small pertubation of 1e-5
-#    wp <- as.vector(weight)
-#    wp <- wp + runif(length(wp), 0, 1e-5)
    
    t.start <- proc.time()
    
-   elm <- buildELMatrix(E=E, x=x, weight=wp, ...)
+   elm <- writeELAsMip(E=E, x=x, weight=wp, ...)
    
-   Ee <- elm$E
-   objfn <- elm$objfn
-   ops <- getOps(Ee)
-   lps <- as.lp.editmatrix(Ee, obj=elm$objfn)
-   # TODO move this code into as.lp.editmatrix
-    ## the following code...
-    #   set.bounds(lps, lower=elm$xlim[,1], upper=elm$xlim[,2], columns=1:nrow(elm$xlim))
-    ## attempted to set bounds at non-existent columns 
-    ## this is better solved in buildELMatrix (mvdl)
-   icol <- match(getVars(E, "num"),colnames(lps),nomatch=0)
-   lo <- rep(-1e7, sum(icol > 0))
-   set.bounds(lps, lower=lo, columns=icol[icol>0]) 
-   set.type(lps, columns=elm$binvars , "binary")
-   set.objfn(lps, objfn)
+   lps <- as.lp.mip(elm)
    # end TODO
    lp.control( lps
 #             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
-#              , epsb = 1e-15
-#              , epsd = 1e-15
+             , epsb = 1e-15
+             , epsd = 1e-15
              , epspivot = 2e-15
    )
 
@@ -151,12 +134,15 @@ scale_fac <- function(x){
    if (is.finite(m) && m >= 1E9 ) sc <- 1/sqrt(m)
    sc   
 }
-   
 
 # assumes that E is normalized!
-as.lp.editmatrix <- function(E, obj, type){
-   require(lpSolveAPI)
-   epsb <- 1e-7
+as.lp.mip <- function(mip){
+   if (!require(lpSolveAPI)){
+     stop("This function needs lpSolveAPI which can be installed from CRAN")
+   }
+   
+   E <- mip$E
+   
    A <- getA(E)
    lps <- make.lp(nrow(A), ncol(A))
    
@@ -170,15 +156,13 @@ as.lp.editmatrix <- function(E, obj, type){
    lt <- ops == "<"
    ops[lt] == "<="
    set.constr.type(lps,types=ops)
-
+   
+   set.objfn(lps, mip$objfn)
+   set.type(lps, columns=mip$binvars , "binary")
+   set.bounds(lps, lower=rep(-mip$M, length(mip$numvars)), columns=mip$numvars)
+   
    b <- getb(E)
-   Ab <- abs(getAb(E))
-   
-   maxA <- max(Ab)
-   rangeA <- range(Ab[Ab>0])
-   m <- rangeA[1]/rangeA[2]
-   
-   b[lt] <- (b[lt] - m)
+   b[lt] <- (b[lt] - mip$epsilon)
    set.constr.value(lps, b)
    
    lps
