@@ -1,29 +1,62 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
 \documentclass[11pt, fleqn, a4paper]{article}
+\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
-\usepackage{threeparttable}
-\usepackage{mySweave}
+\usepackage{array}
+\usepackage[rounded]{syntax}
+\usepackage{color, colortbl}
+\usepackage{tex/smalltree}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
+\usepackage{makeidx}
+%\usepackage{mySweave}
+\makeindex
+
+% shorthand to make '<category>' in syntax diagram
+\newcommand{\syncat}{ $\textrm{\sf '}\langle category\rangle\textrm{\sf '}$ }
+\newcommand{\notodot}{\odot\kern-0.85em/\:\,}
+
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
-\DeclareMathOperator{\res}{\mathfrak{R}}
+\DeclareMathOperator{\ocup}{\cup}
+\DeclareMathOperator{\ocap}{\cap}
 \newcommand{\rhomap}{\xrightarrow{\rho}}
+\newcommand{\rows}{\textrm{rows}}
+\newcommand{\columns}{\textrm{columns}}
+\newcommand{\ind}{\textrm{\bf ind}}
+\newcommand{\true}{\textrm{\sc true} }
+\newcommand{\false}{\textrm{\sc false} }
 
-\newtheorem{theorem}{Theorem}
+\newtheorem{theorem}{Theorem}[subsection]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\theend}{\hfill$\Box$}
 
-\usepackage{float} 
+\newcommand{\packageversion}{{\sf 2.5}}
+
+\usepackage{float}
  
 \floatstyle{boxed}
-\newfloat{Rcode}{t}{rco}
-\floatname{Rcode}{Figure}
-
+\newfloat{Rcode}{t!}{rco}
+\floatname{Rcode}{{\rm Figure}}
+\makeatletter
+\renewcommand{\fnum@Rcode}{%
+%% make Rcound count and look like a figure.
+%    \addtocounter{figure}{1}
+    \setcounter{Rcode}{\value{figure}}
+    \addtocounter{Rcode}{1}
+    \rm Figure~\arabic{Rcode}% <- avoid space before ':'
+}
+\makeatother
 
 
 % stimulate latex to put multiple floats on a page.
@@ -37,9 +70,17 @@
 \renewcommand{\floatpagefraction}{.9}
 \renewcommand{\dblfloatpagefraction}{.9}
 \renewcommand{\dbltopfraction}{.9}
-\hyphenation{time-stamp}
 
-<<echo=false>>=
+
+
+\hyphenation{
+    time-stamp 
+    se-pa-ra-te-ly
+    ge-ne-ra-li-zed
+    e-dit-rules
+}
+
+<<init, echo=FALSE>>=
 library(editrules)
 @
 
@@ -47,12 +88,9 @@ library(editrules)
 {\small package version \Sexpr{packageVersion("editrules")}}}
 \author{Edwin de Jonge and Mark van der Loo}
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 \maketitle
 \begin{abstract}
-{\em This vignette is far from finished. Version 2.0 of the package will have
-the full vignette. At the moment, functionality for solving error localization problems
-with lp solvers is experimental.}
+TO DO
 \end{abstract}
 
 \newpage
@@ -85,7 +123,7 @@ rules to data, and to localize erroneous fields in data based on the
 generalized principle of \cite{fellegi:1976}.  The package does not offer
 functionality for data correction. However, it does facilitate the
 identification of the set of solutions for an error correction problem. 
-For a detailed description we refer to \cite{jonge:2011} and \cite{loo:2011b}.
+For a detailed description we refer to \cite{jonge:2011}, \cite{loo:2011b} and {}.
 
 {\sf editrules} offers a fairly complete toolbox to work with numerical and 
 categorical edits. It contains a flexible object for localizing errors, which 
@@ -95,9 +133,17 @@ localization problem with a branch and bound algorithm grows exponentially
 with the number of (incorrect) variables. Many surveys have hundreds of variables, 
 which results in (very) long processing times for records with many errors. 
 
-This paper describes the error localization problem for numerical and categorical 
-edits as a mixed integer problem and its implementation in {\sf editrules}. A brief 
-description can be found in \citep{waal:2011} p. 75.
+This paper describes the error localization problem for numerical, categorical and mixed edits as a mixed integer problem and its implementation in {\sf editrules}. Error localization implemented as a mixed integer programming results in a fast procedure, which is typically much faster than the branch and bound method also available in {\sf editrules}.
+
+We start with a brief description of mixed integer programming and its application to the error localization problem.  
+In section \ref{sec:numdataerror} we describe a mip formulation for numerical records. Section ref describes the mip formulation for categorical records. We end with a discussion on the implementation in {\sf editrules}.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Error localization as a mixed integer problem}
+\label{sec:mipproblem}
+
 Mixed integer programming is a special case of linear programming. Linear 
 programming maximizes a linear objective function, which is subject to linear
 equality and linear inequality constraints. More formally: 
@@ -109,80 +155,101 @@ equality and linear inequality constraints. More formally:
 \end{eqnarray}
 where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
 
-Error localization implemented as a mixed integer programming results in a fast procedure, which is typically much faster than the branch and bound method also available in {\sf editrules}.
+Mixed integer programming is well understood (books?) and there are several sofware packages (citations) that implement efficient solvers for linear and mixed integer problems. If you can formulate your problem as a mip problem, this software can be used to solve the original problem.
+In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. Note that most mip software allows the \ref{eq:mip} to be formulated as a minimization problem where ${\bf}x$ can be negative. They also allow for equality constraints. These are all are simple extensions of \ref{eq:mip}.
 
-In section \ref{sec:numdataerror} we describe a mip formulation for numerical records. Section ref describes the mip formulation for categorical records. We end with a discussion on the implementation in {\sf editrules}.
+In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as MIP problems. This error localization principle minimizes the (weigthed) number of variables that we should change given the current constraints.
+The formulations for error localization for numerical, categorical and mixed edits all have the same parts.
+\begin{itemize}
+  \item A numerical description ${\bf x}$ of record ${\bf r}$ including adaptations ${\bf \Delta}$ and dummy variables. 
+  \item The constraints (edits) that each record ${\bf r}$ must obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$
+  \item The reported values ${\bf r}^0$ formulated as soft constraints for ${\bf r}$ in the form ${\bf A}^0 {\bf x} = {\bf x}^0$
+  \item The (binary) adaption variables $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$  
+  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$
+\end{itemize}
+
+\subsection{Further reading}
+An overview of several mixed integer formulations for error localization can be found in \citep{waal:2011} p. 75.
+Mixed integer programming (convex programming etc.)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% SECTION 2
+%% SECTION 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Numerical data errors}
 \label{sec:numdataerror}
-A numerical record $\bf x$  with reported values $({x^0_1,\dots,x^0_m)}$ has the following linear constraints:
+{\sf editrules} allows for the following numerical constraints (see \ref{jonge:2011}).
+A numerical record $\bf r$  with reported values $({r^0_1,\dots,r^0_m)}$ has the following linear constraints:
 \begin{equation}
 \label{eq:edit}
-A {\bf x \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
+A {\bf r \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 \end{equation}
 
-It can easily be checked with {\sf editrules} if $\bf x$ violates any of these constraints. If this is the
-case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
-complies to the edits. These edits are (usually) valid for all records of a data set. 
-For each reported record we define a seperate mip, which contains the set of edits extended with edits 
-that depend on the reported values.
+\subsection{Mip formulation}
 
-In practice reported values are always bounded: No person is older than 200 years old or taller than 30 feet. So each for each variable $x_i$  we assume a lower boundary $\rm l_i$ and an upper boundary $\rm u_i$\footnote{Note that equation \ref{eq:boundary} can also be written in the form of \ref{eq:edit}. We will use univariate or boundary constraints explicitly and exclude them from \ref{eq:edit}.}.
+The mapping from record ${\bf r}$ to $\bf x$ is relatively easy:
 \begin{equation}
-{\rm l}_i \leq x_i \leq {\rm u}_i \label{eq:boundary}
+{\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m, \delta^{+}_1, \ldots, \delta^{+}_m,\delta^{-}_1, \ldots, \delta^{-}_m)
 \end{equation}
+with $\delta^{+}_i \geq 0 $, $\delta^{-}_i \geq 0$ and $\Delta_i \in \{0,1\}$.\\
 
-For each $x_i$ we introduce a binary variable $\Delta_i \in \{0,1\}$:
-\begin{equation} \label{eq:delta}
-  \Delta_i = \left\{ 
-  \begin{array}{ll}
-         0 & \mbox{if $x_i = x^0_i$} \\
-         1 & \mbox{if $x_i \neq x^0_i$}.
-  \end{array} \right. 
-\end{equation}
-where $x^0_i$ is the reported value for $x_i$. We now add the following edits to the edit set: 
 
-\begin{equation} \label{eq:binconstraint}
- ({\rm l}_i - x^0_i)\Delta_i + x^0_i  \leq   x_i  \leq x^0_i + ({\rm u}_i - x^0_i)\Delta_i 
-\end{equation}
-
-It can easily be checked that if $\Delta_i = 0$ these edits reduce to $x_i = x^0_i$, meaning
-that the reported $x^0_i$ is assumed correct. If $\Delta_i = 1$ the edits 
-reduce to equation \ref{eq:boundary}, meaning that the value of $x_i$ can take any feasible value within 
-its boundaries $\rm l_i$ and $\rm u_i$.
-
-Using principle of Felligi Holt \citep{fellegi:1976} which minimizes the weigthed sum of adaptations, the error localization problem can be written as:
-
-{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\Delta_j$, with:
+Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the exception of strict inequalities.
+We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$
 \begin{equation}
-\label{eq:nummip}
-\begin{array}{rcrcl}
-\sum^m_{j=1} a_{1j} x_j &&                  &\odot_1& b_1    \\
-\ldots                 &&                  &\ldots& \ldots  \\
-\sum^m_{j=1}a_{nj} x_j &&                  &\odot_n& b_n    \\
-    x_1 &-& ({\rm u_1 -  x^0_1}) \Delta_1   &\leq   & x^0_1 \\
-   -x_1 &+& ({\rm l_1} - x^0_1) \Delta_1  &\leq   & -x^0_1 \\
-\ldots  & & \ldots          &       & \ldots \\
-    x_m &-& ({\rm u_m} - x^0_m) \Delta_m   &\leq   & x^0_m \\
-   -x_m &+& ({\rm l_m} - x^0_m) \Delta_m  &\leq   & -x^0_m
-
-\end{array}
+a_{ij} r_i < b_j \iff a_{ij} x_i \leq b_j - \epsilon
 \end{equation}
-with $\rm w_j$ a weight for variable $x_j$. This problem is equal to the following mixed integer problem:
 
-$$
-\begin{array}{rcl}
-   \mbox{Maximize } {\bf c}^T {\bf \hat{x}} \\
-   \hat{A} {\bf \hat{x}} & \leq & {\bf \hat{b}} \\
-   \textrm{with } {\bf \hat{x}} & \geq & 0 \\
-   {\bf \hat{x}} & = &(x_1 - {\rm l_1}, \ldots, x_m - {\rm l_m}, \Delta_1, \ldots, \Delta_m) \\
-   {\bf c} & = & (0, \ldots, 0, -{\rm w_1}, \ldots, -{\rm w_m}) \\
-   {\bf \hat{b}} & = & (b_1, \ldots, b_m, x^0_1, -x^0_1, \ldots, x^0_m, -x^0_m)
-\end{array}
-$$
+The soft constraint for the reported values can be written as:
+\begin{eqnarray}
+                         x_i & =    & r^0_i + \delta^{+}_i - \delta^{-}_i \\
+  \delta^{+}_i + \delta^{-}_i& \leq & M \Delta_i
+\end{eqnarray}
+with $M$ sufficiently large and $i = \{1,\ldots,m\}$. \\
+
+It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
+if $\Delta_i = 1$ then $x_i$ can take any value 
+between $r^0_i - M$ and  $r^0_i + M$.
+
+This makes the mip formulation for error localization in numerical edits complete.
+
+\subsection{Implementation in editrules}
+
+As shown in a previous paper (\cite{jonge:2011}), {\sf editrules} has the function {\sf localizeErrors} 
+which by default uses a branch and bound algorithm. This can be changed to mip
+by supplying the parameter {\sf method="mip"}. For many purposes this will increase
+the speed without noticable changes in the output.
+<<num example>>=
+E <- editmatrix("x <= y")
+dat <- data.frame(x=c(10, 2), y=c(1,2))
+weight <- data.frame(x=c(2,1), y=c(1,1))
+le <- localizeErrors(E, dat, weight=weight, method="mip")
+le$status
+@
+
+Internally {\sf localizeErrors} uses for each record {\sf errorLocalizer.mip}.
+<<num mip>>=
+E <- editmatrix("x <= y")
+r <- c(x=10, y=1)
+weight <- c(x=2, y=1)
+el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
+str(el)
+
+@
+
+<<>>=
+# write errorlocalization as mip
+mip <- editrules:::writeELAsMip(E, r, weight=weight)
+print(mip$E, textOnly=TRUE)
+mip$objfn
+@
+
+
+
+
+\subsection{Numerical subtleties}
+
+ 
 
 \subsection{Boundaries}
 The extended edit set derived in (\ref{eq:nummip}) depends on the boundaries $\rm l_i$ and 
@@ -195,10 +262,6 @@ The chance for numerical instability and rounding errors is considerably larger 
 
 You should realize, that you the user are probably in a better position to scale the problem than any computer algorithm. 
 \end{quote}
-
-For the error localization problem this means that the upper and lower boundaries of variables $x_i$ 
-shouldn't be too large. A reasonable approach is to take the minimum and maximum values for all variables 
-in a dataset and multiply them with a factor $f$ (e.g. $1000$).
 
 \subsection{Implementation in {\sf editrules}}
 {\sf editrules} contains the function {\sf localizeErrors} which can be used to localize errors in a {\tt data.frame}. It default implemention using a branch and bound algorithm is described in detail in \citep{jonge:2011}. It accepts an {\sf editmatrix} and a {\sf
@@ -217,7 +280,7 @@ Figure \ref{RlocalizeErrors} shows an example of localizing errors using mip.
 
 %
 \begin{Rcode}
-<<keep.source=true>>=
+<<keep.source=TRUE>>=
 E <- editmatrix(c(
     "x + y == z",
     "x > 0",
@@ -371,7 +434,7 @@ cateditmatrix} is an {\sf editmatrix} object, which is described in
 \cite{jonge:2011}, but it "remembers" that it is categorical. 
 %
 \begin{Rcode}
-<<keep.source=true>>=
+<<keep.source=TRUE>>=
 E <- editrules:::cateditmatrix( 
        expression( gender %in% c("male", "female")
                  , if (pregnant) gender == "female"
@@ -390,7 +453,7 @@ An example is shown in figure \ref{R:localizeCat}
 
 % checkDatamodel is niet overloaded voor cateditmatrix. Moeten we dit doen, aangezien cateditmatrix (nog) niet 'public' is.
 \begin{Rcode}
-<<keep.source=true>>=
+<<keep.source=TRUE>>=
 #dat <- data.frame(gender="male", pregnant=TRUE)
 #localizeErrors(E,dat, method="mip")
 @
@@ -398,14 +461,22 @@ An example is shown in figure \ref{R:localizeCat}
 \label{R:localizeCat}
 \end{Rcode}
 
+\begin{figure}
+<<tidy=FALSE>>=
+E <- editarray(c(
+    "gender %in% c('male','female')",
+    "pregnant %in% c('yes','no')",
+    "if (gender == 'male') pregnant == 'no'"
+    )
+)
+E
+@
+\caption{This is a caption}
+\end{figure}
+
+\section{localizeErrors}
+
 \section{Discussion}
-
-Is a usefull addition to {\tt editrules}, finds quickly solutions to error localization  problems with 
-hundreds to thousands of variables. 
-
-Solutions given by current lp solvers can be numerical unstable, which may result in a false positive 
-or a false negative solution. Luckily {\tt editrules} contains {\tt substValue} and {\tt isFeasible} 
-used to increase the numerical stability by using smaller boundaries for the variables.
 
 \subsection{Comparison to {\tt backtracker}}
 errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.

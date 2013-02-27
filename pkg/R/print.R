@@ -44,10 +44,10 @@ print.editarray <- function(x, textOnly=FALSE, ...){
 #' @keywords internal
 print.editmatrix <- function(x, textOnly=FALSE, ...){
     if (!textOnly){
-       print(toDataFrame(x), ...)
-       cat("Edit matrix:\n")
+      cat("Edit matrix:\n")
+      print(toDataFrame(x), ...)
+      cat("\nEdit rules:\n")
     }
-    cat("\nEdit rules:\n")
     desc <- attr(x,'description')
     if ( is.null(desc) ){ 
         desc <- rep("",nrow(x))
@@ -56,7 +56,7 @@ print.editmatrix <- function(x, textOnly=FALSE, ...){
     }
     u <- as.character(x)
     nm <- names(u)
-    pr <- paste(format(nm,width=max(nchar(nm))),':',paste(u,desc),collapse='\n')
+    pr <- paste(format(nm,width=max(nchar(nm))),':', paste(u,desc), collapse='\n')
     cat(pr,'\n')
 }
 
@@ -68,10 +68,12 @@ print.editmatrix <- function(x, textOnly=FALSE, ...){
 #' @param x cateditmatrix object to be printed
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
-print.cateditmatrix <- function(x, ...){
-    cat("Edit matrix:\n")
-    print(as.data.frame(x), ...)
-    cat("\nEdit rules:\n")
+print.cateditmatrix <- function(x, textOnly=TRUE, ...){
+    if (!textOnly) {
+      cat("Edit matrix:\n")
+      print(as.data.frame(x), ...)
+      cat("\nEdit rules:\n")
+    }
     desc <- attr(x,'description')
     if ( is.null(desc) ){ 
         desc <- rep("",nrow(x))

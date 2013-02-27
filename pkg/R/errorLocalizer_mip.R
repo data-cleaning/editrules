@@ -103,7 +103,7 @@ errorLocalizer.mip <- function( E
    idx <- match(names(sol.values), names(x), nomatch=0)
    
    x_feasible[names(sol.num)] <- sol.num 
-   
+    
    if (length(sol.cat))
       x_feasible[names(sol.cat)] <- sol.cat
 #    if (is.cateditmatrix(E)){
