@@ -399,11 +399,10 @@ test_that("Consistency with B&B algorithm",{
 
 test_that("strict inequalities are treated correctly", {
   E <- editmatrix("x > 0")
-  expect_equivalent(errorLocalizer.mip(E, 0)$adapt, TRUE)
-  
-  #expect_equivalent(errorLocalizer.mip(E, c(x=1e-7))$adapt, FALSE)  
-  # below 1e-8 it won't work.
-  #expect_equivalent(errorLocalizer.mip(E, c(x=1e-8))$adapt, FALSE)
+  expect_that(errorLocalizer.mip(E, c(x=0))$adapt, is_equivalent_to(TRUE))
+  expect_that(errorLocalizer.mip(E, c(x=1e-4))$adapt, is_equivalent_to(TRUE))
+
+  expect_that(errorLocalizer.mip(E, c(x=1e-3))$adapt, is_equivalent_to(FALSE))
 })
 
 
