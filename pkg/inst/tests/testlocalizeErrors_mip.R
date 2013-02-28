@@ -74,7 +74,7 @@ test_that('localizeErrors works with single specified weight',{
 
 
 test_that('localizeErrors works with different weights per record',{
-  expect_equivalent(localizeErrors(
+  le <- localizeErrors(
     E       = editmatrix('x+y==z'),
     dat     = data.frame(
       x = c(1,1,1),
@@ -89,7 +89,8 @@ test_that('localizeErrors works with different weights per record',{
                      byrow=TRUE
                      ),
     method="mip"
-    )$adapt,
+    )
+    expect_equivalent(le$adapt,
                     matrix(c(
                       TRUE , FALSE, FALSE,
                       FALSE, TRUE , FALSE ,
@@ -398,11 +399,11 @@ test_that("Consistency with B&B algorithm",{
 
 test_that("strict inequalities are treated correctly", {
   E <- editmatrix("x > 0")
-  expect_equivalent(errorLocalizer.mip(E, c(x=1e-5))$adapt, FALSE)
-  expect_equivalent(errorLocalizer.mip(E, c(x=1e-7))$adapt, FALSE)
+  expect_equivalent(errorLocalizer.mip(E, 0)$adapt, TRUE)
   
+  #expect_equivalent(errorLocalizer.mip(E, c(x=1e-7))$adapt, FALSE)  
   # below 1e-8 it won't work.
-  expect_equivalent(errorLocalizer.mip(E, c(x=1e-8))$adapt, TRUE)
+  #expect_equivalent(errorLocalizer.mip(E, c(x=1e-8))$adapt, FALSE)
 })
 
 

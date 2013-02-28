@@ -48,7 +48,6 @@ errorLocalizer.mip <- function( E
 
    vars <- getVars(E)
    E <- as.editset(E)
-   
    DUMP <- FALSE
    
    wp <- perturbWeights(as.vector(weight))
@@ -63,9 +62,10 @@ errorLocalizer.mip <- function( E
 #             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = maxduration
              , epsint = 1e-15
-             , epsb = 1e-15
-             , epsd = 1e-15
-             , epspivot = 2e-15
+#             , epssel = 1e-15
+#            , epsb = 1e-15
+#              , epsd = 1e-15
+#              , epspivot = 1e-15
    )
 
    if (DUMP) write.lp(lps, "test3.lp")
@@ -98,7 +98,8 @@ errorLocalizer.mip <- function( E
    #print(list(idx=idx, sol=sol))
    adapt <- sapply(x, function(i) FALSE)
    adapt[names(sol.adapt)] <- (sol.adapt > 0)
-
+   #browser()
+   
    x_feasible <- x
    idx <- match(names(sol.values), names(x), nomatch=0)
    
@@ -159,7 +160,7 @@ as.lp.mip <- function(mip){
    
    set.objfn(lps, mip$objfn)
    set.type(lps, columns=mip$binvars , "binary")
-   set.bounds(lps, lower=rep(-mip$M, length(mip$numvars)), columns=mip$numvars)
+   set.bounds(lps, lower=rep(-Inf, length(mip$numvars)), columns=mip$numvars)
    
    b <- getb(E)
    b[lt] <- (b[lt] - mip$epsilon)

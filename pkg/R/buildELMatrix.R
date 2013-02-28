@@ -12,7 +12,7 @@ writeELAsMip <- function( E
                       , weight = rep(1, length(x))
                       , maxvalue = 1e15
                       , M = 1e7
-                      , epsilon = 1e-7
+                      , epsilon = 1e-3
                       , ...
                       ){
   E <- as.editset(E)
@@ -72,7 +72,8 @@ writeELAsMip <- function( E
   }
   
 #  el.E <- c(mix.se, cat.se, num.se, E$num, cateditmatrix(E$mixcat))     
-
+  lt <- getOps(el.E) == "<"
+    
   el.vars <- getVars(el.E)
   el.binvars <- sapply(el.vars, is.character)
   el.binvars[el.vars %in% num.vars] <- FALSE
