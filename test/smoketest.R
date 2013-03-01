@@ -63,5 +63,5 @@ if (any(diff)) {
   
   cbind(x=x, bb=BB[1,], mip=MIP[1,], mipfeas=elMIP$x_feasible)
   write.lp(elMIP$lp, "test.lp")
-
 }
+
