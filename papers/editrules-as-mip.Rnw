@@ -6,7 +6,6 @@
 \usepackage{array}
 \usepackage[rounded]{syntax}
 \usepackage{color, colortbl}
-\usepackage{tex/smalltree}
 \usepackage{natbib}
 \usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
@@ -161,7 +160,7 @@ In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip p
 
 Note that most mip software allows the \ref{eq:mip} to be formulated as a minimization problem where ${\bf}x$ can be negative. They also allow for equality constraints. These are all are simple extensions of \ref{eq:mip}.
 
-In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as a mip problems. This error localization principle minimizes the (weigthed) number of variables that should be changed to obey the current constraints. The formulations for error localization for different types are different but all have the same parts:
+In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as a mip problems. This error localization principle minimizes the (weigthed) number of variables that should be changed to obey the current constraints. The formulations for error localization for the three types are different but all have the same parts:
 \begin{itemize}
   \item A numerical description ${\bf x}$ of record ${\bf r}$ including binary adaptation variables ${\bf \Delta}$ and other dummy variables. 
   \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$
