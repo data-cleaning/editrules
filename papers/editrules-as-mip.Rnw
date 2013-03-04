@@ -156,22 +156,26 @@ equality and linear inequality constraints. More formally:
 \end{eqnarray}
 where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
 
-Mixed integer programming is well understood (books?) and there are several sofware packages (citations) that implement efficient solvers for linear and mixed integer problems. If you can formulate your problem as a mip problem, this software can be used to solve the original problem.
-In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. Note that most mip software allows the \ref{eq:mip} to be formulated as a minimization problem where ${\bf}x$ can be negative. They also allow for equality constraints. These are all are simple extensions of \ref{eq:mip}.
+Mixed integer programming is well understood and there are several sofware packages that implement efficient solvers for linear and mixed integer problems. If your problem can be formulated as a mip problem, mip software can be used to solve the original problem.
+In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. 
 
-In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as MIP problems. This error localization principle minimizes the (weigthed) number of variables that we should change given the current constraints.
-The formulations for error localization for numerical, categorical and mixed edits all have the same parts.
+Note that most mip software allows the \ref{eq:mip} to be formulated as a minimization problem where ${\bf}x$ can be negative. They also allow for equality constraints. These are all are simple extensions of \ref{eq:mip}.
+
+In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as a mip problems. This error localization principle minimizes the (weigthed) number of variables that should be changed to obey the current constraints. The formulations for error localization for different types are different but all have the same parts:
 \begin{itemize}
-  \item A numerical description ${\bf x}$ of record ${\bf r}$ including adaptations ${\bf \Delta}$ and dummy variables. 
-  \item The constraints (edits) that each record ${\bf r}$ must obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$
-  \item The reported values ${\bf r}^0$ formulated as soft constraints for ${\bf r}$ in the form ${\bf A}^0 {\bf x} = {\bf x}^0$
-  \item The (binary) adaption variables $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$  
-  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$
+  \item A numerical description ${\bf x}$ of record ${\bf r}$ including binary adaptation variables ${\bf \Delta}$ and other dummy variables. 
+  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$
+  \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} have formulated as soft constraints ${\bf A}^0 {\bf x} = {\bf r}^0$
+  \item Binary adaption variable(s) $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$  
+  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$. The object function is the same for all formulations.
 \end{itemize}
+
+In the next sections we will describe the mip formulations for the numerical, categorical and mixed edits and show their implementation in {\sf editrules}.
 
 \subsection{Further reading}
 An overview of several mixed integer formulations for error localization can be found in \citep{waal:2011} p. 75.
 Mixed integer programming (convex programming etc.).
+List of mip software.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
@@ -192,31 +196,34 @@ The mapping from record ${\bf r}$ to $\bf x$ is relatively easy:
 \begin{equation}
 {\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m, \delta^{+}_1, \ldots, \delta^{+}_m,\delta^{-}_1, \ldots, \delta^{-}_m)
 \end{equation}
-with $\delta^{+}_i \geq 0 $, $\delta^{-}_i \geq 0$ and $\Delta_i \in \{0,1\}$.\\
+with $\Delta_i \in \{0,1\}$, $\delta^{+}_i \geq 0 $ and $\delta^{-}_i \geq 0$.\\
 
 
 Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the exception of strict inequalities.
 We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$
 \begin{equation}
-a_{ij} r_i < b_j \iff a_{ij} x_i \leq b_j - \epsilon
+a_{ij} r_i < b_j \implies a_{ij} r_i \leq b_j - \epsilon
 \end{equation}
+Note that for reasons we give in a following section you should avoid writing strict inequalities in practice.
 
 The soft constraint for the reported values can be written as:
 \begin{eqnarray}
-                         x_i & =    & r^0_i + \delta^{+}_i - \delta^{-}_i \\
-  \delta^{+}_i + \delta^{-}_i& \leq & M \Delta_i
+                         r_i & =    & r^0_i + \delta^{+}_i - \delta^{-}_i  \label{eq:numsoft} \\
+  \delta^{+}_i + \delta^{-}_i& \leq & M \Delta_i                           \label{eq:numadapt}
 \end{eqnarray}
 with $M$ sufficiently large and $i = \{1,\ldots,m\}$. \\
 
-It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
+Equation \ref{eq:numsoft} allows $r_i$ to be different from $r^0_i$, but equation \ref{eq:numadapt} shows
+that this results in $\Delta_i = 1$. It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
 if $\Delta_i = 1$ then $x_i$ can take any value 
-between $r^0_i - M$ and  $r^0_i + M$.
+between $r^0_i - M$ and  $r^0_i + M$. 
+Since the objective function tries to minimize $w^T \Delta_i$, the mip solver will try to keep each variables $r_i$ at its reported value $r^0_i$.
 
 This makes the mip formulation for error localization in numerical edits complete.
 
-\subsection{Implementation in editrules}
- {\sf editrules} internally creates for each 
-record an extended {\sf editmatrix} {\tt E} that contains the conditional boundary conditions as defined 
+\subsection{Implementation}
+{\sf editrules} uses an {\sf editmatrix} object to store numerical data constraints. This object is described extensively in {\cite{jone:}}
+{\tt E} that contains the conditional boundary conditions as defined 
 in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to solve the resulting mixed integer program.
 As shown in a previous paper (\cite{jonge:2011}), {\sf editrules} has the function {\sf localizeErrors} 
 which by default uses a branch and bound algorithm. We extended this function with a parameter {\tt method}, that can be used to select the {\tt "localizer"} or {\tt "mip"} method. 
@@ -226,8 +233,12 @@ the speed without noticable changes in the output.
 E <- editmatrix("x <= y")
 dat <- data.frame(x=c(10, 2), y=c(1,2))
 weight <- data.frame(x=c(2,1), y=c(1,1))
-le <- localizeErrors(E, dat, weight=weight, method="mip")
-le$status
+
+bb <- localizeErrors(E, dat, weight=weight)
+mip <- localizeErrors(E, dat, weight=weight, method="mip")
+
+bb$adapt
+mip$adapt
 @
 
 Internally {\sf localizeErrors} uses for each record {\sf errorLocalizer.mip}.
@@ -394,7 +405,7 @@ cateditmatrix} is an {\sf editmatrix} object, which is described in
 \cite{jonge:2011}, but it "remembers" that it is categorical. 
 %
 \begin{Rcode}
-<<keep.source=TRUE>>=
+<<keep.source=TRUE, tidy=FALSE>>=
 E <- editrules:::cateditmatrix( 
        expression( gender %in% c("male", "female")
                  , if (pregnant) gender == "female"
@@ -434,14 +445,18 @@ E
 \caption{This is a caption}
 \end{figure}
 
-\section{localizeErrors}
+\section{Mixed data errors}
 
-\section{Discussion}
+\subsection{Mip formulation}
+\subsection{Implementation}
 
-\subsection{Comparison to {\tt backtracker}}
+\section{Comparison}
+
+\subsection{Benchmark comparison to {\tt backtracker}}
 errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.
 It can also find more equivalent solutions, which is not possible or difficult with MIP solvers.
 
+\section{Conclusion}
 \bibliographystyle{chicago}
 \bibliography{editrules}
 
