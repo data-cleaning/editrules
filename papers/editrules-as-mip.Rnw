@@ -90,7 +90,10 @@ library(xtable)
 \begin{document}
 \maketitle
 \begin{abstract}
-TO DO
+R package {\sf editrules} offers a mixed integer programming implementation for 
+localizing erronous fields. We describe the mip formulation for numerical, categorical 
+and mixed edits and their implementation. A benchmark is given between the branch 
+and bound and mip that are both available in {\sf editrules}. 
 \end{abstract}
 
 \newpage
@@ -162,11 +165,11 @@ Note that most mip software allows the \ref{eq:mip} to be formulated as a minimi
 
 In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as a mip problems. This error localization principle minimizes the (weigthed) number of variables that should be changed to obey the current constraints. The formulations for error localization for the three types are different but all have the same parts:
 \begin{itemize}
-  \item A numerical description ${\bf x}$ of record ${\bf r}$ including binary adaptation variables ${\bf \Delta}$ and other dummy variables. 
-  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$
+  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$, with ${\bf w}$ the vector of weights and ${\bf \Delta}$ a vector of binary adaptation variables. If $\Delta_i = 1$, value $r_i$ must be adapted. The objective function is the same for all formulations.
+  \item A numerical description ${\bf x}$ of record ${\bf r}$ that includes binary adaptation variables ${\bf \Delta}$ and other dummy variables. 
+  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey formulated in the form ${\bf A} {\bf r} \leq {\bf b}$
   \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} have formulated as soft constraints ${\bf A}^0 {\bf x} = {\bf r}^0$
-  \item Binary adaption variable(s) $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$  
-  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$. The object function is the same for all formulations.
+  \item Binary adaption variable(s) $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$.
 \end{itemize}
 
 In the next sections we will describe the mip formulations for the numerical, categorical and mixed edits and show their implementation in {\sf editrules}.
@@ -284,6 +287,8 @@ A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has t
 \end{equation}
 with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
 
+\subsection{Mip formulation}
+
 It can easily be checked with {\sf editrules} if $\bf v$ violates any of these constraints. If this is the
 case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
 complies to the edits. Internally {\sf editrules} uses an {\sf editarray} object which is described in 
@@ -397,6 +402,7 @@ Note that parts of equation (\ref{eq:tmip}) can be written in a negated form:
   \end{array} \right. 
 \end{equation}
 
+\subsection{Implementation}
 \subsection{The {\sf cateditmatrix} object}
 To create a mip formulation for the categorical error localization problem,
 {\sf editrules} uses internally the {\sf cateditmatrix} object. {\sf
@@ -404,7 +410,7 @@ cateditmatrix} is an {\sf editmatrix} object, which is described in
 \cite{jonge:2011}, but it "remembers" that it is categorical. 
 %
 \begin{Rcode}
-<<keep.source=TRUE, tidy=FALSE>>=
+<<tidy=FALSE>>=
 E <- editrules:::cateditmatrix( 
        expression( gender %in% c("male", "female")
                  , if (pregnant) gender == "female"
@@ -445,15 +451,8 @@ E
 \end{figure}
 
 \section{Mixed data errors}
-
 \subsection{Mip formulation}
 \subsection{Implementation}
-
-\section{Comparison}
-
-\subsection{Benchmark comparison to {\tt backtracker}}
-errorLocalizer is more complete, offers a more complete tool box for finding an optimal solution.
-It can also find more equivalent solutions, which is not possible or difficult with MIP solvers.
 
 \section{Conclusion}
 \bibliographystyle{chicago}
