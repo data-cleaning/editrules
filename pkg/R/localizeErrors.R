@@ -53,7 +53,7 @@
 #'
 #' @export
 
-localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("localizer", "mip"), useBlocks=TRUE, ...){
+localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("bb", "mip", "localizer"), useBlocks=TRUE, ...){
     stopifnot(is.data.frame(dat))
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
     if ( is.data.frame(weight) ) weight <- as.matrix(weight)
@@ -128,12 +128,12 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
 #' @param verbose \code{logical} print progress report during run?
 #' @param pretext \code{character} text to print before progress report
 #' @param weight a \code{nrow(dat)xncol(dat)} array of weights
-#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used?
+#' @param method should branch and bound ("bb") or mix integer programming ("mip") be used?
 #' @param call call to include in \code{\link{errorLocation}} object
 #' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("localizer", "mip"), ...){
+localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("bb", "mip", "localizer"), ...){
     vars <- getVars(E)
     weight <- weight[,vars,drop=FALSE]
 
@@ -158,7 +158,13 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
     maxDurationExceeded <- logical(n)
     fmt <- paste('\r%s record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
+    
     if (method == "localizer"){
+      warning("method=='localizer' is deprecated. Please use method=='bb'")
+      method <- "bb"
+    }
+    
+    if (method == "bb"){
       for ( i in 1:n ){
           if (verbose){ 
               cat(sprintf(fmt,pretext,i,n)) 

@@ -1,3 +1,6 @@
+version 2.7-1
+- changed method parameter of localizeErrors into "bb" or "mip" ("localizer" is deprecated).
+
 version 2.7-0
 - bugfix: numeric edits now include constants assigned in editfile (thanks to Jeroen Pannekoek)
 - BREAKING CHANGE: first argument in as.igraph is now called 'x' to comply with new generic from igraph package

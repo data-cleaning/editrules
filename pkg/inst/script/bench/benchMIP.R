@@ -26,31 +26,40 @@ genOrderedVars <- function(nvar=10){
   as.editmatrix(A, ops=rep("<=", nvar))
 }
 
-testOrdered <- function(nvars=10){
+testOrdered <- function(nvars=10, method="localizer"){
   E <- genOrderedVars(nvars)
   res <- NULL
   data <- as.data.frame(matrix(0, ncol=nvars, nrow=nvars, dimnames=list(errors=NULL, vars=getVars(E))))
   for (errors in seq_len(nvars)){
     data[errors,seq_len(errors)] <- rev(seq_len(errors))  # creates errors...
   }
-  BB <- localizeErrors(E, data)
-  MIP <- localizeErrors(E, data, method="mip")
   
-  a <- cbind(BB$status, nvars=nvars, method="bb")
-  b <- cbind(MIP$status, nvars=nvars, method="mip")
-  rbind(a,b)
+  
+  le <- localizeErrors(E, data, method=method)
+  
+  cbind(le$status, nvars=nvars, method=method)
 }
 
 f <- file("benchordered.txt", open="wt")
 writeLines(paste(c("weight", "degeneracy", "user", "system", "elapsed", "maxDurationExceeded", 
              "nvars", "method"), collapse="\t"), f)
-for (i in 1:100){
+
+m <- seq_len(100)
+for (i in m){
   cat("nvars = ",i,"....")
-  res <- testOrdered(nvars=i)
+  res <- testOrdered(nvars=i, method="mip")
   cat("\nWriting results\n")
   write.table(res, f, col.names=FALSE, row.names=FALSE)
   flush(f)
 }
+for (i in m){
+  cat("nvars = ",i,"....")
+  res <- testOrdered(nvars=i, method="localizer")
+  cat("\nWriting results\n")
+  write.table(res, f, col.names=FALSE, row.names=FALSE)
+  flush(f)
+}
+
 close(f)
 
 tab <- read.table("benchordered.txt", header=T)
