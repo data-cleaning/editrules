@@ -33,7 +33,7 @@
 #' @param verbose print progress to screen?
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an \code{array} or \code{data.frame} of weights with the same dimensions as \code{dat}.
-#' @param method should errorlocalizer ("localizer") or mix integer programming ("mip") be used? 
+#' @param method should errorlocalizer ("bb") or mix integer programming ("mip") be used? 
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'  

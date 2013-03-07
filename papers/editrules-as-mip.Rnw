@@ -13,7 +13,6 @@
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
 \usepackage{makeidx}
-%\usepackage{mySweave}
 \makeindex
 
 % shorthand to make '<category>' in syntax diagram
@@ -198,15 +197,14 @@ The mapping from record ${\bf r}$ to $\bf x$ is relatively easy:
 \begin{equation}
 {\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m, \delta^{+}_1, \ldots, \delta^{+}_m,\delta^{-}_1, \ldots, \delta^{-}_m)
 \end{equation}
-with $\Delta_i \in \{0,1\}$, $\delta^{+}_i \geq 0 $ and $\delta^{-}_i \geq 0$.\\
-
+with $\Delta_i \in \{0,1\}$, and auxilliary variables $\delta^{+}_i \geq 0 $ and $\delta^{-}_i \geq 0$.\\
 
 Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the exception of strict inequalities.
-We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$
+We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$ from $b_j$.
 \begin{equation}
 a_{ij} r_i < b_j \implies a_{ij} r_i \leq b_j - \epsilon
 \end{equation}
-Note that for reasons we give in a following section you should avoid writing strict inequalities in practice.
+Note that for reasons we give later you should avoid writing strict inequalities.
 
 The soft constraint for the reported values can be written as:
 \begin{eqnarray}
@@ -277,63 +275,39 @@ You should realize, that you the user are probably in a better position to scale
 \section{Categorical data errors}
 
 \label{sec:catdataerror}
-A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has the following $n$ constraints:
-\begin{equation}e^i = 
-  \begin{array}{rl}
+A categorical record $\bf r$  with reported values $({r^0_1,\dots,r^0_m)}$ has the following $n$ constraints:
+\begin{equation}e_i = 
     \label{eq:catedit}
-    \mbox{{\bf if }} & v_j \in F^i_j \mbox{ for }j = 1, \ldots, m \\
-    \mbox{ {\bf then}} & \mbox{FALSE}
-  \end{array}
+    \mbox{{\bf if }}  \Big( \bigwedge_{j=1}^m r_j \in F_{ij} \Big)
+    \mbox{ {\bf then }} \mbox{FALSE}
 \end{equation}
-with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
+with $F_{ij} \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k_j\}$ for each $r_j$ and $i = 1 \ldots n$ the number of edits.
 
 \subsection{Mip formulation}
-
-It can easily be checked with {\sf editrules} if $\bf v$ violates any of these constraints. If this is the
-case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
-complies to the edits. Internally {\sf editrules} uses an {\sf editarray} object which is described in 
-detail in \cite{loo:2011b}. In this paper we use a different, but equivalent, representation to allow for 
-an easy conversion to a mixed integer program: {\sf cateditmatrix}.
-
-A record of $m$ categorical variables can be written as an element
-of the cartesian product space $D$:
-\begin{equation}
-  \label{eq:Domain}
-  D = D_1\times D_2\times\cdots\times D_m,
-\end{equation}
-where each $D_j$ is the set of possible categories for variable $j$.
-
-The number of categories for variable $j$ is labeled $d_j$ while the
-total number of categories is labeled $d$, given by
-\begin{equation}
-  d=\sum_{j=1}^n d_j
-\end{equation}
-Categorical record $\bf v$ can be written in this space as
-\begin{equation}
-  \begin{array}{rcl}
-    {\bf \check{v}} & = & \oplus^m_{j=1} (\check{v}_{j1}, \ldots, \check{v}_{j{d_j}}) \\
-                    & = & (\check{v}_{1 1}, \cdots, \check{v}_{1 {d_1}},
-                          \cdots, \check{v}_{m 1}, \cdots,     \check{v}_{m {d_m}})
-  \end{array}
-\end{equation}
-
+Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a numerical vector. We encode each $r_j$ in $k_j$ binary dummy variables $(d_{j1} \ldots d_{jk_j})$ 
 \begin{equation}
   \mbox{with }
-  \check{v}_{jk} 
+  d_{ji} 
   =  \left\{ 
   \begin{array}{ll}
-         0 & \mbox{if } v_j \not= k \\
-         1 & \mbox{if } v_j = k
+         0 & \mbox{if } r_j \not= i \\
+         1 & \mbox{if } r_j = i
   \end{array} \right.
 \end{equation}
 
-Equation (\ref{eq:catedit}) can be written in the following form:
+The numerical encoding of record ${\bf r}$ with $m$ categorical variables is 
+$$
+  {\bf x} = \big( d_{11},\ldots,d_{1k_1}, \ldots, d_{m1},\ldots,d_{mk_m}, \Delta_1, \ldots, \Delta_m \big)
+$$
+
+
+Constraints (\ref{eq:catedit}) can be written in the following form:
 \begin{eqnarray}
-     e^i  & = & \lnot \bigwedge_{j=1}^m v_j \in F^i_j = \bigvee_{j=1}^m\lnot (v_j \in {F^i_j}) \\
-          & = &  \bigvee_{j=1}^m v_j \not\in {F^i_j} = \bigvee_{j=1}^m v_j \in T^i_j
+     e_i  & = & \lnot \bigwedge_{j=1}^m r_j \in F_{ij} = \bigvee_{j=1}^m\lnot (r_j \in F_{ij}) \\
+          & = &  \bigvee_{j=1}^m r_j \not\in F_{ij} = \bigvee_{j=1}^m r_j \in T_{ij}
 \end{eqnarray}
 with $T^i_j = D_j \setminus F^i_j$. 
-This means that edit $e^i$ is satisfied if at least one $v_j \in T^i_j$. $e^i$ can therefore be written as:
+This means that edit $e_i$ is satisfied if at least one $r_j \in T_{ij}$. $e_i$ can now be written as:
 
 \begin{equation} \label{eq:tmip}
   \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}\right) \geq 1
@@ -439,13 +413,14 @@ An example is shown in figure \ref{R:localizeCat}
 
 \begin{figure}
 <<tidy=FALSE>>=
-E <- editarray(c(
-    "gender %in% c('male','female')",
-    "pregnant %in% c('yes','no')",
-    "if (gender == 'male') pregnant == 'no'"
+E <- editarray(expression(
+    gender %in% c('male','female'),
+    pregnant %in% c(TRUE, FALSE),
+    if (pregnant) gender == 'female'
     )
 )
-E
+x <- c(pregnant=TRUE, gender="male")
+editrules:::writeELAsMip(E,x)
 @
 \caption{This is a caption}
 \end{figure}
@@ -453,7 +428,15 @@ E
 \section{Mixed data errors}
 \subsection{Mip formulation}
 \subsection{Implementation}
-
+<<tidy=FALSE>>=
+E <- editset(expression(
+    married %in% c(TRUE, FALSE),
+    if (married) age >= 17
+    )
+)
+x <- c(age=9, married=TRUE)
+editrules:::writeELAsMip(E, x)
+@
 \section{Conclusion}
 \bibliographystyle{chicago}
 \bibliography{editrules}
