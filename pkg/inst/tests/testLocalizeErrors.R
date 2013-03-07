@@ -119,4 +119,17 @@ test_that("localizeErrors works with TRUE/FALSE",{
     localizeErrors(E,data.frame(A=c(TRUE,FALSE),B=c('c',"d")))
 })
 
+test_that("localizeErrors works with mixed edit",{
+  E <- editset(expression(
+    married %in% c(TRUE,FALSE),
+    if (married==TRUE) age >=17
+  ))
+  
+  le <- localizeErrors(E, data.frame(married=TRUE, age=9))
+  expect_equal(sum(le$adapt), 1, info="bb returns correct result")  
+
+  le <- localizeErrors(E, data.frame(married=TRUE, age=9), method="mip")
+  expect_equal(sum(le$adapt), 1, info="mip returns correct result")  
+  
+})
 
