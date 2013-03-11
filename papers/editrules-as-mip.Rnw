@@ -419,8 +419,9 @@ E <- editarray(expression(
     if (pregnant) gender == 'female'
     )
 )
-x <- c(pregnant=TRUE, gender="male")
-editrules:::writeELAsMip(E,x)
+x <- list(pregnant=TRUE, gender="male")
+mipform <- editrules:::writeELAsMip(E,x)
+print(mipform$E, textOnly=TRUE)
 @
 \caption{This is a caption}
 \end{figure}
@@ -434,7 +435,7 @@ E <- editset(expression(
     if (married) age >= 17
     )
 )
-x <- c(age=9, married=TRUE)
+x <- list(age=9, married=TRUE)
 editrules:::writeELAsMip(E, x)
 @
 \section{Conclusion}

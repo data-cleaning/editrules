@@ -22,11 +22,11 @@ isFeasible <- function(E, warn=FALSE){
     ## TODO: make it return the subset of edits causing the contradiction.
     vars <- getVars(E)
     vars2 <- vars
-    feasible <- !isObviouslyInfeasible(E)
-    while( feasible && length(vars) > 0 ){
+    feasible <- any(!isObviouslyInfeasible(E))
+    while( isTRUE(feasible) && length(vars) > 0 ){
         E <- eliminate(E,vars[1])
         vars <- vars[-1]
-        feasible <- !isObviouslyInfeasible(E)
+        feasible <- any(!isObviouslyInfeasible(E))
         if ( !feasible && warn )
             warning(
                 paste("system becomes obviously infeasible after eliminating",

@@ -51,13 +51,21 @@ writeELAsMip <- function( E
   cat.vars <- getVars(E, type="cat")
   if (!is.null(cat.vars)){
     cat.idx <- match(cat.vars, names(x))
-    cat.A <- diag(1, nrow=length(cat.idx))
-    cat.A <- cbind(cat.A,cat.A)
     cat.x_0 <- unlist(x[cat.idx])
     
+
+    cat.A <- diag(1, nrow=length(cat.x_0))
+    cat.A <- cbind(cat.A, cat.A)
+        
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
+    
     # check for non existing levels (including NA's)
-    cat.b <- ifelse(asCat(cat.x_0, useLogicals=FALSE) %in% getlevels(E$mixcat), 1, 2)
+    invalidCats <- !(asCat(cat.x_0, useLogicals=FALSE) %in% getlevels(E$mixcat))    
+    if (any(invalidCats)){ # remove invalid categories otherwise they will turn up in the resulting editmatrix...
+      cat.A <- cat.A[,-which(invalidCats), drop=FALSE]
+    }
+    cat.b <- rep(1, nrow(cat.A))
+    
     cat.se <- as.editmatrix(cat.A, b=cat.b)
     el.E <- c(cat.se, cateditmatrix(E$mixcat), el.E)
   }
