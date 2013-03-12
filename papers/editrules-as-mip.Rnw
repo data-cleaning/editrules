@@ -158,9 +158,9 @@ equality and linear inequality constraints. More formally:
 where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continious and integer variables.
 
 Mixed integer programming is well understood and there are several sofware packages that implement efficient solvers for linear and mixed integer problems. If your problem can be formulated as a mip problem, mip software can be used to solve the original problem.
-In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. 
+In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. \\
 
-Note that most mip software allows the \ref{eq:mip} to be formulated as a minimization problem where ${\bf}x$ can be negative. They also allow for equality constraints. These are all are simple extensions of \ref{eq:mip}.
+Most mip software allows for a broader (but equivalent) formulation of the mip problem.  (\ref{eq:mipmax}) can be written as  a minimization problem (by changing the sign of ${\bf}c^T$),  $A$ can include equality constraints (by replacing it withtwo inequility constraints) and ${\bf x}$ can be negative (by adding so-called slack variables). We will make use of these broader definition.
 
 In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as a mip problems. This error localization principle minimizes the (weigthed) number of variables that should be changed to obey the current constraints. The formulations for error localization for the three types are different but all have the same parts:
 \begin{itemize}
