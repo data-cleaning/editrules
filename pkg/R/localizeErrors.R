@@ -34,6 +34,7 @@
 #' @param weight Vector of positive weights for every variable in \code{dat}, or 
 #'      an \code{array} or \code{data.frame} of weights with the same dimensions as \code{dat}.
 #' @param method should errorlocalizer ("bb") or mix integer programming ("mip") be used? 
+#' @param retrieve Return the first found solution or the best solution? ("bb" method only).
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
 #' @param ... Further options to be passed to \code{\link{errorLocalizer}}
 #'  
@@ -52,9 +53,10 @@
 #'  http://CRAN.R-project.org/package=lpSolveAPI
 #'
 #' @export
-
-localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("bb", "mip", "localizer"), useBlocks=TRUE, ...){
+localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxduration=600, method=c("bb", "mip", "localizer"), 
+  useBlocks=TRUE, retrieve=c("best","first"), ...){
     stopifnot(is.data.frame(dat))
+    retrieve <- match.arg(retrieve)
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
     if ( is.data.frame(weight) ) weight <- as.matrix(weight)
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
@@ -111,7 +113,8 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             call=sys.call(),
             weight=weight, 
             maxduration=maxduration,
-            method=method, ...)
+            method=method, 
+            retrieve=retrieve, ...)
     }
     if (verbose) cat('\n')
     # weights for checkdatamodel cannot be added naively with those of errorLocalizer
@@ -129,11 +132,11 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
 #' @param pretext \code{character} text to print before progress report
 #' @param weight a \code{nrow(dat)xncol(dat)} array of weights
 #' @param method should branch and bound ("bb") or mix integer programming ("mip") be used?
-#' @param call call to include in \code{\link{errorLocation}} object
+#' @param retrieve return \code{best} or \code{first} found solution (bb method only) 
 #' @param maxduration max time for searchBest()
 #' 
 #' @keywords internal
-localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("bb", "mip", "localizer"), ...){
+localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), weight, maxduration, method=c("bb", "mip", "localizer"), retrieve, ...){
     vars <- getVars(E)
     weight <- weight[,vars,drop=FALSE]
 
@@ -173,7 +176,11 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
           r <- as.list(dat[i,vars,drop=FALSE])
           wt <- weight[i, ]
           bt <- errorLocalizer(E, r, weight=wt, ...)
-          e <- bt$searchBest(maxduration=maxduration)
+          if (retrieve=='best'){ 
+            e <- bt$searchBest(maxduration=maxduration)
+          } else {
+            e <- bt$searchNext(maxduration=maxduration)
+          }
           if (!is.null(e) && !bt$maxdurationExceeded){
               err[i,vars] <- e$adapt
               wgt[i] <- e$w
