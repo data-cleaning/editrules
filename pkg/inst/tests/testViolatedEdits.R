@@ -60,6 +60,14 @@ test_that("violation of inequalities are detected",{
     )
 })
 
+test_that("summary.violatedEdits works when no edits are violated",{
+    
+   expect_equal(summary(violatedEdits(
+        editmatrix("x+y==z"),
+        c(x=1,y=2,z=3)
+    )),NULL)
+
+})
 
 test_that("NA's in data are handled correctly by violatededits.editmatrix",{
     expect_identical(

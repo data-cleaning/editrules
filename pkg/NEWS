@@ -1,4 +1,5 @@
 version 2.7-1
+- bugfix: summary.violatedEdits crashed when no edits were violated.
 - Branch and Bound method now bounds (instead of crashes) when memory allocation for variable elimination fails
 - The 'status' of errorLocation object gains column indicating whether the memory allocation failure was hit as bound condition
 - localizeErrors gains 'retrieve' argument, controling which solution to return: the best or the first encountered.
