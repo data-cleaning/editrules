@@ -159,6 +159,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
     wgt <- rep(NA,n)
     degeneracy <- rep(NA,n)
     maxDurationExceeded <- logical(n)
+    memfail <- logical(n)
     fmt <- paste('\r%s record %',nchar(n),'d of %d',sep="")
     method <- match.arg(method)
     
@@ -188,6 +189,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
           degeneracy[i] <- bt$degeneracy
           duration[i,] <- getDuration(bt$duration)
           maxDurationExceeded[i] <- bt$maxdurationExceeded
+          if ( !is.null(bt$memfail) ) memfail[i] <- TRUE
       }
     } else if (method == "mip"){
       for ( i in 1:n ){
@@ -213,7 +215,8 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
             weight  = wgt,
             degeneracy=degeneracy,
             duration,
-            maxDurationExceeded
+            maxDurationExceeded,
+            memfail
             ),
         call=call,
         method=method,
@@ -260,7 +263,8 @@ localize_singleton <- function(E, dat,
         user = numeric(n),
         system=numeric(n),
         elapsed=numeric(n),
-        maxDurationExceeded=logical(n)
+        maxDurationExceeded=logical(n),
+        memfail = logical(n)
     )
     newerrorlocation(
         adapt       = adapt,
