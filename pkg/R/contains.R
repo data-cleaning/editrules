@@ -33,6 +33,7 @@ contains.matrix <- function(E, var=NULL, tol=sqrt(.Machine$double.eps),...){
     if ( is.null(var) && !is.null(colnames(E)) ) var <- colnames(E)
     if ( is.null(var) ) var <- 1:ncol(E)
     u <- abs(E[,var,drop=FALSE]) > tol
+   
     dimnames(u) <- dimnames(E[,var,drop=FALSE])
     u
 }
