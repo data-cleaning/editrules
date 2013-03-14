@@ -141,7 +141,8 @@ errorLocalizer.editmatrix <- function(
 
             w <- sum(weight[adapt])
 
-            if ( w > min(wsol,maxweight) 
+            if ( w > min(wsol,maxweight)
+              || .memfail 
               || sum(adapt) > maxadapt
               || isObviouslyInfeasible.editmatrix(.E,tol=tol)
                ) return(FALSE)
@@ -165,8 +166,14 @@ errorLocalizer.editmatrix <- function(
             totreat <- totreat[-1]
         },
         choiceRight = {
+            .memfail <- FALSE
             .var <- totreat[1]
-            .E <- eliminate.editmatrix(.E, .var)
+            .E <- tryCatch(
+              eliminate.editmatrix(.E, .var),
+              error=function(e){
+                .memfail <<- TRUE
+                .E 
+              })
             adapt[.var] <- TRUE
             totreat <- totreat[-1]
         },
@@ -178,7 +185,8 @@ errorLocalizer.editmatrix <- function(
         adapt = adapt,
         weight = weight,
         wsol = wsol,
-        tol  = tol
+        tol  = tol,
+        .memfail = FALSE
     )
     
     # add a searchBest function, currently returns random solution in the case of multiple optima
@@ -235,7 +243,7 @@ errorLocalizer.editarray <- function(
         isSolution = {
             w <- sum(weight[adapt])
 
-            if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
+            if ( .memfail || w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
             .I <- unique(do.call(c, c(ind[.totreat],ind[names(adapt)[adapt]])))
@@ -261,8 +269,14 @@ errorLocalizer.editarray <- function(
             .totreat <- .totreat[-1]
         },
         choiceRight = {
+            .memfail <- FALSE
             .var <- .totreat[1]
-            .E <- eliminate.editarray(.E, .var)
+            .E <- tryCatch(
+              eliminate.editarray(.E, .var),
+              error = function(e){
+                .memfail <<- TRUE
+                .E
+              })
             adapt[.var] <- TRUE
             .totreat <- .totreat[-1]
         },
@@ -274,7 +288,8 @@ errorLocalizer.editarray <- function(
         adapt   = adapt,
         weight  = weight,
         wsol    = wsol,
-        ind     = ind
+        ind     = ind,
+        .memfail = FALSE
     )
     # add a searchBest function, currently returns random solution in the case of multiple optima
     with(bt,{
@@ -333,7 +348,7 @@ errorLocalizer.editlist <- function(
         isSolution = {
             w <- sum(weight[adapt])
 
-            if ( w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
+            if ( .memfail || w > min(wsol,maxweight) || sum(adapt) > maxadapt )  return(FALSE) 
 
             # check feasibility 
 #            .infNum <- sapply(.E,function(e) isObviouslyInfeasible(e$num))
@@ -393,8 +408,14 @@ errorLocalizer.editlist <- function(
             .totreat <- .totreat[-1]
         },
         choiceRight = {
+            .memfail <- FALSE
             .var <- .totreat[1]
-            .E <- eliminate.editlist(.E, .var)
+            .E <- tryCatch(
+              eliminate.editlist(.E, .var),
+              error = function(e){
+                .memfail <<- TRUE
+                .E
+              })
             adapt[.var] <- TRUE
             .totreat <- .totreat[-1]
         },
@@ -408,7 +429,8 @@ errorLocalizer.editlist <- function(
         wsol        = wsol,
         ind         = ind,
         .icat       = icat,
-        .catvar     = catvar
+        .catvar     = catvar,
+        .memfail    = FALSE
     )
     # add a searchBest function, returns random solution when multiple weights are encountered.
     with(bt,{
