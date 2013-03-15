@@ -186,9 +186,10 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
               err[i,vars] <- e$adapt
               wgt[i] <- e$w
           }
-          degeneracy[i] <- bt$degeneracy
-          duration[i,] <- getDuration(bt$duration)
-          maxDurationExceeded[i] <- bt$maxdurationExceeded
+# the ifelse's are dirty workarounds for an error occurring sometimes when retrieve='first'
+          degeneracy[i] <- ifelse(is.null(bt$degeneracy),NA,bt$degeneracy)
+          duration[i,] <- ifelse(is.null(bt$duration), c(0,0,0), getDuration(bt$duration))
+          maxDurationExceeded[i] <- ifelse(is.null(bt$maxDurationExceeded),FALSE, bt$maxdurationExceeded)
           if ( !is.null(bt$memfail) ) memfail[i] <- TRUE
       }
     } else if (method == "mip"){
@@ -231,7 +232,7 @@ getDuration <- function(x){
     if (!is.na(y[5L])) 
         y[2L] <- y[2L] + y[5L]
     y <- y[1L:3L]
-    names(y) <- c(gettext("user"), gettext("system"), gettext("elapsed"))
+    names(y) <- c("user", "system", "elapsed")
     y
 }
 
