@@ -1,3 +1,10 @@
+TODO
+* Remove redundant edits with mip
+* Remove redundant edits with convex hull method
+* feasibility check of editset/editarray/editmatrix with mip (isFeasible.mip)
+
+
+
 Todo list for friday gehackedday.
 
 
