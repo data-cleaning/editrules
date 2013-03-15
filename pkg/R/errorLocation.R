@@ -17,6 +17,7 @@
 #'              \item{\code{system} system time used to generate solution (as in \code{sys.time})}
 #'              \item{\code{elapsed} elapsed time used to generate solution (as in \code{sys.time})}
 #'              \item{\code{maxDurationExceeded} Was the maximum search time reached?}
+#'              \item{\code{memfail} Indicates whether a branch was broken off due to memory allocation failure (branch and bound only)}
 #'          }
 #'      }
 #'      \item{\code{method} The error localization method used, can be "mip", "localizer" or "checkDatamodel".}
@@ -133,7 +134,8 @@ print.errorLocation <- function(x,...){
             user       = x$status$user + y$status$user,
             system     = x$status$system + y$status$system,
             elapsed    = x$status$elapsed + y$status$elapsed,
-            maxDurationExceeded = x$status$maxDurationExceeded | y$status$maxDurationExceeded
+            maxDurationExceeded = x$status$maxDurationExceeded | y$status$maxDurationExceeded,
+            memfail    = x$status$memfail | y$status$memfail
             ),
         call = call,
         method=unique(c(x$method, y$method)),
@@ -154,14 +156,15 @@ print.errorLocation <- function(x,...){
 
 
 # create an empty Status data.frame with n rows
-emptyStatus <- function(n, weight=0, degeneracy=1, user=0, system=0, elapsed=0, maxDurationExceeded=FALSE){
+emptyStatus <- function(n, weight=0, degeneracy=1, user=0, system=0, elapsed=0, maxDurationExceeded=FALSE,memfail=FALSE){
     data.frame(
         weight=rep(weight,n),
         degeneracy=rep(degeneracy,n),
         user=rep(user,n),
         system=rep(system,n),
         elapsed=rep(elapsed,n),
-        maxDurationExceeded=rep(maxDurationExceeded,n)
+        maxDurationExceeded=rep(maxDurationExceeded,n),
+        memfail=rep(memfail,n)
     )
 }
 
