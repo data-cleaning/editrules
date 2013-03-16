@@ -10,7 +10,6 @@
 writeELAsMip <- function( E
                       , x
                       , weight = rep(1, length(x))
-                      , maxvalue = 1e15
                       , M = 1e7
                       , epsilon = 1e-3
                       , ...

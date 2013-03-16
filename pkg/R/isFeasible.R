@@ -26,6 +26,8 @@ isFeasible <- function(E, warn=FALSE){
     while( isTRUE(feasible) && length(vars) > 0 ){
         E <- eliminate(E,vars[1])
         vars <- vars[-1]
+        ## TODO: cleanup editlists that have infeasible parts, currently they are included
+        ## for all eliminations.
         feasible <- any(!isObviouslyInfeasible(E))
         if ( !feasible && warn )
             warning(
