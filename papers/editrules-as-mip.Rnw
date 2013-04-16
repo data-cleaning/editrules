@@ -136,10 +136,17 @@ localization problem with a branch and bound algorithm grows exponentially
 with the number of (incorrect) variables. Many surveys have hundreds of variables, 
 which results in (very) long processing times for records with many errors. 
 
-This paper describes the error localization problem for numerical, categorical and mixed edits as a mixed integer problem and its implementation in {\sf editrules}. Error localization implemented as a mixed integer programming results in a fast procedure, which is typically much faster than the branch and bound method also available in {\sf editrules}.
+This paper describes the error localization problem for numerical, categorical 
+and mixed edits as a mixed integer problem and its implementation in 
+{\sf editrules}. Error localization implemented as a mixed integer programming 
+results in a fast procedure, which is typically much faster than the branch 
+and bound method also available in {\sf editrules}.
 
-We start with a brief description of mixed integer programming and its application to the error localization problem.  
-In section \ref{sec:numdataerror} we describe a mip formulation for numerical records. Section ref describes the mip formulation for categorical records. We end with a discussion on the implementation in {\sf editrules}.
+We start with a brief description of mixed integer programming and its 
+application to the error localization problem.  
+In section \ref{sec:numdataerror} we describe a mip formulation for numerical 
+records. Section \ref{sec:catdataerror} describes the mip formulation for categorical records. 
+We end with a discussion on the implementation in {\sf editrules}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 2
@@ -157,19 +164,37 @@ equality and linear inequality constraints. More formally:
 \end{eqnarray}
 where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continuous and integer variables.
 
-Mixed integer programming is well understood and there are several software packages that implement efficient solvers for linear and mixed integer problems. If your problem can be formulated as a mip problem, mip software can be used to solve the original problem.
+Mixed integer programming is well understood and there are several software 
+packages that implement efficient solvers for linear and mixed integer problems. 
+If your problem can be formulated as a mip problem, mip software can be used to
+solve the original problem.
 In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip problems. 
 
-Most mip software allows for a broader (but equivalent) formulation of the mip problem.  (\ref{eq:mipmax}) can be written as  a minimization problem (by changing the sign of ${\bf}c^T$),  $A$ can include equality constraints (by replacing it withtwo inequility constraints) and ${\bf x}$ can be negative (by adding so-called slack variables). We will make use of these broader definition.
+Most mip software allows for a broader (but equivalent) formulation of the 
+mip problem.  (\ref{eq:mipmax}) can be written as  a minimization problem 
+(by changing the sign of ${\bf}c^T$),  $A$ can include equality constraints 
+(by replacing it with two inequality constraints) and ${\bf x}$ can be negative
+(by adding so-called slack variables). In our formuluation of error localization
+as a mip problem we make use of this broader definition.
 
-In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} for numerical, categorical and mixed constraints as mip problems. This error localization principle minimizes the (weighted) number of variables that must be changed to obey a set of constraints. The formulations for error localization for the three types are different but all have the same parts:
+In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} 
+for numerical, categorical and mixed constraints as mip problems. 
+This principle minimizes the (weighted) number of variables that must be 
+changed to obey a set of constraints. The formulations for error localization
+for the three types are different but all have the same parts:
 \begin{itemize}
-  \item The objective function that minimizes the (weighted) number of adaptions in the form of ${\bf w}^T {\bf \Delta}$, with ${\bf w}$ the vector of weights and ${\bf \Delta}$ a vector of binary adaptation variables. If $\Delta_i = 1$, value $r_i$ of record ${\bf r}$ is considered erroneous.
-  The objective function is the same for all three formulations.
-  \item A numerical description ${\bf x}$ of record ${\bf r}$ that includes binary adaptation variables ${\bf \Delta}$ and auxiliary variables. 
-  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey formulated in the form ${\bf A} {\bf x} \leq {\bf b}$.
-  \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} have formulated as soft constraints ${\bf A}^0 {\bf x} = {\bf x}^0$.
-  \item Binary adaption variable(s) $\Delta_i$ that are constrained to 1 if $r_i \neq r^0_i$ in the form ${\bf A}^\Delta {\bf x} \leq {\bf b}^\Delta$.
+  \item An objective function that minimizes the (weighted) number of adaptions
+  in the form of ${\bf w}^T {\bf \Delta}$, with ${\bf w}$ the vector of weights
+  and ${\bf \Delta}$ a vector of binary adaptation variables. 
+  If $\Delta_i = 1$, value $r_i$ of record ${\bf r}$ is considered erroneous.
+  This objective function is the same for all three types.
+  \item A numerical description ${\bf x}$ of record ${\bf r}$ that includes 
+  binary adaptation variables ${\bf \Delta}$ and auxiliary variables. 
+  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey 
+  formulated in the form ${\bf A} {\bf x} \leq {\bf b}$.
+  \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} obey 
+  formulated as soft constraints ${\bf A}^0 {\bf x} \leq {\bf x}^0$. These assure
+  that if $r_i \neq r_i^0$ then $\Delta_i = 1$.
 \end{itemize}
 
 In the next sections we will describe the mip formulations for the numerical, categorical and mixed edits and show their implementation in {\sf editrules}.
@@ -194,40 +219,47 @@ A {\bf r \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 
 \subsection{Mip formulation}
 
-The mapping from record ${\bf r}$ to $\bf x$ is relatively easy:
+The mapping from record ${\bf r}$ to $\bf x$ is easy:
 \begin{equation}
-{\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m, \delta^{+}_1, \ldots, \delta^{+}_m,\delta^{-}_1, \ldots, \delta^{-}_m)
+{\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m)
 \end{equation}
-with $\Delta_i \in \{0,1\}$, $\delta^{+}_i \geq 0 $ and $\delta^{-}_i \geq 0$.\\
+with $\Delta_i \in \{0,1\}$\\
 
-Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the exception of strict inequalities.
+Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the 
+exception of strict inequalities.
 We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$ from $b_j$.
 \begin{equation}
-a_{ij} r_i < b_j \implies a_{ij} r_i \leq b_j - \epsilon
+\sum_{i=1}^m a_{ij} r_i < b_j \implies \sum_{i=1}^m a_{ij} r_i \leq b_j - \epsilon
 \end{equation}
-Note that for reasons we give later you should avoid writing strict inequalities.
 
-The soft constraint for the reported values can be written as:
+Note that for reasons we give later you should avoid writing strict inequalities
+as much as possible.
+
+The soft constraints $A^0$ for the reported values can be written as:
 \begin{eqnarray}
-                         r_i & =    & r^0_i + \delta^{+}_i - \delta^{-}_i  \label{eq:numsoft} \\
-  \delta^{+}_i + \delta^{-}_i& \leq & M \Delta_i                           \label{eq:numadapt}
+                         r_i & \leq    & r^0_i + M \Delta_i \label{eq:numsoft1} \\
+          r^0_i - M \Delta_i & \leq    & r_i  \label{eq:numsoft2}
 \end{eqnarray}
 with $M$ sufficiently large and $i = \{1,\ldots,m\}$. \\
 
-Equation \ref{eq:numsoft} allows $r_i$ to be different from $r^0_i$, but equation \ref{eq:numadapt} shows
-that this results in $\Delta_i = 1$. It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
+It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
 if $\Delta_i = 1$ then $x_i$ can take any value 
 between $r^0_i - M$ and  $r^0_i + M$. 
-Since the objective function tries to minimize $w^T \Delta_i$, the mip solver will try to keep each variables $r_i$ at its reported value $r^0_i$.
+Since the objective function tries to minimize $w^T \Delta_i$, 
+the mip solver will try to keep each variable $r_i$ at its reported value $r^0_i$.
 
 This makes the mip formulation for error localization in numerical edits complete.
 
 \subsection{Implementation}
-{\sf editrules} uses an {\sf editmatrix} object to store numerical data constraints. This object is described extensively in {\cite{jone:}}
+In {\sf editrules} we use an {\sf editmatrix} object to store numerical data 
+constraints. This object is described extensively in {\cite{jone:}}
 {\tt E} that contains the conditional boundary conditions as defined 
-in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to solve the resulting mixed integer program.
-As shown in a previous paper (\cite{jonge:2011}), {\sf editrules} has the function {\sf localizeErrors} 
-which by default uses a branch and bound algorithm. We extended this function with a parameter {\tt method}, that can be used to select the {\tt "bb"} or {\tt "mip"} method. 
+in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to 
+solve the resulting mixed integer program.
+As shown in a previous paper (\cite{jonge:2011}), {\sf editrules} has the 
+function {\sf localizeErrors} which by default uses a branch and bound 
+algorithm. We extended this function with a parameter {\tt method}, that can be 
+used to select the {\tt "bb"} or {\tt "mip"} method. 
 For many purposes specifying {\tt "mip"} will increase
 the speed without noticable changes in the output.
 <<num example>>=
@@ -262,15 +294,27 @@ mip$objfn[mip$objfn > 0]
 
 \subsection{Numerical subtleties}
 
-The extended edit set derived in (\ref{eq:nummip}) depends on the boundaries $\rm l_i$ and 
-$\rm u_i$. Mathematically the size of these coefficients does not matter. Computationally however their
-size is important. If any $|{\rm u_i - c_i}| \gg |a_j|$ or $|{\rm l_i - c_i}| \gg |a_j|$ the resulting mixed integer program may become numerical
-unstable. From the lpsolve manual \citep{lpsolveman:2012}:
+The mip formulation for numerical constraints depends on two constants $M$ and
+$\epsilon$. These constants end up in the coefficient matrix of the mip solver.
+Mathematically the size of these coefficients does not matter. Computationally 
+however it does: if coefficient $a_{ij} \ll a_{kl}$ then the solution
+may become numerical unstable, since the ratio of the two may be 
+indistinguishable from zero to the mip solver. 
+
+In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. If
+the other coefficients are within this range the mip solver will be stable. 
+If not, you should rescale some of your variables and constraints. 
+
+From the lpsolve manual \citep{lpsolveman:2012}:
 
 \begin{quote}
-The chance for numerical instability and rounding errors is considerably larger when the input data contains both large and small numbers. So to improve stability, one must try to work with numbers that are somewhat in the same range. Ideally in the neighbourhood of 1.\\
+The chance for numerical instability and rounding errors is considerably 
+larger when the input data contains both large and small numbers. 
+So to improve stability, one must try to work with numbers that are somewhat 
+in the same range. Ideally in the neighborhood of 1.\\
 
-You should realize, that you the user are probably in a better position to scale the problem than any computer algorithm. 
+You should realize, that you the user are probably in a better position to 
+scale the problem than any computer algorithm. 
 \end{quote}
 
 \section{Categorical data errors}
@@ -284,47 +328,14 @@ A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has t
     \mbox{ {\bf then}} & \mbox{FALSE}
   \end{array}
 \end{equation}
-with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
+with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k_j\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
 
 \subsection{Mip formulation}
-Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a numerical vector. We encode each $r_j$ in $k_j$ binary dummy variables $(d_{j1} \ldots d_{jk_j})$ 
+Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a numerical vector. We therefore encode each $v_j$ in $k_j$ binary dummy variables $(d_{j1} \ldots d_{jk_j})$ 
 
-It can easily be checked with {\sf editrules} if $\bf v$ violates any of these constraints. If this is the
-case, the task is to find the minimal (weighted) number of adjustments to the reported values such that it
-complies to the edits. Internally {\sf editrules} uses an {\sf editarray} object which is described in 
-detail in \cite{loo:2011b}. In this paper we use a different, but equivalent, representation to allow for 
-an easy conversion to a mixed integer program: {\sf cateditmatrix}.
-
-A record of $m$ categorical variables can be written as an element
-of the Cartesian product space $D$:
+The numerical representation of $\bf{v}$, a record of $m$ categorical variables can be written as:
 \begin{equation}
-  \label{eq:Domain}
-  D = D_1\times D_2\times\cdots\times D_m,
-\end{equation}
-where each $D_j$ is the set of possible categories for variable $j$.
-
-The number of categories for variable $j$ is labeled $d_j$ while the
-total number of categories is labeled $d$, given by
-\begin{equation}
-  d=\sum_{j=1}^n d_j
-\end{equation}
-Categorical record $\bf v$ can be written in this space as
-\begin{equation}
-  \begin{array}{rcl}
-    {\bf \check{v}} & = & \oplus^m_{j=1} (\check{v}_{j1}, \ldots, \check{v}_{j{d_j}}) \\
-                    & = & (\check{v}_{1 1}, \cdots, \check{v}_{1 {d_1}},
-                          \cdots, \check{v}_{m 1}, \cdots,     \check{v}_{m {d_m}})
-  \end{array}
-\end{equation}
-
-\begin{equation}
-  \mbox{with }
-  \check{v}_{jk} 
-  =  \left\{ 
-  \begin{array}{ll}
-         0 & \mbox{if } v_j \not= k \\
-         1 & \mbox{if } v_j = k
-  \end{array} \right.
+  {\bf x} = (d_{1,1}\ldots d_{1,k_1}, \ldots, d_{m, 1}, \ldots, d_{m, k_m}, \Delta_1, \ldots, \Delta_m)
 \end{equation}
 
 Equation (\ref{eq:catedit}) can be written in the following form:
