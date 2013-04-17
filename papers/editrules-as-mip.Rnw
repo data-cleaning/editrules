@@ -186,10 +186,10 @@ for the three types are different but all have the same parts:
   \item An objective function that minimizes the (weighted) number of adaptions
   in the form of ${\bf w}^T {\bf \Delta}$, with ${\bf w}$ the vector of weights
   and ${\bf \Delta}$ a vector of binary adaptation variables. 
-  If $\Delta_i = 1$, value $r_i$ of record ${\bf r}$ is considered erroneous.
+  If $\Delta_i = 1$, value $r_i^0$ of record ${\bf r}$ is considered erroneous.
   This objective function is the same for all three types.
   \item A numerical description ${\bf x}$ of record ${\bf r}$ that includes 
-  binary adaptation variables ${\bf \Delta}$ and auxiliary variables. 
+  binary adaptation variables ${\bf \Delta}$ and possibly auxiliary variables. 
   \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey 
   formulated in the form ${\bf A} {\bf x} \leq {\bf b}$.
   \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} obey 
@@ -197,10 +197,12 @@ for the three types are different but all have the same parts:
   that if $r_i \neq r_i^0$ then $\Delta_i = 1$.
 \end{itemize}
 
-In the next sections we will describe the mip formulations for the numerical, categorical and mixed edits and show their implementation in {\sf editrules}.
+In the next sections we will describe the mip formulations for the numerical, 
+categorical and mixed edits and show their implementation in {\sf editrules}.
 
 \subsection{Further reading}
-An overview of several mixed integer formulations for error localization can be found in \citep{waal:2011} p. 75.
+An overview of several mixed integer formulations for error localization can 
+be found in \citep{waal:2011} p. 75.
 Mixed integer programming (convex programming etc.).
 List of mip software.
 
@@ -319,99 +321,93 @@ scale the problem than any computer algorithm.
 
 \section{Categorical data errors}
 
+
 \label{sec:catdataerror}
 A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has the following $n$ constraints:
-\begin{equation}e^i = 
+\begin{equation}e^j = 
   \begin{array}{rl}
     \label{eq:catedit}
-    \mbox{{\bf if }} & v_j \in F^i_j \mbox{ for }j = 1, \ldots, m \\
+    \mbox{{\bf if }} & v_i \in F^j_i \mbox{ for }i = 1, \ldots, m \\
     \mbox{ {\bf then}} & \mbox{FALSE}
   \end{array}
 \end{equation}
-with $F^i_j \subseteq D_j$ where $D_j$ is the possible set of categories $\{1, \ldots, k_j\}$ for each $v_j$ and $i = 1 \ldots n$ the number of edits.
+with $F^j_i \subseteq D_i$ where $D_i$ is the possible set of categories $\{c_{i,1}, \ldots, c_{i,n_i}\}$ for each $v_i$ and $j = 1 \ldots n$ the number of edits.
 
-\subsection{Mip formulation}
-Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a numerical vector. We therefore encode each $v_j$ in $k_j$ binary dummy variables $(d_{j1} \ldots d_{jk_j})$ 
-
-The numerical representation of $\bf{v}$, a record of $m$ categorical variables can be written as:
-\begin{equation}
-  {\bf x} = (d_{1,1}\ldots d_{1,k_1}, \ldots, d_{m, 1}, \ldots, d_{m, k_m}, \Delta_1, \ldots, \Delta_m)
-\end{equation}
+Remarkable about categorical edits is that its literature (\ref) formulates the 
+problem negatively. If a condition is true than the edit is violated. For mip 
+we need the possitive formulation, since it requires constraints 
+that must hold.
 
 Equation (\ref{eq:catedit}) can be written in the following form:
 \begin{eqnarray}
-     e^i  & = & \lnot \bigwedge_{j=1}^m v_j \in F^i_j = \bigvee_{j=1}^m\lnot (v_j \in {F^i_j}) \\
-          & = &  \bigvee_{j=1}^m v_j \not\in {F^i_j} = \bigvee_{j=1}^m v_j \in T^i_j
+     e^j  & = & \lnot \bigwedge_{i=1}^m v_i \in F^j_i = \bigvee_{i=1}^m\lnot (v_i \in {F^j_i}) \\
+          & = &  \bigvee_{i=1}^m v_i \not\in {F^j_i} = \bigvee_{i=1}^m v_i \in T^j_i \label{eq:catpos}
 \end{eqnarray}
-with $T^i_j = D_j \setminus F^i_j$. 
-This means that edit $e^i$ is satisfied if at least one $v_j \in T^i_j$. $e^i$ can therefore be written as:
+with $T^j_i = D_i \setminus F^j_i$. 
+This means that edit $e^j$ is satisfied if at least one $v_i \in T^j_i$. 
+
+\subsection{Mip formulation}
+Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
+numerical vector. We therefore encode each $v_i$ in $n_i$ binary dummy variables
+$$
+v_i = (d_{i,1} \ldots d_{i,n_i})
+$$
+with
+\begin{equation}
+  d_{i,k} = \left\{ 
+  \begin{array}{ll}
+         1 & \mbox{if $v_i = c_{i,k}$}\\
+         0 & \mbox{if $v_i \neq c_{i,k}$}
+  \end{array} \right. 
+\end{equation}
+
+
+The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
+can then be written as:
+\begin{equation}
+  {\bf x} = (d_{1,1}\ldots d_{1,n_1}, \ldots, d_{m, 1}, \ldots, d_{m, n_m}, 
+  \Delta_1, \ldots, \Delta_m)
+\end{equation}
+
+Constraint matrix $A$ for categorical edits is composed out of two parts.
+First the fact that each $v_i$ can only have one categorical value:
+\begin{equation}
+   \sum^{n_i}_{k=1} d_{i,k} = 1
+\end{equation}
+for $i$ is $(1, \ldots, m)$
+
+Second the categorical edits, equation \ref{eq:catpos} can now be written as:
 
 \begin{equation} \label{eq:tmip}
-  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}\right) \geq 1
+  \sum^m_{i=1} \left(\sum^{n_i}_{k=1} t^j_{i,k} \cdot d_{i,k}\right) 
+  \geq 1
 \end{equation}
 
 \begin{equation} \label{eq:aijk}
   \mbox{with }
-  t^i_{jk} = \left\{ 
+  t^j_{i,k} = \left\{ 
   \begin{array}{ll}
-         0 & \mbox{if } k \not\in T^i_j\\
-         1 & \mbox{if } k \in T^i_j
+         0 & \mbox{if } c_{i,k} \not\in T^j_i\\
+         1 & \mbox{if } c_{i,k} \in T^j_i
   \end{array} \right. 
 \end{equation}
-These edits are (usually) valid for all records of a data set. Note that equation (\ref{eq:catmip}) is in 
-a form to be used in a mixed integer program where $\check{v}_{jk}$ are integer variables.
+If one of the $c_{i,k} \in T^j_i$ then the edits is valid.\\
 
-For each $v_j$ its categories should exclude each other, so the following constraint must hold:
+
+The soft constraints $A^0$ can be written as:
+
 \begin{equation}
-   \left(\sum^{d_j}_{k=1} \check{v}_{jk}\right) \leq 1
+   d_{i,k^0_i}  =  1 - \Delta_i  \mbox{ with } v^0_i = c_{i,k^0}
 \end{equation}
 
-We introduce for each $v_j$ a binary variable $\Delta_j \in {0,1}$:
-\begin{equation} \label{eq:catdelta}
-  \Delta_j = \left\{ 
-  \begin{array}{ll}
-         0 & \mbox{if $v_j = v^0_j$}\\
-         1 & \mbox{if $v_j \neq v^0_j$}.
-  \end{array} \right. 
-\end{equation}
+It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0_i} = 1$, 
+meaning that the reported value 
+$v^0_i$ is assumed correct. 
+If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
+value. Since mip minimizes the objective function it will try to keep the reported 
+values $v^0_i$
 
-where $v^0_j$ is the reported value for $v_i$. We now add the following edit to the edit set:
-\begin{equation}
-   \check{v}_{jk^0_j}  =  1 - \Delta_j \mbox{ with } k^0_j = v^0_j
-\end{equation}
-It can be easily checked that if $\Delta_j = 0$ $\check{v}_{jk^0_j} = 1$, meaning that the reported value 
-$v^0_j$ is assumed correct. If $\Delta_j = 1$, $\check{v}_{jk^0_j} = 0$, meaning that $v_j$ should have a different value.
-
-The categorical error localization problem now can be written as:
-
-{\textrm Minimize} $\sum^m_{j=1} {\rm w_j}\Delta_j$, with:
-\begin{equation}
-\label{eq:catmip}
-\begin{array}{rcrcl}
-  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^1_{jk} \cdot \check{v}_{jk}\right)&& &\geq& 1 \\
-  \ldots                 &&                  &\ldots& \ldots  \\
-  \sum^m_{j=1} \left(\sum^{d_j}_{k=1} t^n_{jk} \cdot \check{v}_{jk}\right)&& &\geq& 1 \\
-    \sum^{d_1}_{k=1} \check{v}_{1k} && & \leq & 1 \\
-    \check{v}_{1k^0_1} & +    & \Delta_1 & =    & 1 \\
-    \ldots  & & \ldots          &       & \ldots \\
-    \sum^{d_m}_{k=1} \check{v}_{mk} && & \leq & 1 \\
-    \check{v}_{mk^0_m} & + & \Delta_m & =    & 1 \\
-\end{array}
-\end{equation}
-
-Note that parts of equation (\ref{eq:tmip}) can be written in a negated form:
-\begin{equation} \label{eq:fmip}
-  \mbox{ if } T^i_j \neq \emptyset \mbox{ then } \sum^{d_j}_{k=1} t^i_{jk} \cdot \check{v}_{jk}  = 1 - \left(\sum^{d_j}_{k=1} f^i_{jk} \cdot \check{v}_{jk} \right) 
-\end{equation}
-
-\begin{equation} \label{eq:aijk}
-  \mbox{with }
-  f^i_{jk} = \left\{ 
-  \begin{array}{ll}
-         0 & \mbox{if } k \not\in F^i_j\\
-         1 & \mbox{if } k \in F^i_j
-  \end{array} \right. 
-\end{equation}
+This makes the mip formulation for categorical edits complete.
 
 \subsection{Implementation}
 \subsection{The {\sf cateditmatrix} object}
