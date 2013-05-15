@@ -15,7 +15,7 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
     using the igraph package.
 Version: 2.7.1
 Depends: R (>= 2.12.0), igraph
-URL: http://code.google.com/p/editrules/
+URL: https://github.com/edwindj/editrules
 Date: 2011-09-25
 Suggests: lpSolveAPI, iterators
 
