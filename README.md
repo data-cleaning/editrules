@@ -19,13 +19,13 @@ These errors can be detected and are closely related to their resolution.
 The reader is referred to the deducorrect package for treating such errors.
 
 To install the latest version in R:
-```
+```R
 install.packages("editrules")
 ```
 
 Typical usage is:
 
-```
+```R
 # load a data.frame with the edit rules
 E.csv <- 
 'name , edit       , description
