@@ -137,8 +137,10 @@ as.editmatrix <- function( A
        cn <- make.names(paste("x", 1:ncol(A), sep=""), unique=TRUE)
     }
     rn <- rownames(A)
-    if ( is.null(rn) || length(unique(rn)) != length(rn) ){
-       rn <- paste("num", 1:nrow(A), sep="")
+    if ( is.null(rn) ){
+      rn <- paste("num", 1:nrow(A), sep="")
+    } else {
+      rn <- make.unique(rn)
     }
     A <- cbind(as.matrix(A), b)
     dimnames(A) <- list(rules=rn,var=c(cn,"CONSTANT"))
