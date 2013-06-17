@@ -50,7 +50,7 @@ test_that("editset parses conditional categorical/numerical edits",{
     expect_equal(E$num, editmatrix(expression()))
     expect_equivalent(E$mixnum, editmatrix(expression(x<=0)))
     expect_equal(dim(E$mixcat),c(1,6))
-    expect_equivalent(getArr(E$mixcat),array(c(T,F,T,T,F,T),dim=c(1,6)))
+    expect_equivalent(getArr(E$mixcat),array(c(F,T,T,F,T,T),dim=c(1,6)))
     
     # test 2: numerical statement in 'then' clause
     v <- expression(
@@ -61,7 +61,7 @@ test_that("editset parses conditional categorical/numerical edits",{
     E <- editset(v)    
     expect_equal(E$num, editmatrix(expression()))
     expect_equivalent(E$mixnum, editmatrix(expression(x>0)))
-    expect_equivalent(getArr(E$mixcat), array(c(F,T,T,T,F,T),dim=c(1,6)))
+    expect_equivalent(getArr(E$mixcat), array(c(F,T,F,T,T,T),dim=c(1,6)))
 })
 
 
