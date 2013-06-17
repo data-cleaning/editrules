@@ -1,55 +1,60 @@
 #' Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for 
 #' constructing a mip/lp problem.
 #' @param E normalized \code{editmatrix}
-#' @param xlim \code{matrix} with columns lower and upper boundary, and rows are variables (in same order as E)
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits <- function(E, prefix="adapt."){   # TODO change prefix into .delta.
+softEdits <- function(E, prefix="delta."){
   
   if (!nrow(E)){
     return(E)
   }
   
+  M <- 1e7
+  
   n <- nrow(E)
   vars <- getVars(E)
   ops <- getOps(E)
-  eq <- ops == "=="
   
   adapt <- paste(prefix,rownames(E), sep="")
-  delta.plus <- paste("delta.plus.",rownames(E),sep="")
-  delta.min <- paste("delta.min.",rownames(E),sep="")
   
+  A <- getA(E)
   b <- getb(E)
   isna <- is.na(b)
-    
-  Ab <- cbind( getA(E)
-             , diag(0, n)  # adapt
-             , diag(-1, n)  # delta+
-             , diag(ifelse(eq, 1, 0), n)   # delta-
+  eq <- (ops == "==") & !isna
+  
+  Ab <- cbind( A
+             , diag(-M, n)
              , b
-             )
-  # filter out the NA
-  Ab <- Ab[!isna,,drop=FALSE]
-  ops <- ops[!isna]
+             )[!isna,,drop=FALSE]
   
-  colnames(Ab) <- c(getVars(E), adapt, delta.plus, delta.min, "CONSTANT")
+  # copy the equality constraints
+  Ab_eq <- if(any(eq)){
+           cbind( -A
+                , diag(-M,n)
+                , -b
+                )[eq,,drop=FALSE]
+           }
   
-  # this assures that adapt is set to 1 for b=NA  
-  a <- ifelse(isna, 1, -getOption("editrules.maxdiff", 1e7))
-  dp <- ifelse(isna, 0, 1)
-  dm <- ifelse(eq, dp, 0)
-  b <- ifelse(isna, 1, 0)
+  # NA's must be changed.
+  Ab_na <- if(any(isna)){
+              cbind( diag(0, n)
+                , diag(1, n)
+                , 1
+                )[isna,,drop=FALSE]
+           }
+  # TODO cleanup this code
+  #print(list(Ab=Ab, Ab_eq=Ab_eq, Ab_na=Ab_na))
+  Ab <- rbind(Ab, Ab_eq, Ab_na)
+  rownames(Ab) <- make.unique(rownames(Ab))
+  ops <- c(ops[!isna], ops[eq], rep("==", sum(isna)))
+  ops <- gsub("==", "<=", ops)
   
-  Ab2 <- cbind( diag(0, nrow=n, ncol=length(vars))
-              , diag(a, n) # adapt
-              , diag(dp,n)   # delta+
-              , diag(dm, n) # delta-
-              , b
-              )
-  rownames(Ab2) <- delta.plus #should not be equal to rownames(E)
-  ops2 <- ifelse(isna, "==", "<=")
-    
-  seE <- neweditmatrix(rbind(Ab,Ab2), ops=c(ops,ops2))
+  #print(list(Ab=Ab, ops=ops))
+  
+  
+  colnames(Ab) <- c(getVars(E), adapt, "CONSTANT")
+  
+  seE <- neweditmatrix(Ab, ops=ops)
   seE
 }
 
@@ -83,7 +88,4 @@ softEdits.cateditmatrix <- function(E, prefix=".se."){
 #                           )
 #                )
 # 
-# xlim <- cbind(l=c(x=-1,y=-5), u=c(2,10))
-# xlim
-# #upperBounds(E, xlim)
-# (se <- softEdits(E,xlim))
+# (se <- softEdits(E))

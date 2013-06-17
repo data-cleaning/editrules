@@ -42,7 +42,7 @@ writeELAsMip <- function( E
     num.x0 <- unlist(x[num.idx])
     # create an editmatrix x_i == x^0_i
     num.E <- as.editmatrix(num.x, num.x0)
-    num.se <- softEdits(num.E)
+    num.se <- softEdits(num.E, "adapt.")
     el.E <- c(num.se, E$num, el.E)
   }
 

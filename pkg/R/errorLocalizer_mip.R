@@ -65,7 +65,7 @@ errorLocalizer.mip <- function( E
 #             , epssel = 1e-15
 #            , epsb = 1e-15
 #              , epsd = 1e-15
-#              , epspivot = 1e-15
+             , epspivot = 1e-15
    )
 
    if (DUMP) write.lp(lps, "test3.lp")
@@ -76,6 +76,8 @@ errorLocalizer.mip <- function( E
    sol <- get.variables(lps)
    # lps may have optimized and removed redundant adapt.variables, so retrieve names of variable...
    names(sol) <- colnames(lps)
+   
+   #print(sol)
    ## weights are perturbed so objective function is recalculated as sum(weights[adapt])
    # w <- get.objective(lps)
    # get the positions of the adapt.variables
