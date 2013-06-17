@@ -112,37 +112,6 @@ writeELAsMip <- function( E
 
 buildELMatrix <- writeELAsMip
 
-editsetToMip <- function(E, M=1e7, epsilon=1e-3, ...){  
-  E <- as.editset(E)
-
-  E.mip <- c( E$num,
-              cateditmatrix(E$mixcat),
-              softEdits(E$mixnum, prefix="")
-            )
-  
-  lt <- getOps(E.mip) == "<"
-  
-  vars <- getVars(E.mip)
-  binvars <- sapply(vars, is.character)
-  binvars[vars %in% getVars(E, "num")] <- FALSE
-  
-  objfn <- sapply(vars, function(v) 0)
-  
-  #   if (any(soft)){
-  #      soft.idx <- grep("^\\.soft", el.vars)
-  #      objfn[soft.idx] <- (1-lambda) * soft.weights
-  #   }
-  structure(
-    list( E = E.mip
-          , objfn = objfn
-          , binvars = which(binvars)
-          , M = M
-          , epsilon = epsilon
-    ),
-    class="mip"
-  )
-}
-
 # E <- editset(expression(
 #   x < y,
 #   y < z,
