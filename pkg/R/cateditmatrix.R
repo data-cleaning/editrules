@@ -14,6 +14,7 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
       x <- as.character(x)
     }
     edts <- parseEdits(x)
+    #names(edts) <- names(x)
     
     catedits <- lapply(edts,parseCat,sep=sep, useLogical=TRUE, env=env)
     catedits <- lapply(catedits, parseCatEdit)

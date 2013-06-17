@@ -21,6 +21,7 @@ parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
             })
      }
      
+     #TODO fix this: should work, but currently generates errors in the tests.
 #      nms <- names(E)
 #      if (!is.null(nms)){
 #        names(edits) <- make.unique(nms, sep="")

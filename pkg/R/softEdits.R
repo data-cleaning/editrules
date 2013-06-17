@@ -3,13 +3,11 @@
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits <- function(E, prefix="delta."){
+softEdits <- function(E, prefix="delta.", M=1e7){
   
   if (!nrow(E)){
     return(E)
   }
-  
-  M <- 1e7
   
   n <- nrow(E)
   vars <- getVars(E)
@@ -45,12 +43,10 @@ softEdits <- function(E, prefix="delta."){
   # TODO cleanup this code
   #print(list(Ab=Ab, Ab_eq=Ab_eq, Ab_na=Ab_na))
   Ab <- rbind(Ab, Ab_eq, Ab_na)
-  rownames(Ab) <- make.unique(rownames(Ab))
-  ops <- c(ops[!isna], ops[eq], rep("==", sum(isna)))
+  rownames(Ab) <- make.unique(rownames(Ab), "_" )
+  ops <- c(ops[!isna], ops[eq])
   ops <- gsub("==", "<=", ops)
-  
-  #print(list(Ab=Ab, ops=ops))
-  
+  ops <- c(ops, rep("==", sum(isna)))
   
   colnames(Ab) <- c(getVars(E), adapt, "CONSTANT")
   
