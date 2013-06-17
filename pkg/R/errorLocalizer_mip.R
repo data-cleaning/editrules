@@ -143,7 +143,6 @@ as.lp.mip <- function(mip){
    if (!require(lpSolveAPI)){
      stop("This function needs lpSolveAPI which can be installed from CRAN")
    }
-   
    E <- mip$E
    
    A <- getA(E)

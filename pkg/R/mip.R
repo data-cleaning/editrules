@@ -35,5 +35,5 @@ as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
 }
 
 # # quick test 
-E <- editset(c(r1="x > 1","y >= x", r2="if (x>1) y> 2", r3="A %in% c('a', 'b')"))
-as.mip(E)
+# E <- editset(c(r1="x > 1","y >= x", r2="if (x>1) y> 2", r3="A %in% c('a', 'b')"))
+# as.mip(E)

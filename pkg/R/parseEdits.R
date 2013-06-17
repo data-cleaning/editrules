@@ -20,6 +20,12 @@ parseEdits <- function(E, type=c("all", "num", "cat", "mix")){
                 stop(paste("Not all edits can be parsed, parser returned", e$message,sep="\n"))
             })
      }
+     
+#      nms <- names(E)
+#      if (!is.null(nms)){
+#        names(edits) <- make.unique(nms, sep="")
+#      }
+     
      type <- match.arg(type)
      if (type=="all"){
        return(edits)

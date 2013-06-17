@@ -26,7 +26,7 @@ c.editmatrix <- function(...){
     }
     rn
   })
-  nms <- make.unique(unlist(nms))
+  nms <- make.unique(unlist(nms), sep="")
   rownames(A) <- nms
   
   as.editmatrix(A=A, ops=ops, b=b)
