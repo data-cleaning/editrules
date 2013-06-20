@@ -54,7 +54,7 @@ c.editarray <- function(...){
   
   B <- do.call(rbind, B)
   cats <- sub("^.+:", "", lvls)
-  vars <- sub(":.+$", "", lvls)
+  vars <- sub(":.*$", "", lvls)
   ind <- seq_along(lvls)
   names(ind) <- cats
   ind <- split(ind, vars)
