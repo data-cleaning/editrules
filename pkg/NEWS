@@ -1,6 +1,7 @@
 version 2.8
 - Concatenating editmatrix, editset and editset now keep their rownames
 - Simplified mip implementation
+- fixed a bug, empty levels are now allowed. Thanks to kforner
 
 version 2.7-1
 - bugfix: summary.violatedEdits crashed when no edits were violated.
