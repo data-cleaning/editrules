@@ -1,9 +1,9 @@
-#' Write an editset into a mip representation 
-#' 
-#' Write an editset as a mip problem. 
-#' Note that the objective function is empty
-#' @param E an \code{link{editset}} or an object that is coerciable to an 
-#' {\code editset}
+# Write an editset into a mip representation 
+# 
+# Write an editset as a mip problem. 
+# Note that the objective function is empty
+# @param E an \code{link{editset}} or an object that is coerciable to an 
+# \code{editset}
 as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
   E <- as.editset(E)
   

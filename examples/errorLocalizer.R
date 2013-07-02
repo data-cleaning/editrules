@@ -10,8 +10,8 @@ cp$searchNext()
 cp$searchNext()
 # third solution:
 cp$searchNext()
-# there are no more solution since changing more variables would increase the weight,
-# so the result of the next statement is NULL:
+# there are no more solution since changing more variables would increase the
+# weight, so the result of the next statement is NULL:
 cp$searchNext()
 
 # Increasing the reliability weight of turnover, yields 2 solutions:
@@ -30,7 +30,8 @@ E <- editmatrix(c(
         "p + c == t",
         "c - 0.6*t >= 0"))
 cp <- errorLocalizer(E,x=c(p=755,c=125,t=200))
-# Now, there's only one solution, but we need two runs to find it (the 1st one has higher weight)
+# Now, there's only one solution, but we need two runs to find it (the 1st one
+# has higher weight)
 cp$searchNext()
 cp$searchNext()
 
@@ -56,21 +57,26 @@ cp$searchNext()
 # 
 # 3 variables, recording age class, position in household, and marital status:
 # We define the datamodel and the rules
-E <- editarray(c(
-    "age \%in\% c('under aged','adult')",
-    "maritalStatus \%in\% c('unmarried','married','widowed','divorced')",
-    "positionInHousehold \%in\% c('marriage partner', 'child', 'other')",
-    "if( age == 'under aged' ) maritalStatus == 'unmarried'",
-    "if( maritalStatus \%in\% c('married','widowed','divorced')) !positionInHousehold \%in\% c('marriage partner','child')"
+E <- editarray(expression(
+    age %in% c('under aged','adult'),
+    maritalStatus %in% c('unmarried','married','widowed','divorced'),
+    positionInHousehold %in% c('marriage partner', 'child', 'other'),
+    if( age == 'under aged' ) 
+        maritalStatus == 'unmarried',
+    if( maritalStatus %in% c('married','widowed','divorced')) 
+        !positionInHousehold %in% c('marriage partner','child')
     )
 )
 E
 
 # Let's define a record with an obvious error:
-r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
-# The age class and position in household are consistent, while the marital status conflicts. 
-# Therefore, changing only the marital status (in stead of both age class and postition in household)
-# seems reasonable. 
+r <- c(
+  age = 'under aged', 
+  maritalStatus='married', 
+  positionInHousehold='child')
+# The age class and position in household are consistent, while the marital
+# status conflicts.  Therefore, changing only the marital status (in stead of
+# both age class and postition in household) seems reasonable. 
 el <- errorLocalizer(E,r)
 el$searchNext()
 

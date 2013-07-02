@@ -209,8 +209,8 @@ plot.violatedEdits <- function(x, topn=min(10,ncol(x)), ...){
 #' @export
 summary.violatedEdits <- function(object, E=NULL, minfreq=1, ...){
   N <- nrow(object)
-  if (sum(object)==0){
-    cat("\nNo edit violations\n")
+  if (sum(object, na.rm=TRUE)==0){
+    message(sprintf("No violations detected, %d checks evaluated to NA",sum(is.na(object))))
     return()
   }
   Nna <- sum(apply(is.na(object),1, all))
