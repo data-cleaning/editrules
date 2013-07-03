@@ -176,32 +176,6 @@ print.backtracker <- function(x, ..., VERBOSE=FALSE){
    print(ls.str(x$state, all.names=VERBOSE))
 }
 
-#' iterate over all solutions of a \code{\link{backtracker}}
-#'
-#' iterate over all solutions of a \code{\link{backtracker}}
-#' This method is identical to calling \code{$searchNext} on a \code{backtracker}. Please note that iterating
-#' a backtracker changes the state of a backtracker.
-#'
-#' 
-#' @param x \code{\link{backtracker}} object
-#' @param ... extra parameters that will given to the \code{searchNext()} function
-#' @return backtracker iterator
-#' @seealso \code{iter} from the package iterators
-#' @keywords internal
-#' @export
-iter.backtracker <- function(x, ...){
-   # TODO add stop iteration
-   
-   x$nextElem <- function(){ 
-      sol <- x$searchNext(...)
-      if (is.null(sol)){
-         stop("StopIteration", call.=FALSE)
-      }
-      sol
-   }
-   class(x) <- c("abstractiter","iter", "backtracker")
-   x
-}
 
 choicepoint <- function(isSolution, choiceLeft, choiceRight, list=NULL, ...){
    warning("choicepoint method is deprecated, please use backtracker.")

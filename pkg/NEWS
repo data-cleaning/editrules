@@ -1,5 +1,6 @@
 version 2.7.2
-- now depends lpSolveAPI and iterators (instead of suggests)
+- Suggest-dependency on iterators removed
+- now depends on lpSolveAPI (instead of suggests) 
 - small documentation changes to comply to new CRAN policy
 - bugfix in summary.violatedEdits: would crash on NA's
 - Concatenating editmatrix, editset and editset now keep their rownames

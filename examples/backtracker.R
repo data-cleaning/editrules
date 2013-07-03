@@ -16,15 +16,8 @@ bt$searchNext(VERBOSE=TRUE)
 # next search will return NULL because there is no more solution
 bt$searchNext()
 
-
 bt$reset()
 
-# backtracker also works with iterators
-if (require(iterators)){
-   it <- iter(bt)
-   nextElem(it)
-   #nextElem(it)
-}
 
 
 
