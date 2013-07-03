@@ -33,9 +33,11 @@ softEdits <- function(E, prefix="delta.", M=1e7){
                 )[eq,,drop=FALSE]
            }
   
+  # clear A, trick that keeps the rownames
+  A[,] <- 0
   # NA's must be changed.
   Ab_na <- if(any(isna)){
-              cbind( diag(0, n)
+              cbind( A #matrix(0, nrow=n, ncol=ncol(A))
                 , diag(1, n)
                 , 1
                 )[isna,,drop=FALSE]
@@ -81,7 +83,10 @@ softEdits.cateditmatrix <- function(E, prefix=".se."){
 # E <- editmatrix(expression( x - y < 2
 #                           , x + y < 5
 #                           , x + y == 3
+#                           , z == 1
 #                           )
 #                )
 # 
+# # set the z == NA
+# E[4,ncol(E)] <- NA
 # (se <- softEdits(E))
