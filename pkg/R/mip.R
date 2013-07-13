@@ -1,9 +1,15 @@
-# Write an editset into a mip representation 
-# 
-# Write an editset as a mip problem. 
-# Note that the objective function is empty
-# @param E an \code{link{editset}} or an object that is coerciable to an 
-# \code{editset}
+#' Write an editset into a mip representation 
+#' 
+#' Write an editset as a mip problem. 
+#' Note that the objective function is empty
+#' @param E an \code{link{editset}} or an object that is coerciable to an 
+#' \code{editset}
+#' @param objfn 
+#' @param M Constant that is used for allowing softconstraints
+#' @param epsilon Constant that is used for converting '<' into '<='
+#' @param ... not used 
+#' @return a mip object containing al information for transforming it into an lp problem
+#' @export
 as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
   E <- as.editset(E)
   

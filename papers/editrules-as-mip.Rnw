@@ -1,48 +1,31 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
 \documentclass[11pt, fleqn, a4paper]{article}
-\usepackage{inconsolata}
+%\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{array}
-\usepackage[rounded]{syntax}
-\usepackage{color, colortbl}
+%\usepackage[rounded]{syntax}
+%\usepackage{color, colortbl}
 \usepackage{natbib}
-\usepackage[noend]{algpseudocode}
-\usepackage{algorithm}
-\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-\renewcommand{\algorithmicensure}{\textbf{Output:}}
+%\usepackage[noend]{algpseudocode}
+%\usepackage{algorithm}
+%\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+%\renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
 \usepackage{makeidx}
 \makeindex
-
-% shorthand to make '<category>' in syntax diagram
-\newcommand{\syncat}{ $\textrm{\sf '}\langle category\rangle\textrm{\sf '}$ }
-\newcommand{\notodot}{\odot\kern-0.85em/\:\,}
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
 \DeclareMathOperator{\ocup}{\cup}
 \DeclareMathOperator{\ocap}{\cap}
-\newcommand{\rhomap}{\xrightarrow{\rho}}
-\newcommand{\rows}{\textrm{rows}}
-\newcommand{\columns}{\textrm{columns}}
-\newcommand{\ind}{\textrm{\bf ind}}
-\newcommand{\true}{\textrm{\sc true} }
-\newcommand{\false}{\textrm{\sc false} }
-
-\newtheorem{theorem}{Theorem}[subsection]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{remark}[theorem]{Remark}
-\newtheorem{example}[theorem]{Example}
-\newtheorem{definition}[theorem]{Definition}
-\newcommand{\theend}{\hfill$\Box$}
 
 \newcommand{\packageversion}{{\sf 2.5}}
+\newcommand{\code}[1]{\textsf{#1}}
+\newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
-\usepackage{float}
- 
+\usepackage{float} 
 \floatstyle{boxed}
 \newfloat{Rcode}{t!}{rco}
 \floatname{Rcode}{{\rm Figure}}
@@ -70,7 +53,6 @@
 \renewcommand{\dbltopfraction}{.9}
 
 
-
 \hyphenation{
     time-stamp 
     se-pa-ra-te-ly
@@ -80,7 +62,7 @@
 
 <<init, echo=FALSE, results='hide', message=FALSE>>=
 library(editrules)
-library(xtable)
+#library(xtable)
 @
 
 \title{Error localization as a mixed integer problem with the {\tt editrules} package\\
@@ -121,7 +103,6 @@ the options for error localization and record correction are currently limited.
 The {\sf R} package {\sf editrules} was
 developed to help closing the gap between raw data retrieval and data analysis
 with {\sf R}.  The main purpose of the {\sf editrules} package is to provide a
-user-friendly environment for handling data restriction rules, to apply those
 rules to data, and to localize erroneous fields in data based on the
 generalized principle of \cite{fellegi:1976}.  The package does not offer
 functionality for data correction. However, it does facilitate the
@@ -145,7 +126,7 @@ and bound method also available in {\sf editrules}.
 We start with a brief description of mixed integer programming and its 
 application to the error localization problem.  
 In section \ref{sec:numdataerror} we describe a mip formulation for numerical 
-records. Section \ref{sec:catdataerror} describes the mip formulation for categorical records. 
+records. Section \ref{sec:catdataerror} describes the mip formulation for categorical records. Restriction on both numerical and categorical can also be implemented using mip. We describe the mip implementation of so called mixed edits in \ref{sec:mixdataerror}.
 We end with a discussion on the implementation in {\sf editrules}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -172,9 +153,9 @@ In {\sf editrules} we use \ref{lpSolveAPI:2011} to formulate and solve our mip p
 
 Most mip software allows for a broader (but equivalent) formulation of the 
 mip problem.  (\ref{eq:mipmax}) can be written as  a minimization problem 
-(by changing the sign of ${\bf}c^T$),  $A$ can include equality constraints 
-(by replacing it with two inequality constraints) and ${\bf x}$ can be negative
-(by adding so-called slack variables). In our formuluation of error localization
+ by changing the sign of ${\bf}c^T$,  $A$ can include equality constraints 
+by replacing each equality with two inequality constraints and ${\bf x}$ can be negative
+by adding so-called slack variables. In our formuluation of error localization
 as a mip problem we make use of this broader definition.
 
 In this paper we formulate Felligi Holt error localization \citep{fellegi:1976} 
@@ -182,18 +163,19 @@ for numerical, categorical and mixed constraints as mip problems.
 This principle minimizes the (weighted) number of variables that must be 
 changed to obey a set of constraints. The formulations for error localization
 for the three types are different but all have the same parts:
+
 \begin{itemize}
-  \item An objective function that minimizes the (weighted) number of adaptions
+  \item[] An objective function that minimizes the (weighted) number of adaptions
   in the form of ${\bf w}^T {\bf \Delta}$, with ${\bf w}$ the vector of weights
   and ${\bf \Delta}$ a vector of binary adaptation variables. 
   If $\Delta_i = 1$, value $r_i^0$ of record ${\bf r}$ is considered erroneous.
   This objective function is the same for all three types.
-  \item A numerical description ${\bf x}$ of record ${\bf r}$ that includes 
+  \item[a)] A numerical description ${\bf x}$ of record ${\bf r}$ that includes 
   binary adaptation variables ${\bf \Delta}$ and possibly auxiliary variables. 
-  \item The constraints (edits) that each record ${\bf r}$ {\bf must} obey 
-  formulated in the form ${\bf A} {\bf x} \leq {\bf b}$.
-  \item The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} obey 
-  formulated as soft constraints ${\bf A}^0 {\bf x} \leq {\bf x}^0$. These assure
+  \item[b)] The hard constraints (edits) that each record ${\bf r}$ {\bf must} obey 
+  formulated in the form ${\bf A}^H {\bf x} \leq {\bf b}^H$.
+  \item[c)] The reported values ${\bf r}^0$ that record ${\bf r}$ {\bf should} obey 
+  formulated as constraints ${\bf A}^0 {\bf x} \leq {\bf x}^0$. These assure
   that if $r_i \neq r_i^0$ then $\Delta_i = 1$.
 \end{itemize}
 
@@ -205,6 +187,9 @@ An overview of several mixed integer formulations for error localization can
 be found in \citep{waal:2011} p. 75.
 Mixed integer programming (convex programming etc.).
 List of mip software.
+Internally the package \cite{lpSolveAPI:2011} is used to 
+solve the resulting mixed integer program.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
@@ -212,53 +197,72 @@ List of mip software.
 
 \section{Numerical data errors}
 \label{sec:numdataerror}
-{\sf editrules} allows for the following numerical constraints (see \ref{jonge:2011}).
-A numerical record $\bf r$  with reported values $({r^0_1,\dots,r^0_m)}$ has the following linear constraints:
+\code{editrules} allows for the following numerical constraints (see \ref{jonge:2011}).
+Suppose a numerical record $\bf r$  with reported values $({r^0_1,\dots,r^0_m)}$ has the following linear constraints:
 \begin{equation}
 \label{eq:edit}
 A {\bf r \odot b} \textrm{ with }\odot\in\{<,\leq,=\}^n,
 \end{equation}
 
+Note that this formulation is almost identical to the constraint part of linear optimization problems. 
+
 \subsection{Mip formulation}
 
-The mapping from record ${\bf r}$ to $\bf x$ is easy:
-\begin{equation}
-{\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m)
-\end{equation}
-with $\Delta_i \in \{0,1\}$\\
-
-Writing the constraints $A$ of \ref{eq:edit} is also straightforward, with the 
-exception of strict inequalities.
-We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$ from $b_j$.
-\begin{equation}
-\sum_{i=1}^m a_{ij} r_i < b_j \implies \sum_{i=1}^m a_{ij} r_i \leq b_j - \epsilon
-\end{equation}
-
-Note that for reasons we give later you should avoid writing strict inequalities
-as much as possible.
-
-The soft constraints $A^0$ for the reported values can be written as:
-\begin{eqnarray}
-                         r_i & \leq    & r^0_i + M \Delta_i \label{eq:numsoft1} \\
-          r^0_i - M \Delta_i & \leq    & r_i  \label{eq:numsoft2}
-\end{eqnarray}
-with $M$ sufficiently large and $i = \{1,\ldots,m\}$. \\
-
-It can easily be checked that if $\Delta_i = 0$ then $x_i = r^0_i$ and 
-if $\Delta_i = 1$ then $x_i$ can take any value 
-between $r^0_i - M$ and  $r^0_i + M$. 
-Since the objective function tries to minimize $w^T \Delta_i$, 
-the mip solver will try to keep each variable $r_i$ at its reported value $r^0_i$.
+\begin{itemize}
+  \item[a)]
+  The mapping from record ${\bf r}$ to $\bf x$ is easy:
+  \begin{equation}
+  {\bf x} = (r_1, \ldots, r_m, \Delta_1, \ldots, \Delta_m)
+  \end{equation}
+  with $\Delta_i \in \{0,1\}$\\
+  
+  \item[b)]
+  Writing the constraints $A$ of equation \ref{eq:edit} into ${\bf A}^H$  
+  is also straightforward, with the exception of strict inequalities.
+  We rewrite strict inequalities by subtracting a sufficiently small $\epsilon$ from $b_j$.
+  \begin{equation}
+  \sum_{i=1}^m a_{ji} r_i < b_j \implies \sum_{i=1}^m a_{ji} r_i \leq b_j - \epsilon
+  \end{equation}
+  
+  Note that for reasons we give later you should avoid writing strict inequalities
+  as much as possible.
+  
+  \item[c)]
+  The constraints ${\bf A}^0$ for the reported values can be written as:
+  \begin{eqnarray}
+                           r_i & \leq    & r^0_i + M \Delta_i \label{eq:numsoft1} \\
+            r^0_i - M \Delta_i & \leq    & r_i  \label{eq:numsoft2}
+  \end{eqnarray}
+  with $M$ sufficiently large and $i = \{1,\ldots,m\}$. \\
+  
+  It can easily be checked that if $\Delta_i = 0$ then $r_i = r^0_i$ and 
+  if $\Delta_i = 1$ then $r_i$ can take any value 
+  between $r^0_i - M$ and  $r^0_i + M$. 
+  Since the objective function tries to minimize $w^T \Delta_i$, 
+  the mip solver will try to keep each variable $r_i$ at its reported value $r^0_i$.
+\end{itemize}
 
 This makes the mip formulation for error localization in numerical edits complete.
 
 \subsection{Implementation}
 In {\sf editrules} we use an {\sf editmatrix} object to store numerical data 
-constraints. This object is described extensively in {\cite{jone:}}
-{\tt E} that contains the conditional boundary conditions as defined 
-in (\ref{eq:nummip}). Internally the package \cite{lpSolveAPI:2011} is used to 
-solve the resulting mixed integer program.
-As shown in a previous paper (\cite{jonge:2011}), {\sf editrules} has the 
+constraints. This object is described extensively in {\cite{jonge:2011}}
+As shown in a previous paper (\cite{jonge:2011}).
+<<nummatrix example>>=
+(E <- editmatrix("y >= x"))
+@
+The example \code{E} shows that \code{editmatrix} recognizes the constraint: it has been 
+rewritten in standard normalized format.
+
+<<echo=FALSE>>=
+em <- writeELAsMip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
+@
+
+<<tidy=FALSE, eval=FALSE>>=
+em <- writeELAsMip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
+@
+
+{\sf editrules} has the 
 function {\sf localizeErrors} which by default uses a branch and bound 
 algorithm. We extended this function with a parameter {\tt method}, that can be 
 used to select the {\tt "bb"} or {\tt "mip"} method. 
@@ -303,9 +307,9 @@ however it does: if coefficient $a_{ij} \ll a_{kl}$ then the solution
 may become numerical unstable, since the ratio of the two may be 
 indistinguishable from zero to the mip solver. 
 
-In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. If
-the other coefficients are within this range the mip solver will be stable. 
-If not, you should rescale some of your variables and constraints. 
+In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This will 
+be sufficient for most purposes, since numerical values and coefficient of the constraints 
+in most cases will be in this range. If not, you should rescale some of your variables and constraints to make it so.
 
 From the lpsolve manual \citep{lpsolveman:2012}:
 
@@ -324,89 +328,91 @@ scale the problem than any computer algorithm.
 
 \label{sec:catdataerror}
 A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has the following $n$ constraints:
-\begin{equation}e^j = 
+\begin{equation}e_j = 
   \begin{array}{rl}
     \label{eq:catedit}
-    \mbox{{\bf if }} & v_i \in F^j_i \mbox{ for }i = 1, \ldots, m \\
+    \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
     \mbox{ {\bf then}} & \mbox{FALSE}
   \end{array}
 \end{equation}
-with $F^j_i \subseteq D_i$ where $D_i$ is the possible set of categories $\{c_{i,1}, \ldots, c_{i,n_i}\}$ for each $v_i$ and $j = 1 \ldots n$ the number of edits.
+with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and $j = 1 \ldots n$ the number of edits.
 
-Remarkable about categorical edits is that its literature (\ref) formulates the 
-problem negatively. If a condition is true than the edit is violated. For mip 
-we need the possitive formulation, since it requires constraints 
+Remarkable about categorical edits is their negative formulation in 
+literature (e.g. \ref{}): if a condition is true than the edit is violated. This is in contrast with numerical edits, which state rules that the record must obey. To translate categorical edits into mip we need a possitive reformulation, since mip requires constraints 
 that must hold.
 
 Equation (\ref{eq:catedit}) can be written in the following form:
 \begin{eqnarray}
-     e^j  & = & \lnot \bigwedge_{i=1}^m v_i \in F^j_i = \bigvee_{i=1}^m\lnot (v_i \in {F^j_i}) \\
-          & = &  \bigvee_{i=1}^m v_i \not\in {F^j_i} = \bigvee_{i=1}^m v_i \in T^j_i \label{eq:catpos}
+     e_j  & = & \lnot \bigwedge_{i=1}^m v_i \in F_{i,j} = \bigvee_{i=1}^m\lnot (v_i \in {F_{i,j}}) \\
+          & = &  \bigvee_{i=1}^m v_i \not\in {F_{i,j}} = \bigvee_{i=1}^m v_i \in T_{i,j} \label{eq:catpos}
 \end{eqnarray}
-with $T^j_i = D_i \setminus F^j_i$. 
-This means that edit $e^j$ is satisfied if at least one $v_i \in T^j_i$. 
+with $T_{i,j} = D_i \setminus F_{i,j}$. 
+This means that edit $e^j$ is satisfied if at least one $v_i \in T_{i,j}$. 
 
 \subsection{Mip formulation}
-Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
-numerical vector. We therefore encode each $v_i$ in $n_i$ binary dummy variables
-$$
-v_i = (d_{i,1} \ldots d_{i,n_i})
-$$
-with
-\begin{equation}
-  d_{i,k} = \left\{ 
-  \begin{array}{ll}
-         1 & \mbox{if $v_i = c_{i,k}$}\\
-         0 & \mbox{if $v_i \neq c_{i,k}$}
-  \end{array} \right. 
-\end{equation}
-
-
-The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
-can then be written as:
-\begin{equation}
-  {\bf x} = (d_{1,1}\ldots d_{1,n_1}, \ldots, d_{m, 1}, \ldots, d_{m, n_m}, 
-  \Delta_1, \ldots, \Delta_m)
-\end{equation}
-
-Constraint matrix $A$ for categorical edits is composed out of two parts.
-First the fact that each $v_i$ can only have one categorical value:
-\begin{equation}
-   \sum^{n_i}_{k=1} d_{i,k} = 1
-\end{equation}
-for $i$ is $(1, \ldots, m)$
-
-Second the categorical edits, equation \ref{eq:catpos} can now be written as:
-
-\begin{equation} \label{eq:tmip}
-  \sum^m_{i=1} \left(\sum^{n_i}_{k=1} t^j_{i,k} \cdot d_{i,k}\right) 
-  \geq 1
-\end{equation}
-
-\begin{equation} \label{eq:aijk}
-  \mbox{with }
-  t^j_{i,k} = \left\{ 
-  \begin{array}{ll}
-         0 & \mbox{if } c_{i,k} \not\in T^j_i\\
-         1 & \mbox{if } c_{i,k} \in T^j_i
-  \end{array} \right. 
-\end{equation}
-If one of the $c_{i,k} \in T^j_i$ then the edits is valid.\\
-
-
-The soft constraints $A^0$ can be written as:
-
-\begin{equation}
-   d_{i,k^0_i}  =  1 - \Delta_i  \mbox{ with } v^0_i = c_{i,k^0}
-\end{equation}
-
-It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0_i} = 1$, 
-meaning that the reported value 
-$v^0_i$ is assumed correct. 
-If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
-value. Since mip minimizes the objective function it will try to keep the reported 
-values $v^0_i$
-
+\begin{itemize}
+  \item[a)]
+  Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
+  numerical vector. We therefore encode each $v_i$ in $l_i$ binary dummy variables
+  $$
+  v_i = (d_{i,1}, \ldots, d_{i,l_i})
+  $$
+  with
+  \begin{equation}
+    d_{i,k} = \left\{ 
+    \begin{array}{ll}
+           1 & \mbox{if $v_i = c_{i,k}$}\\
+           0 & \mbox{if $v_i \neq c_{i,k}$}
+    \end{array} \right. 
+  \end{equation}
+  
+  The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
+  can then be written as:
+  \begin{equation}
+    {\bf x} = (d_{1,1}\ldots d_{1,n_1}, \ldots, d_{m, 1}, \ldots, d_{m, l_m}, 
+    \Delta_1, \ldots, \Delta_m)
+  \end{equation}
+  
+  \item[b)]
+  Constraint matrix ${\bf A}$ for categorical edits is composed out of two parts.
+  First the fact that each $v_i$ can only have one categorical value:
+  \begin{equation}
+     \sum^{n_i}_{k=1} d_{i,k} = 1
+  \end{equation}
+  for $i$ is $(1, \ldots, m)$
+  
+  Second the categorical constraints of equation \ref{eq:catpos}. They can now be written as:
+  
+  \begin{equation} \label{eq:tmip}
+    \sum^m_{i=1} \left(\sum^{l_i}_{k=1} t_{i,j,k} \cdot d_{i,k}\right) 
+    \geq 1
+  \end{equation}
+  
+  \begin{equation} \label{eq:aijk}
+    \mbox{with }
+    t_{i,j,k} = \left\{ 
+    \begin{array}{ll}
+           0 & \mbox{if } c_{i,k} \not\in T_{i,j}\\
+           1 & \mbox{if } c_{i,k} \in T_{i,j}
+    \end{array} \right. 
+  \end{equation}
+  If one of the $c_{i,k} \in T^j_i$ then the edits is valid.\\
+  
+  
+  \item[c)]
+  The constraints ${\bf A}^0$ can be written as:
+  
+  \begin{equation}
+     d_{i,k^0_i}  =  1 - \Delta_i 
+  \end{equation}
+  where $k^0_i$ denotes the reported value $v^0_i$
+  It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0} = 1$, 
+  meaning that the reported value 
+  $v^0_i$ is assumed correct. 
+  If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
+  value. Since mip minimizes the objective function it will try to keep the reported 
+  values $v^0_i$
+\end{itemize}
 This makes the mip formulation for categorical edits complete.
 
 \subsection{Implementation}
