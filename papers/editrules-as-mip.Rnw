@@ -4,10 +4,7 @@
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{array}
-%\usepackage[rounded]{syntax}
-%\usepackage{color, colortbl}
 \usepackage{natbib}
-%\usepackage[noend]{algpseudocode}
 %\usepackage{algorithm}
 %\renewcommand{\algorithmicrequire}{\textbf{Input:}}
 %\renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -286,7 +283,7 @@ E <- editmatrix("x <= y")
 r <- c(x=10, y=1)
 weight <- c(x=2, y=1)
 el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
-str(el)
+#str(el)
 @
 
 
@@ -464,7 +461,22 @@ E
 \end{figure}
 
 \section{Mixed data errors}
+
+Often a data set or survey contains both numerical as categorical variables.
+In that case it happens that there are hard constraint including both types
+of variables. Such a constraint is called a mixed edit or mixed constraint.
+{\sf editrules} allows for mixed constraints which are extensively described in 
+\ref{}.
+
+The branch and bound implementation of {\sf editrules} works, but is inefficient
+for larger problems. It very quickly generates very large memory objects and 
+takes a long time to finish. For these problems a {\sf mip} implementation comes
+to the rescue.
+
 \subsection{Mip formulation}
+A set of mixed constraints contains pure numerical, pure categorical
+and mixed constraints.
+
 \subsection{Implementation}
 
 <<tidy=FALSE>>=
@@ -473,8 +485,8 @@ E <- editset(expression(
   if (married==TRUE) age >= 17
   ))
 editrules:::writeELAsMip(E, x=c(age=9, married=TRUE))
-errorLocalizer.mip(E, x=c(age=9, married=TRUE))
-localizeErrors(E, dat=data.frame(age=9, married=TRUE))
+#errorLocalizer.mip(E, x=c(age=9, married=TRUE))
+#localizeErrors(E, dat=data.frame(age=9, married=TRUE))
 @
 
 
