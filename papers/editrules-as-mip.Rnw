@@ -461,6 +461,7 @@ E
 \end{figure}
 
 \section{Mixed data errors}
+\label{sec:mixdataerror}
 
 Often a data set or survey contains both numerical as categorical variables.
 In that case it happens that there are hard constraint including both types
@@ -473,9 +474,32 @@ for larger problems. It very quickly generates very large memory objects and
 takes a long time to finish. For these problems a {\sf mip} implementation comes
 to the rescue.
 
-\subsection{Mip formulation}
 A set of mixed constraints contains pure numerical, pure categorical
-and mixed constraints.
+and mixed constraints. 
+
+A mixed record $\bf r$  with reported values $({r^0_1, \dots,r^0_l,
+v^0_1,\dots,v^0_m)}$ has the 
+following $n$ constraints:
+\begin{equation}e_j = 
+  \begin{array}{rl}
+    \label{eq:mixedit}
+    \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
+    \mbox{ {\bf then}} & \sum^l_{k=1} a_{jk} \cdot r_k \leq b_j \\ 
+  \end{array}
+\end{equation}
+with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the 
+possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and 
+$j = 1 \ldots n$ the number of edits.
+
+Equation \ref{eq:mixedit} can written in a more general form:
+
+\begin{equation}
+e_j = \bigvee_{i=1}^m (v_i \in T_{i,j}) \vee \sum^l_{k=1} a_{jk} \cdot r_k 
+\leq b_j
+\end{equation}
+
+
+\subsection{Mip formulation}
 
 \subsection{Implementation}
 
