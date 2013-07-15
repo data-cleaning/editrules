@@ -74,6 +74,10 @@ cateditmatrix <- function(x, sep=":", env=parent.frame()){
 #' @param ... further arguments passed to or from other methods.
 #' @keywords internal
 as.character.cateditmatrix <- function(x, asIfStatement=FALSE, ...){
+  # empty cateditmatrix?
+  if (length(x) == 0) 
+    return(str(x))
+  
   if (isTRUE(asIfStatement)){
     A <- getA(x)
     ops <- getOps(x)

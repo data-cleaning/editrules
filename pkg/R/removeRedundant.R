@@ -18,12 +18,12 @@ removeRedundant <- function(E){
     lps <- as.lp.mip(m1)
     statuscode <- solve(lps)
     
-    o <- -get.objective(lps)
+    o <- -1*get.objective(lps)
     
     keep[r] <<- (b[r] <= o) 
     c(o=o, t=b[r])
   })
-  keep
+  E[names(keep)[keep],]
 }
 
 # E <- editmatrix(c(A="x>2", B="y > x", C="y>1" , D="x>1"))

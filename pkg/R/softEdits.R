@@ -3,7 +3,16 @@
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits <- function(E, prefix="delta.", M=1e7){
+softEdits <- function(E, prefix="delta.", ...){
+  UseMethod("softEdits")
+}
+
+#' Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for 
+#' constructing a mip/lp problem.
+#' @param E normalized \code{editmatrix}
+#' @param prefix \code{character} used for naming dummy variables in matrix.
+#' @keywords internal
+softEdits.editmatrix <- function(E, prefix="delta.", M=1e7, ...){
   
   if (!nrow(E)){
     return(E)
@@ -61,7 +70,7 @@ softEdits <- function(E, prefix="delta.", M=1e7){
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits.cateditmatrix <- function(E, prefix=".se."){
+softEdits.cateditmatrix <- function(E, prefix="delta.", ...){
   if (!nrow(E)){
     return(E)
   }
@@ -76,6 +85,18 @@ softEdits.cateditmatrix <- function(E, prefix=".se."){
   binvars <- sapply(colnames(seA), is.character)
   seE <- as.editmatrix(seA, getb(E), getOps(E), binvars=binvars)
   seE
+}
+
+#' Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for 
+#' constructing a mip/lp problem.
+#' @param E normalized \code{editmatrix}
+#' @param prefix \code{character} used for naming dummy variables in matrix.
+#' @keywords internal
+softEdits.editarray<- function(E, prefix="delta.", ...){
+  if (!nrow(E)){
+    return(E)
+  }
+  softEdits.cateditmatrix(cateditmatrix(E), prefix=prefix, ...)
 }
 
 #quick tests
