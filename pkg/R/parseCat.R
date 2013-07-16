@@ -32,7 +32,7 @@ parseCat <- function(x, val=NA, edit=logical(0), sep=":", useLogical=FALSE, env=
         edit <- parseCat(x[[2]], val,  edit, sep, useLogical, env=env)
     } else if ( op %in% c("%in%","==") ){
         cat <- eval(x[[3]], envir=env)
-        if ( is.na(val) && op == "==" ) val <- TRUE
+        if ( is.na(val) && op == "==" ) val <- FALSE
         if (is.logical(cat) && useLogical){
             if (length(cat) > 1){
               val <- NA

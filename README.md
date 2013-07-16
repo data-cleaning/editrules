@@ -7,7 +7,7 @@ The editrules package aims to provide an environment to conveniently define, rea
 * Constraints on value combinations of categorical data
 * Conditional constraints on numerical and/or mixed data
 
-In literature these constraints, or restrictions are refered to as ``edits''. 
+In literature these constraints, or restrictions are refered to as _edits_. 
 editrules can perform common rule set manipulations like variable elimination and value substitution, 
 and offers error localization functionality based on the (generalized) paradigm of Fellegi and Holt. 
 Under this paradigm, one determines the smallest (weighted) number of variables to adapt such that no

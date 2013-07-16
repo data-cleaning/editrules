@@ -65,7 +65,6 @@ reduce.editarray <- function(E,...){
 #' @rdname reduce
 #'
 reduce.editset <- function(E,...){
-
     num <- reduce(E$num)
     mixcat <- reduce(E$mixcat)
     v <- getVars(mixcat)
