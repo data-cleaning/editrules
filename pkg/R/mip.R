@@ -8,7 +8,8 @@
 #' @param M Constant that is used for allowing softconstraints
 #' @param epsilon Constant that is used for converting '<' into '<='
 #' @param ... not used 
-#' @return a mip object containing al information for transforming it into an lp problem
+#' @return a mip object containing al information for transforming it 
+#' into an lp/mip problem
 #' @export
 as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
   E <- as.editset(E)
@@ -38,6 +39,15 @@ as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
     ),
     class="mip"
   )
+}
+
+#' @S3method print mip
+print.mip <- function(x, ...){
+  print.editmatrix(x$E, textOnly=T)
+  idx <- x$objfn != 0
+  of <- paste0(x$objfn, "*", colnames(E))[idx]
+  of <- paste(of, collapse=" + ")
+  cat("objective function = min: ", of, "\n")
 }
 
 # # quick test 
