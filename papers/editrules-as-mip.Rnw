@@ -247,37 +247,21 @@ In {\sf editrules} we use an {\sf editmatrix} object to store numerical data
 constraints. This object is described extensively in {\cite{jonge:2011}}
 As shown in a previous paper (\cite{jonge:2011}).
 <<nummatrix example>>=
-(E <- editmatrix("y >= x"))
+as.character(E <- editmatrix("y >= x"))
 @
-The example \code{E} shows that \code{editmatrix} recognizes the constraint: it has been 
-rewritten in standard normalized format.
+The example \code{E} shows that \code{editmatrix} recognizes the constraint: 
+it has been rewritten in standard normalized format.
 The mip formulation reuses the \code{editmatrix} object, but adds some extra 
 metadata. The \code{as.mip} function transforms the editmatrix into a mip object.
 
-<<echo=FALSE>>=
-em <- editrules:::writeELAsMip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
-@
-
-<<tidy=FALSE, eval=FALSE>>=
-em <- writeELAsMip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
-@
-
-{\sf editrules} has the 
-function {\sf localizeErrors} which by default uses a branch and bound 
-algorithm. We extended this function with a parameter {\tt method}, that can be 
-used to select the {\tt "bb"} or {\tt "mip"} method. 
-For many purposes specifying {\tt "mip"} will increase
-the speed without noticable changes in the output.
-
-
-
 <<>>=
-# write errorlocalization as mip
-mip <- editrules:::writeELAsMip(E, r, weight=weight)
-print(mip$E, textOnly=TRUE)
-mip$objfn[mip$objfn > 0]
+as.mip(E)
 @
 
+Adding the ${\bf A}^0$ constraints we get:
+<<>>=
+as.mip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
+@
 \subsection{Numerical subtleties}
 
 The mip formulation for numerical constraints depends on two constants $M$ and
@@ -425,12 +409,15 @@ To create a mip formulation for the categorical error localization problem,
 \code{editrules} rewrites categorical edits into a numerical matrix using the
 function \code{as.mip}.
 <<>>=
-mip <- editrules:::as.mip(E)
+as.mip(E)
 @
-Above example show the rewriting of ${\em A}^H$. If we add the $A^0$
+Above example shows the rewriting of ${\bf A}^H$. If we add the $A^0$
 constraints we get:
-<<>>=
-editrules:::as.mip(E, x=c(), weight=c())$E
+<<tidy=FALSE>>=
+as.mip( E
+      , x=c(gender="male", pregnant=TRUE)
+      , weight=c(1,2)
+      )
 @
 
 
@@ -542,9 +529,17 @@ E <- editset(expression(
   married %in% c(TRUE, FALSE),
   if (married==TRUE) age >= 17
   ))
-editrules:::writeELAsMip(E, x=c(age=9, married=TRUE))
-#errorLocalizer.mip(E, x=c(age=9, married=TRUE))
-#localizeErrors(E, dat=data.frame(age=9, married=TRUE))
+as.mip(E, x=c(age=9, married=TRUE))
+@
+
+Writing this to ${\bf A}^H$ form we get:
+<<>>=
+as.mip(E)
+@
+
+Adding some (inconsistent!) ${\bf A}^0$ we get:
+<<>>=
+as.mip(E, x=c(age=9, married=TRUE))
 @
 
 \section{Usage}
@@ -566,16 +561,46 @@ mip$adapt
 @
 
 Internally {\sf localizeErrors} uses for each record {\sf errorLocalizer.mip}.
+Unlike {\em branch and bound} this is not a \code{backtracker} object.
+\code{errorlocalizer.mip} writes the constraints and values into a mip problems,
+feeds it into the \code{lpSolveApi} and formats the resulting output.
 <<num mip>>=
 E <- editmatrix("x <= y")
 r <- c(x=10, y=1)
 weight <- c(x=2, y=1)
 el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
-#str(el)
+ls.str(el)
 @
+Both \code{localizerErrors} as \code{errorLocalizer.mip} can be executed with a 
+\code{editmatrix}, \code{editarray} or \code{editset} object.
 
+Note in the example that the {\em mip} solver returns two extra properties that are
+not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
+Since a mip-solvers goal is to find a feasible solution, a set of feasible x 
+values is available. It can be helpful to have these values, but note 
+that the set is not unique and that the proposed values for the variables to be 
+adjusted lie on the boundary of a convex solution region. 
+So  in many cases it is better to use proper imputation method to generate
+sensible values.
+Secondly \code{errorlocalizer.mip} returns the \code{lp} object. This object is 
+a \code{lpSolveApi} object and can be further manipulated or written to disk.
+For more information consult the manual of \code{lpSolveApi}.
+
+A advantage of the branch and bound algorithm is that it can generate all best
+solutions for a given record.  The mip implementation only generates one of the 
+best. This is implemented by adding a small uniform pertubation to the weights, 
+so mip chooses one of the best at random. This is identical 
+to the default behavior of \code{localizeErrors} for \code{method='bb'}.
 
 \section{Conclusion}
+\code{editrules} includes a mip implementation of the localize errors formalism 
+of Felligi and Holt. This mip implementation is typically must faster than the
+branch and bound algorithm. 
+
+For most problems mip will generate a good solution. However for problems where
+coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
+the problem: otherwise the mip solver will become unstable.
+
 \bibliographystyle{chicago}
 \bibliography{editrules}
 

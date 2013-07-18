@@ -44,10 +44,12 @@ as.mip <- function(E, objfn = NULL, M=1e7, epsilon=1e-3,...){
 #' @S3method print mip
 print.mip <- function(x, ...){
   print.editmatrix(x$E, textOnly=T)
-  idx <- x$objfn != 0
-  of <- paste0(x$objfn, "*", colnames(E))[idx]
-  of <- paste(of, collapse=" + ")
-  cat("objective function = min: ", of, "\n")
+  if (!is.null(x$objfn)) {
+    idx <- x$objfn != 0
+    of <- paste0(x$objfn, "*", colnames(E))[idx]
+    of <- paste(of, collapse=" + ")    
+    cat("objective function = min: ", of, "\n")
+  }
 }
 
 # # quick test 
