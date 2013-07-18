@@ -420,7 +420,6 @@ as.mip( E
       )
 @
 
-
 \section{Mixed data errors}
 \label{sec:mixdataerror}
 
