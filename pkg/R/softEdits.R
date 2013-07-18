@@ -80,7 +80,7 @@ softEdits.cateditmatrix <- function(E, prefix="delta.",...){
   
   dummies <- paste(prefix, rownames(E), sep="")
   
-  seA <- diag(ifelse(eq, 1, -1), ncol=length(eq), nrow=length(eq))
+  seA <- diag(ifelse(eq, -1, 1), ncol=length(eq), nrow=length(eq))
   colnames(seA) <- dummies
   seA <- cbind(getA(E), seA)
   

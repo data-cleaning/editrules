@@ -55,6 +55,7 @@ errorLocalizer.mip <- function( E
    t.start <- proc.time()
    
    elm <- writeELAsMip(E=E, x=x, weight=wp, ...)
+   #elm <- as.mip(E=E, x=x, weight=wp, prefix="adapt.",...)
    
    lps <- as.lp.mip(elm)
    # end TODO

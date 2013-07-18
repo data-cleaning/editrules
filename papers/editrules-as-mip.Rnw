@@ -415,7 +415,7 @@ Above example shows the rewriting of ${\bf A}^H$. If we add the $A^0$
 constraints we get:
 <<tidy=FALSE>>=
 as.mip( E
-      , x=c(gender="male", pregnant=TRUE)
+      , x=list(gender="male", pregnant=TRUE)
       , weight=c(1,2)
       )
 @
@@ -528,7 +528,6 @@ E <- editset(expression(
   married %in% c(TRUE, FALSE),
   if (married==TRUE) age >= 17
   ))
-as.mip(E, x=c(age=9, married=TRUE))
 @
 
 Writing this to ${\bf A}^H$ form we get:
@@ -538,7 +537,7 @@ as.mip(E)
 
 Adding some (inconsistent!) ${\bf A}^0$ we get:
 <<>>=
-as.mip(E, x=c(age=9, married=TRUE))
+as.mip(E, x=list(age=9, married=TRUE))
 @
 
 \section{Usage}

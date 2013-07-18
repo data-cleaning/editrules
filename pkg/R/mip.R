@@ -10,7 +10,8 @@
 #' @return a mip object containing al information for transforming it 
 #' into an lp/mip problem
 #' @export
-as.mip <- function(E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3,...){
+as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
+                  , ...){
   E <- as.editset(E)
   objfn <- NULL
   
@@ -27,20 +28,35 @@ as.mip <- function(E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3,...){
     }
     
     names(weight) <- paste0("delta.", names(x))
+    # create expression vector with var == value
+    expr <- as.expression( lapply(names(x)
+                         , function(v){ 
+                              substitute( var == value
+                                        , list(var=as.symbol(v), value=x[[v]])
+                                        )
+                         }))
+    
+    isna <- sapply(x, is.na)
     
     num_vars <- getVars(E, type="num")
-    num_idx <- match(num_vars, names(x))
-    num <- na.omit(x[num_idx])
-    A0_num <- editmatrix(paste(names(num),"==", num))
-    rownames(A0_num) <- names(num)
+    nums <- !isna & names(x) %in% num_vars
+    
+    if (any(nums)) { 
+      A0_num <- editmatrix(expr[nums])
+      rownames(A0_num) <- names(x)[nums]
+      A0_num <- softEdits(A0_num, prefix=prefix)
+    } else A0_num <- NULL
     
     cat_vars <- getVars(E, type="cat")
-    cat_idx <- match(cat_vars, names(x))
-    cat <- na.omit(x[cat_idx])
-    A0_cat <- cateditmatrix(paste(names(cat),"==", cat))
-    rownames(A0_cat) <- names(cat)
+    cats <- !isna & names(x) %in% cat_vars
     
-    E_mip <- c(E_mip, softEdits(A0_num), softEdits(A0_cat))
+    if (any(cats)){
+      A0_cat <- cateditmatrix(expr[cats])
+      rownames(A0_cat) <- names(x)[cats]
+      A0_cat <- softEdits(A0_cat, prefix=prefix)
+    } else A0_cat <- NULL
+    
+    E_mip <- c(E_mip, A0_num, A0_cat)
     
     objfn <- sapply(colnames(E_mip), function(v) { weight[v] })
     objfn[is.na(objfn)] <- 0
