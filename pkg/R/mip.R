@@ -71,12 +71,14 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
   ops[lt] <- "<="
   E_mip = as.editmatrix(A=A, b=b, ops=ops)
   
-  binvars = !sapply(getVars(E_mip), `%in%`, getVars(E, type="num"))
+  numvars = sapply(getVars(E_mip), `%in%`, getVars(E, type="num"))
+  binvars = !numvars
   
   structure(
     list( E = E_mip
         , objfn = objfn
         , binvars = which(binvars)
+        , numvars = which(numvars)
         , M = M
         , epsilon = epsilon
     ),
