@@ -6,6 +6,7 @@ checklpSolveAPI <- function(){
         "with install.packages('lpSolveAPI')",sep="\n")
     require(lpSolveAPI) || stop(nolpSolveAPI)
 }
+ 
 
 #' Localize errors using a MIP approach.
 #' 

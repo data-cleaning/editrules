@@ -247,7 +247,7 @@ In {\sf editrules} we use an {\sf editmatrix} object to store numerical data
 constraints. This object is described extensively in {\cite{jonge:2011}}
 As shown in a previous paper (\cite{jonge:2011}).
 <<nummatrix example>>=
-as.character(E <- editmatrix("y >= x"))
+as.character(E <- editmatrix("y > x"))
 @
 The example \code{E} shows that \code{editmatrix} recognizes the constraint: 
 it has been rewritten in standard normalized format.
@@ -257,11 +257,17 @@ metadata. The \code{as.mip} function transforms the editmatrix into a mip object
 <<>>=
 as.mip(E)
 @
+Note that \code{as.mip} has rewritten the strict inequality by adding  
+$\epsilon = 0.001$.
 
 Adding the ${\bf A}^0$ constraints we get:
 <<>>=
 as.mip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
 @
+The weights are put in the objective function. And for the reported values
+(explain rewriting...) with $M=10^7$.
+
+
 \subsection{Numerical subtleties}
 
 The mip formulation for numerical constraints depends on two constants $M$ and
@@ -392,7 +398,6 @@ This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$.
 This makes the mip formulation for categorical edits complete.
 
 \subsection{Implementation}
-\subsection{The {\sf cateditmatrix} object}
 \code{editrules} uses \code{editarray} for dealing with categorical edits. These
 are described in \cite{loo:2011b}. An example \code{editarray} is given below.
 <<tidy=FALSE>>=
@@ -411,7 +416,18 @@ function \code{as.mip}.
 <<>>=
 as.mip(E)
 @
-Above example shows the rewriting of ${\bf A}^H$. If we add the $A^0$
+Above example shows the rewriting of ${\bf A}^H$. All variables are binary 
+variables $\in \{0,1\}$. Constraint \code{num1} states
+that \code{gender} either must be \code{'male'} or \code{'female'}. Constraint 
+\code{num2} states that \code{pregnant} and \code{gender:male} cannot both be
+1 (true).
+
+Note that \code{as.mip} 
+recognizes that \code{pregnant} is a \code{logical}. The mip formulation contains
+just one binary variable for \code{pregnant}.
+(explain...)
+
+If we add the $A^0$
 constraints we get:
 <<tidy=FALSE>>=
 as.mip( E
@@ -419,7 +435,7 @@ as.mip( E
       , weight=c(1,2)
       )
 @
-
+(explain)
 \section{Mixed data errors}
 \label{sec:mixdataerror}
 
@@ -534,11 +550,13 @@ Writing this to ${\bf A}^H$ form we get:
 <<>>=
 as.mip(E)
 @
+(explain...)
 
 Adding some (inconsistent!) ${\bf A}^0$ we get:
 <<>>=
 as.mip(E, x=list(age=9, married=TRUE))
 @
+(explain...)
 
 \section{Usage}
 The mip implementation in \code{editrules} is transparent.
@@ -579,12 +597,12 @@ values is available. It can be helpful to have these values, but note
 that the set is not unique and that the proposed values for the variables to be 
 adjusted lie on the boundary of a convex solution region. 
 So  in many cases it is better to use proper imputation method to generate
-sensible values.
+sensible values for the variable that need to be adjusted.
 Secondly \code{errorlocalizer.mip} returns the \code{lp} object. This object is 
 a \code{lpSolveApi} object and can be further manipulated or written to disk.
 For more information consult the manual of \code{lpSolveApi}.
 
-A advantage of the branch and bound algorithm is that it can generate all best
+A advantage of the branch and bound algorithm is that it can generate all optimal
 solutions for a given record.  The mip implementation only generates one of the 
 best. This is implemented by adding a small uniform pertubation to the weights, 
 so mip chooses one of the best at random. This is identical 
