@@ -48,14 +48,14 @@ writeELAsMip <- function( E
 
   # cat part
   cat.vars <- getVars(E, type="cat")
-  if (!is.null(cat.vars)){
+  if ( length(cat.vars) > 0 ){
     cat.idx <- match(cat.vars, names(x))
     cat.x_0 <- unlist(x[cat.idx])
     
 
     cat.A <- diag(1, nrow=length(cat.x_0))
     cat.A <- cbind(cat.A, cat.A)
-        
+    #browser()    
     colnames(cat.A) <- c(asCat(cat.x_0), paste("adapt.", cat.vars, sep=""))
     
     # check for non existing levels (including NA's)
