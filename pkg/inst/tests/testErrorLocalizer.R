@@ -78,6 +78,12 @@ test_that("errorlocalizer.editarray runs when blocks reduces the datamodel",{
     err=localizeErrors(e.diag,dat.diag)
 })
 
+test_that("if-else edits are parsed to MIP correctly",{
+  e <- editset("if (x > 0 ) y> 0")
+  d <- data.frame(x = 1,y=0)
+  localizeErrors(e,d,method='mip')
+})
+
 
 
 
