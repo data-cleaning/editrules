@@ -129,7 +129,23 @@ test_that("localizeErrors works with mixed edit",{
   expect_equal(sum(le$adapt), 1, info="bb returns correct result")  
 
   le <- localizeErrors(E, data.frame(married=TRUE, age=9), method="mip")
-  expect_equal(sum(le$adapt), 1, info="mip returns correct result")  
+  expect_equal(sum(le$adapt), 1, info="mip returns correct result")   
+ 
+})
+
+test_that("localizeErrors works for simple numerical if-else", {
+  le <- localizeErrors(
+    editset("if ( x > 0 ) y > 0")
+    , data.frame(x=1,y=0)
+  )
+  expect_equal(sum(le$adapt),1)
+  le <- localizeErrors(
+    editset("if ( x > 0 ) y > 0")
+    , data.frame(x=1,y=0)
+    , method="mip"
+  )
+  expect_equal(sum(le$adapt),1)
   
 })
+
 

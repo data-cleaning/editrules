@@ -4,8 +4,11 @@
 #' Note that the objective function is empty
 #' @param E an \code{link{editset}} or an object that is coerciable to an 
 #' \code{editset}
+#' @param x record
+#' @param weight reliability weights
 #' @param M Constant that is used for allowing softconstraints
 #' @param epsilon Constant that is used for converting '<' into '<='
+#' @param prefix prefix for dummy variables
 #' @param ... not used 
 #' @return a mip object containing al information for transforming it 
 #' into an lp/mip problem
