@@ -85,5 +85,69 @@ reduce.editset <- function(E,...){
 
 }
 
+#' Retrieve values stricktly implied by rules
+#'
+#' @export
+impliedValues <- function(E,...){
+  UseMethod('impliedValues')
+}
 
-
+#'
+#'
+#' Detects cases where two inequalities imply an equality, e.g. \eqn{x\leq 0} and \eqn{x\geq0}
+#' implies \eqn{x=0}. Also detects straight equalities, e.g. \eqn{x==0} implies \eqn{x=0}. Such
+#' cases arise frequently when manipulating edits by value subsitution or variable elimination.
+#'
+#' @method impliedValues editmatrix
+#'
+#' @param E editmatrix
+#' @param tol Maximum deviation for two values to be considered equal.
+#'
+#' @return Numeric vector, whose names are variable names and values are unique values implied by the rules.
+#' @rdname impliedValues
+#' @export
+impliedValues.editmatrix <- function(E,tol=sqrt(.Machine$double.eps),...){
+  if (!isNormalized(E)) E <- normaliz(E)
+ 
+  iv <- numeric(0)
+  iv[getVars(E)] <- NA
+ 
+  # edits containing one variable
+  i <- rowSums(contains(E,tol=tol)) == 1
+  if ( sum(i) == 0 ) return(numeric(0)) 
+  e <- reduce(E[i,])
+ 
+  # direct equalities
+  ops <- getOps(e)
+  eqs <- e[ops == '==', ]
+  eqA <- getA(eqs)
+  eqb <- getb(eqs)
+  j <- apply(abs(eqA),1,which.max)
+  i <- 1:nrow(eqs)
+  iv[colnames(eqA)[j]] <- eqb/eqA[cbind(i,j)]
+ 
+  x <- iv[!is.na(iv)]
+  # combined inequalities
+  ieq <- e[ops %in% c('<=','>=')]
+  if (length(x) > 0)
+    ieq <- substValue(ieq, names(x), x,reduce=TRUE)
+  Ab <- getAb(e)
+  for ( v in getVars(ieq) ){
+    ab <- Ab[abs(Ab[,v])>tol,,drop=FALSE]
+    ab <- ab/abs(ab[,v])
+    b <- ab[,'CONSTANT']
+    for ( i in 1:length(b) ){
+      j <- ( abs(b[i] + b[-i]) < tol & abs(ab[i,v] + ab[-i,v]) < tol )
+      if (any(j)){
+        iv[v] = abs(b[i])
+        break
+      }
+    }
+  }
+  iv <- iv[!is.na(iv)]
+  if ( length(iv) > 0 ){
+    E <- substValue(E,names(iv),iv,reduce=TRUE)
+    c(iv,impliedValues(E))
+  }
+  iv
+}
