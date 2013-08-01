@@ -68,11 +68,17 @@ library(editrules)
 \begin{document}
 \maketitle
 \begin{abstract}
-R package {\sf editrules} offers a mixed integer programming implementation for 
-localizing erronous fields. We describe the mip formulation for numerical, categorical 
-localizing erroneous fields. We describe the mip formulation for numerical, categorical 
-and mixed edits and their implementation. A benchmark is given between the branch 
-and bound and mip that are both available in {\sf editrules}. 
+Error localization is the problem of finding out which fields in raw data
+records contain erroneous values. The \code{editrules} extension package for
+the \R{} environment for statistical computing was recently extended with a module
+that allows for error localization based on a mixed integer programming
+formulation (mip). In this paper we describe the mip formulation of the error
+localization problem for the case of numerical, categorical, or mixed numerical
+and categorical datasets. The new module is benchmarked against a previously
+available module, which is based on a branch-and-bound approach. The benchmark
+shows that the mip-based approach is significantly faster and has a smaller memory
+footprint. Trade-offs between the branch-and-bound and mip approaches are discussed
+as well.
 \end{abstract}
 
 \newpage
@@ -84,48 +90,119 @@ and bound and mip that are both available in {\sf editrules}.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
-Analyses of real data are often hindered by occurrences of incomplete or
+Analyses of data are often hindered by occurrences of incomplete or
 inconsistent raw data records.  The process of locating and correcting such
 errors is referred to as {\em data editing}, and it has been estimated that
-National Statistics Institutes spend up to 40\% of their resources on this
-process \citep{waal:2011}. For this reason, considerable attention is paid to
-the development of data editing methods that can be automated. Since data are
-often required to obey many interrelated consistency rules, data
-editing can be too complex to perform manually. \citet{winkler:1999} mentions
-practical cases where records have to obey 250, 300 or even 750 internal
-consistency rules.  Although the {\sf R} statistical environment has numerous
-facilities for analyzing categorical data [See {\em e.g.} \citet{husson:2010}],
-the options for error localization and record correction are currently limited.
+National Statistics Institutes may spend up to 40\% of their resources on this
+process \citep{waal:2011}. Moreover, data are often required to obey many
+cross-variable consistency rules which significantly complicate the data
+editing process. Indeed, \citet{winkler:1999} mentions practical cases
+(household surveys) where records have to obey 250, 300 or even 750
+user-defined interrelated consistency rules.  For these reasons, considerable
+attention is paid to the development of data editing methods that can be
+automated. 
 
-The {\sf R} package {\sf editrules} was
-developed to help closing the gap between raw data retrieval and data analysis
-with {\sf R}.  The main purpose of the {\sf editrules} package is to provide a
-rules to data, and to localize erroneous fields in data based on the
-generalized principle of \cite{fellegi:1976}.  The package does not offer
-functionality for data correction. However, it does facilitate the
-identification of the set of solutions for an error correction problem. 
-For a detailed description we refer to \cite{jonge:2011}, \cite{loo:2011b} and 
-\cite{loo:2011a}.
+\subsection{Error localization}
+Automated (and even manual) data editing strategies typically consist of three steps:
+\begin{enumerate}
+\item Find out which rules (expectations) a record violates;
+\item find out which fields in a record cause those violations;
+\item replace the values in those fields with better estimates, such that no rules
+are violated anymore.
+\end{enumerate}
+The second step is usually referred to as the \emph{error localization}
+problem, which is the focus of the current paper.  Although it is widely
+recognized that data editing is a necessary step in the statistical process,
+the amount of changes made to the data should obviously be minimized to avoid
+introducing bias in estimations based on the edited data. This then, led to the
+development of the following minimisation problem.
+%
+\begin{quote}
+Given a record of $n$ variables, subject to a number of possibly multivariate
+consistency rules. Find the smallest (weighted) subset of fields, such that their
+original values can be replaced in such a way that no rules are violated anymore. 
+\end{quote}
+%
+This minimization problem is named after \cite{fellegi:1976}, who first
+formulated and solved the problem for the case of categorical data. Error
+localization has been extensively discussed in literature\footnote{See
+\citet{waal:2011} and references therein}, so we will suffice with a few
+remarks. First, note that the minimization problem is possibly over a search
+space of size $2^n$, rendering a brute-force approach that runs through all
+possible solution candidates computationally infeasible. Second, the problem is
+complicated by the occurrence of \emph{implied rules}. That is, the solution
+set must not only allow the record to obey the original, user-defined set of
+rules, but also rules that are logically or arithmetically implied by the
+original set. To cope with these complications, several algorithmic approaches
+have been developed, of which two are worth mentioning in this context:
+the first is the branch-and-bound approach, developed by \cite{waal:2003a}.
+The second is an approach based on mixed-integer programming (mip), described
+in \cite{waal:2011}.
 
-{\sf editrules} offers a fairly complete toolbox to work with numerical and 
-categorical edits. It contains a flexible object for localizing errors, which 
-can be adapted by the user of {\sf editrules} based on a branch and bound
-algorithm \citep{waal:2011}. However, for the time to solve the error 
-localization problem with a branch and bound algorithm grows exponentially 
-with the number of (incorrect) variables. Many surveys have hundreds of variables, 
-which results in (very) long processing times for records with many errors. 
+\subsection{The \code{editrules} package}
+Over the past five to ten years, the \R{} statistical environment received a
+surge in popularity and as a consequence it has been extended with many
+packages that allow for statistical analyses of data. However, the number of
+packages specifically aimed at data editing seems to be somewhat limited,
+except possibly in the area of imputation.  The {\sf R} package {\sf editrules}
+\citep{jonge:2011a} was developed to help to bridge the gap between raw data
+retrieval and data analysis with {\sf R}.  The main purpose of the package is
+to provide an easy and consistent interface to define data consistency rules
+(often referred to as \emph{edit rules}) in \R{} and to confront them with
+data. Furthermore, the package allows for basic rule manipulation (deriving new
+rules, finding inconsistencies, \emph{etc.}) and for error localization
+functionality.  in records.  As such, the package does not offer functionality
+to correct data.  Rather, it is aimed at identifying the set of solutions to an
+error correction problem: the first two steps mentioned in the data editing
+strategy above. Previous developments of the package have been described
+in \cite{jonge:2011,loo:2011b} and \cite{loo:2011a}.
 
-This paper describes the error localization problem for numerical, categorical 
-and mixed edits as a mixed integer problem and its implementation in 
-{\sf editrules}. Error localization implemented as a mixed integer programming 
-results in a fast procedure, which is typically much faster than the branch 
-and bound method also available in {\sf editrules}.
 
-We start with a brief description of mixed integer programming and its 
-application to the error localization problem.  
-In section \ref{sec:numdataerror} we describe a mip formulation for numerical 
-records. Section \ref{sec:catdataerror} describes the mip formulation for categorical records. Restriction on both numerical and categorical can also be implemented using mip. We describe the mip implementation of so called mixed edits in \ref{sec:mixdataerror}.
-We end with a discussion on the implementation in {\sf editrules}.
+The \code{editrules} package offers a fairly complete toolbox, allowing users
+to work with numerical, categorical or mixed-type data editing rules. Up until
+now, error localization was performed by an implementation of the
+branch-and-bound algorithm described by \cite{waal:2003}. The main disadvantage
+of this approach is that the branch-and-bound algorithm has $\mathcal{O}(2^n)$
+worst-case time and memory complexity, where $n$ is the number of variables
+occurring in a connected set of rules. Moreover, the branch-and-bound solver is
+written in pure \R{}, making it intrisically slower than a compiled language
+implementation. The main advantages of this approach are the ease of
+implementation and the opportunity for users to exert fine-grained control over
+the algorithm.
+
+As stated before, the error localisation problem can, under mild conditions, be
+translated to a mixed-integer programming problem, which offers the oppertunity
+to reuse well-established results from the field of linear and mixed-integer
+programming. Indeed, many advanced algorithms for solving such problems have
+been developed and in many cases implementations in a compiled language are
+available under a permissive license. In \code{editrules}, the solver of the
+\code{lpsolve} library \citep{berkelaar:2004} is used through \R{}'s
+\code{lpSolveAPI} package \citep{lpSolveAPI:2011}. The \code{lpsolve} library
+is written in \code{ANSI} \code{C} and has been tried and tested extensively.
+
+The strategy to solve error localisation problems through this library from 
+\R{} therefore consists of translating the problem to a suitable mixed-integer
+programming problem, feeding this problem to \code{lpSolveAPI} and retranslating
+the results to an error location. 
+
+
+For technical reasons, we distinguish between
+\begin{itemize}
+\item linear, numerical restrictions of the form $\bf{a}\cdot\bf{x}\leq b$;
+\item restrictions on categorical data, of the form $\textrm{\textbf{if} } \mathbf{v} \in \mathbf{F} \textrm{\textbf{ then} FALSE}$;
+\item restrictions on mixed-type data, for example $\textrm{\textbf{if} } x > 0 \textrm{ \textbf{then} } \mathbf{v} \in \mathbf{F} $.
+\end{itemize}
+Here, $\mathbf{x}$ is a vector of numerical variables and $\mathbf{a}$ and $b$ are
+constants, $\mathbf{v}$ is a vector of categorical variables and $\mathbf{F}$ a vector of
+subdomains for the elements of $\mathbf{v}$. The rules and their notations will be specified
+in more detail in the sections to follow. 
+
+The main part of this paper will focus on how to translatea these types of
+error localisation problems to a mixed-integer formulation, paying attention to
+both theoretical and practical details.  We will give examples of how users can
+apply this functionality to their own problem  in \R{} and benchmark the new
+mip-functionality against the existing branch-and-bound solution.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 2

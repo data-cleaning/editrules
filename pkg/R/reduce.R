@@ -97,17 +97,23 @@ impliedValues <- function(E,...){
 #' Detects cases where two inequalities imply an equality, e.g. \eqn{x\leq 0} and \eqn{x\geq0}
 #' implies \eqn{x=0}. Also detects straight equalities, e.g. \eqn{x==0} implies \eqn{x=0}. Such
 #' cases arise frequently when manipulating edits by value subsitution or variable elimination.
+#' The function recursively detects equalities and combined inequalities that imply fixed values, 
+#' substitutes those fixed values and looks for new implied values until no new values are found.
 #'
 #' @method impliedValues editmatrix
 #'
 #' @param E editmatrix
 #' @param tol Maximum deviation for two values to be considered equal.
-#'
+#' @param ... Currently unused
 #' @return Numeric vector, whose names are variable names and values are unique values implied by the rules.
 #' @rdname impliedValues
+#'
+#' @seealso \code{\link{reduce}}, \code{\link{substValue}}, \code{\link{eliminate}}
+#' @example ../examples/impliedValues.R
+#' 
 #' @export
 impliedValues.editmatrix <- function(E,tol=sqrt(.Machine$double.eps),...){
-  if (!isNormalized(E)) E <- normaliz(E)
+  if (!isNormalized(E)) E <- normalize(E)
  
   iv <- numeric(0)
   iv[getVars(E)] <- NA
@@ -147,7 +153,8 @@ impliedValues.editmatrix <- function(E,tol=sqrt(.Machine$double.eps),...){
   iv <- iv[!is.na(iv)]
   if ( length(iv) > 0 ){
     E <- substValue(E,names(iv),iv,reduce=TRUE)
-    c(iv,impliedValues(E))
+    c(iv,impliedValues.editmatrix(E,tol))
+  } else {
+    iv
   }
-  iv
 }
