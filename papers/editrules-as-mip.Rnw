@@ -218,7 +218,10 @@ equality and linear inequality constraints. More formally:
    A {\bf x} \leq {\bf b} \\
    \textrm{with } {\bf x} \geq 0 \label{eq:mippos}
 \end{eqnarray}
-where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a coefficient matrix for the constraints. In mixed integer programming (mip) ${\bf x}$ is a mixture of continuous and integer variables.
+where ${\bf x}$ is the vector of (numerical) variables to be optimized, ${\bf
+c}$ is a vector of weights, ${\bf b}$ is a vector of upper bounds and $A$ is a
+coefficient matrix for the constraints. In mixed integer programming (mip)
+${\bf x}$ is a mixture of continuous and integer variables.
 
 Mixed integer programming is well understood and there are several software 
 packages that implement efficient solvers for linear and mixed integer problems. 

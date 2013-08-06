@@ -62,6 +62,15 @@ test_that("editset parses conditional categorical/numerical edits",{
     expect_equal(E$num, editmatrix(expression()))
     expect_equivalent(E$mixnum, editmatrix(expression(x>0)))
     expect_equivalent(getArr(E$mixcat), array(c(F,T,F,T,T,T),dim=c(1,6)))
+
+  # throws exception in editrules 2.8.0 (thanks to Alois Haslinger)
+  editset(expression(
+      x %in% letters[1:2]
+    , y %in% letters[3:5]
+    , y > 0
+    , if(x =='a' & y == 'c') y < 7
+  ))
+
 })
 
 
