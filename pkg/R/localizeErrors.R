@@ -81,8 +81,6 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
         ),
         stringsAsFactors=FALSE
     )
-    # check for lpSolveApi 
-    if ( match.arg(method) == "mip" ) checklpSolveAPI()
 
     # separate E in independent blocks
     if ( is.editset(E) && !method=="mip"){

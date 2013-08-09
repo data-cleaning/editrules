@@ -1,12 +1,3 @@
-# test for presence of lpSolveAPI package.
-checklpSolveAPI <- function(){
-    nolpSolveAPI <- paste(
-        "The lpSolveAPI package is required for this function.", 
-        "If you have access to an internet connection it can be installed",
-        "with install.packages('lpSolveAPI')",sep="\n")
-    require(lpSolveAPI) || stop(nolpSolveAPI)
-}
- 
 
 #' Localize errors using a MIP approach.
 #' 

@@ -153,9 +153,9 @@ to provide an easy and consistent interface to define data consistency rules
 (often referred to as \emph{edit rules}) in \R{} and to confront them with
 data. Furthermore, the package allows for basic rule manipulation (deriving new
 rules, finding inconsistencies, \emph{etc.}) and for error localization
-functionality.  in records.  As such, the package does not offer functionality
+functionality.  As such, the package does not offer functionality
 to correct data.  Rather, it is aimed at identifying the set of solutions to an
-error correction problem: the first two steps mentioned in the data editing
+error correction problem: the second step mentioned in the data editing
 strategy above. Previous developments of the package have been described
 in \cite{jonge:2011,loo:2011b} and \cite{loo:2011a}.
 
@@ -185,19 +185,14 @@ is written in \code{ANSI} \code{C} and has been tried and tested extensively.
 The strategy to solve error localisation problems through this library from 
 \R{} therefore consists of translating the problem to a suitable mixed-integer
 programming problem, feeding this problem to \code{lpSolveAPI} and retranslating
-the results to an error location. 
-
-
-For reasons to become apparent below, we distinguish between
+the results to an error location. It is necessary
+to distinguish between:
 \begin{itemize}
-\item linear, numerical restrictions of the form $\mathbf{a}\cdot\mathbf{x}\leq b$;
-\item restrictions on categorical data, of the form $\textrm{\textbf{if} } \mathbf{v} \in \mathbf{F} \textrm{\textbf{ then} FALSE}$;
-\item restrictions on mixed-type data, for example $\textrm{\textbf{if} } x > 0 \textrm{ \textbf{then} } \mathbf{v} \in \mathbf{F} $.
+  \item linear restrictions on purely numerical data,
+  \item restrictions on purely categorical data, and
+  \item restrictions on mixed-type data,
 \end{itemize}
-Here, $\mathbf{x}$ is a vector of numerical variables and $\mathbf{a}$ and $b$ are
-constants, $\mathbf{v}$ is a vector of categorical variables and $\mathbf{F}$ a vector of
-subdomains for the elements of $\mathbf{v}$. The rules and their notations will be specified
-in more detail in the sections to follow. 
+since for each data type a different translation strategy is necessary.
 
 The main part of this paper will focus on how to translate these types of error
 localisation problems to a mixed-integer formulation, paying attention to both
@@ -241,19 +236,19 @@ important special case occurs when the integer coefficients of \mathbf{z} may
 only take values from \{0,1\}. Such variables are often called binary variables
 or decision variables. It occurs as a special case since defining \mathbf{z} to
 be integer and applying the appropriate restrictions yields the same problem.
-Mixed integer programming is well understood and there several software
-packages packages are available that implement efficient solvers.  Most mip
-software allows for a broader (but equivalent) formulation of the mip problem,
-allowing the set of restrictions to include inequalities as well as
-equalities. As a side note, we mention that under equality constraints,
-solutions for the integer part of $\mathbf{z}$ only exist when the equality
-constraints pertaining to the integer part of \mathbf{z} are \emph{totally
+
+Mixed integer programming is well understood and several software packages
+packages are available that implement efficient solvers.  Most mip software
+allows for a broader (but equivalent) formulation of the mip problem, allowing
+the set of restrictions to include inequalities as well as equalities. As a
+side note, we mention that under equality constraints, solutions for the
+integer part of $\mathbf{z}$ only exist when the equality constraints
+pertaining to the integer part of \mathbf{z} are \emph{totally
 unimodular}\footnote{This means that every square submatrix of the coefficient
 matrix pertaining to the integer part of \mathbf{z} has determinant 0 or
 $\pm1$.}. However, as we will see below, constraints that pertain to the real
 and/or integer part of \mathbf{z} are always inequalities in our case, so this
 is of no particular concern to us.
-
 
 In this paper we reformulate Felligi Holt error localization
 \citep{fellegi:1976} for numerical, categorical and mixed constraints in terms
