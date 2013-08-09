@@ -225,9 +225,6 @@ elements of \mathbf{c}, \mathbf{R} and \mathbf{d} are limited to the rational
 numbers \citep{schrijver:1998}, which is never a problem in practice since we
 are always working with a computer representation of numbers. 
 
-
-
-
 The name \emph{mixed-integer programming} stems from the fact that $\mathbf{z}$
 contains continuous as well as integer variables. When $\mathbf{z}$ consists
 solely of continuous or integer variables, Problem~\eqref{eq:mipmin} reduces
@@ -305,16 +302,6 @@ $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
 $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
 
-
-%\subsection{Further reading}
-%An overview of several mixed integer formulations for error localization can 
-%be found in \citep{waal:2011} p. 75.
-%Mixed integer programming (convex programming etc.).
-%List of mip software.
-%Internally the package \cite{lpSolveAPI:2011} is used to 
-%solve the resulting mixed integer program.
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -370,45 +357,52 @@ two more or less arbitrary numerical constants: $\epsilon$ and $M$. The
 ramifications of this will be discussed in Section \ref{sec:linedits:num}
 below. 
 
+%\subsection{Implementation and numerical subtleties}
+%\marginpar{\code{as.mip} wordt nergens gebruikt en is ook voor de gebruiker niet
+%nuttig: weglaten lijkt me.}
+%In {\sf editrules} an {\sf editmatrix} object is used to store linear 
+%constraints. This object is described extensively in {\cite{jonge:2011}},
+%and it can be generated (amongst other methods) by calling a function of the
+%same name. For example:
+%<<nummatrix example>>=
+%E <- editmatrix("y > x")
+%as.character(E)
+%@
+%%
+%The function \code{as.mip} translates the user defined restrictions in \code{E}
+%by adding `epsilons' where necessary:
+%<<>>=
+%as.mip(E)
+%@
+%The resulting object is an object of class \code{mip}. By default, a value of
+%$\epsilon=10^{-3}$ is chosen. However, this value may be controlled by passing
+%an extra \code{epsilon} argument. Without the values of an actual record, the mip
+%problem cannot be completed. Adding a record and (optionally) weights allows
+%\code{as.mip} to complete the mip formulation.
+%<<>>=
+%as.mip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
+%@
+%The weights are incorporated in the objective function and the default value of $M$ equals
+%$10^7$. The value of $M$ can be user-controlled by passing the optional argument
+%\code{M}.
+
+
 \subsection{Implementation and numerical subtleties}
-\marginpar{\code{as.mip} wordt nergens gebruikt en is ook voor de gebruiker niet
-nuttig: weglaten lijkt me.}
-In {\sf editrules} an {\sf editmatrix} object is used to store linear 
-constraints. This object is described extensively in {\cite{jonge:2011}},
-and it can be generated (amongst other methods) by calling a function of the
-same name. For example:
-<<nummatrix example>>=
-E <- editmatrix("y > x")
-as.character(E)
-@
-%
-The function \code{as.mip} translates the user defined restrictions in \code{E}
-by adding `epsilons' where necessary:
-<<>>=
-as.mip(E)
-@
-The resulting object is an object of class \code{mip}. By default, a value of
-$\epsilon=10^{-3}$ is chosen. However, this value may be controlled by passing
-an extra \code{epsilon} argument. Without the values of an actual record, the mip
-problem cannot be completed. Adding a record and (optionally) weights allows
-\code{as.mip} to complete the mip formulation.
-<<>>=
-as.mip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
-@
-The weights are incorporated in the objective function and the default value of $M$ equals
-$10^7$. The value of $M$ can be user-controlled by passing the optional argument
-\code{M}.
-
-
-\subsection{Numerical subtleties}
 \label{sec:linedits:num}
-The mip formulation for numerical constraints depends on two constants $M$ and
-$\epsilon$. These constants end up in the coefficient matrix of the mip solver.
-Mathematically the size of these coefficients does not matter. Computationally 
-however it does: if coefficient $a_{ij} \ll a_{kl}$ then the solution
-may become numerical unstable, since the ratio of the two is 
-indistinguishable from zero to the mip solver. 
+Reformulating the error localisation problem in terms of a mip problem
+introduces two constants: $M$ and $\epsilon$. These constants end up in the
+coefficient matrix of the mip solver.  Mathematically, there are no bounds on
+the values of $M$ and $\epsilon$, as long as they are chosen so that the
+problem remains feasible. In practice however, limitations on the accuracy with
+wich numbers are represented on a computer put restrictions on the value range
+of numbers that enter the mip problem. In the \code{lpsolve} library (as well
+as in R), both numbers on the real line are represented as \code{double
+precision} numbers, meaning that there are about 15 decimal positions of
+precision.
 
+
+
+\marginpar{Hier zouden we de defaults moeten verantwoorden en ook uitleggen waarom we bepaalde default lp.control opties hebben gekozen}
 In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
 will 
 be sufficient for most purposes, since numerical values and coefficients of the

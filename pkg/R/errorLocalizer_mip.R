@@ -33,7 +33,7 @@
 errorLocalizer.mip <- function( E
                             , x
                             , weight=rep(1, length(x))
-                            , maxduration=600
+                            , maxduration=600L
                             , verbose="neutral"
                             , ...
                             ){
@@ -53,7 +53,7 @@ errorLocalizer.mip <- function( E
    # end TODO
    lp.control( lps
 #             , presolve = "rows"    # move univariate constraints into bounds
-             , timeout = maxduration
+             , timeout = as.integer(maxduration)
              , epsint = 1e-15
 #             , epssel = 1e-15
 #            , epsb = 1e-15

@@ -1,6 +1,5 @@
 # 
 removeRedundant <- function(E){
-  checklpSolveAPI()
   
   m <- as.mip(E)
   A <- -getA(m$E)
