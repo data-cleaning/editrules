@@ -67,8 +67,8 @@ test_that("editset parses conditional categorical/numerical edits",{
   editset(expression(
       x %in% letters[1:2]
     , y %in% letters[3:5]
-    , y > 0
-    , if(x =='a' & y == 'c') y < 7
+    , z > 0
+    , if(x =='a' && y == 'c') z < 7
   ))
 
 })
