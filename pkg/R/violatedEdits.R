@@ -89,6 +89,8 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
     newviolatedEdits(v)
 }
 
+## TODO: Remove this function (mvdl):
+
 # @rdname violatedEdits
 # @method violatedEdits data.frame
 # @export
@@ -124,6 +126,7 @@ violatedEdits.editset <- function(E, dat, datamodel=TRUE, ...){
 }
 
 
+# TODO: remove the function below. (mvdl)
 
 # Lists which rows of \code{data.frame dat} violate which constraints
 #
