@@ -1,8 +1,9 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
-\documentclass[11pt, fleqn, a4paper]{article}
+\documentclass[10pt, fleqn, a4paper]{article}
 %\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
+\usepackage{bbm} % mathbb numbers
 \usepackage{array}
 \usepackage{natbib}
 %\usepackage{algorithm}
@@ -351,11 +352,11 @@ $\Delta_i=0$ we obtain the set of restrictions
 \end{eqnarray*}
 which is infeasible except when $\delta=0$.
 
-This completes the formulation of the error localisation in the case of linear
-edits in terms of a mip problem. The formulation comes at a cost of introducing
-two more or less arbitrary numerical constants: $\epsilon$ and $M$. The
-ramifications of this will be discussed in Section \ref{sec:linedits:num}
-below. 
+%This completes the formulation of the error localisation in the case of linear
+%edits in terms of a mip problem. The formulation comes at a cost of introducing
+%two more or less arbitrary numerical constants: $\epsilon$ and $M$. The
+%ramifications of this will be discussed in Section \ref{sec:linedits:num}
+%below. 
 
 %\subsection{Implementation and numerical subtleties}
 %\marginpar{\code{as.mip} wordt nergens gebruikt en is ook voor de gebruiker niet
@@ -395,14 +396,36 @@ coefficient matrix of the mip solver.  Mathematically, there are no bounds on
 the values of $M$ and $\epsilon$, as long as they are chosen so that the
 problem remains feasible. In practice however, limitations on the accuracy with
 wich numbers are represented on a computer put restrictions on the value range
-of numbers that enter the mip problem. In the \code{lpsolve} library (as well
-as in R), both numbers on the real line are represented as \code{double
-precision} numbers, meaning that there are about 15 decimal positions of
-precision.
+of numbers that enter the mip solver. In the \code{lpsolve} library (as well
+as in \R{}), numbers on the real line are represented as \code{double precision}
+numbers, meaning that there are about 15 decimal positions of precision. 
+
+To avoid significant roundoff errors, it is a good idea to restrict the range
+of input data. In fact, the authors of the \code{lpsolve} reference manual
+\citep{lpsolveman:2012} state the following.
+%
+\begin{quote}
+The chance for numerical instability and rounding errors is considerably 
+larger when the input data contains both large and small numbers. 
+So to improve stability, one must try to work with numbers that are somewhat 
+in the same range. Ideally in the neighborhood of 1.
+[...]You should realize, that you the user are probably in a better position to 
+scale the problem than any computer algorithm. 
+\end{quote}
 
 
-
-\marginpar{Hier zouden we de defaults moeten verantwoorden en ook uitleggen waarom we bepaalde default lp.control opties hebben gekozen}
+\begin{equation}
+\left[\begin{array}{c|c}
+  \mathbf{A}^H &\mathbf{b}^H\\
+  \mathbf{A}^0 &\mathbf{b}^0
+\end{array}\right] 
+= 
+\left[\begin{array}{rrr|r}
+  \multicolumn{2}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
+  \mathbbm{1} & \mathbf{0} & M\mathbbm{1}  &\mathbf{x}^0\\
+  \mathbf{0}  & -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
+\end{array}\right] 
+\end{equation}
 In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
 will 
 be sufficient for most purposes, since numerical values and coefficients of the
@@ -413,15 +436,6 @@ variables and constraints to make it so.
 The linear programming manual from \code{lpsolve}  \citep{lpsolveman:2012} says the 
 following on this matter:
 
-\begin{quote}
-The chance for numerical instability and rounding errors is considerably 
-larger when the input data contains both large and small numbers. 
-So to improve stability, one must try to work with numbers that are somewhat 
-in the same range. Ideally in the neighborhood of 1.\\
-
-You should realize, that you the user are probably in a better position to 
-scale the problem than any computer algorithm. 
-\end{quote}
 
 \section{Categorical data errors}
 
@@ -685,6 +699,7 @@ as.mip(E, x=list(age=9, married=TRUE))
 (explain...)
 
 \section{Usage}
+\marginpar{Toevoegen: hoe kunnen \code{M} en \code{epsilon} worden ingesteld.}
 The mip implementation in \code{editrules} is transparent.
 The \code{localizeErrors} function is extended to include an extra parameter
 \code{method}. The default value of \code{method} is \code{'bb'}: branch and bound.
