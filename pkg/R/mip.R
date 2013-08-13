@@ -24,13 +24,13 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
            )
   
   if (!missing(x)){
-    if (missing(weight)){
+    if (is.null(weight)){
       weight <- rep(1.0, length(x))
     } else {
       stopifnot(length(weight) == length(x))
     }
     
-    names(weight) <- paste0("delta.", names(x))
+    names(weight) <- paste0(prefix, names(x))
     # create expression vector with var == value
     expr <- as.expression( lapply(names(x)
                          , function(v){ 
@@ -58,11 +58,14 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
       rownames(A0_cat) <- names(x)[cats]
       A0_cat <- softEdits(A0_cat, prefix=prefix)
     } else A0_cat <- NULL
-    
+        
     E_mip <- c(E_mip, A0_num, A0_cat)
+    if (any(isna)){
+      E_mip <- c( E_mip
+                , editmatrix(paste0(prefix, names(x)[isna], "==", 1))
+                )
+    }
     
-    objfn <- sapply(colnames(E_mip), function(v) { weight[v] })
-    objfn[is.na(objfn)] <- 0
   }
   
   # replace strict inequalities...
@@ -74,7 +77,11 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
   ops[lt] <- "<="
   E_mip = as.editmatrix(A=A, b=b, ops=ops)
   
-  numvars = sapply(getVars(E_mip), `%in%`, getVars(E, type="num"))
+  vars <- colnames(A)
+  objfn <- sapply(vars, function(v) 0)
+  objfn[names(weight)] <- weight
+  
+  numvars = sapply(vars, `%in%`, getVars(E, type="num"))
   binvars = !numvars
   
   structure(
@@ -93,7 +100,7 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
 print.mip <- function(x, ...){
   print.editmatrix(x$E, textOnly=T)
   if (!is.null(x$objfn)) {
-    idx <- x$objfn != 0
+    idx <- which(x$objfn != 0)
     of <- paste0(x$objfn, "*", colnames(x$E))[idx]
     of <- paste(of, collapse=" + ")    
     cat("objective function = min: ", of, "\n")

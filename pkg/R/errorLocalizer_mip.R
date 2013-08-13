@@ -46,8 +46,8 @@ errorLocalizer.mip <- function( E
    
    t.start <- proc.time()
    
-   elm <- writeELAsMip(E=E, x=x, weight=wp, ...)
-   #elm <- as.mip(E=E, x=x, weight=wp, prefix="adapt.",...)
+   #elm <- writeELAsMip(E=E, x=x, weight=wp, ...)
+   elm <- as.mip(E=E, x=x, weight=wp, prefix="adapt.",...)
    
    lps <- as.lp.mip(elm)
    # end TODO
@@ -151,7 +151,7 @@ as.lp.mip <- function(mip){
    lt <- ops == "<"
    ops[lt] == "<="
    set.constr.type(lps,types=ops)
-   
+   #print(list(lps=lps, objfn=mip$objfn, mip=mip, b=getb(E)))
    set.objfn(lps, mip$objfn)
    set.type(lps, columns=mip$binvars , "binary")
    set.bounds(lps, lower=rep(-Inf, length(mip$numvars)), columns=mip$numvars)
