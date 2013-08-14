@@ -101,9 +101,11 @@ print.mip <- function(x, ...){
   print.editmatrix(x$E, textOnly=T)
   if (!is.null(x$objfn)) {
     idx <- which(x$objfn != 0)
-    of <- paste0(x$objfn, "*", colnames(x$E))[idx]
-    of <- paste(of, collapse=" + ")    
-    cat("objective function = min: ", of, "\n")
+    if (length(idx)) {
+      of <- paste0(x$objfn, "*", colnames(x$E))[idx]
+      of <- paste(of, collapse=" + ")    
+      cat("objective function = min: ", of, "\n")
+    }
   }
 }
 

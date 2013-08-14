@@ -338,20 +338,24 @@ b-\epsilon$, with $\epsilon$ a suitably small constant.
 In the case of linear edits, the set of constraints $\mathbf{R}^0\mathbf{z}\leq\mathbf{d}^0$
 consists of pairs of the form
 \begin{eqnarray*}
-x_i - M\Delta_i   &\leq& x_i^0\\
--x_i - M\Delta_i  &\leq& -x^0_i,
+  x_i - M\Delta_i   &\leq& x_i^0\\
+  -x_i - M\Delta_i  &\leq& -x^0_i
 \end{eqnarray*}
 for $i=1,2,\ldots,n$. Here The $x^0_i$ are the actual observed values in the
 record and $M$ is a suitably large constant allowing $x_i$ to vary between
-$x_i^0-M$ and $x_i^0+M$.  It is not difficult to see that if $x_i$ is different
-from $x_i^0$, $\Delta_i$ must equal 1. For, if we choose $x_i=x_i^0+\delta$ and
-$\Delta_i=0$ we obtain the set of restrictions
-\begin{eqnarray*}
-\delta  &\leq& 0 \\
--\delta &\leq& 0,
-\end{eqnarray*}
-which is infeasible except when $\delta=0$.
+$x_i^0-M$ and $x_i^0+M$.  
+Note that this is equal to
+\begin{equation}
+  x_i^0 - M\Delta_i \leq  x_i  \leq x_i^0 + M\Delta_i
+\end{equation}
 
+It is not difficult to see that if $x_i$ is different
+from $x_i^0$, $\Delta_i$ must equal 1. For, if we choose
+$\Delta_i=0$ we obtain the set of restrictions
+\begin{equation}
+  x_i^0 \leq  x_i  \leq x_i^0
+\end{equation}
+which states that $x_i$ equals $x_i^0$
 %This completes the formulation of the error localisation in the case of linear
 %edits in terms of a mip problem. The formulation comes at a cost of introducing
 %two more or less arbitrary numerical constants: $\epsilon$ and $M$. The
@@ -682,7 +686,7 @@ This makes the mip formulation for mixed constraints complete.
 <<tidy=FALSE>>=
 E <- editset(expression(
   married %in% c(TRUE, FALSE),
-  if (married==TRUE) age >= 17
+  if (married) age >= 17
   ))
 @
 
@@ -728,7 +732,7 @@ weight <- c(x=2, y=1)
 el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
 ls.str(el)
 @
-Both \code{localizerErrors} as \code{errorLocalizer.mip} can be executed with a 
+Both \code{localizerErrors} as \code{errorLocalizer.mip} can be executed with an 
 \code{editmatrix}, \code{editarray} or \code{editset} object.
 
 Note in the example that the {\em mip} solver returns two extra properties that are
@@ -737,13 +741,13 @@ Since a mip-solvers goal is to find a feasible solution, a set of feasible x
 values is available. It can be helpful to have these values, but note 
 that the set is not unique and that the proposed values for the variables to be 
 adjusted lie on the boundary of a convex solution region. 
-So  in many cases it is better to use proper imputation method to generate
+So  in many cases it is better to use a proper imputation method to generate
 sensible values for the variable that need to be adjusted.
 Secondly \code{errorlocalizer.mip} returns the \code{lp} object. This object is 
 a \code{lpSolveApi} object and can be further manipulated or written to disk.
 For more information consult the manual of \code{lpSolveApi}.
 
-A advantage of the branch and bound algorithm is that it can generate all optimal
+An advantage of the branch and bound algorithm is that it can generate all optimal
 solutions for a given record.  The mip implementation only generates one of the 
 best. This is implemented by adding a small uniform pertubation to the weights, 
 so mip chooses one of the best at random. This is identical 
