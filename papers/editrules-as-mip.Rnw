@@ -309,7 +309,7 @@ $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
 \section{Linear edit rules}
 \label{sec:numdataerror}
-For a numercical record \mathbf{x} taking values in $\mathbb{R}^n$, a set of linear
+For a numerical record \mathbf{x} taking values in $\mathbb{R}^n$, a set of linear
 restrictions can be written as
 \begin{equation}
 \label{eq:linedits}
