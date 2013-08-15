@@ -329,10 +329,39 @@ $\Delta_i=0$ we obtain the set of restrictions
 which states that $x_i$ equals $x_i^0$
 
 \subsection{Categorical edit rules}
-
-
 \label{sec:catdataerror}
-A categorical record $\bf v$  with reported values $({v^0_1,\dots,v^0_m)}$ has 
+Categoricar records $\mathbf{v}\in D$ take values in a cartesian product domain 
+\begin{equation}
+D = D_1\times D_2\times\cdots\times D_m,
+\end{equation}
+where each $D_i$ is a finite set of categories for the $i^\textrm{th}$ categorical variable.
+An edit $e$ is a subset of $D$ that can be written as
+\begin{equation}
+e = F_{j1}\times F_{j2}\times\cdots \times F_{jm},
+\end{equation}
+where each $F_{ji}$ is a subset of $D_i$. It is understood that if a record
+$\mathbf{v}\in e$, the record violates $e$. Hence, categorical edits are
+negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may not
+be) in contrast to linear edits which are positively formulated (they specify
+the region of $\mathbb{R}^n$ where \mathbf{x} must be). To be able to translate
+categorical edits to a MIP problem, we need to reformulate them as positive
+edits $\overline{e}$, such that if $\mathbf{v}\in\overline{e}$ then $\mathbf{v}$ satisfies $\mathbf{e}$.
+Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be written as
+%
+\begin{eqnarray}
+\lefteqn{
+\overline{e} = \overline{F}_{1}\times F_{2}\times\cdots \times F_{m}
+}\nonumber\\
+&\cup& F_{1}\times \overline{F}_{2}\times\cdots \times F_{m}\cup\cdots 
+\cup F_{1}\times F_{2}\times\cdots \times \overline{F}_{m},
+\label{eq:complement}
+\end{eqnarray}
+%
+where for each variable $i$, we have $\overline{F}_i=D\backslash F_i$. Observe
+that it follows from Eq.\ \eqref{eq:complement} that if at least one $v_i\in \overline{F}_i$,
+then \mathbf{v} satisfies $e$.
+
+with reported values $({v^0_1,\dots,v^0_m)}$ has 
 the following $n$ constraints:
 \begin{equation}e_j = 
   \begin{array}{rl}
