@@ -1,14 +1,11 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
-\documentclass[10pt, fleqn, a4paper]{article}
+\documentclass[10pt, fleqn]{cbsreport}
 %\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amssymb, amsthm}
 \usepackage{bbm} % mathbb numbers
 \usepackage{array}
 \usepackage{natbib}
-%\usepackage{algorithm}
-%\renewcommand{\algorithmicrequire}{\textbf{Input:}}
-%\renewcommand{\algorithmicensure}{\textbf{Output:}}
 \usepackage{threeparttable}
 \usepackage{makeidx}
 \makeindex
@@ -16,10 +13,7 @@
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
-\DeclareMathOperator{\ocup}{\cup}
-\DeclareMathOperator{\ocap}{\cap}
 
-\newcommand{\packageversion}{{\sf 2.5}}
 \newcommand{\code}[1]{\textsf{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
@@ -29,15 +23,6 @@
 \floatstyle{boxed}
 \newfloat{Rcode}{t!}{rco}
 \floatname{Rcode}{{\rm Figure}}
-\makeatletter
-\renewcommand{\fnum@Rcode}{%
-%% make Rcound count and look like a figure.
-%    \addtocounter{figure}{1}
-    \setcounter{Rcode}{\value{figure}}
-    \addtocounter{Rcode}{1}
-    \rm Figure~\arabic{Rcode}% <- avoid space before ':'
-}
-\makeatother
 
 
 % stimulate latex to put multiple floats on a page.
@@ -54,10 +39,6 @@
 
 
 \hyphenation{
-    time-stamp 
-    se-pa-ra-te-ly
-    ge-ne-ra-li-zed
-    e-dit-rules
 }
 
 <<init, echo=FALSE, results='hide', message=FALSE>>=
@@ -65,10 +46,14 @@ library(editrules)
 #library(xtable)
 @
 
-\title{Error localization as a mixed integer problem with the {\tt editrules} package\\
-{\small package version \Sexpr{packageVersion("editrules")}}}
+\title{Error localization as a mixed integer problem with the {\tt editrules} package}
 \author{Edwin de Jonge and Mark van der Loo}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  START
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+
 \maketitle
 \begin{abstract}
 Error localization is the problem of finding out which fields in raw data
@@ -302,13 +287,8 @@ problem, we need to properly define \mathbf{z}, the restriction set
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
 $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% SECTION 3
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\section{Linear edit rules}
-\label{sec:numdataerror}
+\subsection{Linear edit rules}
+\label{sec:linedits:mip}
 For a numerical record \mathbf{x} taking values in $\mathbb{R}^n$, a set of linear
 restrictions can be written as
 \begin{equation}
@@ -319,9 +299,6 @@ where in \code{editrules}, we allow the set of restrictions to contain equalitie
 inequalities ($\leq$) and strict inequalities ($<$). 
 The formulation of these edit rules is very close to the formulation of the original
 mip problem of Eq.\ \eqref{eq:mipmin}.
-
-\subsection{Mip formulation}
-\label{sec:linedits:mip}
 The vector to miminize over is defined as follows:
 \begin{equation}
 \mathbf{z} = (x_1,x_2,\ldots,x_n,\Delta_1,\Delta_2,\ldots,\Delta_n).
@@ -343,105 +320,15 @@ consists of pairs of the form
 \end{eqnarray*}
 for $i=1,2,\ldots,n$. Here The $x^0_i$ are the actual observed values in the
 record and $M$ is a suitably large constant allowing $x_i$ to vary between
-$x_i^0-M$ and $x_i^0+M$.  
-Note that this is equal to
-\begin{equation}
-  x_i^0 - M\Delta_i \leq  x_i  \leq x_i^0 + M\Delta_i
-\end{equation}
-
-It is not difficult to see that if $x_i$ is different
-from $x_i^0$, $\Delta_i$ must equal 1. For, if we choose
+$x_i^0-M$ and $x_i^0+M$. It is not difficult to see that if $x_i$ is different
+from $x_i^0$ then $\Delta_i$ must equal 1. For, if we choose
 $\Delta_i=0$ we obtain the set of restrictions
 \begin{equation}
   x_i^0 \leq  x_i  \leq x_i^0
 \end{equation}
 which states that $x_i$ equals $x_i^0$
-%This completes the formulation of the error localisation in the case of linear
-%edits in terms of a mip problem. The formulation comes at a cost of introducing
-%two more or less arbitrary numerical constants: $\epsilon$ and $M$. The
-%ramifications of this will be discussed in Section \ref{sec:linedits:num}
-%below. 
 
-%\subsection{Implementation and numerical subtleties}
-%\marginpar{\code{as.mip} wordt nergens gebruikt en is ook voor de gebruiker niet
-%nuttig: weglaten lijkt me.}
-%In {\sf editrules} an {\sf editmatrix} object is used to store linear 
-%constraints. This object is described extensively in {\cite{jonge:2011}},
-%and it can be generated (amongst other methods) by calling a function of the
-%same name. For example:
-%<<nummatrix example>>=
-%E <- editmatrix("y > x")
-%as.character(E)
-%@
-%%
-%The function \code{as.mip} translates the user defined restrictions in \code{E}
-%by adding `epsilons' where necessary:
-%<<>>=
-%as.mip(E)
-%@
-%The resulting object is an object of class \code{mip}. By default, a value of
-%$\epsilon=10^{-3}$ is chosen. However, this value may be controlled by passing
-%an extra \code{epsilon} argument. Without the values of an actual record, the mip
-%problem cannot be completed. Adding a record and (optionally) weights allows
-%\code{as.mip} to complete the mip formulation.
-%<<>>=
-%as.mip(E, x=c(x=10, y=0), weight=c(x=1,y=2))
-%@
-%The weights are incorporated in the objective function and the default value of $M$ equals
-%$10^7$. The value of $M$ can be user-controlled by passing the optional argument
-%\code{M}.
-
-
-\subsection{Implementation and numerical subtleties}
-\label{sec:linedits:num}
-Reformulating the error localisation problem in terms of a mip problem
-introduces two constants: $M$ and $\epsilon$. These constants end up in the
-coefficient matrix of the mip solver.  Mathematically, there are no bounds on
-the values of $M$ and $\epsilon$, as long as they are chosen so that the
-problem remains feasible. In practice however, limitations on the accuracy with
-wich numbers are represented on a computer put restrictions on the value range
-of numbers that enter the mip solver. In the \code{lpsolve} library (as well
-as in \R{}), numbers on the real line are represented as \code{double precision}
-numbers, meaning that there are about 15 decimal positions of precision. 
-
-To avoid significant roundoff errors, it is a good idea to restrict the range
-of input data. In fact, the authors of the \code{lpsolve} reference manual
-\citep{lpsolveman:2012} state the following.
-%
-\begin{quote}
-The chance for numerical instability and rounding errors is considerably 
-larger when the input data contains both large and small numbers. 
-So to improve stability, one must try to work with numbers that are somewhat 
-in the same range. Ideally in the neighborhood of 1.
-[...]You should realize, that you the user are probably in a better position to 
-scale the problem than any computer algorithm. 
-\end{quote}
-
-
-\begin{equation}
-\left[\begin{array}{c|c}
-  \mathbf{A}^H &\mathbf{b}^H\\
-  \mathbf{A}^0 &\mathbf{b}^0
-\end{array}\right] 
-= 
-\left[\begin{array}{rr|r}
-  \multicolumn{1}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
-  \mathbbm{1} & M\mathbbm{1}  &\mathbf{x}^0\\
-  -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
-\end{array}\right] 
-\end{equation}
-In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
-will 
-be sufficient for most purposes, since numerical values and coefficients of the
-constraints 
-in most cases will be in this range. If not, you should rescale some of your
-variables and constraints to make it so.
-
-The linear programming manual from \code{lpsolve}  \citep{lpsolveman:2012} says the 
-following on this matter:
-
-
-\section{Categorical data errors}
+\subsection{Categorical edit rules}
 
 
 \label{sec:catdataerror}
@@ -473,7 +360,9 @@ Equation (\ref{eq:catedit}) can be written in the following form:
 with $T_{i,j} = D_i \setminus F_{i,j}$. 
 This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$. 
 
-\subsection{Mip formulation}
+
+%% susbsubwordt verwijderd maar voor nu even handig.
+\subsubsection{Mip formulation}
 \begin{itemize}
   \item[a)]
   Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
@@ -541,46 +430,7 @@ This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$.
 \end{itemize}
 This makes the mip formulation for categorical edits complete.
 
-\subsection{Implementation}
-\code{editrules} uses \code{editarray} for dealing with categorical edits. These
-are described in \cite{loo:2011b}. An example \code{editarray} is given below.
-<<tidy=FALSE>>=
-(E <- editarray(expression(
-    gender %in% c('male','female'),
-    pregnant %in% c(TRUE, FALSE),
-    if (pregnant) gender == 'female'
-    )
-))
-@
-\code{E} is an editarray. That \code{E} parses the constraints can be seen in 
-the pregnant constraint: it has been rewritten in an equivalent form.
-To create a mip formulation for the categorical error localization problem,
-\code{editrules} rewrites categorical edits into a numerical matrix using the
-function \code{as.mip}.
-<<>>=
-as.mip(E)
-@
-Above example shows the rewriting of ${\bf A}^H$. All variables are binary 
-variables $\in \{0,1\}$. Constraint \code{num1} states
-that \code{gender} either must be \code{'male'} or \code{'female'}. Constraint 
-\code{num2} states that \code{pregnant} and \code{gender:male} cannot both be
-1 (true).
-
-Note that \code{as.mip} 
-recognizes that \code{pregnant} is a \code{logical}. The mip formulation contains
-just one binary variable for \code{pregnant}.
-(explain...)
-
-If we add the $A^0$
-constraints we get:
-<<tidy=FALSE>>=
-as.mip( E
-      , x=list(gender="male", pregnant=TRUE)
-      , weight=c(1,2)
-      )
-@
-(explain)
-\section{Mixed data errors}
+\subsection{Conditional rules on mixed type data}
 \label{sec:mixdataerror}
 
 Often a data set or survey contains both numerical as categorical variables.
@@ -618,7 +468,7 @@ e_j = \bigvee_{i=1}^m (v_i \in T_{i,j}) \vee \sum^l_{k=1} a_{jk} \cdot r_k
 \odot b_j
 \end{equation}
 
-\subsection{Mip formulation}
+\subsubsection{Mip formulation}
 \begin{itemize}
   \item[a]
   
@@ -681,29 +531,61 @@ e_j = \bigvee_{i=1}^m (v_i \in T_{i,j}) \vee \sum^l_{k=1} a_{jk} \cdot r_k
 
 This makes the mip formulation for mixed constraints complete.
 
-\subsection{Implementation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SECTION 3
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation and numerical stability issues}
+\label{sec:linedits:num}
+Reformulating the error localisation problem in terms of a mip problem
+introduces two constants: $M$ and $\epsilon$. These constants end up in the
+coefficient matrix of the mip solver.  Mathematically, there are no bounds on
+the values of $M$ and $\epsilon$, as long as they are chosen so that the
+problem remains feasible. In practice however, limitations on the accuracy with
+wich numbers are represented on a computer put restrictions on the value range
+of numbers that enter the mip solver. In the \code{lpsolve} library (as well
+as in \R{}), numbers on the real line are represented as \code{double precision}
+numbers, meaning that there are about 15 decimal positions of precision. 
 
-<<tidy=FALSE>>=
-E <- editset(expression(
-  married %in% c(TRUE, FALSE),
-  if (married) age >= 17
-  ))
-@
+To avoid significant roundoff errors, it is a good idea to restrict the range
+of input data. In fact, the authors of the \code{lpsolve} reference manual
+\citep{lpsolveman:2012} state the following.
+%
+\begin{quote}
+The chance for numerical instability and rounding errors is considerably 
+larger when the input data contains both large and small numbers. 
+So to improve stability, one must try to work with numbers that are somewhat 
+in the same range. Ideally in the neighborhood of 1.
+[...]You should realize, that you the user are probably in a better position to 
+scale the problem than any computer algorithm. 
+\end{quote}
 
-Writing this to ${\bf A}^H$ form we get:
-<<>>=
-as.mip(E)
-@
-(explain...)
 
-Adding some (inconsistent!) ${\bf A}^0$ we get:
-<<>>=
-as.mip(E, x=list(age=9, married=TRUE))
-@
-(explain...)
+\begin{equation}
+\left[\begin{array}{c|c}
+  \mathbf{A}^H &\mathbf{b}^H\\
+  \mathbf{A}^0 &\mathbf{b}^0
+\end{array}\right] 
+= 
+\left[\begin{array}{rr|r}
+  \multicolumn{1}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
+  \mathbbm{1} & M\mathbbm{1}  &\mathbf{x}^0\\
+  -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
+\end{array}\right] 
+\end{equation}
+In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
+will 
+be sufficient for most purposes, since numerical values and coefficients of the
+constraints 
+in most cases will be in this range. If not, you should rescale some of your
+variables and constraints to make it so.
+
+The linear programming manual from \code{lpsolve}  \citep{lpsolveman:2012} says the 
+following on this matter:
+
+
 
 \section{Usage}
-\marginpar{Toevoegen: hoe kunnen \code{M} en \code{epsilon} worden ingesteld.}
+\subsection{Error localisation}
 The mip implementation in \code{editrules} is transparent.
 The \code{localizeErrors} function is extended to include an extra parameter
 \code{method}. The default value of \code{method} is \code{'bb'}: branch and bound.
@@ -752,6 +634,70 @@ solutions for a given record.  The mip implementation only generates one of the
 best. This is implemented by adding a small uniform pertubation to the weights, 
 so mip chooses one of the best at random. This is identical 
 to the default behavior of \code{localizeErrors} for \code{method='bb'}.
+
+
+\subsection{Setting up your own lp problem}
+\code{editrules} uses \code{editarray} for dealing with categorical edits. These
+are described in \cite{loo:2011b}. An example \code{editarray} is given below.
+<<tidy=FALSE>>=
+(E <- editarray(expression(
+    gender %in% c('male','female'),
+    pregnant %in% c(TRUE, FALSE),
+    if (pregnant) gender == 'female'
+    )
+))
+@
+\code{E} is an editarray. That \code{E} parses the constraints can be seen in 
+the pregnant constraint: it has been rewritten in an equivalent form.
+To create a mip formulation for the categorical error localization problem,
+\code{editrules} rewrites categorical edits into a numerical matrix using the
+function \code{as.mip}.
+<<>>=
+as.mip(E)
+@
+Above example shows the rewriting of ${\bf A}^H$. All variables are binary 
+variables $\in \{0,1\}$. Constraint \code{num1} states
+that \code{gender} either must be \code{'male'} or \code{'female'}. Constraint 
+\code{num2} states that \code{pregnant} and \code{gender:male} cannot both be
+1 (true).
+
+Note that \code{as.mip} 
+recognizes that \code{pregnant} is a \code{logical}. The mip formulation contains
+just one binary variable for \code{pregnant}.
+(explain...)
+
+If we add the $A^0$
+constraints we get:
+<<tidy=FALSE>>=
+as.mip( E
+      , x=list(gender="male", pregnant=TRUE)
+      , weight=c(1,2)
+      )
+@
+(explain)
+
+\subsection{Implementation}
+
+<<tidy=FALSE>>=
+E <- editset(expression(
+  married %in% c(TRUE, FALSE),
+  if (married) age >= 17
+  ))
+@
+
+Writing this to ${\bf A}^H$ form we get:
+<<>>=
+as.mip(E)
+@
+(explain...)
+
+Adding some (inconsistent!) ${\bf A}^0$ we get:
+<<>>=
+as.mip(E, x=list(age=9, married=TRUE))
+@
+(explain...)
+
+
 
 \section{Conclusion}
 \code{editrules} includes a mip implementation of the localize errors formalism 
