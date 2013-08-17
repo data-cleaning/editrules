@@ -350,10 +350,11 @@ Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be writ
 %
 \begin{eqnarray}
 \lefteqn{
-\overline{e} = \overline{F}_{1}\times F_{2}\times\cdots \times F_{m}
+\overline{e} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
 }\nonumber\\
-&\cup& F_{1}\times \overline{F}_{2}\times\cdots \times F_{m}\cup\cdots 
-\cup F_{1}\times F_{2}\times\cdots \times \overline{F}_{m},
+&\cup& D_{1}\times \overline{F}_{2}\times\cdots \times D_{m}\cup\cdots 
+\cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{m}\nonumber\\
+&=& \overline{F}_{1} \cup \cdots \cup \overline{F}_{m},
 \label{eq:complement}
 \end{eqnarray}
 %
