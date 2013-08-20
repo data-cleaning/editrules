@@ -1,6 +1,5 @@
 # generate large editmatrix useful for performance testing
 
-
 require(editrules)
 
 genEditMatrix <- function(nedits, nvars, nvr=min(4, nvars)){

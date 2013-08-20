@@ -14,7 +14,7 @@
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
 
-\newcommand{\code}[1]{\textsf{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \renewcommand{\mathbf}[1]{\ensuremath{\boldsymbol{#1}}}
@@ -354,41 +354,47 @@ Here, $\overline{e_j}$ is the complement of $\mathbf{e_j}$ in $D$, which can be 
 }\nonumber\\
 &\cup& D_{1}\times \overline{F}_{j2}\times\cdots \times D_{m}\cup\cdots 
 \cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{jm}
-\label{eq:complement}\\
-&=& \overline{F}_{j1} \cup \cdots \cup \overline{F}_{jm},
+\label{eq:complement}
 \end{eqnarray}
 %
 where for each variable $i$, we have $\overline{F}_{ji}=D\backslash F_{ji}$. Observe
 that it follows from Eq.\ \eqref{eq:complement} that if at least one $v_i\in \overline{F}_{ji}$,
 then \mathbf{v} satisfies $e_j$.
-
-with reported values $({v^0_1,\dots,v^0_m)}$ has 
-the following $n$ constraints:
-\begin{equation}e_j = 
-  \begin{array}{rl}
-    \label{eq:catedit}
-    \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
-    \mbox{ {\bf then}} & \mbox{FALSE}
-  \end{array}
+\begin{equation}
+  e_j = \bigvee_{i=1}^m v_i \in \overline{F}_{ij}
 \end{equation}
-with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the
-possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and $j = 1 \ldots n$ the number of edits.
 
-Remarkable about categorical edits is their negative formulation in 
-literature (e.g. \ref{}): if a condition is true than the edit is violated. 
-This is in contrast with numerical edits, which state rules that the record
-must obey. To translate categorical edits into mip we need a possitive 
-reformulation, since mip requires constraints 
-that must hold.
 
-Equation (\ref{eq:catedit}) can be written in the following form:
-\begin{eqnarray}
-     e_j  & = & \lnot \bigwedge_{i=1}^m v_i \in F_{i,j} = \bigvee_{i=1}^m\lnot (v_i \in {F_{i,j}}) \\
-          & = &  \bigvee_{i=1}^m v_i \not\in {F_{i,j}} = \bigvee_{i=1}^m v_i 
-          \in T_{i,j} \label{eq:catpos}
-\end{eqnarray}
-with $T_{i,j} = D_i \setminus F_{i,j}$. 
-This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$. 
+%%%%
+
+
+% with reported values $({v^0_1,\dots,v^0_m)}$ has 
+% the following $n$ constraints:
+% \begin{equation}e_j = 
+%   \begin{array}{rl}
+%     \label{eq:catedit}
+%     \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
+%     \mbox{ {\bf then}} & \mbox{FALSE}
+%   \end{array}
+% \end{equation}
+% with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the
+% possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and $j = 1 \ldots n$ the number of edits.
+% 
+% Remarkable about categorical edits is their negative formulation in 
+% literature (e.g. \ref{}): if a condition is true than the edit is violated. 
+% This is in contrast with numerical edits, which state rules that the record
+% must obey. To translate categorical edits into mip we need a possitive 
+% reformulation, since mip requires constraints 
+% that must hold.
+% 
+% Equation (\ref{eq:catedit}) can be written in the following form:
+% \begin{eqnarray}
+%      e_j  & = & \lnot \bigwedge_{i=1}^m v_i \in F_{i,j} = \bigvee_{i=1}^m\lnot (v_i \in {F_{i,j}}) \\
+%           & = &  \bigvee_{i=1}^m v_i \not\in {F_{i,j}} = \bigvee_{i=1}^m v_i 
+%           \in T_{i,j} \label{eq:catpos}
+% \end{eqnarray}
+% with $T_{i,j} = D_i \setminus F_{i,j}$. 
+% This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$. 
 
 
 %% susbsubwordt verwijderd maar voor nu even handig.
@@ -721,12 +727,14 @@ as.mip(E)
 @
 (explain...)
 
-Adding some (inconsistent!) ${\bf A}^0$ we get:
+Adding some ${\bf A}^0$ we get:
 <<>>=
 as.mip(E, x=list(age=9, married=TRUE))
 @
 (explain...)
 
+\section{Benchmarks}
+\subsection{Tests}
 
 
 \section{Conclusion}
