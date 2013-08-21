@@ -1,5 +1,5 @@
 library(editrules)
-FILE =" benchmip_categorical.txt"
+FILE ="benchmip_categorical.txt"
 
 #' Create account balance
 generate_E <- function(nvar=10){
@@ -50,6 +50,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
       write.table(rpt, file=txt, col.names=init, row.names=FALSE)
       init <- FALSE
       flush(txt)
+      gc()
       #print(rpt)
     }
   }

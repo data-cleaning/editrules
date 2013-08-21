@@ -34,18 +34,19 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
   errorloc <- c("begin", "end", "middle")
   
   if (nerrors > nvars) stop("nvars cannot be less than nerrors")
-  for (ne in seq_len(nerrors)){
-    for (nvar in seq(from=ne, to=nvars)){
-      E <- generate_balance(nvar)
-      data <- generate_data(E, ne)
-      cat("\r nvar=", nvar, " ne=", ne, " method=", method)
-      le <- localizeErrors(E, data, method=method)
-      rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
-      
-      write.table(rpt, file=txt, col.names=init, row.names=FALSE)
-      init <- FALSE
-      flush(txt)
-      #print(rpt)
+  for (nvar in seq_len(nvars)){
+    for (ne in seq(1, min(nerrors, nvar))){
+        try({
+        E <- generate_balance(nvar)
+        data <- generate_data(E, ne)
+        cat("\r nvar=", nvar, " ne=", ne, " method=", method)
+        le <- localizeErrors(E, data, method=method)
+        rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
+        
+        write.table(rpt, file=txt, col.names=init, row.names=FALSE)
+        init <- FALSE
+        flush(txt)
+      })
       gc()
     }
   }
@@ -55,6 +56,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
 
 if (file.exists(FILE)) file.remove(FILE)
 
+# bench(10,10, method="mip")
 bench(100,10, method="mip")
 bench(50,10, method="bb")
 
