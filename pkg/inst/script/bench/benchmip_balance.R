@@ -3,9 +3,23 @@ FILE ="benchmip_balance.txt"
 
 #' Create account balance
 generate_balance <- function(nvar=15){
-  i <- seq_len(floor((nvar-1)/2))
-  edits <- paste0("x",i,"==", "x", 2*i, "+", "x", 2*i + 1)
-  editmatrix(edits)
+  i <- seq_len(floor((nvar)/2))
+  edits <- c( "x1 >= 0"
+            , paste0("x",i,"==", "x", 2*i, "+", "x", 2*i + 1)
+            )
+  
+  vars <- paste0("x",seq_len(nvar))
+  
+  if (nvar>1){
+    edits <- c(edits, paste0(head(vars,-1), ">=", tail(vars,-1)))
+  }
+  
+  E <- editmatrix(edits)
+  if (nvar %% 2 == 0){
+    E[,-(nvar+1)]
+  } else {
+    E
+  }
 }
 
 generate_data <- function(E, nerrors=0){
@@ -56,7 +70,6 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
 
 if (file.exists(FILE)) file.remove(FILE)
 
-# bench(10,10, method="mip")
 bench(100,10, method="mip")
 bench(50,10, method="bb")
 
@@ -64,3 +77,10 @@ dat <- read.table(FILE, header=TRUE)
 library(ggplot2)
 qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc, geom=c("point", "line")) + geom_jitter()
 ggsave("benchmip_balance.png")
+
+
+#View(dat)
+# n <- 4
+# (E <- generate_balance(n))
+# (dat <- generate_data(E,1))
+# localizeErrors(E, dat, method="mip")

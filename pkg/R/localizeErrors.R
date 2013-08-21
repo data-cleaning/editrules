@@ -76,7 +76,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
                     x
                 }
             }, 
-            classes=c('logical','factor'), 
+            classes=if(method=="mip") 'factor' else c('logical','factor'), 
             how='replace'
         ),
         stringsAsFactors=FALSE

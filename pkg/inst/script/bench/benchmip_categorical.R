@@ -8,8 +8,9 @@ generate_E <- function(nvar=10){
   
   # if all TRUE no errors. FALSE values introduce errors
   edits <- c( paste0(vars, " %in% c(TRUE,FALSE)")
-            , paste0("if (",tail(vars, n), ")", head(vars, n))
+            , paste0("if (",head(vars, -1), ")", tail(vars, -1))
             )
+  edits <- c(edits, "A1 == TRUE")
   editarray(edits)
 }
 
@@ -30,7 +31,7 @@ generate_data <- function(E, nerrors=0){
 }
 
 
-bench <- function(nvars = 10, nerrors=10, method="bb"){
+bench <- function(nvars = 10, nerrors=9, method="bb"){
   
   init <- !file.exists(FILE)
   txt <- file(FILE, "at")
@@ -46,7 +47,6 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
       cat("\r nvar=", nvar, " ne=", ne, " method=", method)
       le <- localizeErrors(E, data, method=method)
       rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
-      
       write.table(rpt, file=txt, col.names=init, row.names=FALSE)
       init <- FALSE
       flush(txt)
@@ -56,19 +56,21 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
   }
 }
 
-if (file.exists(FILE)) file.remove(FILE)
+  if (file.exists(FILE)) file.remove(FILE)
 
-bench(50,10, method="mip")
-bench(50,10, method="bb")
+  bench(10,2, method="mip")
+  #bench(50,10, method="bb")
 
-dat <- read.table(FILE, header=TRUE)
-library(ggplot2)
-qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc) + geom_jitter()
-ggsave("benchmip_categorical.png")
-
+  dat <- read.table(FILE, header=TRUE)
+  library(ggplot2)
+  qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc) + geom_jitter()
+  ggsave("benchmip_categorical.png")
+# 
 
 
 
 ### quick testing
 # (E <- generate_E())
-# generate_data(E, nerrors=1)
+# (dat <- generate_data(E, nerrors=3))
+# localizeErrors(E,dat, method="mip")
+# editrules:::errorLocalizer.mip(E,dat[1,])
