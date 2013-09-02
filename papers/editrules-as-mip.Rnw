@@ -2,7 +2,7 @@
 \documentclass[10pt, fleqn]{cbsreport}
 %\usepackage{inconsolata}
 \usepackage[english]{babel}
-\usepackage{amsmath, amssymb, amsthm}
+\usepackage{amsmath, amsthm}
 \usepackage{bbm} % mathbb numbers
 \usepackage{array}
 \usepackage{natbib}
@@ -17,7 +17,7 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
-\renewcommand{\mathbf}[1]{\ensuremath{\boldsymbol{#1}}}
+%\renewcommand{\mathbf}[1]{\ensuremath{\mathbf{#1}}}
 
 \usepackage{float} 
 \floatstyle{boxed}
@@ -207,7 +207,7 @@ where $\mathbf{c}$ is a constant vector and $\mathbf{z}$ is a vector consisting
 of real and integer coefficients. The inner product $\mathbf{c}^T\mathbf{z}$ is
 referred to as the \emph{objective function}.  Furthermore, $\mathbf{R}$ is a
 coefficent matrix and $\mathbf{d}$ a vector of upper bounds. Formally, the
-elements of \mathbf{c}, \mathbf{R} and \mathbf{d} are limited to the rational
+elements of $\mathbf{c}$, $\mathbf{R}$ and $\mathbf{d}$ are limited to the rational
 numbers \citep{schrijver:1998}, which is never a problem in practice since we
 are always working with a computer representation of numbers. 
 
@@ -215,9 +215,9 @@ The name \emph{mixed-integer programming} stems from the fact that $\mathbf{z}$
 contains continuous as well as integer variables. When $\mathbf{z}$ consists
 solely of continuous or integer variables, Problem~\eqref{eq:mipmin} reduces
 respectively to a \emph{linear} or an \emph{integer programming} problem.  An
-important special case occurs when the integer coefficients of \mathbf{z} may
+important special case occurs when the integer coefficients of $\mathbf{z}$ may
 only take values from \{0,1\}. Such variables are often called binary variables
-or decision variables. It occurs as a special case since defining \mathbf{z} to
+or decision variables. It occurs as a special case since defining $\mathbf{z}$ to
 be integer and applying the appropriate restrictions yields the same problem.
 
 Mixed integer programming is well understood and several software packages
@@ -226,11 +226,11 @@ allows for a broader (but equivalent) formulation of the mip problem, allowing
 the set of restrictions to include inequalities as well as equalities. As a
 side note, we mention that under equality constraints, solutions for the
 integer part of $\mathbf{z}$ only exist when the equality constraints
-pertaining to the integer part of \mathbf{z} are \emph{totally
+pertaining to the integer part of $\mathbf{z}$ are \emph{totally
 unimodular}\footnote{This means that every square submatrix of the coefficient
-matrix pertaining to the integer part of \mathbf{z} has determinant 0 or
+matrix pertaining to the integer part of $\mathbf{z}$ has determinant 0 or
 $\pm1$.}. However, as we will see below, constraints that pertain to the real
-and/or integer part of \mathbf{z} are always inequalities in our case, so this
+and/or integer part of $\mathbf{z}$ are always inequalities in our case, so this
 is of no particular concern to us.
 
 In this paper we reformulate Felligi Holt error localization
@@ -242,7 +242,7 @@ function is of the form
 \begin{equation}
 \mathbf{w}^T\mathbf{\Delta},
 \end{equation}
-where \mathbf{w} is a vector of positive weights and \mathbf{\Delta} a vector
+where $\mathbf{w}$ is a vector of positive weights and $\mathbf{\Delta}$ a vector
 of binary variables, one for each variable in the original record, that
 indicates whether its value should be adapted. More precisely,
 for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we have
@@ -274,22 +274,22 @@ Here, the restrictions indicated with $H$ represent a matrix representation of
 the user-defined (hard) restrictions that the original record $\mathbf{r}$ must
 obey. The vector $\mathbf{z}$ is a numerical vector, containing at least a
 numerical representation of the values in a record and the binary variables
-\mathbf{\Delta}. An algorithmic mip-solver will iteratively alter the values of
-\mathbf{z} until a solution satisfying \eqref{eq:errlocasmip} is reached. To make
+$\mathbf{\Delta}$. An algorithmic mip-solver will iteratively alter the values of
+$\mathbf{z}$ until a solution satisfying \eqref{eq:errlocasmip} is reached. To make
 sure that the objective function reflects the (weighted) number of variables
 altered in the process, the restrictions in $\mathbf{R}^0$ serve to make sure that
-the values in \mathbf{z} that represent values in \mathbf{r} cannot be altered
-without setting the corresponding value in \mathbf{\Delta} to 1.
+the values in $\mathbf{z}$ that represent values in $\mathbf{r}$ cannot be altered
+without setting the corresponding value in $\mathbf{\Delta}$ to 1.
 
 Summarizing, in order to translate the error localisation problem for the cases
 of linear, categorical or conditional mixed restrictions to a mixed integer
-problem, we need to properly define \mathbf{z}, the restriction set
+problem, we need to properly define $\mathbf{z}$, the restriction set
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
 $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
 \subsection{Linear edit rules}
 \label{sec:linedits:mip}
-For a numerical record \mathbf{x} taking values in $\mathbb{R}^n$, a set of linear
+For a numerical record $\mathbf{x}$ taking values in $\mathbb{R}^n$, a set of linear
 restrictions can be written as
 \begin{equation}
 \label{eq:linedits}
@@ -334,35 +334,87 @@ Categoricar records $\mathbf{v}\in D$ take values in a cartesian product domain
 \begin{equation}
 D = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
-where each $D_i$ is a finite set of categories for the $i^\textrm{th}$ categorical variable.
-An edit $e_j$ is a subset of $D$ that can be written as
+where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
+categorical variable. The category names themselves are unimportant, so for
+each $D_i$ we may write
 \begin{equation}
-e_j = F_{j1}\times F_{j2}\times\cdots \times F_{jm},
+\label{eq:defineD}
+D_i = \{1,2,\ldots,|D_i|\}.
 \end{equation}
-where each $F_{ji}$ is a subset of $D_i$. It is understood that if a record
-$\mathbf{v}\in e_j$ then the record violates $e_j$. Hence, categorical edits are
+The size of the domain, $|D|$, for categorical records is equal to the product
+of the $|D_i|$.
+
+A set of edits splits $D$ into a region where records are considered valid and
+records where records are considered invalid. Specifically, each categorical edit
+$e$ can be written as 
+\begin{equation}
+e = F_{1}\times F_{2}\times\cdots \times F_{j},
+\end{equation}
+where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
+$\mathbf{v}\in e$ then the record violates $e$. Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may not
 be) in contrast to linear edits which are positively formulated (they specify
-the region of $\mathbb{R}^n$ where \mathbf{x} must be). To be able to translate
+the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to translate
 categorical edits to a MIP problem, we need to reformulate them as positive
-edits $\overline{e_j}$, such that if $\mathbf{v}\in\overline{e_j}$ then $\mathbf{v}$ satisfies $\mathbf{e_j}$.
-Here, $\overline{e_j}$ is the complement of $\mathbf{e_j}$ in $D$, which can be written as
+edits $\overline{e}$, such that if $\mathbf{v}\in\overline{e}$ then $\mathbf{v}$ satisfies $e$.
+Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be written as
 %
 \begin{eqnarray}
+\label{eq:invedit}
 \lefteqn{
-\overline{e_j} = \overline{F}_{j1}\times D_{2}\times\cdots \times D_{m}
+\overline{e} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
 }\nonumber\\
-&\cup& D_{1}\times \overline{F}_{j2}\times\cdots \times D_{m}\cup\cdots 
-\cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{jm}
+&\cup& D_{1}\times \overline{F}_{2}\times\cdots \times D_{m}\cup\cdots 
+\cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{m},
 \label{eq:complement}
 \end{eqnarray}
 %
-where for each variable $i$, we have $\overline{F}_{ji}=D\backslash F_{ji}$. Observe
-that it follows from Eq.\ \eqref{eq:complement} that if at least one $v_i\in \overline{F}_{ji}$,
-then \mathbf{v} satisfies $e_j$.
+where for each variable $i$, we have $\overline{F}_{i}$ is the complement of
+$F_{i}$ in $D_i$.  Eq.\ \eqref{eq:complement} states that if at least one
+$v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. 
+
+To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we first
+associate with each categorical variable $v_i$ a binary vector $\mathbf{d}$ the coeffiecients
+of which are defined as follows (also see Eq.\ \eqref{eq:defineD}).
 \begin{equation}
-  e_j = \bigvee_{i=1}^m v_i \in \overline{F}_{ij}
+d_j(v_i) = \left\{\begin{array}{l}
+1\textrm{ if } v_i = j\\
+0\textrm{ otherwise}.
+\end{array}\right.
 \end{equation}
+Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$. It
+is zero everywhere except at the value of $v_i\in D_i$. We will write $\mathbf{d}(\mathbf{v})$
+to indicate the concatenatenated vector $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$.
+Similarly, for each edit
+$e$ we can define a binary vector $\mathbf{e}$ representing an edit as
+\begin{equation}
+\mathbf{e}(e) = \Lor_{\mathbf{v}\in \overline{e}}\mathbf{d}(\mathbf{v}),
+\end{equation}
+where the $\lor$ is to be interpreted elementwise.
+
+The demands in Eq.\ \eqref{eq:invedit} can now be stored as linear restrictions:
+\begin{equation}
+\label{eq:hardcat}
+\mathbf{e}(e)\cdot \mathbf{d}(\mathbf{v}) \geq 1,
+\end{equation}
+while the fact that each variable $v_i$ can contain maximal a single value translate to 
+\begin{equation}
+\label{eq:hardmaxcat}
+\sum_{j=1}^{|D_i|}d_j(v_i) = 1.
+\end{equation}
+Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
+$\mathbf{R}^H$ of Eq. \eqref{eq:errlocasmip}.
+
+The vector to minimize over can now be written as
+\begin{equation}
+\mathbf{z} = (\mathbf{d}(\mathbf{v}),\Delta_1,\Delta_2,\ldots\Delta_m).
+\end{equation}
+Since the variables $v_i$ can take only a single value, the restriction matrix $\mathbf{R}^H$ will
+at least contain the following restrictions.
+
+%\begin{equation}
+%  e_j = \bigvee_{i=1}^m v_i \in \overline{F}_{ij}
+%\end{equation}
 
 
 %%%%
