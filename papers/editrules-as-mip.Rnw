@@ -344,20 +344,21 @@ D_i = \{1,2,\ldots,|D_i|\}.
 The size of the domain, $|D|$, for categorical records is equal to the product
 of the $|D_i|$.
 
-A set of edits splits $D$ into a region where records are considered valid and
-records where records are considered invalid. Specifically, each categorical edit
+An edit splits $D$ into a region where records are considered valid and
+a region where records are considered invalid. Specifically, each categorical edit
 $e$ can be written as 
 \begin{equation}
 e = F_{1}\times F_{2}\times\cdots \times F_{m},
 \end{equation}
 where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
 $\mathbf{v}\in e$ then the record violates $e$. Hence, categorical edits are
-negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may not
-be) in contrast to linear edits which are positively formulated (they specify
-the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to translate
-categorical edits to a MIP problem, we need to reformulate them as positive
-edits $\overline{e}$, such that if $\mathbf{v}\in\overline{e}$ then $\mathbf{v}$ satisfies $e$.
-Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be written as
+negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
+not be) in contrast to linear edits which are positively formulated (they
+specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
+translate categorical edits to a MIP problem, we need to reformulate them as
+positive edits $\overline{e}$, such that if $\mathbf{v}\in\overline{e}$ then
+$\mathbf{v}$ satisfies $e$.  Here, $\overline{e}$ is the complement of
+$\mathbf{e}$ in $D$, which can be written as
 %
 \begin{eqnarray}
 \label{eq:invedit}
@@ -369,15 +370,16 @@ Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be writ
 \label{eq:complement}
 \end{eqnarray}
 %
-where for each variable $i$, we have $\overline{F}_{i}$ is the complement of
+where for each variable $v_i$, $\overline{F}_{i}$ is the complement of
 $F_{i}$ in $D_i$.  Observe that Eq.\ \eqref{eq:complement} states that if at
 least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. Below, we
 will use this property and construct a linear relation that counts the number
-of $v_i\in\overline{F}_i$
+of $v_i\in\overline{F}_i$ over all variables.
 
-To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we first
-associate with each categorical variable $v_i$ a binary vector $\mathbf{d}$ the coeffiecients
-of which are defined as follows (also see Eq.\ \eqref{eq:defineD}).
+To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
+first associate with each categorical variable $v_i$ a binary vector
+$\mathbf{d}$ of which the coeffiecients are defined as follows (also see Eq.\
+\eqref{eq:defineD}).
 \begin{equation}
 \label{eq:definedvec}
 d_j(v_i) = \left\{\begin{array}{l}
@@ -404,9 +406,9 @@ To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocas
 we first impose the obvious restriction that each variable can take but a single value:
 \begin{equation}
 \label{eq:hardmaxcat}
-\sum_{j=1}^{|D_i|}d_j(v_i) = 1.
+\sum_{j=1}^{|D_i|}d_j(v_i) = 1,
 \end{equation}
-It is now not difficult to see that the demand (Eq.\ \eqref{eq:complement}) that at 
+for $i=1,2,\ldots,m$. It is now not difficult to see that the demand (Eq.\ \eqref{eq:complement}) that at 
 least one of the $v_i\in\overline{F}_i$ may be written as
 \begin{equation}
 \label{eq:hardcat}
@@ -415,14 +417,14 @@ least one of the $v_i\in\overline{F}_i$ may be written as
 Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
 $\mathbf{R}^H$.
 
-Using the above notation for $\mathbf{v}$, and adding the $\Delta$-variables
+Using the binary vector notation for $\mathbf{v}$, and adding the $\Delta$-variables
 that indicate variable change, the vector to minimize over (Eq.\
 \eqref{eq:mipmin}) is written as
 \begin{equation}
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\Delta_1,\Delta_2,\ldots,\Delta_m).
 \end{equation}
 To ensure that a change in $v_i$ results in a change in $\Delta_i$, the 
-matrix $\mathbf{R}^0$ contains the restrictions.
+matrix $\mathbf{R}^0$ contains the restrictions
 \begin{equation}
 d_{j^0}(v_i) =  1-\Delta_i,
 \end{equation}
