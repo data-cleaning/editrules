@@ -314,10 +314,11 @@ b-\epsilon$, with $\epsilon$ a suitably small constant.
 
 In the case of linear edits, the set of constraints $\mathbf{R}^0\mathbf{z}\leq\mathbf{d}^0$
 consists of pairs of the form
-\begin{eqnarray*}
-  x_i - M\Delta_i   &\leq& x_i^0\\
+\begin{eqnarray}
+  x_i - M\Delta_i   &\leq& x_i^0\nonumber\\
   -x_i - M\Delta_i  &\leq& -x^0_i
-\end{eqnarray*}
+\label{eq:deltanum}
+\end{eqnarray}
 for $i=1,2,\ldots,n$. Here The $x^0_i$ are the actual observed values in the
 record and $M$ is a suitably large constant allowing $x_i$ to vary between
 $x_i^0-M$ and $x_i^0+M$. It is not difficult to see that if $x_i$ is different
@@ -332,6 +333,7 @@ which states that $x_i$ equals $x_i^0$
 \label{sec:catdataerror}
 Categoricar records $\mathbf{v}\in D$ take values in a cartesian product domain 
 \begin{equation}
+\label{eq:defineD}
 D = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
@@ -426,6 +428,7 @@ that indicate variable change, the vector to minimize over (Eq.\
 To ensure that a change in $v_i$ results in a change in $\Delta_i$, the 
 matrix $\mathbf{R}^0$ contains the restrictions
 \begin{equation}
+\label{eq:deltacat}
 d_{j^0}(v_i) =  1-\Delta_i,
 \end{equation}
 for $i=1,2,\ldots,m$.  Here, $j^0\in D_i$ is the observed
@@ -435,212 +438,83 @@ either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
 $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
 
-%\begin{equation}
-%  e_j = \bigvee_{i=1}^m v_i \in \overline{F}_{ij}
-%\end{equation}
 
-
-%%%%
-
-
-% with reported values $({v^0_1,\dots,v^0_m)}$ has 
-% the following $n$ constraints:
-% \begin{equation}e_j = 
-%   \begin{array}{rl}
-%     \label{eq:catedit}
-%     \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
-%     \mbox{ {\bf then}} & \mbox{FALSE}
-%   \end{array}
-% \end{equation}
-% with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the
-% possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and $j = 1 \ldots n$ the number of edits.
-% 
-% Remarkable about categorical edits is their negative formulation in 
-% literature (e.g. \ref{}): if a condition is true than the edit is violated. 
-% This is in contrast with numerical edits, which state rules that the record
-% must obey. To translate categorical edits into mip we need a possitive 
-% reformulation, since mip requires constraints 
-% that must hold.
-% 
-% Equation (\ref{eq:catedit}) can be written in the following form:
-% \begin{eqnarray}
-%      e_j  & = & \lnot \bigwedge_{i=1}^m v_i \in F_{i,j} = \bigvee_{i=1}^m\lnot (v_i \in {F_{i,j}}) \\
-%           & = &  \bigvee_{i=1}^m v_i \not\in {F_{i,j}} = \bigvee_{i=1}^m v_i 
-%           \in T_{i,j} \label{eq:catpos}
-% \end{eqnarray}
-% with $T_{i,j} = D_i \setminus F_{i,j}$. 
-% This means that edit $e_j$ is satisfied if at least one $v_i \in T_{i,j}$. 
-
-
-%% susbsubwordt verwijderd maar voor nu even handig.
-%\subsubsection{Mip formulation}
-%\begin{itemize}
-%  \item[a)]
-%  Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
-%  numerical vector. We therefore encode each categorical variable $v_i$ in $l_i$
-%  binary dummy variables
-%  $$
-%  v_i = (d_{i,1}, \ldots, d_{i,l_i})
-%  $$
-%  with
-%  \begin{equation}
-%    d_{i,k} = \left\{ 
-%    \begin{array}{ll}
-%           1 & \mbox{if $v_i = c_{i,k}$}\\
-%           0 & \mbox{if $v_i \neq c_{i,k}$}
-%    \end{array} \right. 
-%  \end{equation}
-%  
-%  The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
-%  can then be written as:
-%  \begin{equation}
-%    {\bf x} = (d_{1,1}\ldots d_{1,l_1}, \ldots, d_{m, 1}, \ldots, d_{m, l_m}, 
-%    \Delta_1, \ldots, \Delta_m)
-%  \end{equation}
-%  
-%  \item[b)]
-%  Constraint matrix ${\bf A}^H$ for categorical edits is composed out of two parts.
-%  First the fact that each $v_i$ can only have one categorical value:
-%  \begin{equation}
-%     \sum^{n_i}_{k=1} d_{i,k} = 1
-%  \end{equation}
-%  for $i$ is $(1, \ldots, m)$
-%  
-%  Second the categorical constraints of equation \ref{eq:catpos}. 
-%  They can now be written as:
-%  
-%  \begin{equation} \label{eq:mipcatedit}
-%    \sum^m_{i=1} \left(\sum^{l_i}_{k=1} t_{i,j,k} \cdot d_{i,k}\right) 
-%    \geq 1
-%  \end{equation}
-%  
-%  \begin{equation} \label{eq:aijk}
-%    \mbox{with }
-%    t_{i,j,k} = \left\{ 
-%    \begin{array}{ll}
-%           0 & \mbox{if } c_{i,k} \not\in T_{i,j}\\
-%           1 & \mbox{if } c_{i,k} \in T_{i,j}
-%    \end{array} \right. 
-%  \end{equation}
-%  Meaning that if one of the $c_{i,k} \in T^j_i$ then the edit is valid.\\
-%  
-%  
-%  \item[c)]
-%  The constraints ${\bf A}^0$ can be written as:
-%  
-%  \begin{equation}
-%     d_{i,k^0_i}  =  1 - \Delta_i 
-%  \end{equation}
-%  where $k^0_i$ denotes the reported value $v^0_i$.
-%  It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0} = 1$, 
-%  meaning that the reported value 
-%  $v^0_i$ is assumed correct. 
-%  If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
-%  value. Since mip minimizes the objective function it will try to keep the reported 
-%  values at $v^0_i$.
-%\end{itemize}
-%This makes the mip formulation for categorical edits complete.
-
-\subsection{Conditional rules on mixed type data}
+\subsection{Edits rules on data of mixed type}
 \label{sec:mixdataerror}
-
-Often a data set or survey contains both numerical as categorical variables.
-In that case there are often hard constraints including both types
-of variables. Such a constraint is called a mixed edit or mixed constraint.
-{\sf editrules} allows for mixed constraints which are extensively described in 
-\ref{}.
-
-The branch and bound implementation of {\sf editrules} works, but is inefficient
-for larger problems. It very quickly generates large memory objects and 
-takes a long time to finish. For these problems a {\sf mip} implementation comes
-to the rescue.
-
-A set of mixed constraints contains pure numerical, pure categorical
-and mixed constraints. 
-
-A mixed record $\bf r$  with reported values $({r^0_1, \dots,r^0_l,
-v^0_1,\dots,v^0_m)}$ has the 
-following $n$ constraints:
-\begin{equation}e_j = 
-  \begin{array}{rl}
-    \label{eq:mixedit}
-    \mbox{{\bf if }} & v_i \in F_{i,j} \mbox{ for }i = 1, \ldots, m \\
-    \mbox{ {\bf then}} & \sum^l_{k=1} a_{jk} \cdot r_k \leq b_j \\ 
-  \end{array}
-\end{equation}
-with $F_{i,j} \subseteq D_i$ where $i$ is the number of variables, $D_i$ is the 
-possible set of categories $\{c_{i,1}, \ldots, c_{i,l_i}\}$ for $v_i$ and 
-$j = 1 \ldots n$ the number of edits.
-
-Equation \ref{eq:mixedit} can written in a more general form:
-
+Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
+as a concatenation of numerical and categorical variables 
+taking values in $D\times\mathbb{R}^n$: 
 \begin{equation}
-e_j = \bigvee_{i=1}^m (v_i \in T_{i,j}) \vee \sum^l_{k=1} a_{jk} \cdot r_k 
-\odot b_j
+\mathbf{r} = (v_1,\ldots,v_m,x_1,\ldots,x_n) = (\mathbf{v},\mathbf{x}),
 \end{equation}
+where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
+As stated above, categorical edits are usually defined negatively as a region of
+$D$ that is dissallowed while linear edits define regions in $\mathbb{R}^n$ that
+are allowed. We may choose to formulate a negative formulation of edits containing
+both variable types:
+\begin{equation}
+e = \{\mathbf{r}\in D\times\mathbb{R}^n: 
+\lnot(\mathbf{v}\in \overline{s}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
+\end{equation}
+where it is understood that $s\subseteq D$ and if $\mathbf{r}\in e$, then $\mathbf{r}$ violates $e$.
+To obtain a positive formulation, we first rewrite the set membership condition by applying basic
+rules of first-order logic:
+\begin{eqnarray}
+&&\lnot(\mathbf{v}\in \overline{s}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
+&\Leftrightarrow& \lnot (\mathbf{v}\in \overline{s} \lor \mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
+&\Leftrightarrow& \lnot (\mathbf{v}\in s \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
+\label{eq:implication}
+\end{eqnarray}
+This then yields a positive formulation of $e$ given by
+\begin{equation}
+\overline{e} = \{\mathbf{r}\in D\times\mathbb{R}^n: 
+\mathbf{v}\in s \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
+\end{equation}
+This formulation of edits on mixed-type data is called the \emph{standard form}
+by \citet{waal:2003}. It is also the form in which the \code{editrules} package
+accepts mixed-type edits and has the property that if
+$\mathbf{r}\in\overline{e}$ then $\mathbf{r}$ satisfies $e$.
 
-\subsubsection{Mip formulation}
-\begin{itemize}
-  \item[a]
-  
-  The numerical representation of $\bf{x}$, a record of $k$ numerical variables
-  and $m$ categorical variables can then be written as:
-  \begin{equation}
-    {\bf x} = (r_1, \ldots, r_k, 
-              d_{1,1}\ldots d_{1,l_1}, \ldots, d_{m, 1}, \ldots, d_{m, l_m},
-              \Delta_1, \ldots, \Delta_{k+m}, n_1, \ldots, n_p)
-  \end{equation}
-  with
-  \begin{equation}
-    n_j = \left\{ 
-    \begin{array}{ll}
-           0 & \mbox{if $\sum^l_{k=1} a_{jk} \cdot r_k \leq b_j$}\\
-           1 & \mbox{if $\sum^l_{k=1} a_{jk} \cdot r_k \not \leq b_j$}
-    \end{array} \right. 
-  \end{equation}
+We now define a binary variable $l$ that indicates whether the linear restriction in 
+the consequent is obeyed or not:
+\begin{equation}
+l = \left\{\begin{array}{l}
+0 \textrm{ when } \mathbf{a}^T\mathbf{x}\leq b\\
+1 \textrm{ otherwise.}
+\end{array}\right.
+\end{equation}
+Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implication})
+and the definition of $\mathbf{e}$, we can write the mixed-data edit as
+\begin{equation}
+\label{eq:mixedit}
+\mathbf{e}(s)^T\mathbf{v} - l \geq 0.
+\end{equation}
+These form the user-defined part of the $\mathbf{R}^H$ part of the restriction matrix.
+To connect $l$ with the linear restriction in the consequent we also add
+\begin{equation}
+\label{eq:linconsequent}
+\mathbf{a}^T\mathbf{x} \leq b + Ml,
+\end{equation}
+to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if the
+$l=0$, the inequality $\mathbf{a}^T\mathbf{x}\leq b$ is enforced. When $l=0$ it
+is unimportant for the whole restriction to hold whether the inequality holds.
+Finally, similar to the purely categorical case we need to add restrictions on
+the binary representation of $\mathbf{v}$ as in Eq.\ \eqref{eq:hardmaxcat}, so
+Eq.\ \eqref{eq:hardmaxcat}, Eq.\ \eqref{eq:linconsequent} and Eq.\
+\eqref{eq:mixedit} constitute $\mathbf{R}^H$.
 
-  It is the union of the numerical and categorical description plus extra binary 
-  variables $n_i$. Each $n_i$ is a dummy variable introduced to represent a 
-  negated numerical constraint which is part of a mixed edit.
-  
-  \item[b]
-  The constraints ${\bf A}^H$ are a combination of the categorical and numerical 
-  descriptions. For purely numerical and categorical constraints we use the 
-  formulations as stated in previous sections.
-  
-  A mixed constraint is formulated in (at least) two parts: a categorical part and
-  numerical parts.
-  First equation \ref{eq:mipcatedit} is extended with 
-  numerical dummy 
-  variable $n_j$. For each mixed edit we add the following constraint to ${\bf A}^H$
-  \begin{equation}
-    \label{eq:mixcatedit}
-    \sum^m_{i=1} \left(\sum^{l_i}_{k=1} t_{i,j,k} \cdot d_{i,k}\right) + (1-n_j)
-    \geq 1
-  \end{equation}
-  meaning that one of the categorical or numerical conditions must hold.
-  
-  Further more for each $n_j$ we add the following constraint
-  \begin{equation}
-    \label{eq:mixnumedit}
-    \sum a_{jk} \cdot r_k \leq b_j + Mn_j
-  \end{equation}
-  With $M$ a sufficiently large number.
-  
-  
-  This means that if $n_j = 0$ the numerical constraint must hold and the
-  constraint of eq. \ref{eq:mixcatedit} always holds. If $n_j=1$ then the 
-  numerical constraint is not enforced, since $M$ makes the constraint of
-  eq. \ref{eq:mixnumedit} always true.
-  
-  \item[c]
-  Constraints ${\bf A}^0$ for a mixed record $r$ are simply the 
-  union of the numerical ${\bf A}^0$ for ${\bf r}^0$ and the categorical ${\bf A}^0$ 
-  for ${\bf v}^0$.
-  
-\end{itemize}
+In general there may be $k$ multiple mixed-type edits yielding an equal number of indicator
+variables for inequalities in the consequets. So the vector to minimize over becomes
+\begin{equation}
+\mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
+l_1,\ldots,l_k).
+\end{equation}
+Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
+recorded values consists of the union of the restrictions for categorical variables
+(Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
 
-This makes the mip formulation for mixed constraints complete.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
