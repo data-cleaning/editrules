@@ -348,7 +348,7 @@ A set of edits splits $D$ into a region where records are considered valid and
 records where records are considered invalid. Specifically, each categorical edit
 $e$ can be written as 
 \begin{equation}
-e = F_{1}\times F_{2}\times\cdots \times F_{j},
+e = F_{1}\times F_{2}\times\cdots \times F_{m},
 \end{equation}
 where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
 $\mathbf{v}\in e$ then the record violates $e$. Hence, categorical edits are
@@ -370,47 +370,68 @@ Here, $\overline{e}$ is the complement of $\mathbf{e}$ in $D$, which can be writ
 \end{eqnarray}
 %
 where for each variable $i$, we have $\overline{F}_{i}$ is the complement of
-$F_{i}$ in $D_i$.  Eq.\ \eqref{eq:complement} states that if at least one
-$v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. 
+$F_{i}$ in $D_i$.  Observe that Eq.\ \eqref{eq:complement} states that if at
+least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. Below, we
+will use this property and construct a linear relation that counts the number
+of $v_i\in\overline{F}_i$
 
 To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we first
 associate with each categorical variable $v_i$ a binary vector $\mathbf{d}$ the coeffiecients
 of which are defined as follows (also see Eq.\ \eqref{eq:defineD}).
 \begin{equation}
+\label{eq:definedvec}
 d_j(v_i) = \left\{\begin{array}{l}
 1\textrm{ if } v_i = j\\
 0\textrm{ otherwise}.
 \end{array}\right.
 \end{equation}
-Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$. It
-is zero everywhere except at the value of $v_i\in D_i$. We will write $\mathbf{d}(\mathbf{v})$
-to indicate the concatenatenated vector $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$.
-Similarly, for each edit
-$e$ we can define a binary vector $\mathbf{e}$ representing an edit as
+Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$.
+It is zero everywhere except at the value of $v_i\in D_i$. We will write
+$\mathbf{d}(\mathbf{v})$ to indicate the concatenatenated vector
+$(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$ which represents a complete record.
+Similarly, each edit $e$ is defined a binary vector $\mathbf{e}$ given by
 \begin{equation}
 \mathbf{e}(e) = \Lor_{\mathbf{v}\in \overline{e}}\mathbf{d}(\mathbf{v}),
 \end{equation}
-where the $\lor$ is to be interpreted elementwise.
+where we interpret 1 and 0 as \code{true} and \code{false} respectively and
+the logical 'or' ($\lor$) is applied elementwise to the coefficients of
+$\mathbf{d}$.  The above relation can be interpreted as stating that
+$\mathbf{e}(e)$ is the the union of all records satisfying $e$.
 
-The demands in Eq.\ \eqref{eq:invedit} can now be stored as linear restrictions:
-\begin{equation}
-\label{eq:hardcat}
-\mathbf{e}(e)\cdot \mathbf{d}(\mathbf{v}) \geq 1,
-\end{equation}
-while the fact that each variable $v_i$ can contain maximal a single value translate to 
+
+
+To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
+we first impose the obvious restriction that each variable can take but a single value:
 \begin{equation}
 \label{eq:hardmaxcat}
 \sum_{j=1}^{|D_i|}d_j(v_i) = 1.
 \end{equation}
-Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
-$\mathbf{R}^H$ of Eq. \eqref{eq:errlocasmip}.
-
-The vector to minimize over can now be written as
+It is now not difficult to see that the demand (Eq.\ \eqref{eq:complement}) that at 
+least one of the $v_i\in\overline{F}_i$ may be written as
 \begin{equation}
-\mathbf{z} = (\mathbf{d}(\mathbf{v}),\Delta_1,\Delta_2,\ldots\Delta_m).
+\label{eq:hardcat}
+\mathbf{e}(e)^T\mathbf{d}(\mathbf{v}) \geq 1.
 \end{equation}
-Since the variables $v_i$ can take only a single value, the restriction matrix $\mathbf{R}^H$ will
-at least contain the following restrictions.
+Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
+$\mathbf{R}^H$.
+
+Using the above notation for $\mathbf{v}$, and adding the $\Delta$-variables
+that indicate variable change, the vector to minimize over (Eq.\
+\eqref{eq:mipmin}) is written as
+\begin{equation}
+\mathbf{z} = (\mathbf{d}(\mathbf{v}),\Delta_1,\Delta_2,\ldots,\Delta_m).
+\end{equation}
+To ensure that a change in $v_i$ results in a change in $\Delta_i$, the 
+matrix $\mathbf{R}^0$ contains the restrictions.
+\begin{equation}
+d_{j^0}(v_i) =  1-\Delta_i,
+\end{equation}
+for $i=1,2,\ldots,m$.  Here, $j^0\in D_i$ is the observed
+value for variable $v_i$. It is not difficult to check, using Eq.
+\eqref{eq:definedvec}, that the above equation can only hold for all $j$ when
+either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
+$v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
+
 
 %\begin{equation}
 %  e_j = \bigvee_{i=1}^m v_i \in \overline{F}_{ij}
@@ -450,73 +471,73 @@ at least contain the following restrictions.
 
 
 %% susbsubwordt verwijderd maar voor nu even handig.
-\subsubsection{Mip formulation}
-\begin{itemize}
-  \item[a)]
-  Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
-  numerical vector. We therefore encode each categorical variable $v_i$ in $l_i$
-  binary dummy variables
-  $$
-  v_i = (d_{i,1}, \ldots, d_{i,l_i})
-  $$
-  with
-  \begin{equation}
-    d_{i,k} = \left\{ 
-    \begin{array}{ll}
-           1 & \mbox{if $v_i = c_{i,k}$}\\
-           0 & \mbox{if $v_i \neq c_{i,k}$}
-    \end{array} \right. 
-  \end{equation}
-  
-  The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
-  can then be written as:
-  \begin{equation}
-    {\bf x} = (d_{1,1}\ldots d_{1,l_1}, \ldots, d_{m, 1}, \ldots, d_{m, l_m}, 
-    \Delta_1, \ldots, \Delta_m)
-  \end{equation}
-  
-  \item[b)]
-  Constraint matrix ${\bf A}^H$ for categorical edits is composed out of two parts.
-  First the fact that each $v_i$ can only have one categorical value:
-  \begin{equation}
-     \sum^{n_i}_{k=1} d_{i,k} = 1
-  \end{equation}
-  for $i$ is $(1, \ldots, m)$
-  
-  Second the categorical constraints of equation \ref{eq:catpos}. 
-  They can now be written as:
-  
-  \begin{equation} \label{eq:mipcatedit}
-    \sum^m_{i=1} \left(\sum^{l_i}_{k=1} t_{i,j,k} \cdot d_{i,k}\right) 
-    \geq 1
-  \end{equation}
-  
-  \begin{equation} \label{eq:aijk}
-    \mbox{with }
-    t_{i,j,k} = \left\{ 
-    \begin{array}{ll}
-           0 & \mbox{if } c_{i,k} \not\in T_{i,j}\\
-           1 & \mbox{if } c_{i,k} \in T_{i,j}
-    \end{array} \right. 
-  \end{equation}
-  Meaning that if one of the $c_{i,k} \in T^j_i$ then the edit is valid.\\
-  
-  
-  \item[c)]
-  The constraints ${\bf A}^0$ can be written as:
-  
-  \begin{equation}
-     d_{i,k^0_i}  =  1 - \Delta_i 
-  \end{equation}
-  where $k^0_i$ denotes the reported value $v^0_i$.
-  It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0} = 1$, 
-  meaning that the reported value 
-  $v^0_i$ is assumed correct. 
-  If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
-  value. Since mip minimizes the objective function it will try to keep the reported 
-  values at $v^0_i$.
-\end{itemize}
-This makes the mip formulation for categorical edits complete.
+%\subsubsection{Mip formulation}
+%\begin{itemize}
+%  \item[a)]
+%  Recall from section \ref{sec:mipproblem} that in a mip problem ${\bf x}$ is a 
+%  numerical vector. We therefore encode each categorical variable $v_i$ in $l_i$
+%  binary dummy variables
+%  $$
+%  v_i = (d_{i,1}, \ldots, d_{i,l_i})
+%  $$
+%  with
+%  \begin{equation}
+%    d_{i,k} = \left\{ 
+%    \begin{array}{ll}
+%           1 & \mbox{if $v_i = c_{i,k}$}\\
+%           0 & \mbox{if $v_i \neq c_{i,k}$}
+%    \end{array} \right. 
+%  \end{equation}
+%  
+%  The numerical representation of $\bf{v}$, a record of $m$ categorical variables 
+%  can then be written as:
+%  \begin{equation}
+%    {\bf x} = (d_{1,1}\ldots d_{1,l_1}, \ldots, d_{m, 1}, \ldots, d_{m, l_m}, 
+%    \Delta_1, \ldots, \Delta_m)
+%  \end{equation}
+%  
+%  \item[b)]
+%  Constraint matrix ${\bf A}^H$ for categorical edits is composed out of two parts.
+%  First the fact that each $v_i$ can only have one categorical value:
+%  \begin{equation}
+%     \sum^{n_i}_{k=1} d_{i,k} = 1
+%  \end{equation}
+%  for $i$ is $(1, \ldots, m)$
+%  
+%  Second the categorical constraints of equation \ref{eq:catpos}. 
+%  They can now be written as:
+%  
+%  \begin{equation} \label{eq:mipcatedit}
+%    \sum^m_{i=1} \left(\sum^{l_i}_{k=1} t_{i,j,k} \cdot d_{i,k}\right) 
+%    \geq 1
+%  \end{equation}
+%  
+%  \begin{equation} \label{eq:aijk}
+%    \mbox{with }
+%    t_{i,j,k} = \left\{ 
+%    \begin{array}{ll}
+%           0 & \mbox{if } c_{i,k} \not\in T_{i,j}\\
+%           1 & \mbox{if } c_{i,k} \in T_{i,j}
+%    \end{array} \right. 
+%  \end{equation}
+%  Meaning that if one of the $c_{i,k} \in T^j_i$ then the edit is valid.\\
+%  
+%  
+%  \item[c)]
+%  The constraints ${\bf A}^0$ can be written as:
+%  
+%  \begin{equation}
+%     d_{i,k^0_i}  =  1 - \Delta_i 
+%  \end{equation}
+%  where $k^0_i$ denotes the reported value $v^0_i$.
+%  It can be easily checked that if $\Delta_i = 0$ $d_{i,k^0} = 1$, 
+%  meaning that the reported value 
+%  $v^0_i$ is assumed correct. 
+%  If $\Delta_i = 1$, $d_{i,k^0_i} = 0$, meaning that $v_i$ must have a different 
+%  value. Since mip minimizes the objective function it will try to keep the reported 
+%  values at $v^0_i$.
+%\end{itemize}
+%This makes the mip formulation for categorical edits complete.
 
 \subsection{Conditional rules on mixed type data}
 \label{sec:mixdataerror}
