@@ -8,6 +8,7 @@
 \usepackage{natbib}
 \usepackage{threeparttable}
 \usepackage{makeidx}
+\usepackage{todonotes}
 \makeindex
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
@@ -103,7 +104,7 @@ problem, which is the focus of the current paper.  Although it is widely
 recognized that data editing is a necessary step in the statistical process,
 the amount of changes made to the data should obviously be minimized to avoid
 introducing bias in estimations based on the edited data. This then, led to the
-development of the following minimisation problem.
+development of the following minimization problem.
 %
 \begin{quote}
 Given a record of $n$ variables, subject to a number of possibly multivariate
@@ -117,7 +118,8 @@ localization has been extensively discussed in literature\footnote{See
 \citet{waal:2011} and references therein}, so we will suffice with a few
 remarks. First, note that the minimization problem is possibly over a search
 space of size $2^n$, rendering a brute-force approach that runs through all
-possible solution candidates computationally infeasible. Second, the problem is
+possible solution candidates computationally infeasible\todo{'unfeasible'?}.
+Second, the problem is
 complicated by the occurrence of \emph{implied rules}. That is, the solution
 set must not only allow the record to obey the original, user-defined set of
 rules, but also rules that are logically or arithmetically implied by the
@@ -183,7 +185,7 @@ since for each data type a different translation strategy is necessary.
 The main part of this paper will focus on how to translate these types of error
 localisation problems to a mixed-integer formulation, paying attention to both
 theoretical and practical details.  We will give examples of how users can
-apply this functionality to their own problemd  in \R{} and benchmark the new
+apply this functionality to their own problem  in \R{} and benchmark the new
 mip-functionality against the existing branch-and-bound solution.
 
 
@@ -193,7 +195,7 @@ mip-functionality against the existing branch-and-bound solution.
 \section{Error localization and mixed integer programming}
 \label{sec:mipproblem}
 %
-A mixed integer programming problem is an optimisation problem that can be
+A mixed integer programming problem is an optimization problem that can be
 written in the form
 \begin{equation}
 \begin{array}{r}
@@ -206,7 +208,7 @@ written in the form
 where $\mathbf{c}$ is a constant vector and $\mathbf{z}$ is a vector consisting
 of real and integer coefficients. The inner product $\mathbf{c}^T\mathbf{z}$ is
 referred to as the \emph{objective function}.  Furthermore, $\mathbf{R}$ is a
-coefficent matrix and $\mathbf{d}$ a vector of upper bounds. Formally, the
+coefficient matrix and $\mathbf{d}$ a vector of upper bounds. Formally, the
 elements of $\mathbf{c}$, $\mathbf{R}$ and $\mathbf{d}$ are limited to the rational
 numbers \citep{schrijver:1998}, which is never a problem in practice since we
 are always working with a computer representation of numbers. 
@@ -299,7 +301,7 @@ where in \code{editrules}, we allow the set of restrictions to contain equalitie
 inequalities ($\leq$) and strict inequalities ($<$). 
 The formulation of these edit rules is very close to the formulation of the original
 mip problem of Eq.\ \eqref{eq:mipmin}.
-The vector to miminize over is defined as follows:
+The vector to minimize over is defined as follows:
 \begin{equation}
 \mathbf{z} = (x_1,x_2,\ldots,x_n,\Delta_1,\Delta_2,\ldots,\Delta_n).
 \end{equation}
@@ -331,41 +333,44 @@ which states that $x_i$ equals $x_i^0$
 
 \subsection{Categorical edit rules}
 \label{sec:catdataerror}
-Categoricar records $\mathbf{v}\in D$ take values in a cartesian product domain 
+Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
 \begin{equation}
 \label{eq:defineD}
-D = D_1\times D_2\times\cdots\times D_m,
+\mathbf{D} = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
-categorical variable. The category names themselves are unimportant, so for
-each $D_i$ we may write
+categorical variable. The category names are unimportant in this formulation, 
+so for each $D_i$ we may write
 \begin{equation}
 \label{eq:defineD}
 D_i = \{1,2,\ldots,|D_i|\}.
 \end{equation}
-The size of the domain, $|D|$, for categorical records is equal to the product
+The size of the domain, $|\mathbf{D}|$, for categorical records is equal to the product
 of the $|D_i|$.
 
-An edit splits $D$ into a region where records are considered valid and
-a region where records are considered invalid. Specifically, each categorical edit
-$e$ can be written as 
+A categorical edit splits $\mathbf{D}$ into a region $\overline{\mathbf{F}}$ 
+where records are 
+considered valid and a region $\mathbf{F}$ where records are considered invalid. 
+Typically, each categorical edit $e$ is specified by defining region 
+$\mathbf{F}$ as an invalid combination of categories:
 \begin{equation}
-e = F_{1}\times F_{2}\times\cdots \times F_{m},
+\mathbf{F} = F_{1}\times F_{2}\times\cdots \times F_{m},
 \end{equation}
 where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
-$\mathbf{v}\in e$ then the record violates $e$. Hence, categorical edits are
+$\mathbf{v}\in \mathbf{F}$ then the record violates $e$. 
+Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
 not be) in contrast to linear edits which are positively formulated (they
 specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
-translate categorical edits to a MIP problem, we need to reformulate them as
-positive edits $\overline{e}$, such that if $\mathbf{v}\in\overline{e}$ then
-$\mathbf{v}$ satisfies $e$.  Here, $\overline{e}$ is the complement of
-$\mathbf{e}$ in $D$, which can be written as
+translate categorical edits to a MIP problem, we need to 
+$\overline{\mathbf{F}}$, such that if $\mathbf{v}\in\overline{F}$ then
+$\mathbf{v}$ satisfies $e$.  Here, $\overline{\mathbf{F}}$ is the complement of
+$\mathbf{F}$ in $D$, which can be written as
 %
 \begin{eqnarray}
 \label{eq:invedit}
 \lefteqn{
-\overline{e} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
+\overline{\mathbf{F}} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
 }\nonumber\\
 &\cup& D_{1}\times \overline{F}_{2}\times\cdots \times D_{m}\cup\cdots 
 \cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{m},
@@ -380,7 +385,7 @@ of $v_i\in\overline{F}_i$ over all variables.
 
 To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
 first associate with each categorical variable $v_i$ a binary vector
-$\mathbf{d}$ of which the coeffiecients are defined as follows (also see Eq.\
+$\mathbf{d}$ of which the coefficients are defined as follows (also see Eq.\
 \eqref{eq:defineD}).
 \begin{equation}
 \label{eq:definedvec}
@@ -391,17 +396,25 @@ d_j(v_i) = \left\{\begin{array}{l}
 \end{equation}
 Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$.
 It is zero everywhere except at the value of $v_i\in D_i$. We will write
-$\mathbf{d}(\mathbf{v})$ to indicate the concatenatenated vector
+$\mathbf{d}(\mathbf{v})$ to indicate the concatenated vector
 $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$ which represents a complete record.
-Similarly, each edit $e$ is defined a binary vector $\mathbf{e}$ given by
+Similarly, each edit $e$ is defined as a binary vector $\mathbf{e}$ given by
 \begin{equation}
-\mathbf{e}(e) = \Lor_{\mathbf{v}\in \overline{e}}\mathbf{d}(\mathbf{v}),
+\mathbf{e} = \Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
+\Big),
 \end{equation}
-where we interpret 1 and 0 as \code{true} and \code{false} respectively and
-the logical 'or' ($\lor$) is applied elementwise to the coefficients of
-$\mathbf{d}$.  The above relation can be interpreted as stating that
-$\mathbf{e}(e)$ is the the union of all records satisfying $e$.
+where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
+the logical 'or' ($\lor$) is applied element-wise to the coefficients of
+$\mathbf{d}$.  
 
+
+The above relation can be interpreted as stating that \todo{This is not correct}
+$\mathbf{e}$ is the union of all records satisfying $e$.
+
+\todo[inline]{Or this formulation?}
+\begin{equation}
+\mathbf{e} = (\mathbf{d}(\overline{F}_1), \ldots , \mathbf{d}(\overline{F}_m)),
+\end{equation}
 
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
@@ -414,7 +427,7 @@ for $i=1,2,\ldots,m$. It is now not difficult to see that the demand (Eq.\ \eqre
 least one of the $v_i\in\overline{F}_i$ may be written as
 \begin{equation}
 \label{eq:hardcat}
-\mathbf{e}(e)^T\mathbf{d}(\mathbf{v}) \geq 1.
+\mathbf{e}^T\mathbf{d}(\mathbf{v}) \geq 1.
 \end{equation}
 Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
 $\mathbf{R}^H$.
@@ -449,9 +462,9 @@ taking values in $D\times\mathbb{R}^n$:
 \end{equation}
 where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
 As stated above, categorical edits are usually defined negatively as a region of
-$D$ that is dissallowed while linear edits define regions in $\mathbb{R}^n$ that
+$D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
 are allowed. We may choose to formulate a negative formulation of edits containing
-both variable types:
+both variable types: \todo{$s$ vs $F$ in previous sections}
 \begin{equation}
 e = \{\mathbf{r}\in D\times\mathbb{R}^n: 
 \lnot(\mathbf{v}\in \overline{s}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
@@ -504,7 +517,7 @@ Eq.\ \eqref{eq:hardmaxcat}, Eq.\ \eqref{eq:linconsequent} and Eq.\
 \eqref{eq:mixedit} constitute $\mathbf{R}^H$.
 
 In general there may be $k$ multiple mixed-type edits yielding an equal number of indicator
-variables for inequalities in the consequets. So the vector to minimize over becomes
+variables for inequalities in the consequent. So the vector to minimize over becomes
 \begin{equation}
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
 l_1,\ldots,l_k).
@@ -526,12 +539,12 @@ introduces two constants: $M$ and $\epsilon$. These constants end up in the
 coefficient matrix of the mip solver.  Mathematically, there are no bounds on
 the values of $M$ and $\epsilon$, as long as they are chosen so that the
 problem remains feasible. In practice however, limitations on the accuracy with
-wich numbers are represented on a computer put restrictions on the value range
+which numbers are represented on a computer put restrictions on the value range
 of numbers that enter the mip solver. In the \code{lpsolve} library (as well
 as in \R{}), numbers on the real line are represented as \code{double precision}
 numbers, meaning that there are about 15 decimal positions of precision. 
 
-To avoid significant roundoff errors, it is a good idea to restrict the range
+To avoid significant round off errors, it is a good idea to restrict the range
 of input data. In fact, the authors of the \code{lpsolve} reference manual
 \citep{lpsolveman:2012} state the following.
 %
@@ -599,7 +612,7 @@ weight <- c(x=2, y=1)
 el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
 ls.str(el)
 @
-Both \code{localizerErrors} as \code{errorLocalizer.mip} can be executed with an 
+Both \code{localizeErrors} as \code{errorLocalizer.mip} can be executed with an 
 \code{editmatrix}, \code{editarray} or \code{editset} object.
 
 Note in the example that the {\em mip} solver returns two extra properties that are
@@ -616,7 +629,7 @@ For more information consult the manual of \code{lpSolveApi}.
 
 An advantage of the branch and bound algorithm is that it can generate all optimal
 solutions for a given record.  The mip implementation only generates one of the 
-best. This is implemented by adding a small uniform pertubation to the weights, 
+best. This is implemented by adding a small uniform perturbation to the weights, 
 so mip chooses one of the best at random. This is identical 
 to the default behavior of \code{localizeErrors} for \code{method='bb'}.
 
