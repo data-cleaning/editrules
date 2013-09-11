@@ -11,7 +11,7 @@
 #' of weights is passed, the weights are assumed to be in the same order as the columns of \code{dat}. By passing
 #' an array of weights (of same dimensions as \code{dat}) separate weights can be specified for each record.
 #'
-#' In general, the solotion to an error localiztion problem need not be unique, especially when no weights 
+#' In general, the solution to an error localization problem need not be unique, especially when no weights 
 #' are defined. In such cases, \code{localizeErrors} chooses a solution randomly. See \code{\link{errorLocalizer}}
 #' for more control options.
 #'
@@ -57,6 +57,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
   useBlocks=TRUE, retrieve=c("best","first"), ...){
     stopifnot(is.data.frame(dat))
     retrieve <- match.arg(retrieve)
+    method <- match.arg(method)
     if ( any(is.na(weight)) ) stop('Missing weights detected')    
     if ( is.data.frame(weight) ) weight <- as.matrix(weight)
     if (is.array(weight) && !all(dim(weight) == dim(dat)) ) 
@@ -67,6 +68,7 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
     if ( is.null(colnames(weight)) ) colnames(weight) <- names(dat)
 
     # convert logical and factor to character (except for complete NA-columns)
+    
     dat <- data.frame(
         rapply(
             dat, f=function(x){
@@ -102,7 +104,6 @@ localizeErrors <- function(E, dat, verbose=FALSE, weight=rep(1,ncol(dat)), maxdu
             i <- i + 1
             blockCount <- paste('Processing block ',format(i,width=nchar(n)), ' of ',n,',',sep="")
         }
-
         err <- err %+% localize(
             b, 
             dat, 
@@ -198,7 +199,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
         }
         r <- as.list(dat[i,vars,drop=FALSE])
         wt <- weight[i,]
-        le <- errorLocalizer.mip(E, r, weight=wt, ...)
+        le <- errorLocalizer_mip(E, r, weight=wt, ...)
         if (!le$maxdurationExceeded){
           err[i,vars] <- le$adapt
           wgt[i] <- le$w

@@ -2,7 +2,7 @@
 #' Localize errors using a MIP approach.
 #' 
 #' @section Details:
-#' \code{errorLocalizer.mip} uses \code{E} and \code{x} to define a mixed integer problem
+#' \code{errorLocalizer_mip} uses \code{E} and \code{x} to define a mixed integer problem
 #' and solves this problem using \code{lpSolveApi}. This function can be much faster then \code{\link{errorLocalizer}} 
 #' but does not return the degeneracy of a solution. However it does return an bonus: 
 #' \code{x_feasible}, a feasible solution.
@@ -21,6 +21,7 @@
 #'  \code{x_feasible} and the lp problem (an \code{lpExtPtr} object)
 #'
 #' @seealso \code{\link{localizeErrors}}, \code{\link{errorLocalizer}}, \code{\link{errorLocation}}
+#' @import lpSolveAPI
 #'
 #' @references
 #'  E. De Jonge and Van der Loo, M. (2012) Error localization as a mixed-integer program in 
@@ -29,8 +30,8 @@
 #'  lp_solve and Kjell Konis. (2011). lpSolveAPI: R Interface for
 #'  lp_solve version 5.5.2.0. R package version 5.5.2.0-5.
 #'  http://CRAN.R-project.org/package=lpSolveAPI
-#'
-errorLocalizer.mip <- function( E
+#' @export
+errorLocalizer_mip <- function( E
                             , x
                             , weight=rep(1, length(x))
                             , maxduration=600L
@@ -133,9 +134,9 @@ scale_fac <- function(x){
 
 # assumes that E is normalized!
 as.lp.mip <- function(mip){
-   if (!require(lpSolveAPI)){
-     stop("This function needs lpSolveAPI which can be installed from CRAN")
-   }
+#    if (!require(lpSolveAPI)){
+#      stop("This function needs lpSolveAPI which can be installed from CRAN")
+#    }
    E <- mip$E
    
    A <- getA(E)
@@ -196,14 +197,14 @@ asLevels <- function(x){
 # 
 # x <- c(p=755,c=125,t=200)
 # 
-# errorLocalizer.mip(Et, x)
+# errorLocalizer_mip(Et, x)
 # 
 # Et2 <- editmatrix(expression(
 #   p + c == t    
 #   ))
 # x <- c(p=75,c=125,t=300)
-# errorLocalizer.mip(Et2, x)  # random?
-# errorLocalizer.mip(Et2, x, weight=c(1,1,1))  # random?
+# errorLocalizer_mip(Et2, x)  # random?
+# errorLocalizer_mip(Et2, x, weight=c(1,1,1))  # random?
 # 
 # 
 # 
@@ -225,7 +226,7 @@ asLevels <- function(x){
 # r <- c(age = 'under aged', maritalStatus='married', positionInHousehold='child')
 # # buildELMatrix(Et,x)
 # # buildELMatrix(Ec,r)
-#   errorLocalizer.mip(Et, x)
-#   errorLocalizer.mip(Ec, r)
+#   errorLocalizer_mip(Et, x)
+#   errorLocalizer_mip(Ec, r)
 # # # asCat(r)
 # #  

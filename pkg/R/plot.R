@@ -76,7 +76,7 @@ plot.editmatrix <- function(x,
     violatedcolor='sienna1',
     adaptcolor='sienna1',
     ...){
-    checkigraph()
+    #checkigraph()
     plotEditGraph(
         x, 
         nodetype=nodetype, 
@@ -114,7 +114,7 @@ plot.editarray <- function(
     violatedcolor='sienna1',
     adaptcolor='sienna1',
     ...){
-    checkigraph()
+    #checkigraph()
     plotEditGraph(
         x, 
         nodetype=nodetype, 
@@ -152,7 +152,7 @@ plot.editset <- function(
     violatedcolor='sienna1',
     adaptcolor='sienna1',
     ...){
-    checkigraph()
+    #checkigraph()
     plotEditGraph(
         x, 
         nodetype=nodetype, 

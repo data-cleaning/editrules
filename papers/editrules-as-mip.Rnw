@@ -95,8 +95,8 @@ automated.
 Automated (and even manual) data editing strategies typically consist of three steps:
 \begin{enumerate}
 \item Find out which rules (expectations) a record violates;
-\item find out which fields in a record cause those violations;
-\item replace the values in those fields with better estimates, such that no rules
+\item Find out which fields in a record cause those violations;
+\item Replace the values in those fields with better estimates, such that no rules
 are violated anymore.
 \end{enumerate}
 The second step is usually referred to as the \emph{error localization}
@@ -155,13 +155,13 @@ branch-and-bound algorithm described by \cite{waal:2003}. The main disadvantage
 of this approach is that the branch-and-bound algorithm has $\mathcal{O}(2^n)$
 worst-case time and memory complexity, where $n$ is the number of variables
 occurring in a connected set of rules. Moreover, the branch-and-bound solver is
-written in pure \R{}, making it intrisically slower than a compiled language
+written in pure \R{}, making it intrinsically slower than a compiled language
 implementation. The main advantages of this approach are the ease of
 implementation and the opportunity for users to exert fine-grained control over
 the algorithm.
 
 As stated before, the error localisation problem can, under mild conditions, be
-translated to a mixed-integer programming problem, which offers the oppertunity
+translated to a mixed-integer programming problem, which offers the opportunity
 to reuse well-established results from the field of linear and mixed-integer
 programming. Indeed, many advanced algorithms for solving such problems have
 been developed and in many cases implementations in a compiled language are
@@ -172,8 +172,8 @@ is written in \code{ANSI} \code{C} and has been tried and tested extensively.
 
 The strategy to solve error localisation problems through this library from 
 \R{} therefore consists of translating the problem to a suitable mixed-integer
-programming problem, feeding this problem to \code{lpSolveAPI} and retranslating
-the results to an error location. It is necessary
+programming problem, feeding this problem to \code{lpSolveAPI} and translating
+the results back to an error location. It is necessary
 to distinguish between:
 \begin{itemize}
   \item linear restrictions on purely numerical data,
@@ -333,7 +333,7 @@ which states that $x_i$ equals $x_i^0$
 
 \subsection{Categorical edit rules}
 \label{sec:catdataerror}
-Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
+Categorical records $\mathbf{v}\in \mathbf{D}$ take values in a Cartesian product domain 
 \begin{equation}
 \label{eq:defineD}
 \mathbf{D} = D_1\times D_2\times\cdots\times D_m,
@@ -362,7 +362,7 @@ Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
 not be) in contrast to linear edits which are positively formulated (they
 specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
-translate categorical edits to a MIP problem, we need to 
+translate categorical edits to a MIP problem, we need to specify 
 $\overline{\mathbf{F}}$, such that if $\mathbf{v}\in\overline{F}$ then
 $\mathbf{v}$ satisfies $e$.  Here, $\overline{\mathbf{F}}$ is the complement of
 $\mathbf{F}$ in $D$, which can be written as
@@ -413,7 +413,8 @@ $\mathbf{e}$ is the union of all records satisfying $e$.
 
 \todo[inline]{Or this formulation?}
 \begin{equation}
-\mathbf{e} = (\mathbf{d}(\overline{F}_1), \ldots , \mathbf{d}(\overline{F}_m)),
+\mathbf{e} = \big(\mathbf{d}(\overline{F}_1), \ldots , \mathbf{d}(\overline{F}_m)
+\big),
 \end{equation}
 
 
@@ -451,12 +452,11 @@ either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
 $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
 
-
 \subsection{Edits rules on data of mixed type}
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
 as a concatenation of numerical and categorical variables 
-taking values in $D\times\mathbb{R}^n$: 
+taking values in $\mathbf{D}\times\mathbb{R}^n$: 
 \begin{equation}
 \mathbf{r} = (v_1,\ldots,v_m,x_1,\ldots,x_n) = (\mathbf{v},\mathbf{x}),
 \end{equation}
@@ -532,7 +532,7 @@ recorded values consists of the union of the restrictions for categorical variab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Implementation and numerical stability issues}
+\section{Numerical stability issues}
 \label{sec:linedits:num}
 Reformulating the error localisation problem in terms of a mip problem
 introduces two constants: $M$ and $\epsilon$. These constants end up in the
@@ -581,27 +581,24 @@ The linear programming manual from \code{lpsolve}  \citep{lpsolveman:2012} says 
 following on this matter:
 
 
-
 \section{Usage}
-\subsection{Error localisation}
-The mip implementation in \code{editrules} is transparent.
+\subsection{Error localization}
+\code{editrules} provides the \code{localizeErrors} function for finding errors
+in a \code{data.frame} given an \code{editset}, \code{editmatrix} or \code{editarray}.
 The \code{localizeErrors} function is extended to include an extra parameter
 \code{method}. The default value of \code{method} is \code{'bb'}: branch and bound.
-Setting \code{method} to \code{'mip'} gives identical but faster result.
-
+Setting \code{method} to \code{'mip'} gives identical but faster result. 
+This implementation makes it possible to switch between the two implementations.
 <<num example>>=
 E <- editmatrix("x <= y")
-dat <- data.frame(x=c(10, 2), y=c(1,2))
-weight <- data.frame(x=c(2,1), y=c(1,1))
+dat <- data.frame(x=10, y=1)
+weight <- data.frame(x=2, y=1)
 
-bb <- localizeErrors(E, dat, weight=weight)
-mip <- localizeErrors(E, dat, weight=weight, method="mip")
-
-bb$adapt
-mip$adapt
+localizeErrors(E, dat, weight=weight, method="bb")$adapt
+localizeErrors(E, dat, weight=weight, method="mip")$adapt
 @
-
-Internally {\sf localizeErrors} uses for each record {\sf errorLocalizer.mip}.
+When \code{method=mip} is specified \code{localizeErrors} uses for each record 
+the function \code{errorLocalizer.mip}.
 Unlike {\em branch and bound} this is not a \code{backtracker} object.
 \code{errorlocalizer.mip} writes the constraints and values into a mip problems,
 feeds it into the \code{lpSolveApi} and formats the resulting output.
@@ -609,7 +606,7 @@ feeds it into the \code{lpSolveApi} and formats the resulting output.
 E <- editmatrix("x <= y")
 r <- c(x=10, y=1)
 weight <- c(x=2, y=1)
-el <- editrules:::errorLocalizer.mip(E, r, weight=weight)
+el <- errorLocalizer_mip(E, r, weight=weight)
 ls.str(el)
 @
 Both \code{localizeErrors} as \code{errorLocalizer.mip} can be executed with an 
