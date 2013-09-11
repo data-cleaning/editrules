@@ -133,6 +133,12 @@ scale_fac <- function(x){
 }
 
 # assumes that E is normalized!
+#' Coerces a \code{mip} object into an lpsolve object
+#' 
+#' \code{as.lp.mip} transforms a mip object into a lpSolveApi object.
+#' @param mip object of type \code{mip}.
+#' @seealso \code{\link{as.mip}}, \code{\link{make.lp}}
+#' @export
 as.lp.mip <- function(mip){
 #    if (!require(lpSolveAPI)){
 #      stop("This function needs lpSolveAPI which can be installed from CRAN")

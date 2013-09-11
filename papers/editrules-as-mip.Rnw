@@ -598,29 +598,26 @@ localizeErrors(E, dat, weight=weight, method="bb")$adapt
 localizeErrors(E, dat, weight=weight, method="mip")$adapt
 @
 When \code{method=mip} is specified \code{localizeErrors} uses for each record 
-the function \code{errorLocalizer.mip}.
+the function \code{errorLocalizer\_mip}.
 Unlike {\em branch and bound} this is not a \code{backtracker} object.
-\code{errorlocalizer.mip} writes the constraints and values into a mip problems,
+\code{errorlocalizer\_mip} writes the constraints and values into a mip problems,
 feeds it into the \code{lpSolveApi} and formats the resulting output.
 <<num mip>>=
-E <- editmatrix("x <= y")
-r <- c(x=10, y=1)
-weight <- c(x=2, y=1)
-el <- errorLocalizer_mip(E, r, weight=weight)
+el <- errorLocalizer_mip(E, dat[1,])
 ls.str(el)
 @
-Both \code{localizeErrors} as \code{errorLocalizer.mip} can be executed with an 
+Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
 \code{editmatrix}, \code{editarray} or \code{editset} object.
 
 Note in the example that the {\em mip} solver returns two extra properties that are
 not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
 Since a mip-solvers goal is to find a feasible solution, a set of feasible x 
 values is available. It can be helpful to have these values, but note 
-that the set is not unique and that the proposed values for the variables to be 
-adjusted lie on the boundary of a convex solution region. 
-So  in many cases it is better to use a proper imputation method to generate
-sensible values for the variable that need to be adjusted.
-Secondly \code{errorlocalizer.mip} returns the \code{lp} object. This object is 
+that this solution in general is not unique and that the proposed values for the 
+variables to be adjusted lie on the boundary of a convex solution region. 
+In many cases it is better to use a proper imputation method to generate
+sensible values for the variable that needs to be adjusted.
+Secondly \code{errorlocalizer\_mip} returns the \code{lp} object. This object is 
 a \code{lpSolveApi} object and can be further manipulated or written to disk.
 For more information consult the manual of \code{lpSolveApi}.
 
@@ -630,48 +627,12 @@ best. This is implemented by adding a small uniform perturbation to the weights,
 so mip chooses one of the best at random. This is identical 
 to the default behavior of \code{localizeErrors} for \code{method='bb'}.
 
-
 \subsection{Setting up your own lp problem}
-\code{editrules} uses \code{editarray} for dealing with categorical edits. These
-are described in \cite{loo:2011b}. An example \code{editarray} is given below.
-<<tidy=FALSE>>=
-(E <- editarray(expression(
-    gender %in% c('male','female'),
-    pregnant %in% c(TRUE, FALSE),
-    if (pregnant) gender == 'female'
-    )
-))
-@
-\code{E} is an editarray. That \code{E} parses the constraints can be seen in 
-the pregnant constraint: it has been rewritten in an equivalent form.
-To create a mip formulation for the categorical error localization problem,
-\code{editrules} rewrites categorical edits into a numerical matrix using the
-function \code{as.mip}.
-<<>>=
-as.mip(E)
-@
-Above example shows the rewriting of ${\bf A}^H$. All variables are binary 
-variables $\in \{0,1\}$. Constraint \code{num1} states
-that \code{gender} either must be \code{'male'} or \code{'female'}. Constraint 
-\code{num2} states that \code{pregnant} and \code{gender:male} cannot both be
-1 (true).
+\code{errorLocalizer\_mip} uses the function \code{as.mip} to transform a set of 
+edits and a record into a mip problem. 
 
-Note that \code{as.mip} 
-recognizes that \code{pregnant} is a \code{logical}. The mip formulation contains
-just one binary variable for \code{pregnant}.
-(explain...)
-
-If we add the $A^0$
-constraints we get:
-<<tidy=FALSE>>=
-as.mip( E
-      , x=list(gender="male", pregnant=TRUE)
-      , weight=c(1,2)
-      )
-@
-(explain)
-
-\subsection{Implementation}
+\code{as.mip} implements the mip formulation of sections \ref{sec:mipproblem}.
+We illustrate this with a small example of a mixed edit.
 
 <<tidy=FALSE>>=
 E <- editset(expression(
@@ -679,27 +640,97 @@ E <- editset(expression(
   if (married) age >= 17
   ))
 @
-
-Writing this to ${\bf A}^H$ form we get:
+The hard restrictions \code{E} can be transformed into ${\bf R}^H$ with
+\code{as.mip}
 <<>>=
 as.mip(E)
 @
-(explain...)
+\code{num1} states that variable \code{.num.1} and \code{married} cannot both be true 
+($=1$). If \code{married==TRUE} than restriction of line 2 turns into 
+\code{age >= 17}.
 
-Adding some ${\bf A}^0$ we get:
+Supplying values \code{x} to the function \code{as.mip} adds ${\bf R}^0$:
 <<>>=
 as.mip(E, x=list(age=9, married=TRUE))
 @
-(explain...)
+Two variables \code{delta.age} and \code{delta.married} are introduced, that
+will signify if these variables need to be adapted.
+Line 3 and 4 try to restrict \code{age}  to $9$ and line 5 tries to restrict 
+\code{married} to \code{TRUE}. The last line shows the objective function, which
+canbe influenced by supplying weight to \code{as.mip}.
+
+The mip object is transformed into a 
+\code{lp} object needed by \code{lpSolveAPI} with the function \code{as.lp.mip}.
 
 \section{Benchmarks}
-\subsection{Tests}
 
+The {\emph branch and bound} and {\emph mip} method for error localization 
+have a different performance.
+Both the memory and time complexity is different. The performance of error 
+localization methods depends highly on the number of variables, the number of errors,
+the number of constraints and the order of the variables.
+The performance of numerical error localization with branch and bound is reasonable,
+but for categorical and mixed records rapidly becomes unsatisfying for the typical
+problem sizes of 100 variables and 100 constraints.
+
+To compare the performance we conducted benchmarks for the three types of constraints
+using edits with synthetic data. However the benchmarks reflect properties of a 
+typical error localization problem in practice.  
+
+\subsection{Numerical linear edits}
+The synthetic edits used in this benchmark are a balance system. This type of edits
+are found in are found e.g. in business statistics and energy statistics. 
+The numerical
+variables form a binary tree where the value of a node is the sum of its child node
+values. The value of the top node is constraint to be non-negative.
+<<>>=
+# plot example of balance_mip (generate_E())
+@
+
+A solution to this system is the zero vector $(x_1, \ldots, x_n) = (0,\ldots,0)$.
+We can introduce an error by setting an $x_i$ to $-1$.
+
+This benchmark was run with the number of variables up to 100 and the number of errors
+up to 10.
+
+\todo[inline]{results}
+
+\subsection{Categorical edits}
+For categorical edits we create a chain of categorical edits of the form:
+\code{if ($A_{i}$==TRUE) $A_{i+1}$ == TRUE} for \code{$i$} is $1$ to $n$.
+We restrict ${A_1}$ to \code{TRUE}.
+In practice categorical edits form a web of interconnected edits. The chain of
+edits reflects this connectivity.
+
+\todo[inline]{plot of generated chain for $n = 10$}
+
+The solution to this system is the vector \code{(TRUE, ..., TRUE)}.
+We can introduce an error by setting an $A_i$ to \code{FALSE}.
+
+This benchmark was run with the number of variables up to 100 and the number of errors
+up to 10.
+\todo[inline]{results}.
+
+\subsection{Mixed edits}
+For mixed edits a set of edits of the following form was generated:
+\code{if ($C_i$ == TRUE) $n_i >= 0$}, furthermore the constraints 
+$n_1 = \sum^{N}_{i=2}$ and $n_1 >= 0$ are added.
+
+\todo[inline]{plot of generated editset for $n = 10$}
+
+The solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
+We can introduce an error by setting an $C_i$ to \code{FALSE} or setting a $n_i$
+to $-1$.
+
+This benchmark was run with the number of variables up to 100 and the number of errors
+up to 10.
+\todo[inline]{results}.
 
 \section{Conclusion}
-\code{editrules} includes a mip implementation of the localize errors formalism 
-of Felligi and Holt. This mip implementation is typically must faster than the
-branch and bound algorithm. 
+This paper describes the error localization algorithm for linear, categorical and
+mixed edits as mip problems. It describes the usage and implementation in
+\code{editrules}. This mip implementation is typically much faster than the
+branch and bound algorithm as can be seen from the benchmarks.
 
 For most problems mip will generate a good solution. However for problems where
 coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
