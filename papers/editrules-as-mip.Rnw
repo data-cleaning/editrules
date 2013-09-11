@@ -657,7 +657,7 @@ Two variables \code{delta.age} and \code{delta.married} are introduced, that
 will signify if these variables need to be adapted.
 Line 3 and 4 try to restrict \code{age}  to $9$ and line 5 tries to restrict 
 \code{married} to \code{TRUE}. The last line shows the objective function, which
-canbe influenced by supplying weight to \code{as.mip}.
+canbe influenced by supplying \code{weight} to \code{as.mip}.
 
 The mip object is transformed into a 
 \code{lp} object needed by \code{lpSolveAPI} with the function \code{as.lp.mip}.
