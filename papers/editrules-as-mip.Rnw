@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
-\documentclass[10pt, fleqn]{cbsreport}
+\documentclass[10pt, fleqn, english, rapport]{cbsreport}
 %\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amsthm}
@@ -117,8 +117,9 @@ formulated and solved the problem for the case of categorical data. Error
 localization has been extensively discussed in literature\footnote{See
 \citet{waal:2011} and references therein}, so we will suffice with a few
 remarks. First, note that the minimization problem is possibly over a search
-space of size $2^n$, rendering a brute-force approach that runs through all
-possible solution candidates computationally infeasible\todo{'unfeasible'?}.
+space of size $2^n$, with $n$ the number of fields, rendering a
+brute-force approach that runs through all
+possible solution candidates computationally unfeasible.
 Second, the problem is
 complicated by the occurrence of \emph{implied rules}. That is, the solution
 set must not only allow the record to obey the original, user-defined set of
@@ -379,7 +380,14 @@ $\mathbf{F}$ in $D$, which can be written as
 %
 where for each variable $v_i$, $\overline{F}_{i}$ is the complement of
 $F_{i}$ in $D_i$.  Observe that Eq.\ \eqref{eq:complement} states that if at
-least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. Below, we
+least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. 
+Membership to $\mathbf{\overline{F}}$ can also be 
+written with the following logical statement:
+\begin{equation}
+\mathbf{v} \in \mathbf{\overline{F}}= \bigvee_{i} v_i \in \overline{F}_i
+\end{equation}
+
+Below, we
 will use this property and construct a linear relation that counts the number
 of $v_i\in\overline{F}_i$ over all variables.
 
@@ -407,16 +415,8 @@ where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  
 
-
-The above relation can be interpreted as stating that \todo{This is not correct}
-$\mathbf{e}$ is the union of all records satisfying $e$.
-
-\todo[inline]{Or this formulation?}
-\begin{equation}
-\mathbf{e} = \big(\mathbf{d}(\overline{F}_1), \ldots , \mathbf{d}(\overline{F}_m)
-\big),
-\end{equation}
-
+The above relation can be interpreted as stating that 
+$\mathbf{e}$ is the set of all categories that make a record satisfy $e$.
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
@@ -464,25 +464,30 @@ where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
 As stated above, categorical edits are usually defined negatively as a region of
 $D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
 are allowed. We may choose to formulate a negative formulation of edits containing
-both variable types: \todo{$s$ vs $F$ in previous sections}
+both variable types: 
 \begin{equation}
 e = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-\lnot(\mathbf{v}\in \overline{s}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
+\lnot(\mathbf{v}\in \overline{F}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
 \end{equation}
 where it is understood that $s\subseteq D$ and if $\mathbf{r}\in e$, then $\mathbf{r}$ violates $e$.
 To obtain a positive formulation, we first rewrite the set membership condition by applying basic
 rules of first-order logic:
 \begin{eqnarray}
-&&\lnot(\mathbf{v}\in \overline{s}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
-&\Leftrightarrow& \lnot (\mathbf{v}\in \overline{s} \lor \mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
-&\Leftrightarrow& \lnot (\mathbf{v}\in s \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
+&&\lnot(\mathbf{v}\in \overline{F}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
+&\Leftrightarrow& \lnot (\mathbf{v}\in \overline{F} \lor \mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
+&\Leftrightarrow& \lnot (\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
 \label{eq:implication}
 \end{eqnarray}
 This then yields a positive formulation of $e$ given by
 \begin{equation}
 \overline{e} = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-\mathbf{v}\in s \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
+\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
 \end{equation}
+\todo[inline]{Da's inderdaad de standaard form, maar deze dekt geen restricties van de volgende
+vorm:
+if ($x>0$) then ($y>0$)
+die we ook aankunnen.
+} 
 This formulation of edits on mixed-type data is called the \emph{standard form}
 by \citet{waal:2003}. It is also the form in which the \code{editrules} package
 accepts mixed-type edits and has the property that if
