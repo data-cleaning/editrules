@@ -18,6 +18,13 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\Fc}{\mathbf{\overline{F}}}
+\newcommand{\D}{\mathbf{D}}
+\newcommand{\FD}{\mathbb{F}}
+\newcommand{\FDc}{\overline{\mathbb{F}}}
+
+
 %\renewcommand{\mathbf}[1]{\ensuremath{\mathbf{#1}}}
 
 \usepackage{float} 
@@ -462,36 +469,44 @@ taking values in $\mathbf{D}\times\mathbb{R}^n$:
 \end{equation}
 where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
 As stated above, categorical edits are usually defined negatively as a region of
-$D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
-are allowed. We may choose to formulate a negative formulation of edits containing
-both variable types: 
+$\mathbf{D}$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
+are allowed. We may choose a negative formulation of edits containing
+both variable types by defining $\mathbb{F}$: 
 \begin{equation}
-e = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-\lnot(\mathbf{v}\in \overline{F}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
+\mathbb{F} = \{\mathbf{r}\in \mathbf{D} \times\mathbb{R}^n: 
+\mathbf{v}\in \mathbf{F} \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
 \end{equation}
-where it is understood that $s\subseteq D$ and if $\mathbf{r}\in e$, then $\mathbf{r}$ violates $e$.
-To obtain a positive formulation, we first rewrite the set membership condition by applying basic
+where it is understood that $\F \subseteq \D$ and if $\mathbf{r}
+\in \FD$, then $\mathbf{r}$ violates edit $e$.
+To obtain a positive formulation $\FDc$, we first negate the set membership condition 
+and apply basic
 rules of first-order logic:
 \begin{eqnarray}
-&&\lnot(\mathbf{v}\in \overline{F}) \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
-&\Leftrightarrow& \lnot (\mathbf{v}\in \overline{F} \lor \mathbf{a}^T\mathbf{x}\leq b)\nonumber\\
-&\Leftrightarrow& \lnot (\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
+&&\lnot\big(\mathbf{v}\in \F \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\big)\nonumber\\
+&\Leftrightarrow& \lnot( \mathbf{v}\in \F) \lor \mathbf{a}^T\mathbf{x}\leq b\nonumber\\
+&\Leftrightarrow& (\mathbf{v}\in \F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
 \label{eq:implication}
 \end{eqnarray}
 This then yields a positive formulation of $e$ given by
 \begin{equation}
-\overline{e} = \{\mathbf{r}\in D\times\mathbb{R}^n: 
+\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
 \mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
 \end{equation}
 \todo[inline]{Da's inderdaad de standaard form, maar deze dekt geen restricties van de volgende
 vorm:
 if ($x>0$) then ($y>0$)
 die we ook aankunnen.
+Eigenlijk kunnen we alle statements van de vorm
+\begin{equation}
+\bigvee_i v_i \in \overline{F}_i \bigvee_j \mathbf{a}_j^T\mathbf{x} \leq b_j
+\end{equation}
+aan. Ik twijfel of we dat in het stuk moeten verwerken: ik neig naar wel, maar dan
+moet het hierboven (weer...) herschreven worden.
 } 
 This formulation of edits on mixed-type data is called the \emph{standard form}
 by \citet{waal:2003}. It is also the form in which the \code{editrules} package
 accepts mixed-type edits and has the property that if
-$\mathbf{r}\in\overline{e}$ then $\mathbf{r}$ satisfies $e$.
+$\mathbf{r}\in\FDc$ then $\mathbf{r}$ satisfies $e$.
 
 We now define a binary variable $l$ that indicates whether the linear restriction in 
 the consequent is obeyed or not:
@@ -660,9 +675,13 @@ as.mip(E, x=list(age=9, married=TRUE))
 @
 Two variables \code{delta.age} and \code{delta.married} are introduced, that
 will signify if these variables need to be adapted.
-Line 3 and 4 try to restrict \code{age}  to $9$ and line 5 tries to restrict 
+Line 3 and 4 try to restrict \code{age}  to $9$. As can be seen the value of $M$
+is set to $10^7$. The value of $M$ can be supplied to \code{as.mip}.
+If \code{delta.age} is $1$  the value of \code{age} is not restricted
+to $9$, but to $[9-10^7, 9+10^7]$
+Line 5 tries to restrict 
 \code{married} to \code{TRUE}. The last line shows the objective function, which
-canbe influenced by supplying \code{weight} to \code{as.mip}.
+can be influenced by supplying \code{weight} to \code{as.mip}.
 
 The mip object is transformed into a 
 \code{lp} object needed by \code{lpSolveAPI} with the function \code{as.lp.mip}.
