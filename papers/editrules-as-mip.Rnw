@@ -21,6 +21,7 @@
 \newcommand{\F}{\mathbf{F}}
 \newcommand{\Fc}{\mathbf{\overline{F}}}
 \newcommand{\D}{\mathbf{D}}
+\newcommand{\Ls}{\mathbf{L}}
 \newcommand{\FD}{\mathbb{F}}
 \newcommand{\FDc}{\overline{\mathbb{F}}}
 
@@ -459,7 +460,7 @@ either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
 $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
 
-\subsection{Edits rules on data of mixed type}
+\subsection{Mixed type edits rules}
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
 as a concatenation of numerical and categorical variables 
@@ -474,62 +475,74 @@ are allowed. We may choose a negative formulation of edits containing
 both variable types by defining $\mathbb{F}$: 
 \begin{equation}
 \mathbb{F} = \{\mathbf{r}\in \mathbf{D} \times\mathbb{R}^n: 
-\mathbf{v}\in \mathbf{F} \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\}
+\mathbf{v}\in \mathbf{F} \land \mathbf{x} \in \Ls \}
 \end{equation}
-where it is understood that $\F \subseteq \D$ and if $\mathbf{r}
-\in \FD$, then $\mathbf{r}$ violates edit $e$.
+where $\F \subseteq \D$ and $\Ls$ is a convex subspace of 
+$\mathbb{R}^n$ defined by $\mathbf{A}^\Ls\mathbf{x} > \mathbf{b}^\Ls$.
+It is understood that if $\mathbf{r}
+\in \FD$, then $\mathbf{r}$ violates edit $e$. The rows of 
+$\mathbf{A}^{\Ls}\mathbf{x} > \mathbf{b}^\L$ define half spaces $L_i$ and their 
+intersection forms $\Ls$.
+
 To obtain a positive formulation $\FDc$, we first negate the set membership condition 
 and apply basic
 rules of first-order logic:
 \begin{eqnarray}
-&&\lnot\big(\mathbf{v}\in \F \land \lnot(\mathbf{a}^T\mathbf{x}\leq b)\big)\nonumber\\
-&\Leftrightarrow& \lnot( \mathbf{v}\in \F) \lor \mathbf{a}^T\mathbf{x}\leq b\nonumber\\
-&\Leftrightarrow& (\mathbf{v}\in \F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b).
+&&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in \Ls \big)\nonumber\\
+&\Leftrightarrow& \lnot \big( \mathbf{v}\in \F \land \mathbf{x} \in L_1 \ldots \land \mathbf{x} \in L_{|\Ls|})
+\nonumber\\
+&\Leftrightarrow& \mathbf{v} \not\in \F \lor \mathbf{x} \not\in L_1 \ldots \lor 
+\mathbf{x} \not\in L_{|\Ls|}\\
+&\Leftrightarrow& \mathbf{v}\in \Fc \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
+\lor \ldots \lor \mathbf{a}^T_{|L|}\mathbf{x}\leq b_{|L|}.
 \label{eq:implication}
 \end{eqnarray}
-This then yields a positive formulation of $e$ given by
+This then yields a positive formulation of $\FDc$ given by
 \begin{equation}
-\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
+  r \in \FDc = \bigvee_i v_i \in \overline{F}_i \bigvee^{|\Ls|}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j
 \end{equation}
-\todo[inline]{Da's inderdaad de standaard form, maar deze dekt geen restricties van de volgende
+
+\todo[inline]{De standaard form dekt geen restricties van de volgende
 vorm:
 if ($x>0$) then ($y>0$)
 die we ook aankunnen.
 Eigenlijk kunnen we alle statements van de vorm
+Wat doen we met de standaardform?
 \begin{equation}
-\bigvee_i v_i \in \overline{F}_i \bigvee_j \mathbf{a}_j^T\mathbf{x} \leq b_j
+\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
+\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
 \end{equation}
-aan. Ik twijfel of we dat in het stuk moeten verwerken: ik neig naar wel, maar dan
-moet het hierboven (weer...) herschreven worden.
 } 
-This formulation of edits on mixed-type data is called the \emph{standard form}
-by \citet{waal:2003}. It is also the form in which the \code{editrules} package
+This formulation of edits on mixed-type data is more general than the \emph{standard form}
+by \citet{waal:2003}, which it restricted to half space $L_1$.
+\todo{Give example of expressiveness?}
+It is the form in which the \code{editrules} package
 accepts mixed-type edits and has the property that if
 $\mathbf{r}\in\FDc$ then $\mathbf{r}$ satisfies $e$.
 
-We now define a binary variable $l$ that indicates whether the linear restriction in 
-the consequent is obeyed or not:
+We now define a binary variables $l_i$ that indicate whether $\mathbf{x}$ is 
+in half space $L_i$ or not:
 \begin{equation}
-l = \left\{\begin{array}{l}
-0 \textrm{ when } \mathbf{a}^T\mathbf{x}\leq b\\
-1 \textrm{ otherwise.}
+l_i = \left\{\begin{array}{l}
+0 \textrm{ when } \mathbf{a}^T_i\mathbf{x}\leq b_i\\
+1 \textrm{ when } \mathbf{x} \in L_i
 \end{array}\right.
 \end{equation}
 Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implication})
 and the definition of $\mathbf{e}$, we can write the mixed-data edit as
 \begin{equation}
 \label{eq:mixedit}
-\mathbf{e}(s)^T\mathbf{v} - l \geq 0.
+\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{|\Ls|}_{i=1} (1-l_i) \geq 1.
 \end{equation}
 These form the user-defined part of the $\mathbf{R}^H$ part of the restriction matrix.
-To connect $l$ with the linear restriction in the consequent we also add
+To connect $l_i$ with the linear restrictions we also add
 \begin{equation}
 \label{eq:linconsequent}
-\mathbf{a}^T\mathbf{x} \leq b + Ml,
+\mathbf{a}^T_i\mathbf{x} \leq b_i + Ml_i,
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if the
-$l=0$, the inequality $\mathbf{a}^T\mathbf{x}\leq b$ is enforced. When $l=0$ it
+$l_i=0$, the inequality $\mathbf{a}^T_i\mathbf{x}\leq b_i$ is enforced. When 
+$l_i=0$ it
 is unimportant for the whole restriction to hold whether the inequality holds.
 Finally, similar to the purely categorical case we need to add restrictions on
 the binary representation of $\mathbf{v}$ as in Eq.\ \eqref{eq:hardmaxcat}, so
@@ -545,9 +558,6 @@ l_1,\ldots,l_k).
 Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
 recorded values consists of the union of the restrictions for categorical variables
 (Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
-
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
@@ -703,7 +713,7 @@ typical error localization problem in practice.
 
 \subsection{Numerical linear edits}
 The synthetic edits used in this benchmark are a balance system. This type of edits
-are found in are found e.g. in business statistics and energy statistics. 
+are found frequently e.g. in business statistics and energy statistics. 
 The numerical
 variables form a binary tree where the value of a node is the sum of its child node
 values. The value of the top node is constraint to be non-negative.
@@ -712,7 +722,8 @@ values. The value of the top node is constraint to be non-negative.
 @
 
 A solution to this system is the zero vector $(x_1, \ldots, x_n) = (0,\ldots,0)$.
-We can introduce an error by setting an $x_i$ to $-1$.
+We can introduce an error in the data by setting an $x_i$ to $-1$. This way we 
+can test the algorithm with increasing number of errors. 
 
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
@@ -720,8 +731,8 @@ up to 10.
 \todo[inline]{results}
 
 \subsection{Categorical edits}
-For categorical edits we create a chain of categorical edits of the form:
-\code{if ($A_{i}$==TRUE) $A_{i+1}$ == TRUE} for \code{$i$} is $1$ to $n$.
+For categorical edits we create a chain of categorical edits of the form:\\
+\code{if ($A_{i}$==TRUE) $A_{i+1}$ == TRUE}, for \code{$i$} is $1$ to $n$.\\
 We restrict ${A_1}$ to \code{TRUE}.
 In practice categorical edits form a web of interconnected edits. The chain of
 edits reflects this connectivity.
@@ -732,7 +743,7 @@ The solution to this system is the vector \code{(TRUE, ..., TRUE)}.
 We can introduce an error by setting an $A_i$ to \code{FALSE}.
 
 This benchmark was run with the number of variables up to 100 and the number of errors
-up to 10.
+up to $10$.
 \todo[inline]{results}.
 
 \subsection{Mixed edits}
