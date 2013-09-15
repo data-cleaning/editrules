@@ -682,7 +682,8 @@ The hard restrictions \code{E} can be transformed into ${\bf R}^H$ with
 as.mip(E)
 @
 \code{num1} states that variable \code{.num.1} and \code{married} cannot both be true 
-($=1$). If \code{married==TRUE} than restriction of line 2 turns into 
+($=1$).\\
+If \code{married==TRUE} than the restriction of line 2 turns into 
 \code{age >= 17}.
 
 Supplying values \code{x} to the function \code{as.mip} adds ${\bf R}^0$:
@@ -690,13 +691,14 @@ Supplying values \code{x} to the function \code{as.mip} adds ${\bf R}^0$:
 as.mip(E, x=list(age=9, married=TRUE))
 @
 Two variables \code{delta.age} and \code{delta.married} are introduced, that
-will signify if these variables need to be adapted.
+will signify if variables \code{age} and \code{married} need to be adapted.\\
 Line 3 and 4 try to restrict \code{age}  to $9$. As can be seen the value of $M$
 is set to $10^7$. The value of $M$ can be supplied to \code{as.mip}.
 If \code{delta.age} is $1$  the value of \code{age} is not restricted
-to $9$, but to $[9-10^7, 9+10^7]$
+to $9$, but to $[-10^7+9, 10^7+9]$.\\
 Line 5 tries to restrict 
-\code{married} to \code{TRUE}. The last line shows the objective function, which
+\code{married} to \code{TRUE}.\\
+The last line shows the objective function, which
 can be influenced by supplying \code{weight} to \code{as.mip}.
 
 The mip object is transformed into a 
