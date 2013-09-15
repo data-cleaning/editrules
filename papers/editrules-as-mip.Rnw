@@ -392,7 +392,8 @@ least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$.
 Membership to $\mathbf{\overline{F}}$ can also be 
 written with the following logical statement:
 \begin{equation}
-\mathbf{v} \in \mathbf{\overline{F}}= \bigvee_{i} v_i \in \overline{F}_i
+\label{eq:cat_logical}
+\mathbf{v} \in \mathbf{\overline{F}}= \bigvee^m_{i=1} v_i \in \overline{F}_i
 \end{equation}
 
 Below, we
@@ -401,7 +402,7 @@ of $v_i\in\overline{F}_i$ over all variables.
 
 To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
 first associate with each categorical variable $v_i$ a binary vector
-$\mathbf{d}$ of which the coefficients are defined as follows (also see Eq.\
+$\mathbf{d}$ of which the coefficients are defined as follows (see also Eq.\
 \eqref{eq:defineD}).
 \begin{equation}
 \label{eq:definedvec}
@@ -438,7 +439,7 @@ least one of the $v_i\in\overline{F}_i$ may be written as
 \label{eq:hardcat}
 \mathbf{e}^T\mathbf{d}(\mathbf{v}) \geq 1.
 \end{equation}
-Equations \eqref{eq:hardcat} and \eqref{eq:hardmaxcat} constitute the hard restrictions, stored in
+Equations \eqref{eq:hardmaxcat} and \eqref{eq:hardcat} constitute the hard restrictions, stored in
 $\mathbf{R}^H$.
 
 Using the binary vector notation for $\mathbf{v}$, and adding the $\Delta$-variables
@@ -499,6 +500,7 @@ rules of first-order logic:
 \end{eqnarray}
 This then yields a positive formulation of $\FDc$ given by
 \begin{equation}
+  \label{eq:mixedtype}
   r \in \FDc = \bigvee_i v_i \in \overline{F}_i \bigvee^{|\Ls|}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j
 \end{equation}
 
@@ -506,7 +508,6 @@ This then yields a positive formulation of $\FDc$ given by
 vorm:
 if ($x>0$) then ($y>0$)
 die we ook aankunnen.
-Eigenlijk kunnen we alle statements van de vorm
 Wat doen we met de standaardform?
 \begin{equation}
 \FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
@@ -520,7 +521,12 @@ It is the form in which the \code{editrules} package
 accepts mixed-type edits and has the property that if
 $\mathbf{r}\in\FDc$ then $\mathbf{r}$ satisfies $e$.
 
-We now define a binary variables $l_i$ that indicate whether $\mathbf{x}$ is 
+Note that this formulation is also a generalization of both the linear and the
+categorical edit. In case $\Ls = \emptyset$ Eq. (\ref{eq:mixedtype}) is equal to 
+a categorical edit (Eq. (\ref{eq:cat_logical})).
+When $\F = \emptyset$ and $\Ls = L_1$, we have a linear edit.
+
+We now define binary variables $l_i$ that indicate whether $\mathbf{x}$ is 
 in half space $L_i$ or not:
 \begin{equation}
 l_i = \left\{\begin{array}{l}
@@ -542,7 +548,7 @@ To connect $l_i$ with the linear restrictions we also add
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if the
 $l_i=0$, the inequality $\mathbf{a}^T_i\mathbf{x}\leq b_i$ is enforced. When 
-$l_i=0$ it
+$l_i=1$ it
 is unimportant for the whole restriction to hold whether the inequality holds.
 Finally, similar to the purely categorical case we need to add restrictions on
 the binary representation of $\mathbf{v}$ as in Eq.\ \eqref{eq:hardmaxcat}, so
