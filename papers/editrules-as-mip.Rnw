@@ -460,7 +460,7 @@ either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
 $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
 
-\subsection{Mixed type edits rules}
+\subsection{Mixed-type edit rules}
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
 as a concatenation of numerical and categorical variables 
