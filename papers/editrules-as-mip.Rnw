@@ -504,27 +504,26 @@ This then yields a positive formulation of $\FDc$ given by
   r \in \FDc = \bigvee_i v_i \in \overline{F}_i \bigvee^{|\Ls|}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j
 \end{equation}
 
+This formulation of edits on mixed-type data is more general than the \emph{standard form}
+by \citet{waal:2003}, which it restricted to half space $L_1$.
 \todo[inline]{De standaard form dekt geen restricties van de volgende
 vorm:
 if ($x>0$) then ($y>0$)
 die we ook aankunnen.
-Wat doen we met de standaardform?
+Wat doen we met de standaardform, die ook geven?
 \begin{equation}
 \FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
 \mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
 \end{equation}
 } 
-This formulation of edits on mixed-type data is more general than the \emph{standard form}
-by \citet{waal:2003}, which it restricted to half space $L_1$.
-\todo{Give example of expressiveness?}
 It is the form in which the \code{editrules} package
 accepts mixed-type edits and has the property that if
 $\mathbf{r}\in\FDc$ then $\mathbf{r}$ satisfies $e$.
 
 Note that this formulation is also a generalization of both the linear and the
-categorical edit. In case $\Ls = \emptyset$ Eq. (\ref{eq:mixedtype}) is equal to 
+categorical edit. In case $\Ls = \mathbb{R}^n$ Eq. (\ref{eq:mixedtype}) is equal to 
 a categorical edit (Eq. (\ref{eq:cat_logical})).
-When $\F = \emptyset$ and $\Ls = L_1$, we have a linear edit.
+When $\F = \D$ and $\Ls = L_1$, we have a linear edit.
 
 We now define binary variables $l_i$ that indicate whether $\mathbf{x}$ is 
 in half space $L_i$ or not:
