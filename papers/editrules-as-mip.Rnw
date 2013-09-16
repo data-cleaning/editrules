@@ -420,10 +420,33 @@ Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 %\Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
 %\Big),
 \end{equation}
+\todo[inline]{This is not correct, because or-ing all records 
+creates $e(v_i) = \D_i$ in many cases. And that results in that the edit is 
+always true!\\
+It really is:
+\begin{equation}
+\mathbf{e} = \Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
+\Big),
+\end{equation}
+
+or (ab)using a previous notation
+\begin{equation}
+\mathbf{e} = \big(\mathbf{d}(\overline{F}_1), \ldots ,\mathbf{d}(\overline{F}_m)
+\big),
+\end{equation}
+
+}
+
 where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
 $\mathbf{e}$ is the set of all records satisfing the edit.
+\todo[inline]{This is not correct!, since in many cases 
+$\overline{F_i} = \emptyset \implies d(v_i) = 0$ and thus $\mathbf{e}$ can not
+be the set of all records satisfying the 
+edit...
+}
+
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
@@ -484,13 +507,13 @@ the edit.
 To obtain a positive reformulation, we first negate the set membership
 condition and apply basic rules of proposition logic:
 \begin{eqnarray}
-&&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in \Ls \big)\nonumber\\
-&\Leftrightarrow& \lnot \big( \mathbf{v}\in \F \land \mathbf{x} \in L_1 \ldots \land \mathbf{x} \in L_{|\Ls|})
+&&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in P \big)\nonumber\\
+&\Leftrightarrow& \lnot \big( \mathbf{v}\in \F \land \mathbf{x} \in P_1 \ldots \land \mathbf{x} \in P_{k})
 \nonumber\\
-&\Leftrightarrow& \mathbf{v} \not\in \F \lor \mathbf{x} \not\in L_1 \ldots \lor 
-\mathbf{x} \not\in L_{|\Ls|}\nonumber\\
+&\Leftrightarrow& \mathbf{v} \not\in \F \lor \mathbf{x} \not\in P_1 \ldots \lor 
+\mathbf{x} \not\in P_{k}\nonumber\\
 &\Leftrightarrow& \mathbf{v}\in \overline{\F} \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
-\lor \ldots \lor \mathbf{a}^T_{|L|}\mathbf{x}\leq b_{|L|}.
+\lor \ldots \lor \mathbf{a}^T_{k}\mathbf{x}\leq b_{k}.
 \label{eq:implication}
 \end{eqnarray}
 This then yields a positive formulation of $E$. That is, a record $\mathbf{r}$
@@ -532,7 +555,7 @@ on numerical data:
 \end{equation}
 These conditional type edits are more natural for users as they can directly be
 translated to an \code{if} statement in a scripting language. Finally, note
-that an equalities can be introduced consequent by defining pairs of
+that equalities can be introduced by defining pairs of
 edits like so:
 \begin{equation}
 \left\{\begin{array}{l}
@@ -543,30 +566,30 @@ edits like so:
 
 
 To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we first define binary
-variables $l_i$ that indicate whether $\mathbf{x}$ obeys
-$\mathbf{a}^T_k\mathbf{x}\leq b$ or not:
+variables $p_i$ that indicate whether $\mathbf{x}$ obeys
+$\mathbf{a}^T_k\mathbf{x}\leq b$ or $\mathbf{x} \in P_j$:
 \begin{equation}
-l_j = \left\{\begin{array}{l}
+p_j = \left\{\begin{array}{l}
 0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
-1 \textrm{ when } \mathbf{x} > b_j
+1 \textrm{ when } \mathbf{a}^T_j\mathbf{x} > b_j %( = \mathbf{x} \in P_j)
 \end{array}\right.
 \end{equation}
 Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implication})
 and the definition of $\mathbf{e}$, we can write the mixed-data edit as
 \begin{equation}
 \label{eq:mixedit}
-\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-l_j) \geq 1.
+\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-p_j) \geq 1.
 \end{equation}
 Rules of this form constitute the user-defined part of the $\mathbf{R}^H$ part
-of the restriction matrix. To connect $l_j$ with the linear restrictions we
+of the restriction matrix. To connect $p_j$ with the linear restrictions we
 also add
 \begin{equation}
 \label{eq:linconsequent}
-\mathbf{a}^T_j\mathbf{x} \leq b_j + Ml_j,
+\mathbf{a}^T_j\mathbf{x} \leq b_j + Mp_j,
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
-$l_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
-$l_j=1$ it is unimportant for the whole restriction to hold whether the
+$p_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
+$p_j=1$ it is unimportant for the whole restriction to hold whether the
 inequality holds.  Finally, similar to the purely categorical case we need to
 add restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
