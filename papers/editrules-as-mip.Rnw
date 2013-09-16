@@ -18,9 +18,10 @@
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
-\newcommand{\F}{\mathbf{F}}
+\newcommand{\E}{E}
+\newcommand{\F}{F}
 \newcommand{\Fc}{\mathbf{\overline{F}}}
-\newcommand{\D}{\mathbf{D}}
+\newcommand{\D}{D}
 \newcommand{\Ls}{\mathbf{L}}
 \newcommand{\FD}{\mathbb{F}}
 \newcommand{\FDc}{\overline{\mathbb{F}}}
@@ -342,10 +343,10 @@ which states that $x_i$ equals $x_i^0$
 
 \subsection{Categorical edit rules}
 \label{sec:catdataerror}
-Categorical records $\mathbf{v}\in \mathbf{D}$ take values in a Cartesian product domain 
+Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
 \begin{equation}
 \label{eq:defineD}
-\mathbf{D} = D_1\times D_2\times\cdots\times D_m,
+\D = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
 categorical variable. The category names are unimportant in this formulation, 
@@ -354,32 +355,30 @@ so for each $D_i$ we may write
 \label{eq:defineD}
 D_i = \{1,2,\ldots,|D_i|\}.
 \end{equation}
-The size of the domain, $|\mathbf{D}|$, for categorical records is equal to the product
-of the $|D_i|$.
+The size of the domain, $|\D|$, for categorical records is equal to the
+product of the $|D_i|$.
 
-A categorical edit splits $\mathbf{D}$ into a region $\overline{\mathbf{F}}$ 
-where records are 
-considered valid and a region $\mathbf{F}$ where records are considered invalid. 
-Typically, each categorical edit $e$ is specified by defining region 
-$\mathbf{F}$ as an invalid combination of categories:
+A categorical edit is a subset $\F$ of $\D$ where records are
+considered invalid, and we may write
 \begin{equation}
-\mathbf{F} = F_{1}\times F_{2}\times\cdots \times F_{m},
+\label{eq:defcatedit}
+\F = F_{1}\times F_{2}\times\cdots \times F_{m},
 \end{equation}
 where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
-$\mathbf{v}\in \mathbf{F}$ then the record violates $e$. 
+$\mathbf{v}\in \F$ then the record violates the edit.
 Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
 not be) in contrast to linear edits which are positively formulated (they
 specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
 translate categorical edits to a MIP problem, we need to specify 
-$\overline{\mathbf{F}}$, such that if $\mathbf{v}\in\overline{F}$ then
-$\mathbf{v}$ satisfies $e$.  Here, $\overline{\mathbf{F}}$ is the complement of
-$\mathbf{F}$ in $D$, which can be written as
+$\overline{\F}$, such that if $\mathbf{v}\in\overline{\F}$ then
+$\mathbf{v}$ satisfies $e$.  Here, $\overline{\F}$ is the complement of
+$\F$ in $D$, which can be written as
 %
 \begin{eqnarray}
 \label{eq:invedit}
 \lefteqn{
-\overline{\mathbf{F}} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
+\overline{\F} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
 }\nonumber\\
 &\cup& D_{1}\times \overline{F}_{2}\times\cdots \times D_{m}\cup\cdots 
 \cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{m},
@@ -389,13 +388,13 @@ $\mathbf{F}$ in $D$, which can be written as
 where for each variable $v_i$, $\overline{F}_{i}$ is the complement of
 $F_{i}$ in $D_i$.  Observe that Eq.\ \eqref{eq:complement} states that if at
 least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. 
-Membership to $\mathbf{\overline{F}}$ can also be 
-written with the following logical statement:
-\begin{equation}
-\label{eq:cat_logical}
-\mathbf{v} \in \mathbf{\overline{F}}= \bigvee^m_{i=1} v_i \in \overline{F}_i
-\end{equation}
-
+%%% OPM: dit is extra notatie, die de zaak niet per se duidelijker maakt.
+%Membership to $\overline{\F}$ can also be 
+%written with the following logical statement:
+%\begin{equation}
+%\label{eq:cat_logical}
+%\mathbf{v} \in \overline{\F}= \bigvee^m_{i=1} v_i \in \overline{F}_i
+%\end{equation}
 Below, we
 will use this property and construct a linear relation that counts the number
 of $v_i\in\overline{F}_i$ over all variables.
@@ -415,17 +414,16 @@ Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$.
 It is zero everywhere except at the value of $v_i\in D_i$. We will write
 $\mathbf{d}(\mathbf{v})$ to indicate the concatenated vector
 $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$ which represents a complete record.
-Similarly, each edit $e$ is defined as a binary vector $\mathbf{e}$ given by
+Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \begin{equation}
-\mathbf{e} = \Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
-\Big),
+\mathbf{e} = \bigvee_{\mathbf{v}\in \overline{\F}}\mathbf{d}(\mathbf{v}),
+%\Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
+%\Big),
 \end{equation}
 where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
-$\mathbf{d}$.  
-
-The above relation can be interpreted as stating that 
-$\mathbf{e}$ is the set of all categories that make a record satisfy $e$.
+$\mathbf{d}$.  The above relation can be interpreted as stating that
+$\mathbf{e}$ is the set of all records satisfing the edit.
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
@@ -465,101 +463,122 @@ $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
 as a concatenation of numerical and categorical variables 
-taking values in $\mathbf{D}\times\mathbb{R}^n$: 
+taking values in $D\times\mathbb{R}^n$: 
 \begin{equation}
 \mathbf{r} = (v_1,\ldots,v_m,x_1,\ldots,x_n) = (\mathbf{v},\mathbf{x}),
 \end{equation}
 where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
 As stated above, categorical edits are usually defined negatively as a region of
-$\mathbf{D}$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
+$D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
 are allowed. We may choose a negative formulation of edits containing
-both variable types by defining $\mathbb{F}$: 
+both variable types by defining $\E$: 
 \begin{equation}
-\mathbb{F} = \{\mathbf{r}\in \mathbf{D} \times\mathbb{R}^n: 
-\mathbf{v}\in \mathbf{F} \land \mathbf{x} \in \Ls \}
+\E = \{\mathbf{r}\in \D \times\mathbb{R}^n: 
+\mathbf{v}\in \F \land \mathbf{x} \in P \},
 \end{equation}
-where $\F \subseteq \D$ and $\Ls$ is a convex subspace of 
-$\mathbb{R}^n$ defined by $\mathbf{A}^\Ls\mathbf{x} > \mathbf{b}^\Ls$.
-It is understood that if $\mathbf{r}
-\in \FD$, then $\mathbf{r}$ violates edit $e$. The rows of 
-$\mathbf{A}^{\Ls}\mathbf{x} > \mathbf{b}^\L$ define half spaces $L_i$ and their 
-intersection forms $\Ls$.
+where $\F \subseteq \D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by
+(possibly empty) set of $k$ linear inequalities of the form $\mathbf{a}^T\mathbf{x}
+> b$.  It is understood that if $\mathbf{r} \in \E$, then $\mathbf{r}$ violates
+the edit. 
 
-To obtain a positive formulation $\FDc$, we first negate the set membership condition 
-and apply basic
-rules of first-order logic:
+To obtain a positive reformulation, we first negate the set membership
+condition and apply basic rules of proposition logic:
 \begin{eqnarray}
 &&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in \Ls \big)\nonumber\\
 &\Leftrightarrow& \lnot \big( \mathbf{v}\in \F \land \mathbf{x} \in L_1 \ldots \land \mathbf{x} \in L_{|\Ls|})
 \nonumber\\
 &\Leftrightarrow& \mathbf{v} \not\in \F \lor \mathbf{x} \not\in L_1 \ldots \lor 
-\mathbf{x} \not\in L_{|\Ls|}\\
-&\Leftrightarrow& \mathbf{v}\in \Fc \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
+\mathbf{x} \not\in L_{|\Ls|}\nonumber\\
+&\Leftrightarrow& \mathbf{v}\in \overline{\F} \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
 \lor \ldots \lor \mathbf{a}^T_{|L|}\mathbf{x}\leq b_{|L|}.
 \label{eq:implication}
 \end{eqnarray}
-This then yields a positive formulation of $\FDc$ given by
+This then yields a positive formulation of $E$. That is, a record $\mathbf{r}$
+satisfies $E$ if and only if
 \begin{equation}
   \label{eq:mixedtype}
-  r \in \FDc = \bigvee_i v_i \in \overline{F}_i \bigvee^{|\Ls|}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j
+  \mathbf{r} \in \overline{\E} \Leftrightarrow 
+\bigvee_{i=1}^m v_i \in \overline{F}_i \:\lor\: \bigvee^{k}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j.
+\end{equation}
+%
+%This formulation of edits on mixed-type data is more general than the \emph{standard form}
+%by \citet{waal:2003}, which allows but a single linear inequality.
+%\todo[inline]{De standaard form dekt geen restricties van de volgende
+%vorm:
+%if ($x>0$) then ($y>0$)
+%die we ook aankunnen.
+%Wat doen we met de standaardform, die ook geven?
+%\begin{equation}
+%\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
+%\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
+%\end{equation}
+%} 
+This formulation is both a generalization of linear inequality and
+categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing $k=0$, we get
+$P=\mathbb{R}^n$ and only the categorical part remains. Similarly, choosing
+$\F=\D$, only the linear inequalities remain. The definition in 
+Eq.\ \eqref{eq:implication} can be rewritten as a ``conditional edit'' by using
+the implication replacement rule from propositinal logic  which states that
+$\lnot p\lor q$ may be replaced by $p\Rightarrow q$. If we limit
+Eq.\ \eqref{eq:implication} to a single inequality, we obtain the normal form of
+\cite{waal:2003}.
+\begin{equation}
+\mathbf{v} \in \F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b.
+\end{equation}
+If we choose $\overline{F}=D$ and leave two inequalities we obtain a conditional edit
+on numerical data:
+\begin{equation}
+\mathbf{a}_1^T\mathbf{x} > b_1 \Rightarrow \mathbf{a}_2^T\mathbf{x} \leq b_2.
+\end{equation}
+These conditional type edits are more natural for users as they can directly be
+translated to an \code{if} statement in a scripting language. Finally, note
+that an equalities can be introduced consequent by defining pairs of
+edits like so:
+\begin{equation}
+\left\{\begin{array}{l}
+\mathbf{v} \in \F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b\\
+\mathbf{v} \in \F\Rightarrow -\mathbf{a}^T\mathbf{x}\leq -b.
+\end{array}\right.
 \end{equation}
 
-This formulation of edits on mixed-type data is more general than the \emph{standard form}
-by \citet{waal:2003}, which it restricted to half space $L_1$.
-\todo[inline]{De standaard form dekt geen restricties van de volgende
-vorm:
-if ($x>0$) then ($y>0$)
-die we ook aankunnen.
-Wat doen we met de standaardform, die ook geven?
-\begin{equation}
-\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
-\end{equation}
-} 
-It is the form in which the \code{editrules} package
-accepts mixed-type edits and has the property that if
-$\mathbf{r}\in\FDc$ then $\mathbf{r}$ satisfies $e$.
 
-Note that this formulation is also a generalization of both the linear and the
-categorical edit. In case $\Ls = \mathbb{R}^n$ Eq. (\ref{eq:mixedtype}) is equal to 
-a categorical edit (Eq. (\ref{eq:cat_logical})).
-When $\F = \D$ and $\Ls = L_1$, we have a linear edit.
-
-We now define binary variables $l_i$ that indicate whether $\mathbf{x}$ is 
-in half space $L_i$ or not:
+To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we first define binary
+variables $l_i$ that indicate whether $\mathbf{x}$ obeys
+$\mathbf{a}^T_k\mathbf{x}\leq b$ or not:
 \begin{equation}
-l_i = \left\{\begin{array}{l}
-0 \textrm{ when } \mathbf{a}^T_i\mathbf{x}\leq b_i\\
-1 \textrm{ when } \mathbf{x} \in L_i
+l_j = \left\{\begin{array}{l}
+0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
+1 \textrm{ when } \mathbf{x} > b_j
 \end{array}\right.
 \end{equation}
 Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implication})
 and the definition of $\mathbf{e}$, we can write the mixed-data edit as
 \begin{equation}
 \label{eq:mixedit}
-\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{|\Ls|}_{i=1} (1-l_i) \geq 1.
+\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-l_j) \geq 1.
 \end{equation}
-These form the user-defined part of the $\mathbf{R}^H$ part of the restriction matrix.
-To connect $l_i$ with the linear restrictions we also add
+Rules of this form constitute the user-defined part of the $\mathbf{R}^H$ part
+of the restriction matrix. To connect $l_j$ with the linear restrictions we
+also add
 \begin{equation}
 \label{eq:linconsequent}
-\mathbf{a}^T_i\mathbf{x} \leq b_i + Ml_i,
+\mathbf{a}^T_j\mathbf{x} \leq b_j + Ml_j,
 \end{equation}
-to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if the
-$l_i=0$, the inequality $\mathbf{a}^T_i\mathbf{x}\leq b_i$ is enforced. When 
-$l_i=1$ it
-is unimportant for the whole restriction to hold whether the inequality holds.
-Finally, similar to the purely categorical case we need to add restrictions on
-the binary representation of $\mathbf{v}$ as in Eq.\ \eqref{eq:hardmaxcat}, so
-Eq.\ \eqref{eq:hardmaxcat}, Eq.\ \eqref{eq:linconsequent} and Eq.\
-\eqref{eq:mixedit} constitute $\mathbf{R}^H$.
+to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
+$l_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
+$l_j=1$ it is unimportant for the whole restriction to hold whether the
+inequality holds.  Finally, similar to the purely categorical case we need to
+add restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
+\eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
+\eqref{eq:linconsequent} and Eq.\ \eqref{eq:mixedit} constitute $\mathbf{R}^H$.
 
 In general there may be $k$ multiple mixed-type edits yielding an equal number of indicator
 variables for inequalities in the consequent. So the vector to minimize over becomes
 \begin{equation}
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
-l_1,\ldots,l_k).
+l_1,\ldots,l_K),
 \end{equation}
+where $K$ is the total number of linear edits occuring in all the mixed-type edits.
 Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
 recorded values consists of the union of the restrictions for categorical variables
 (Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
