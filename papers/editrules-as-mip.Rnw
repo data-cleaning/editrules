@@ -14,6 +14,8 @@
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
+\DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
+
 
 \newcommand{\code}[1]{\texttt{#1}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
@@ -34,6 +36,7 @@
 \newfloat{Rcode}{t!}{rco}
 \floatname{Rcode}{{\rm Figure}}
 
+\newtheorem{example}{Example}
 
 % stimulate latex to put multiple floats on a page.
 \setcounter{topnumber}{2}
@@ -341,6 +344,36 @@ $\Delta_i=0$ we obtain the set of restrictions
 \end{equation}
 which states that $x_i$ equals $x_i^0$
 
+\begin{example}
+Consider record with business survey data, consisting of the variables
+\emph{Number of staff} $p$ and \emph{Personel cost}  $c$.  We have the rules
+$p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
+for each staf member, more than one monetary unit is spent. Given two observed
+values $p^0$ and $c^0$, disobeying one or more of the rules, the MIP problem
+for error localization has the following form.
+\begin{equation*}
+\begin{array}{l}
+  \Minimize_{(p,c,\Delta_p,\Delta_c)\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c\\
+  \textrm{s.t. }\left[\begin{array}{rrrr}
+    1 & -1 & 0 & 0\\
+    1 &  0 & 0 & 0\\
+    0 &  1 & 0 & 0\\
+    1 &  0 & -M & 0\\
+    0 &  1 & 0 & -M
+  \end{array}\right]
+  \left[\begin{array}{c}
+   p \\ c \\ \Delta_p \\ \Delta_c
+  \end{array}\right] \leq
+  \left[\begin{array}{c}
+   0 \\ 0 \\ 0 \\ p^0 \\ c^0
+  \end{array}\right].
+\end{array}
+\end{equation*}
+\hfill\qed
+\end{example}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Categorical edit rules}
 \label{sec:catdataerror}
 Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
@@ -419,6 +452,7 @@ Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \begin{equation}
 \mathbf{e} = \left(\bigvee _{\lambda\in \overline{F}_1}\mathbf{d}(\lambda), \ldots ,\bigvee _{\lambda\in \overline{F}_m}\mathbf{d}(\lambda)
 \right),
+\label{eq:ecat}
 \end{equation}
 where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
@@ -430,7 +464,7 @@ To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocas
 we first impose the obvious restriction that each variable can take but a single value:
 \begin{equation}
 \label{eq:hardmaxcat}
-\sum_{j=1}^{|D_i|}d_j(v_i) = 1,
+\sum_{\lambda\in D_i}d_\lambda(v_i) = 1,
 \end{equation}
 for $i=1,2,\ldots,m$. It is now not difficult to see that the demand (Eq.\ \eqref{eq:complement}) that at 
 least one of the $v_i\in\overline{F}_i$ may be written as
@@ -451,15 +485,58 @@ To ensure that a change in $v_i$ results in a change in $\Delta_i$, the
 matrix $\mathbf{R}^0$ contains the restrictions
 \begin{equation}
 \label{eq:deltacat}
-d_{j^0}(v_i) =  1-\Delta_i,
+d_{\lambda^0}(v_i) =  1-\Delta_i,
 \end{equation}
-for $i=1,2,\ldots,m$.  Here, $j^0\in D_i$ is the observed
+for $i=1,2,\ldots,m$.  Here, $\lambda^0\in D_i$ is the observed
 value for variable $v_i$. It is not difficult to check, using Eq.
 \eqref{eq:definedvec}, that the above equation can only hold for all $j$ when
 either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
 $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
+\begin{example}
+Consider a two-variable record from the census with the variables \emph{Marital status} 
+$m$ and \emph{Age class} $a$. We have
+\begin{equation*}
+D = D_m\times D_a = \{\textsf{married, unmarried}\}\times\{\textsf{child, adult}\}.
+\end{equation*}
+Using the binary representation we see that a married adult is represented by the vector
+$\mathbf{v}^0=(\mathbf{d}(\textsf{married}),\mathbf{d}(\textsf{adult})) = (1,0,0,1)$. The rule that
+states ``\emph{A child cannot be married}'' translates to
+\begin{equation*}
+F = F_m\times F_a =  \{\textsf{married}\}\times\{\textsf{child}\}
+\end{equation*}
+which gives $\overline{F}_m=\{\textrm{unmarried}\}$ and $\overline{F}_a=\{\textrm{adult}\}$.
+Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}(F)=(0,1,0,1)$ and one may verify
+that $\mathbf{e}(F)^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the MIP
+problem for error localisation now looks like this.
+\begin{equation*}
+\begin{array}{l}
+  \Minimize_{(m,a,\Delta_m,\Delta_a)\in D\times \{0,1\}^2} \Delta_m + \Delta_a\\
+  \textrm{s.t. }\left[\begin{array}{rrrrrr}
+    1 &  0 & 1 & 0 & 0 & 0\\
+    1 &  1 & 0 & 0 & 0 & 0\\
+    0 &  0 & 1 & 1 & 0 & 0\\
+    1 &  0 & 0 & 0 &-1 & 0\\
+    0 &  0 & 1 & 0 & 0 &-1\\
+  \end{array}\right]
+  \left[\begin{array}{c}
+   d_{\textrm{married}}(m) \\ d_{\textrm{unmarried}}(m) \\ 
+   d_{\textrm{child}}(a)\\ d_{\textrm{adult}}(a)\\ \Delta_m \\ \Delta_a
+  \end{array}\right]
+\begin{array}{c}
+\geq\\=\\=\\=\\=
+\end{array}
+  \left[\begin{array}{c}
+   1 \\ 1 \\ 1 \\ 1 \\ 1
+  \end{array}\right].
+\end{array}
+\end{equation*}
+\hfill\qed
 
+\end{example}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mixed-type edit rules}
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
