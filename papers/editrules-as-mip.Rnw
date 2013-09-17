@@ -405,36 +405,38 @@ $\mathbf{d}$ of which the coefficients are defined as follows (see also Eq.\
 \eqref{eq:defineD}).
 \begin{equation}
 \label{eq:definedvec}
-d_j(v_i) = \left\{\begin{array}{l}
-1\textrm{ if } v_i = j\\
-0\textrm{ otherwise}.
+d_\lambda(v_i) = \left\{\begin{array}{l}
+1\textrm{ if } v_i = \lambda\\
+0\textrm{ otherwise},
 \end{array}\right.
 \end{equation}
+where $\lambda\in D_i$.
 Thus, each element of $\mathbf{d}(v_i)$ corresponds to one category in $D_i$.
 It is zero everywhere except at the value of $v_i\in D_i$. We will write
 $\mathbf{d}(\mathbf{v})$ to indicate the concatenated vector
 $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$ which represents a complete record.
 Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \begin{equation}
-\mathbf{e} = \left(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
+\mathbf{e} = \left(\bigvee _{\lambda\in \overline{F}_1}\mathbf{d}(\lambda), \ldots ,\bigvee _{\lambda\in \overline{F}_m}\mathbf{d}(\lambda)
 \right),
 \end{equation}
 where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
-$\mathbf{e}$ is the set of all records satisfing the edit.
-\todo[inline]{This is not correct!, since in many cases 
-$\overline{F_i} = \emptyset \implies d(v_i) = 0$ and thus $\mathbf{e}$ can not
-be the set of all records satisfying the 
-edit...
-}
-\todo[inline]{
-[MvdL]: When $\overline{F}_i=\varnothing$, $F_i=D_i$ and $v_i$ is not contained in the
-edit.  In that case it doesn't and shouldn't contribute to the sum in Eq.\
-\eqref{eq:hardcat}. In other words $\mathbf{d}(v_i)=\mathbf{0}$ means that
-the edit check does not involve the $i$th variable. I think we should rephrase
-that $\mathbf{e}$ {\em represents} all records obeying the edit.
-}
+$\mathbf{e}$ represents the valid value combinations of variables contained in
+the edit. 
+%\todo[inline]{This is not correct!, since in many cases 
+%$\overline{F_i} = \emptyset \implies d(v_i) = 0$ and thus $\mathbf{e}$ can not
+%be the set of all records satisfying the 
+%edit...
+%}
+%\todo[inline]{
+%[MvdL]: When $\overline{F}_i=\varnothing$, $F_i=D_i$ and $v_i$ is not contained in the
+%edit.  In that case it doesn't and shouldn't contribute to the sum in Eq.\
+%\eqref{eq:hardcat}. In other words $\mathbf{d}(v_i)=\mathbf{0}$ means that
+%the edit check does not involve the $i$th variable. I think we should rephrase
+%that $\mathbf{e}$ {\em represents} all records obeying the edit.
+%}
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
