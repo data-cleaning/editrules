@@ -42,14 +42,16 @@ bench <- function(nvars = 10, nerrors=9, method="bb"){
   if (nerrors >= nvars) stop("nvars cannot be less than nerrors")
   for (ne in seq_len(nerrors)){
     for (nvar in seq(from=ne+1, to=nvars)){
-      E <- generate_E(nvar)
-      data <- generate_data(E, ne)
-      cat("\r nvar=", nvar, " ne=", ne, " method=", method)
-      le <- localizeErrors(E, data, method=method)
-      rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
-      write.table(rpt, file=txt, col.names=init, row.names=FALSE)
-      init <- FALSE
-      flush(txt)
+      try({
+        E <- generate_E(nvar)
+        data <- generate_data(E, ne)
+        cat("\r nvar=", nvar, " ne=", ne, " method=", method)
+        le <- localizeErrors(E, data, method=method)
+        rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
+        write.table(rpt, file=txt, col.names=init, row.names=FALSE)
+        init <- FALSE
+        flush(txt)
+      })
       gc()
       #print(rpt)
     }
@@ -58,15 +60,14 @@ bench <- function(nvars = 10, nerrors=9, method="bb"){
 
   if (file.exists(FILE)) file.remove(FILE)
 
-  bench(10,2, method="mip")
-  #bench(50,10, method="bb")
+  bench(50,10, method="mip")
+  bench(50,10, method="bb")
 
   dat <- read.table(FILE, header=TRUE)
   library(ggplot2)
   qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc) + geom_jitter()
   ggsave("benchmip_categorical.png")
 # 
-
 
 
 ### quick testing

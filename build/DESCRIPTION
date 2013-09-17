@@ -16,4 +16,5 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
 Version: 2.8.1
 Depends: R (>= 2.12.0), igraph, lpSolveAPI
 URL: https://github.com/edwindj/editrules
+BugReports: https://github.com/edwindj/editrules/issues
 Date: 2011-09-25
