@@ -170,7 +170,7 @@ implementation. The main advantages of this approach are the ease of
 implementation and the opportunity for users to exert fine-grained control over
 the algorithm.
 
-As stated before, the error localisation problem can, under mild conditions, be
+As stated before, the error localization problem can, under mild conditions, be
 translated to a mixed-integer programming problem, which offers the opportunity
 to reuse well-established results from the field of linear and mixed-integer
 programming. Indeed, many advanced algorithms for solving such problems have
@@ -180,7 +180,7 @@ available under a permissive license. In \code{editrules}, the solver of the
 \code{lpSolveAPI} package \citep{lpSolveAPI:2011}. The \code{lpsolve} library
 is written in \code{ANSI} \code{C} and has been tried and tested extensively.
 
-The strategy to solve error localisation problems through this library from 
+The strategy to solve error localization problems through this library from 
 \R{} therefore consists of translating the problem to a suitable mixed-integer
 programming problem, feeding this problem to \code{lpSolveAPI} and translating
 the results back to an error location. It is necessary
@@ -193,7 +193,7 @@ to distinguish between:
 since for each data type a different translation strategy is necessary.
 
 The main part of this paper will focus on how to translate these types of error
-localisation problems to a mixed-integer formulation, paying attention to both
+localization problems to a mixed-integer formulation, paying attention to both
 theoretical and practical details.  We will give examples of how users can
 apply this functionality to their own problem  in \R{} and benchmark the new
 mip-functionality against the existing branch-and-bound solution.
@@ -269,7 +269,7 @@ for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we have
 This objective function obviously  meets the requirement that the minimal
 (weighted) number of variables should be adapted. 
 
-For an error localisation problem, the restrictions of Problem
+For an error localization problem, the restrictions of Problem
 \eqref{eq:mipmin} consist of two parts, which we denote
 \begin{equation}
 \left[\begin{array}{c}
@@ -293,7 +293,7 @@ altered in the process, the restrictions in $\mathbf{R}^0$ serve to make sure th
 the values in $\mathbf{z}$ that represent values in $\mathbf{r}$ cannot be altered
 without setting the corresponding value in $\mathbf{\Delta}$ to 1.
 
-Summarizing, in order to translate the error localisation problem for the cases
+Summarizing, in order to translate the error localization problem for the cases
 of linear, categorical or conditional mixed restrictions to a mixed integer
 problem, we need to properly define $\mathbf{z}$, the restriction set
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
@@ -423,11 +423,6 @@ where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
 $\mathbf{e}$ is the set of all records satisfing the edit.
-\todo[inline]{This is not correct!, since in many cases 
-$\overline{F_i} = \emptyset \implies d(v_i) = 0$ and thus $\mathbf{e}$ can not
-be the set of all records satisfying the 
-edit...
-}
 \todo[inline]{
 [MvdL]: When $\overline{F}_i=\varnothing$, $F_i=D_i$ and $v_i$ is not contained in the
 edit.  In that case it doesn't and shouldn't contribute to the sum in Eq.\
@@ -435,7 +430,11 @@ edit.  In that case it doesn't and shouldn't contribute to the sum in Eq.\
 the edit check does not involve the $i$th variable. I think we should rephrase
 that $\mathbf{e}$ {\em represents} all records obeying the edit.
 }
-
+\todo[inline]{[EdJ]Hmmm, I have a slight/minor problem with \textit{represents 
+all records},  $\mathbf{e}$ actually represents all sets $\overline{F}_i$.
+It works as a filter for records: if a record contains one of the categories of 
+$\mathbf{e}$ then it obeys the edit.
+}
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
 \begin{equation}
@@ -599,7 +598,7 @@ recorded values consists of the union of the restrictions for categorical variab
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical stability issues}
 \label{sec:linedits:num}
-Reformulating the error localisation problem in terms of a mip problem
+Reformulating the error localization problem in terms of a mip problem
 introduces two constants: $M$ and $\epsilon$. These constants end up in the
 coefficient matrix of the mip solver.  Mathematically, there are no bounds on
 the values of $M$ and $\epsilon$, as long as they are chosen so that the
@@ -696,8 +695,8 @@ to the default behavior of \code{localizeErrors} for \code{method='bb'}.
 \code{errorLocalizer\_mip} uses the function \code{as.mip} to transform a set of 
 edits and a record into a mip problem. 
 
-\code{as.mip} implements the mip formulation of sections \ref{sec:mipproblem}.
-We illustrate this with a small example of a mixed edit.
+\code{as.mip} implements the mip formulations of section \ref{sec:mipproblem}.
+We illustrate this with a small example of a mixed-typed edit.
 
 <<tidy=FALSE>>=
 E <- editset(expression(
@@ -783,7 +782,7 @@ This benchmark was run with the number of variables up to 100 and the number of 
 up to $10$.
 \todo[inline]{results}.
 
-\subsection{Mixed edits}
+\subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
 \code{if ($C_i$ == TRUE) $n_i >= 0$}, furthermore the constraints 
 $n_1 = \sum^{N}_{i=2}$ and $n_1 >= 0$ are added.
