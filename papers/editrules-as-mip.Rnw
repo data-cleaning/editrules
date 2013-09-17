@@ -416,27 +416,9 @@ $\mathbf{d}(\mathbf{v})$ to indicate the concatenated vector
 $(\mathbf{d}(v_1),\ldots,\mathbf{d}(v_m))$ which represents a complete record.
 Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \begin{equation}
-\mathbf{e} = \bigvee_{\mathbf{v}\in \overline{\F}}\mathbf{d}(\mathbf{v}),
-%\Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
-%\Big),
+\mathbf{e} = \left(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
+\right),
 \end{equation}
-\todo[inline]{This is not correct, because or-ing all records 
-creates $e(v_i) = \D_i$ in many cases. And that results in that the edit is 
-always true!\\
-It really is:
-\begin{equation}
-\mathbf{e} = \Big(\bigvee _{v_1\in \overline{F}_1}\mathbf{d}(v_1), \ldots ,\bigvee _{v_m\in \overline{F}_m}\mathbf{d}(v_m)
-\Big),
-\end{equation}
-
-or (ab)using a previous notation
-\begin{equation}
-\mathbf{e} = \big(\mathbf{d}(\overline{F}_1), \ldots ,\mathbf{d}(\overline{F}_m)
-\big),
-\end{equation}
-
-}
-
 where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
@@ -446,7 +428,13 @@ $\overline{F_i} = \emptyset \implies d(v_i) = 0$ and thus $\mathbf{e}$ can not
 be the set of all records satisfying the 
 edit...
 }
-
+\todo[inline]{
+[MvdL]: When $\overline{F}_i=\varnothing$, $F_i=D_i$ and $v_i$ is not contained in the
+edit.  In that case it doesn't and shouldn't contribute to the sum in Eq.\
+\eqref{eq:hardcat}. In other words $\mathbf{d}(v_i)=\mathbf{0}$ means that
+the edit check does not involve the $i$th variable. I think we should rephrase
+that $\mathbf{e}$ {\em represents} all records obeying the edit.
+}
 
 To set up the hard restriction matrix $\mathbf{R}^H$ of  Eq.\ \eqref{eq:errlocasmip},
 we first impose the obvious restriction that each variable can take but a single value:
