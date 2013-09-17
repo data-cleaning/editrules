@@ -109,7 +109,6 @@ impliedValues <- function(E,...){
 #' @rdname impliedValues
 #'
 #' @seealso \code{\link{reduce}}, \code{\link{substValue}}, \code{\link{eliminate}}
-#' @example ../examples/impliedValues.R
 #' 
 #' @export
 impliedValues.editmatrix <- function(E,tol=sqrt(.Machine$double.eps),...){

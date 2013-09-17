@@ -13,9 +13,8 @@ Description: Facilitates reading and manipulating (multivariate) data restrictio
     and more. Data can be tested against the rules and erroneous fields can be found based
     on Fellegi and Holt's generalized principle. Rules dependencies can be visualized with 
     using the igraph package.
-Version: 2.8
+Version: 2.8.1
 Depends: R (>= 2.12.0), igraph, lpSolveAPI
 URL: https://github.com/edwindj/editrules
 BugReports: https://github.com/edwindj/editrules/issues
 Date: 2011-09-25
-

@@ -1,0 +1,187 @@
+\name{adjacency}
+\alias{adjacency}
+\alias{adjacency.editarray}
+\alias{adjacency.editmatrix}
+\alias{adjacency.editset}
+\alias{as.igraph.editarray}
+\alias{as.igraph.editmatrix}
+\alias{as.igraph.editset}
+\title{Derive adjecency matrix from collection of edits}
+\usage{
+  adjacency(E, nodetype = c("all", "rules", "vars"),
+    rules = rownames(E), vars = getVars(E), ...)
+
+  \method{adjacency}{editmatrix} (E,
+    nodetype = c("all", "rules", "vars"),
+    rules = rownames(E), vars = getVars(E), ...)
+
+  \method{adjacency}{editarray} (E,
+    nodetype = c("all", "rules", "vars"),
+    rules = rownames(E), vars = getVars(E), ...)
+
+  \method{adjacency}{editset} (E,
+    nodetype = c("all", "rules", "vars"),
+    rules = c(rownames(E$num), rownames(E$mixcat)),
+    vars = getVars(E), ...)
+
+  \method{as.igraph}{editmatrix} (x,
+    nodetype = c("all", "rules", "vars"),
+    rules = editnames(E), vars = getVars(E),
+    weighted = TRUE, ...)
+
+  \method{as.igraph}{editarray} (x,
+    nodetype = c("all", "rules", "vars"),
+    rules = editnames(E), vars = getVars(E),
+    weighted = TRUE, ...)
+
+  \method{as.igraph}{editset} (x,
+    nodetype = c("all", "rules", "vars"),
+    rules = editnames(E), vars = getVars(E),
+    weighted = TRUE, ...)
+}
+\arguments{
+  \item{E}{\code{\link{editmatrix}},
+  \code{\link{editarray}} or \code{\link{editset}}}
+
+  \item{nodetype}{adjacency between rules, vars or both?}
+
+  \item{rules}{selection of edits}
+
+  \item{vars}{selection of variables}
+
+  \item{...}{arguments to be passed to or from other
+  methods}
+
+  \item{x}{An object of class \code{\link{editmatrix}},
+  \code{\link{editarray}} or \code{\link{editset}}}
+
+  \item{weighted}{see
+  \code{\link[igraph]{graph.adjacency}}}
+}
+\value{
+  the adjacency matrix of edits in \code{E} with resect to
+  the variables in \code{vars}
+}
+\description{
+  A set of edits can be represented as a graph where every
+  vertex is an edit. Two vertices are connected if they
+  have at least one variable in \code{vars} in common.
+}
+\details{
+  \code{adjacency} returns the adjacency matrix. The
+  elements of the matrix count the number of variables
+  shared by the edits indicated in the row- and column
+  names. The adjacency matrix can be converted to an igraph
+  object with \code{graph.adjacency}from the \code{igraph}
+  package.
+
+  \code{as.igraph} converts a set of edits to an
+  \code{igraph} object directly.
+}
+\examples{
+
+## Examples with linear (in)equality edits
+
+# load predefined edits from package
+data(edits)
+edits
+
+# convert to editmatrix
+E <- editmatrix(edits)
+
+## Not run:
+# (Note to reader: the Not run directive only prevents the examle commands from
+# running when package is built)
+
+# Total edit graph
+plot(E)
+
+# Graph with dependent edits
+plot(E, nodetype="rules")
+
+# Graph with dependent variables
+plot(E, nodetype="vars")
+
+# Total edit graph, but with curved lines (option from igraph package)
+plot(E, edge.curved=TRUE)
+
+
+# graph, plotting just the connections caused by variable 't'
+plot(E,vars='t')
+
+## End(Not run) 
+
+# here's an example with a broken record.
+r <- c(ct = 100, ch = 30, cp = 70, p=30,t=130 ) 
+violatedEdits(E,r)
+errorLocalizer(E,r)$searchBest()$adapt
+
+# we color the violated edits and the variables that have to be adapted
+
+## Not run
+set.seed(1) # (for reprodicibility)
+plot(E,
+     adapt=errorLocalizer(E,r)$searchBest()$adapt,   
+     violated=violatedEdits(E,r))
+## End(Not run) 
+
+
+
+# extract total graph (as igraph object)
+as.igraph(E)
+
+# extract graph with edges related to variable 't' and 'ch'
+as.igraph(E,vars=c('t','ch'))
+
+# extract total adjacency matrix
+adjacency(E)
+
+# extract adjacency matrix related to variables t and 'ch'
+adjacency(E,vars=c('t','ch'))
+
+## Examples with categorical edits
+
+# generate an editarray:
+E <- editarray(expression(
+    age \%in\% c('<15','16-65','>65'),
+    employment \%in\% c('unemployed','employed','retired'),
+    salary \%in\% c('none','low','medium','high'),
+    if (age == '<15') employment=='unemployed',
+    if (salary != 'none') employment != 'unemployed',
+    if (employment == 'unemployed') salary == 'none'))
+
+
+## Not run:
+# plot total edit graph
+plot(E)
+
+# plot with a different layout
+plot(E,layout=layout.circle)
+
+# plot edit graph, just the connections caused by 'salary'
+plot(E,vars='salary')
+
+## End(Not run)
+
+# extract edit graph
+as.igraph(E)
+
+# extract edit graph, just the connections caused by 'salary'
+as.igraph(E,vars='salary')
+
+# extract adjacency matrix
+adjacency(E)
+
+# extract adjacency matrix, only caused by 'employment'
+adjacency(E,vars='employment')
+
+
+
+
+
+}
+\seealso{
+  \code{\link{plot.editmatrix}},
+  \code{\link{plot.editarray}}, \code{\link{plot.editset}}
+}
+

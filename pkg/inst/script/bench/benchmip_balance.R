@@ -67,17 +67,17 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
 }
 
 ## quick testing
-
-if (file.exists(FILE)) file.remove(FILE)
-
-bench(100,10, method="mip")
-bench(50,10, method="bb")
-
-dat <- read.table(FILE, header=TRUE)
-library(ggplot2)
-qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc, geom=c("point", "line")) + geom_jitter()
-ggsave("benchmip_balance.png")
-
+start <- fucntion(){
+  if (file.exists(FILE)) file.remove(FILE)
+  
+  bench(100,10, method="mip")
+  bench(50,10, method="bb")
+  
+  dat <- read.table(FILE, header=TRUE)
+  library(ggplot2)
+  qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc, geom=c("point", "line")) + geom_jitter()
+  ggsave("benchmip_balance.png")
+}
 
 #View(dat)
 # n <- 4

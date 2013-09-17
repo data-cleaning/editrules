@@ -1,5 +1,4 @@
 require(testthat)
-library(lpSolveAPI)
 
 context("Localize errors using MIP")
 
@@ -13,7 +12,7 @@ test_that("localizeError.mip",{
   
   x <- c(p=755,c=125,t=200)
   
-  sol <- errorLocalizer.mip(Et, x)
+  sol <- errorLocalizer_mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
   expect_equal(unname(sol$x_feasible[1:3]), c(75, 125, 200), tolerance=1e-10)
@@ -159,7 +158,7 @@ test_that("localizeError_mip editset",{
   
   x <- c(p=755,c=125,t=200)
   
-  sol <- errorLocalizer.mip(Et, x)
+  sol <- errorLocalizer_mip(Et, x)
   expect_equal(sol$w, 1)
   expect_equivalent(sol$adapt, c(TRUE, FALSE, FALSE))
   expect_equivalent(sol$x_feasible, c(75, 125, 200))
@@ -349,14 +348,14 @@ test_that("Records of range 1-1e9",{
       x7 + x3 + x8 == x9
    ))
    expect_equal(
-      errorLocalizer.mip(e,x)$w,
+      errorLocalizer_mip(e,x)$w,
       errorLocalizer(e,x)$searchBest()$w
    )
    
    x[] <- 10^(p)
    # MIP is sensitive to (very) large differences in values (mvdl/ejne 11.08.2012)
    expect_true(
-     errorLocalizer.mip(e,x)$w != errorLocalizer(e,x)$searchBest()$w
+     errorLocalizer_mip(e,x)$w != errorLocalizer(e,x)$searchBest()$w
    )
 })
 
@@ -387,7 +386,7 @@ test_that("Consistency with B&B algorithm",{
 
    expect_equal(
       errorLocalizer(e,r)$searchBest()$w, 
-      errorLocalizer.mip(e,r)$w
+      errorLocalizer_mip(e,r)$w
    )
    X <- as.data.frame(t(r))
    expect_equal(
@@ -399,10 +398,10 @@ test_that("Consistency with B&B algorithm",{
 
 test_that("strict inequalities are treated correctly", {
   E <- editmatrix("x > 0")
-  expect_that(errorLocalizer.mip(E, c(x=0))$adapt, is_equivalent_to(TRUE))
-  expect_that(errorLocalizer.mip(E, c(x=1e-4))$adapt, is_equivalent_to(TRUE))
+  expect_that(errorLocalizer_mip(E, c(x=0))$adapt, is_equivalent_to(TRUE))
+  expect_that(errorLocalizer_mip(E, c(x=1e-4))$adapt, is_equivalent_to(TRUE))
 
-  expect_that(errorLocalizer.mip(E, c(x=1e-3))$adapt, is_equivalent_to(FALSE))
+  expect_that(errorLocalizer_mip(E, c(x=1e-3))$adapt, is_equivalent_to(FALSE))
 })
 
 
