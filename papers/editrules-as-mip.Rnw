@@ -351,24 +351,29 @@ $p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
 for each staf member, more than one monetary unit is spent. Given two observed
 values $p^0$ and $c^0$, disobeying one or more of the rules, the MIP problem
 for error localization has the following form.
+\begin{displaymath}
+ \Minimize_{(\mathbf{c},\mathbf{\Delta})\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c
+\end{displaymath}
 \begin{equation*}
-\begin{array}{l}
-  \Minimize_{(p,c,\Delta_p,\Delta_c)\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c\\
   \textrm{s.t. }\left[\begin{array}{rrrr}
     1 & -1 & 0 & 0\\
     1 &  0 & 0 & 0\\
     0 &  1 & 0 & 0\\
     1 &  0 & -M & 0\\
-    0 &  1 & 0 & -M
+   -1 &  0 & -M & 0\\
+    0 &  1 & 0 & -M\\
+   -1 &  1 & 0 & -M\\
   \end{array}\right]
   \left[\begin{array}{c}
    p \\ c \\ \Delta_p \\ \Delta_c
   \end{array}\right] \leq
   \left[\begin{array}{c}
-   0 \\ 0 \\ 0 \\ p^0 \\ c^0
+   0 \\ 0 \\ 0 \\ p^0\\-p^0 \\ c^0\\ -c^0
   \end{array}\right].
-\end{array}
 \end{equation*}
+Here, the first three rows in the set of restrictions represent the consistency rules
+while the other rows connect the indicator variables $\mathbf{\Delta}=(\Delta_p,\Delta_c)$
+with $p$ and $c$. 
 \hfill\qed
 \end{example}
 
@@ -495,7 +500,7 @@ $v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
 
 \begin{example}
 Consider a two-variable record from the census with the variables \emph{Marital status} 
-$m$ and \emph{Age class} $a$. We have
+$m$ and \emph{Age class} $a$. We have $\mathbf{v}=(m,a)\in D$ where
 \begin{equation*}
 D = D_m\times D_a = \{\textsf{married, unmarried}\}\times\{\textsf{child, adult}\}.
 \end{equation*}
@@ -509,9 +514,10 @@ which gives $\overline{F}_m=\{\textrm{unmarried}\}$ and $\overline{F}_a=\{\textr
 Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}(F)=(0,1,0,1)$ and one may verify
 that $\mathbf{e}(F)^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the MIP
 problem for error localisation now looks like this.
+\begin{equation}
+  \Minimize_{(\mathbf{v},\mathbf{\Delta})\in D\times \{0,1\}^2} \Delta_m + \Delta_a
+\end{equation}
 \begin{equation*}
-\begin{array}{l}
-  \Minimize_{(m,a,\Delta_m,\Delta_a)\in D\times \{0,1\}^2} \Delta_m + \Delta_a\\
   \textrm{s.t. }\left[\begin{array}{rrrrrr}
     1 &  0 & 1 & 0 & 0 & 0\\
     1 &  1 & 0 & 0 & 0 & 0\\
@@ -529,10 +535,12 @@ problem for error localisation now looks like this.
   \left[\begin{array}{c}
    1 \\ 1 \\ 1 \\ 1 \\ 1
   \end{array}\right].
-\end{array}
 \end{equation*}
+Here, the first row represents the edit rule, the second and third force that each
+variable can take but one value (Eq.\ \ref{eq:hardcat}), the last two rows
+connect the indicator variables $\Delta_m$ and $\Delta_a$ with the value
+of $m$ and $a$ (Eq.\ \ref{eq:deltacat}).
 \hfill\qed
-
 \end{example}
 
 
@@ -578,19 +586,6 @@ satisfies $E$ if and only if
   \mathbf{r} \in \overline{\E} \Leftrightarrow 
 \bigvee_{i=1}^m v_i \in \overline{F}_i \:\lor\: \bigvee^{k}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j.
 \end{equation}
-%
-%This formulation of edits on mixed-type data is more general than the \emph{standard form}
-%by \citet{waal:2003}, which allows but a single linear inequality.
-%\todo[inline]{De standaard form dekt geen restricties van de volgende
-%vorm:
-%if ($x>0$) then ($y>0$)
-%die we ook aankunnen.
-%Wat doen we met de standaardform, die ook geven?
-%\begin{equation}
-%\FDc = \{\mathbf{r}\in D\times\mathbb{R}^n: 
-%\mathbf{v}\in F \Rightarrow \mathbf{a}^T\mathbf{x}\leq b\}.
-%\end{equation}
-%} 
 This formulation is both a generalization of linear inequality and
 categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing $k=0$, we get
 $P=\mathbb{R}^n$ and only the categorical part remains. Similarly, choosing
@@ -620,11 +615,11 @@ edits like so:
 \end{equation}
 
 
-To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we first define binary
-variables $p_i$ that indicate whether $\mathbf{x}$ obeys
+To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
+first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
 $\mathbf{a}^T_k\mathbf{x}\leq b$ or $\mathbf{x} \in P_j$:
 \begin{equation}
-p_j = \left\{\begin{array}{l}
+\ell_j = \left\{\begin{array}{l}
 0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
 1 \textrm{ when } \mathbf{a}^T_j\mathbf{x} > b_j %( = \mathbf{x} \in P_j)
 \end{array}\right.
@@ -633,33 +628,86 @@ Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implic
 and the definition of $\mathbf{e}$, we can write the mixed-data edit as
 \begin{equation}
 \label{eq:mixedit}
-\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-p_j) \geq 1.
+\mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-\ell_j) \geq 1.
 \end{equation}
 Rules of this form constitute the user-defined part of the $\mathbf{R}^H$ part
-of the restriction matrix. To connect $p_j$ with the linear restrictions we
+of the restriction matrix. To connect $\ell_j$ with the linear restrictions we
 also add
 \begin{equation}
 \label{eq:linconsequent}
 \mathbf{a}^T_j\mathbf{x} \leq b_j + Mp_j,
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
-$p_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
-$p_j=1$ it is unimportant for the whole restriction to hold whether the
+$\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
+$\ell_j=1$ it is unimportant for the whole restriction to hold whether the
 inequality holds.  Finally, similar to the purely categorical case we need to
 add restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
 \eqref{eq:linconsequent} and Eq.\ \eqref{eq:mixedit} constitute $\mathbf{R}^H$.
 
-In general there may be $k$ multiple mixed-type edits yielding an equal number of indicator
-variables for inequalities in the consequent. So the vector to minimize over becomes
+In general there may be $k$ multiple mixed-type edits yielding an equal number
+of indicator variables for inequalities in the consequent. So the vector to
+minimize over becomes
 \begin{equation}
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
-l_1,\ldots,l_K),
+\ell_1,\ldots,\ell_K),
 \end{equation}
 where $K$ is the total number of linear edits occuring in all the mixed-type edits.
 Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
 recorded values consists of the union of the restrictions for categorical variables
 (Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
+
+
+
+\begin{example}
+We consider a record $\mathbf{r}$ with the variables \emph{type of business}
+$t$, which takes values in $D_t=\{\textrm{sp},\textrm{other}\}$, where ``sp''
+stands for ``sole proprietorship'', \emph{personnel cost} $c\in
+\mathbb{R}$ and \emph{number of staff} $p\in\mathbb{R}$. Hence, we have
+$\mathbf{r}=(t,p,c)\in D_t\times\mathbb{R}^2$. We impose the following rules on
+$\mathbf{r}$: $p\geq0$, $c\geq0$, $c\geq p$ and if the \emph{business type} is
+a sole proprietorship, then the number of staff must equal zero. This may
+be expressed as $(t \in \{\textrm{sp}\})\Rightarrow (p=0)$ or equivalently
+$(t\in\{\textrm{other}\})\lor (p=0)$.
+\begin{equation*}
+\Minimize_{(\mathbf{r},\mathbf{\Delta},\ell)\in D_t\times\mathbb{R}^2\times\{0,1\}^4} \Delta_t + \Delta_p + \Delta_c
+\end{equation*}
+\begin{equation*}
+\textrm{s.t. }\left[\begin{array}{rrrrrrrr}
+0 & 1& 0& 0& 0& 0& 0&-1\\
+0 & 0& 1& 0& 0& 0& 0& 0\\
+0 & 0& 0& 1& 0& 0& 0& 0\\
+0 & 0& 1&-1& 0& 0& 0& 0\\
+1 & 1& 0& 0& 0& 0& 0& 0\\
+0 & 0& 1& 0& 0& 0& 0&-M\\
+1 & 0& 0& 0& 1& 0& 0& 0\\
+0 & 0& 1& 0& 0&-M& 0& 0\\
+0 & 0&-1& 0& 0&-M& 0& 0\\
+0 & 0& 0& 1& 0& 0&-M& 0\\
+0 & 0& 0&-1& 0& 0&-M& 0\\
+\end{array}\right]
+\left[\begin{array}{cccccccc}
+d_{\textrm{sp}}(t)\\ d_{\textrm{other}}(t)\\
+p\\c\\ \Delta_t \\ \Delta_p \\ \Delta_c \\ \ell
+\end{array}\right]
+\begin{array}{c}
+\geq \\ \geq \\ \geq \\ \geq \\ = \\ > \\ = \\ \leq \\ \leq \\ \leq \\ \leq
+\end{array}
+\left[\begin{array}{c}
+0 \\ 0 \\ 0 \\  0 \\  1 \\ 0 \\ 1 \\ p^0 \\ -p^0 \\ c^0 \\ -c^0
+\end{array}\right]
+\end{equation*}
+The first row in the restriction represents the mixed rule, translated as shown
+in Eq.\ \eqref{eq:mixedit}. Row six connects the indicator variable $\ell$
+with the numerical edit in the consequent of
+$t\in\{\textrm{sp}\}\Rightarrow(p=0)$.  Rows two, three and four represent the
+numerical edits limiting values of $p$ and $c$. Row five forces $t$ to have only one 
+value and row seven connects the value of $t$ with that of $\Delta_t$. Finally, 
+rows eight to eleven connect the numerical variables with the corresponing
+change indicators.
+\hfill\qed
+\end{example}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% SECTION 3
