@@ -511,8 +511,8 @@ states ``\emph{A child cannot be married}'' translates to
 F = F_m\times F_a =  \{\textsf{married}\}\times\{\textsf{child}\}
 \end{equation*}
 which gives $\overline{F}_m=\{\textrm{unmarried}\}$ and $\overline{F}_a=\{\textrm{adult}\}$.
-Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}(F)=(0,1,0,1)$ and one may verify
-that $\mathbf{e}(F)^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the MIP
+Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}=(0,1,0,1)$ and one may verify
+that $\mathbf{e}^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the MIP
 problem for error localisation now looks like this.
 \begin{equation}
   \Minimize_{(\mathbf{v},\mathbf{\Delta})\in D\times \{0,1\}^2} \Delta_m + \Delta_a
@@ -635,7 +635,7 @@ of the restriction matrix. To connect $\ell_j$ with the linear restrictions we
 also add
 \begin{equation}
 \label{eq:linconsequent}
-\mathbf{a}^T_j\mathbf{x} \leq b_j + Mp_j,
+\mathbf{a}^T_j\mathbf{x} \leq b_j + M\ell_j,
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
 $\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
@@ -765,10 +765,10 @@ following on this matter:
 \subsection{Error localization}
 \code{editrules} provides the \code{localizeErrors} function for finding errors
 in a \code{data.frame} given an \code{editset}, \code{editmatrix} or \code{editarray}.
-The \code{localizeErrors} function is extended to include an extra parameter
+This \code{localizeErrors} function has been extended to include an extra parameter
 \code{method}. The default value of \code{method} is \code{'bb'}: branch and bound.
-Setting \code{method} to \code{'mip'} gives identical but faster result. 
-This implementation makes it possible to switch between the two implementations.
+A user can switch the implementation by setting \code{method} to \code{'mip'}
+. The following example shows that this gives identical (but faster) result. 
 <<num example>>=
 E <- editmatrix("x <= y")
 dat <- data.frame(x=10, y=1)
@@ -777,10 +777,11 @@ weight <- data.frame(x=2, y=1)
 localizeErrors(E, dat, weight=weight, method="bb")$adapt
 localizeErrors(E, dat, weight=weight, method="mip")$adapt
 @
-When \code{method=mip} is specified \code{localizeErrors} uses for each record 
-the function \code{errorLocalizer\_mip}.
-Unlike {\em branch and bound} this is not a \code{backtracker} object.
-\code{errorlocalizer\_mip} writes the constraints and values into a mip problems,
+When \code{method=mip} is specified \code{localizeErrors} internally 
+uses for each record the function \code{errorLocalizer\_mip}.
+Unlike {\em branch and bound} this is not a \code{backtracker} object as described
+in \ref{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
+and values into a mip problem,
 feeds it into the \code{lpSolveApi} and formats the resulting output.
 <<num mip>>=
 el <- errorLocalizer_mip(E, dat[1,])
@@ -789,29 +790,30 @@ ls.str(el)
 Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
 \code{editmatrix}, \code{editarray} or \code{editset} object.
 
-Note in the example that the {\em mip} solver returns two extra properties that are
+Note in the example above that the {\em mip} solver returns two extra properties that are
 not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
-Since a mip-solvers goal is to find a feasible solution, a set of feasible x 
-values is available. It can be helpful to have these values, but note 
-that this solution in general is not unique and that the proposed values for the 
-variables to be adjusted lie on the boundary of a convex solution region. 
+When it has found a solution (which is usually the case), a set of feasible x 
+values is available. It can be helpful to have an explicit solution, but note 
+that it is in general not unique and that the feasible values 
+lie on the boundary of a convex solution region. 
 In many cases it is better to use a proper imputation method to generate
-sensible values for the variable that needs to be adjusted.
+sensible values for the variables that need to be adjusted.
 Secondly \code{errorlocalizer\_mip} returns the \code{lp} object. This object is 
 a \code{lpSolveApi} object and can be further manipulated or written to disk.
-For more information consult the manual of \code{lpSolveApi}.
+For more information consult the manual of \code{lpSolveApi}
+(\ref{lpSolveAPI:2011}).
 
 An advantage of the branch and bound algorithm is that it can generate all optimal
 solutions for a given record.  The mip implementation only generates one of the 
-best. This is implemented by adding a small uniform perturbation to the weights, 
-so mip chooses one of the best at random. This is identical 
+best. In \code{editrules} this is implemented by adding a small uniform 
+perturbation to the weights, so mip chooses one of the best at random. 
+This is identical 
 to the default behavior of \code{localizeErrors} for \code{method='bb'}.
 
 \subsection{Setting up your own lp problem}
-\code{errorLocalizer\_mip} uses the function \code{as.mip} to transform a set of 
-edits and a record into a mip problem. 
-
-\code{as.mip} implements the mip formulations of section \ref{sec:mipproblem}.
+\code{errorLocalizer\_mip} uses the function \code{as.mip}.
+\code{as.mip} implements the rewriting into the mip 
+formulations of section \ref{sec:mipproblem}.
 We illustrate this with a small example of a mixed-typed edit.
 
 <<tidy=FALSE>>=
@@ -825,12 +827,13 @@ The hard restrictions \code{E} can be transformed into ${\bf R}^H$ with
 <<>>=
 as.mip(E)
 @
-\code{num1} states that variable \code{.num.1} and \code{married} cannot both be true 
+\code{num1} states that variable \code{.l1} and \code{married} cannot both be true 
 ($=1$).\\
-If \code{married==TRUE} than the restriction of line 2 turns into 
+If \code{married==TRUE}, than is \code{.l1==0} and the restriction of line 2 
+turns into 
 \code{age >= 17}.
 
-Supplying values \code{x} to the function \code{as.mip} adds ${\bf R}^0$:
+Supplying values \code{x} to \code{as.mip} adds ${\bf R}^0$:
 <<>>=
 as.mip(E, x=list(age=9, married=TRUE))
 @

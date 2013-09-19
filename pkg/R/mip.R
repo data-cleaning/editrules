@@ -1,7 +1,6 @@
 #' Write an editset into a mip representation 
 #' 
-#' Write an editset as a mip problem. 
-#' Note that the objective function is empty
+#' Writes an editset or an object coercable to an editset as a mip problem. 
 #' @param E an \code{link{editset}} or an object that is coerciable to an 
 #' \code{editset}
 #' @param x record
@@ -47,7 +46,7 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
     if (any(nums)) { 
       A0_num <- editmatrix(expr[nums])
       rownames(A0_num) <- names(x)[nums]
-      A0_num <- softEdits(A0_num, prefix=prefix)
+      A0_num <- softEdits(A0_num, prefix=prefix, postfix="0")
     } else A0_num <- NULL
     
     cat_vars <- getVars(E, type="cat")
@@ -56,7 +55,7 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
     if (any(cats)){
       A0_cat <- cateditmatrix(expr[cats])
       rownames(A0_cat) <- names(x)[cats]
-      A0_cat <- softEdits(A0_cat, prefix=prefix)
+      A0_cat <- softEdits(A0_cat, prefix=prefix, postfix="0")
     } else A0_cat <- NULL
         
     E_mip <- c(E_mip, A0_num, A0_cat)

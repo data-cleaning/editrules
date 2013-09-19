@@ -12,7 +12,7 @@ softEdits <- function(E, prefix="delta.", ...){
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits.editmatrix <- function(E, prefix="delta.", M=1e7, ...){
+softEdits.editmatrix <- function(E, prefix="delta.", postfix="", M=1e7, ...){
   
   if (!nrow(E)){
     return(E)
@@ -55,7 +55,7 @@ softEdits.editmatrix <- function(E, prefix="delta.", M=1e7, ...){
   # TODO cleanup this code
   #print(list(Ab=Ab, Ab_eq=Ab_eq, Ab_na=Ab_na))
   Ab <- rbind(Ab, Ab_eq, Ab_na)
-  rownames(Ab) <- make.unique(rownames(Ab), "_" )
+  rownames(Ab) <- make.unique(paste0(rownames(Ab), postfix), "_" )
   ops <- c(ops[!isna], ops[eq])
   ops <- gsub("==", "<=", ops)
   ops <- c(ops, rep("==", sum(isna)))
@@ -71,7 +71,7 @@ softEdits.editmatrix <- function(E, prefix="delta.", M=1e7, ...){
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits.cateditmatrix <- function(E, prefix="delta.",...){
+softEdits.cateditmatrix <- function(E, prefix="delta.", postfix="", ...){
   if (!nrow(E)){
     return(E)
   }
@@ -83,6 +83,7 @@ softEdits.cateditmatrix <- function(E, prefix="delta.",...){
   seA <- diag(ifelse(eq, -1, 1), ncol=length(eq), nrow=length(eq))
   colnames(seA) <- dummies
   seA <- cbind(getA(E), seA)
+  rownames(seA) <- paste0(rownames(seA), postfix)
   
   binvars <- sapply(colnames(seA), is.character)
   seE <- as.editmatrix(seA, b, getOps(E), binvars=binvars)
@@ -94,11 +95,11 @@ softEdits.cateditmatrix <- function(E, prefix="delta.",...){
 #' @param E normalized \code{editmatrix}
 #' @param prefix \code{character} used for naming dummy variables in matrix.
 #' @keywords internal
-softEdits.editarray<- function(E, prefix="delta.", ...){
+softEdits.editarray<- function(E, prefix="delta.", postfix="", ...){
   if (!nrow(E)){
     return(E)
   }
-  softEdits.cateditmatrix(cateditmatrix(E), prefix=prefix, ...)
+  softEdits.cateditmatrix(cateditmatrix(E), prefix=prefix, postfix=postfix, ...)
 }
 
 #quick tests

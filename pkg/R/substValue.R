@@ -143,7 +143,7 @@ indFromArray <- function(A,sep){
 #' @rdname substValue 
 #' @export
 substValue.editset <- function(E, var, value, simplify=TRUE, ...){
-# Techical note. Substituting a dummy variable (e.g. .num.1) with TRUE or 
+# Techical note. Substituting a dummy variable (e.g. .l1) with TRUE or 
 # FALSE amounts to making an assumption about the validity
 # of the condition stated in that dummy. As such, it should not be added
 # to the numerical editmatrix (since that editmatrix is only relevant when the
