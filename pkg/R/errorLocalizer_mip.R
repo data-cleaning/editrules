@@ -53,7 +53,7 @@ errorLocalizer_mip <- function( E
    lps <- as.lp.mip(elm)
    # end TODO
    lp.control( lps
-#             , presolve = "rows"    # move univariate constraints into bounds
+             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = as.integer(maxduration)
              , epsint = 1e-15
 #             , epssel = 1e-15
@@ -163,11 +163,35 @@ as.lp.mip <- function(mip){
    set.type(lps, columns=mip$binvars , "binary")
    set.bounds(lps, lower=rep(-Inf, length(mip$numvars)), columns=mip$numvars)
    
-   b <- getb(E)
-   b[lt] <- (b[lt] - mip$epsilon)
-   set.constr.value(lps, b)
+   # should improve performance quite a lot: a SOS1 make bin variables exclusive.
+   for (sos in asSOS(colnames(lps))){
+     add.SOS( lps, sos$name, 
+              type=1, priority=1, 
+              columns=sos$columns, 
+              weights=sos$weights
+            )
+   }
    
+   b <- getb(E)
+   set.constr.value(lps, b)
    lps
+}
+
+
+asSOS <- function(vars){
+  CAT <- ":\\w+"
+  
+  idx <- grepl(CAT, vars)
+  var <- sub(CAT, "", vars)
+  
+  sosname <- unique(var[idx])
+  sapply(sosname, function(sos){
+    columns = which(var == sos)
+    list( name=sos
+        , columns=columns
+        , weights = rep(1, length(columns))
+    )
+  }, simplify=FALSE)
 }
 
 asCat <- function(x, sep=":", useLogicals=TRUE){

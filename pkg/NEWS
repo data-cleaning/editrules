@@ -1,3 +1,7 @@
+version 2.9
+- mixed typed edits now have naming convention used in paper
+- added SOS1 type edits for categorical constraint. Should improve performance.
+
 version 2.8 
 - printing an empty cateditmatrix doesn't fail anymore
 - fix a bug in parsing a mix edit with no numeric constraint in the premisse 
