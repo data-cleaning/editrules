@@ -704,7 +704,7 @@ with the numerical edit in the consequent of
 $t\in\{\textrm{sp}\}\Rightarrow(p=0)$.  Rows two, three and four represent the
 numerical edits limiting values of $p$ and $c$. Row five forces $t$ to have only one 
 value and row seven connects the value of $t$ with that of $\Delta_t$. Finally, 
-rows eight to eleven connect the numerical variables with the corresponing
+rows eight to eleven connect the numerical variables with the corresponding
 change indicators.
 \hfill\qed
 \end{example}
@@ -965,6 +965,7 @@ to $-1$.
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
 
+\todo[inline]{Mixed data graphs/data is not yet correct!}
 <<echo=FALSE, warning=FALSE, fig.height=3.5>>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
