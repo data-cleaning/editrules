@@ -79,6 +79,10 @@ start <- fucntion(){
   ggsave("benchmip_balance.png")
 }
 
+sdat <- subset(dat, errorloc=="middle")
+qplot(data=sdat, x=nvar, y=elapsed, color=method, group=nerrors, geom="line", 
+      facets=~method, ylim=c(0,150))
+
 #View(dat)
 # n <- 4
 # (E <- generate_balance(n))
