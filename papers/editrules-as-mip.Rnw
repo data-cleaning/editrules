@@ -56,6 +56,7 @@
 
 <<init, echo=FALSE, results='hide', message=FALSE>>=
 library(editrules)
+set.seed(41)
 #library(xtable)
 @
 
@@ -179,7 +180,7 @@ to reuse well-established results from the field of linear and mixed-integer
 programming. Indeed, many advanced algorithms for solving such problems have
 been developed and in many cases implementations in a compiled language are
 available under a permissive license. In \code{editrules}, the solver of the
-\code{lpsolve} library \citep{berkelaar:2004} is used through \R{}'s
+\code{lpsolve} library \citep{berkelaar:2010} is used through \R{}'s
 \code{lpSolveAPI} package \citep{lpSolveAPI:2011}. The \code{lpsolve} library
 is written in \code{ANSI} \code{C} and has been tried and tested extensively.
 
@@ -726,7 +727,7 @@ numbers, meaning that there are about 15 decimal positions of precision.
 
 To avoid significant round off errors, it is a good idea to restrict the range
 of input data. In fact, the authors of the \code{lpsolve} reference manual
-\citep{lpsolveman:2012} state the following.
+\citep{berkelaar:2010} state the following.
 %
 \begin{quote}
 The chance for numerical instability and rounding errors is considerably 
@@ -757,10 +758,6 @@ constraints
 in most cases will be in this range. If not, you should rescale some of your
 variables and constraints to make it so.
 
-The linear programming manual from \code{lpsolve}  \citep{lpsolveman:2012} says the 
-following on this matter:
-
-
 \section{Usage}
 \subsection{Error localization}
 \code{editrules} provides the \code{localizeErrors} function for finding errors
@@ -772,19 +769,18 @@ A user can switch the implementation by setting \code{method} to \code{'mip'}
 <<num example>>=
 E <- editmatrix("x <= y")
 dat <- data.frame(x=10, y=1)
-weight <- data.frame(x=2, y=1)
 
-localizeErrors(E, dat, weight=weight, method="bb")$adapt
-localizeErrors(E, dat, weight=weight, method="mip")$adapt
+localizeErrors(E, dat, method="bb")$adapt
+localizeErrors(E, dat, method="mip")$adapt
 @
 When \code{method=mip} is specified \code{localizeErrors} internally 
 uses for each record the function \code{errorLocalizer\_mip}.
-Unlike {\em branch and bound} this is not a \code{backtracker} object as described
-in \ref{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
+Unlike {\em branch and bound} this is not a \code{backtracker} object
+\citep[see][]{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
 and values into a mip problem,
 feeds it into the \code{lpSolveApi} and formats the resulting output.
 <<num mip>>=
-el <- errorLocalizer_mip(E, dat[1,])
+el <- errorLocalizer_mip(E, list(x=10,y=1))
 ls.str(el)
 @
 Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
