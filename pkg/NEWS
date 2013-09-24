@@ -1,6 +1,6 @@
 version 2.9
 - mixed typed edits now have naming convention used in paper
-- added SOS1 type edits for categorical constraint. Should improve performance.
+- added SOS1 type edits for categorical constraint. Should improve mip performance.
 - editset subsetting now support negative row index
 
 version 2.8 
