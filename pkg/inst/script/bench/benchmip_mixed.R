@@ -20,9 +20,10 @@ generate_E <- function(nvar=10){
   }
   
   if (n_cat){
-    edits <- c( edits
+    edits <- c( "n1 >= 0"
+              , edits
               , paste0(var_cat, " %in% c(TRUE,FALSE)")
-              , paste0("if (", var_cat, ") ", tail(var_num,n_cat),"<=0")
+              , paste0("if (!", var_cat, ") ", tail(var_num,n_cat),"< 0")
               )
   }
   editset(edits)
