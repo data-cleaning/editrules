@@ -155,15 +155,14 @@ as.lp.mip <- function(mip){
    
    ops <- getOps(E)
    ops[ops=="=="] <- "="
-   lt <- ops == "<"
-   ops[lt] == "<="
+   ops[ops=="<"] <- "<="
    set.constr.type(lps,types=ops)
    #print(list(lps=lps, objfn=mip$objfn, mip=mip, b=getb(E)))
    set.objfn(lps, mip$objfn)
    set.type(lps, columns=mip$binvars , "binary")
    set.bounds(lps, lower=rep(-Inf, length(mip$numvars)), columns=mip$numvars)
    
-   # should improve performance quite a lot: a SOS1 make bin variables exclusive.
+   # should improve performance quite a lot: a SOS1 makes bin variables exclusive.
    for (sos in asSOS(colnames(lps))){
      add.SOS( lps, sos$name, 
               type=1, priority=1, 
@@ -177,7 +176,8 @@ as.lp.mip <- function(mip){
    lps
 }
 
-
+# splits category names (<variable>:<category>) into variable column groups needed
+# for SOS1 constraints
 asSOS <- function(vars){
   CAT <- ":\\w+"
   

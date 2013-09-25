@@ -3,7 +3,8 @@
 \title{Derive editmatrix with soft constraints based on boundaries of variables. This is a utility function that is used for
 constructing a mip/lp problem.}
 \usage{
-  softEdits.editarray(E, prefix = "delta.", ...)
+  softEdits.editarray(E, prefix = "delta.", postfix = "",
+    ...)
 }
 \arguments{
   \item{E}{normalized \code{editmatrix}}
