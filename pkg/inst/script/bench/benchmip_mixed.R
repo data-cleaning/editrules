@@ -15,6 +15,7 @@ generate_E <- function(nvar=10){
   if (length(var_num) > 1){
     nsum <- paste(tail(var_num, -1), collapse="+")
     edits <- paste0("n1 == ", nsum)
+    edits <- c(edits, paste0("n1 >= ", tail(var_num, -1)))
   } else {
     edits <- "n1 == 0"
   }

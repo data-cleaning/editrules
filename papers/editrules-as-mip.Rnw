@@ -867,18 +867,20 @@ The synthetic edits used in this benchmark are a balance system. This type of ed
 are found frequently in business statistics and energy statistics. 
 The numerical
 variables form a binary tree where the value of a node is the sum of its child node
-values. The value of the top node is constraint to be non-negative.
+values. The value of the top node is constraint to be non-negative and always at least as
+large as any other value.
 \begin{eqnarray*}
-x_1 & \geq & 0 \\
 x_1 & =    & x_2 + x_3 \\
 &\vdots & \\
-x_n &=     & x_{2n} + x_{2n+1} 
+x_n &=     & x_{2n} + x_{2n+1} \\
+x_1 & \geq & 0 \\
+x_1 & \geq & x_i
 \end{eqnarray*}
 A solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldots,0)$.
 An error is introduced in the data by setting an $x_i$ to $-1$. 
 
 The benchmark was run for balance systems of size $1$ up to $101$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is higly dependant on the 
+records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
@@ -906,10 +908,10 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
 \label{fig:numperf}
 \end{figure}
 Figure \ref{fig:numperf} shows the performance of error localization for increasing
-number of variables and increasing number of errors. \code{mip} performance vastly
+number of variables and increasing number of errors. \code{mip} performance is vastly
 superior for problem size of $100$ variables and $10$ errors. With \code{"bb"} no 
-(optimal) solution is found for problems with 
-more then 50 variables en 4 errors within 10 minutes. In contract \code{"mip"} 
+(optimal) solution is found within 10 minutes for problems with 
+more then 50 variables en 4 errors. In contrast \code{"mip"} 
 solves the problem with $100$ variables an $10$ errors within seconds.
 \code{bb} for up-to $2$ errors and 50 variables is reasonable. Note that the 
 performance of \code{bb} in practice often is better than in this test: when
@@ -918,18 +920,18 @@ to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Categorical edits}
 Categorical edits often form a web of interconnected edits. 
-To reflect this connectivity this benchmark creates a 
-chain of categorical edits of the form:
-\begin{eqnarray*}{l}
-A_{i}\texttt{==TRUE}\\
-\texttt{if (}A_{1}\texttt{==TRUE) }A_{2} \texttt{== TRUE}\\
+To reflect this connectivity the categorical benchmark creates a 
+chain of edits of the form:
+\begin{eqnarray*}
+v_{1}\texttt{==TRUE}\\
+\texttt{if (}v_{1}\texttt{==TRUE) }v_{2} \texttt{== TRUE}\\
 \vdots\\
-\texttt{if (}A_{n-1}\texttt{==TRUE) }A_{n} \texttt{== TRUE}
+\texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} \texttt{== TRUE}
 \end{eqnarray*}
-The solution to this system is the vector \code{(TRUE, ..., TRUE)}.
-An error in the data can be introduced by setting an $A_i$ to \code{FALSE}.
+The only solution to this system is the vector \code{(TRUE, ..., TRUE)}.
+An error in the data can be introduced by setting a $v_i$ to \code{FALSE}.
 
-The benchmark was run for balance systems of size $1$ up to $101$. For each system
+The benchmark was run for balance systems of size $1$ up to $50$. For each system
 records with $1$ to $10$ errors were created. Since \code{bb} is higly dependant on the 
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
@@ -953,9 +955,9 @@ $n_1 = \sum^{N}_{i=2}$ and $n_1 >= 0$ are added.
 \begin{eqnarray*}
 n_1 & \geq & 0\\
 n_1 & = & \sum^{N/2}_{i=2}n_i\\
-\texttt{if (}C_{1}\texttt{==TRUE) }&& n_{1} \geq 0\\
+\texttt{if (}n_{1} \geq 0 \texttt{)} && C_{1}\texttt{==TRUE } \\
 &\vdots\\
-\texttt{if (}C_{N/2}\texttt{==TRUE) }&& n_{N/2} \geq 0
+\texttt{if (}n_{N/2} \geq 0 \texttt{)} && C_{N/2}\texttt{==TRUE }
 \end{eqnarray*}
 
 The solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.

@@ -11,7 +11,8 @@ generate_balance <- function(nvar=15){
   vars <- paste0("x",seq_len(nvar))
   
   if (nvar>1){
-    edits <- c(edits, paste0(head(vars,-1), ">=", tail(vars,-1)))
+    #edits <- c(edits, paste0(head(vars,-1), ">=", tail(vars,-1)))
+    edits <- c(edits, paste0("x1 >= ", tail(vars,-1)))
   }
   
   E <- editmatrix(edits)
