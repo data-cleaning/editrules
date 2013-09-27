@@ -1,4 +1,4 @@
-\name{editmatrix}
+\name{as.matrix.editmatrix}
 \alias{as.character.editmatrix}
 \alias{as.data.frame.editmatrix}
 \alias{as.expression.editmatrix}
@@ -9,6 +9,10 @@
 \alias{summary.editmatrix}
 \title{Create an editmatrix}
 \usage{
+  \method{as.matrix}{editmatrix} (x, ...)
+
+  \method{c}{editmatrix} (...)
+
   editmatrix(editrules, normalize = TRUE)
 
   \method{as.data.frame}{editmatrix} (x, ...)
@@ -16,10 +20,6 @@
   \method{as.character}{editmatrix} (x, ...)
 
   \method{as.expression}{editmatrix} (x, ...)
-
-  \method{as.matrix}{editmatrix} (x, ...)
-
-  \method{c}{editmatrix} (...)
 
   \method{str}{editmatrix} (object, ...)
 
@@ -44,14 +44,14 @@
   \item{...}{Arguments to pass to or from other methods}
 }
 \value{
+  \code{as.matrix}: Augmented \code{matrix} of
+  \code{editmatrix}. (See also \code{\link{getAb}}).
+
   \code{editmatrix} : An object of class \code{editmatrix}
 
   \code{as.data.frame} a 3-column \code{data.frame} with
   columns 'name' and 'edit'. If the input editmatrix has a
   \code{description} attribute a third column is returned.
-
-  \code{as.matrix}: Augmented \code{matrix} of
-  \code{editmatrix}. (See also \code{\link{getAb}}).
 }
 \description{
   An \code{editmatrix} is a numerical matrix and a set of

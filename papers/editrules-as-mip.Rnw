@@ -949,19 +949,19 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
 
 \subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
-\code{if ($C_i$ == TRUE) $n_i >= 0$}, furthermore the constraints 
-$n_1 = \sum^{N}_{i=2}$ and $n_1 >= 0$ are added.
+\code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the constraints 
+$x_1 = \sum^{N}_{i=2}$ and $x_1 >= 0$ are added.
 
 \begin{eqnarray*}
-n_1 & \geq & 0\\
-n_1 & = & \sum^{N/2}_{i=2}n_i\\
-\texttt{if (}n_{1} \geq 0 \texttt{)} && C_{1}\texttt{==TRUE } \\
+x_1 & \geq & 0\\
+x_1 & = & \sum^{N/2}_{i=2}x_i\\
+\texttt{if (}x_{1} \geq 0 \texttt{)} && v_{1}\texttt{==TRUE } \\
 &\vdots\\
-\texttt{if (}n_{N/2} \geq 0 \texttt{)} && C_{N/2}\texttt{==TRUE }
+\texttt{if (}x_{N/2} \geq 0 \texttt{)} && v_{N/2}\texttt{==TRUE }
 \end{eqnarray*}
 
 The solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
-We can introduce an error by setting an $C_i$ to \code{FALSE} or setting a $n_i$
+We can introduce an error by setting an $v_i$ to \code{FALSE} or setting a $x_i$
 to $-1$.
 
 This benchmark was run with the number of variables up to 100 and the number of errors

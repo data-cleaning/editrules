@@ -1,7 +1,7 @@
 \name{getVars}
 \alias{getVars}
-\alias{getVars.NULL}
 \alias{getVars.editset}
+\alias{getVars.NULL}
 \title{get names of variables in a set of edits}
 \usage{
   getVars(E, ...)
