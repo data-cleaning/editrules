@@ -9,17 +9,19 @@
   \item{E}{an \code{link{editset}} or an object that is
   coerciable to an \code{editset}}
 
-  \item{x}{record}
+  \item{x}{named \code{list}/\code{vector} with variable
+  values}
 
-  \item{weight}{reliability weights}
+  \item{weight}{reliability weights for values of \code{x}}
 
-  \item{M}{Constant that is used for allowing
-  softconstraints}
+  \item{M}{Constant that is used for allowing the values to
+  differ from \code{x}}
 
   \item{epsilon}{Constant that is used for converting '<'
   into '<='}
 
-  \item{prefix}{prefix for dummy variables}
+  \item{prefix}{prefix for dummy variables that are
+  created}
 
   \item{...}{not used}
 }
@@ -28,7 +30,7 @@
   it into an lp/mip problem
 }
 \description{
-  Write an editset as a mip problem. Note that the
-  objective function is empty
+  Writes an editset or an object coercable to an editset as
+  a mip problem.
 }
 

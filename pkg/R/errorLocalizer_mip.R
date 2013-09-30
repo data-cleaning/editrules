@@ -53,7 +53,7 @@ errorLocalizer_mip <- function( E
    lps <- as.lp.mip(elm)
    # end TODO
    lp.control( lps
-#             , presolve = "rows"    # move univariate constraints into bounds
+             , presolve = "rows"    # move univariate constraints into bounds
              , timeout = as.integer(maxduration)
              , epsint = 1e-15
 #             , epssel = 1e-15
@@ -155,19 +155,43 @@ as.lp.mip <- function(mip){
    
    ops <- getOps(E)
    ops[ops=="=="] <- "="
-   lt <- ops == "<"
-   ops[lt] == "<="
+   ops[ops=="<"] <- "<="
    set.constr.type(lps,types=ops)
    #print(list(lps=lps, objfn=mip$objfn, mip=mip, b=getb(E)))
    set.objfn(lps, mip$objfn)
    set.type(lps, columns=mip$binvars , "binary")
    set.bounds(lps, lower=rep(-Inf, length(mip$numvars)), columns=mip$numvars)
    
-   b <- getb(E)
-   b[lt] <- (b[lt] - mip$epsilon)
-   set.constr.value(lps, b)
+   # should improve performance quite a lot: a SOS1 makes bin variables exclusive.
+   for (sos in asSOS(colnames(lps))){
+     add.SOS( lps, sos$name, 
+              type=1, priority=1, 
+              columns=sos$columns, 
+              weights=sos$weights
+            )
+   }
    
+   b <- getb(E)
+   set.constr.value(lps, b)
    lps
+}
+
+# splits category names (<variable>:<category>) into variable column groups needed
+# for SOS1 constraints
+asSOS <- function(vars){
+  CAT <- ":\\w+"
+  
+  idx <- grepl(CAT, vars)
+  var <- sub(CAT, "", vars)
+  
+  sosname <- unique(var[idx])
+  sapply(sosname, function(sos){
+    columns = which(var == sos)
+    list( name=sos
+        , columns=columns
+        , weights = rep(1, length(columns))
+    )
+  }, simplify=FALSE)
 }
 
 asCat <- function(x, sep=":", useLogicals=TRUE){

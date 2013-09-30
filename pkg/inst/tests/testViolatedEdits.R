@@ -156,7 +156,7 @@ test_that("Empty editarray is handled correctly",{
 
 })
 
-for ( d in dir("../../../pkg/R",full.names=TRUE) ) dmp <- source(d)
+#for ( d in dir("../../../pkg/R",full.names=TRUE) ) dmp <- source(d)
 test_that("Pure numerical editset",{
     expect_true(
         violatedEdits(

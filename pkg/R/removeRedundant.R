@@ -22,8 +22,9 @@ removeRedundant <- function(E){
     keep[r] <<- (b[r] <= o) 
     c(o=o, t=b[r])
   })
-  E[names(keep)[keep],]
+  structure(E[names(keep)[keep],], removed=E[names(keep)[!keep],])
 }
 
 # E <- editmatrix(c(A="x>2", B="y > x", C="y>1" , D="x>1"))
-# removeRedundant(E)
+# Er <- removeRedundant(E)
+# Er

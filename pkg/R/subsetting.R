@@ -61,6 +61,12 @@
 #' @rdname subsetting
 #' @export
 `[.editset` <- function(x,i,j, ...){
+    if (is.numeric(i) && i[1] < 0){
+      N <- nrow(x$num) + nrow(x$mixcat)
+      # make a negative selection positive
+      i <- seq_len(N)[i]
+      print(list(i=i, N=N))
+    }
     if ( is.logical(i) ) i <- which(i)
     nnum <- nrow(x$num)
     mixcat <- x$mixcat[i[i>nnum]-nnum]

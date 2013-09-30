@@ -11,7 +11,8 @@ generate_balance <- function(nvar=15){
   vars <- paste0("x",seq_len(nvar))
   
   if (nvar>1){
-    edits <- c(edits, paste0(head(vars,-1), ">=", tail(vars,-1)))
+    #edits <- c(edits, paste0(head(vars,-1), ">=", tail(vars,-1)))
+    edits <- c(edits, paste0("x1 >= ", tail(vars,-1)))
   }
   
   E <- editmatrix(edits)
@@ -78,6 +79,10 @@ start <- fucntion(){
   qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc, geom=c("point", "line")) + geom_jitter()
   ggsave("benchmip_balance.png")
 }
+
+sdat <- subset(dat, errorloc=="middle")
+qplot(data=sdat, x=nvar, y=elapsed, color=method, group=nerrors, geom="line", 
+      facets=~method, ylim=c(0,150))
 
 #View(dat)
 # n <- 4

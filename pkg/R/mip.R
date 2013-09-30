@@ -3,17 +3,22 @@
 #' Writes an editset or an object coercable to an editset as a mip problem. 
 #' @param E an \code{link{editset}} or an object that is coerciable to an 
 #' \code{editset}
-#' @param x record
-#' @param weight reliability weights
-#' @param M Constant that is used for allowing softconstraints
+#' @param x named \code{list}/\code{vector} with variable values
+#' @param weight reliability weights for values of \code{x}
+#' @param M Constant that is used for allowing the values to differ from \code{x}
 #' @param epsilon Constant that is used for converting '<' into '<='
-#' @param prefix prefix for dummy variables
+#' @param prefix prefix for dummy variables that are created
 #' @param ... not used 
 #' @return a mip object containing al information for transforming it 
 #' into an lp/mip problem
 #' @export
 as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
                   , ...){
+  
+  #TODO add ruleWeights = c(Inf, ..., 1, 1, NA) etc. check with `is.finite`
+  #TODO add lambda used in objfn of softEdits
+  #TODO add objfn specification (needs reordering in function so it has the same order)
+  
   E <- as.editset(E)
   objfn <- NULL
   
