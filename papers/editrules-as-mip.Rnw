@@ -747,7 +747,7 @@ scale the problem than any computer algorithm.
 = 
 \left[\begin{array}{rr|r}
   \multicolumn{1}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
-  \mathbbm{1} & M\mathbbm{1}  &\mathbf{x}^0\\
+  \mathbbm{1} & -M\mathbbm{1}  &\mathbf{x}^0\\
   -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
 \end{array}\right] 
 \end{equation}
