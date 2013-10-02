@@ -4,27 +4,27 @@ FILE ="benchmip_mixed.txt"
 generate_E <- function(nvar=10){
   if (nvar < 1) stop("nvar needs to be bigger than 3")
   s <- seq_len(nvar)
-  
-  var_num <- head(s, ceiling(nvar/2))
-  var_cat <- tail(s, floor(nvar/2))
+  n_num <- ceiling(nvar/2)
+  var_num <- head(s, n_num)
+  var_cat <- tail(s, -n_num)
   n_cat <- length(var_cat)
   
-  var_num <- paste0("n", var_num)
-  if (n_cat) var_cat <- paste0("C", var_cat-n_cat) else character()
+  var_num <- paste0("x", var_num)
+  if (n_cat) var_cat <- paste0("v", var_cat-n_num) else character()
   
   if (length(var_num) > 1){
     nsum <- paste(tail(var_num, -1), collapse="+")
-    edits <- paste0("n1 == ", nsum)
-    edits <- c(edits, paste0("n1 >= ", tail(var_num, -1)))
+    edits <- paste0("x1 == ", nsum)
+    edits <- c(edits, paste0("x1 >= ", tail(var_num, -1)))
   } else {
-    edits <- "n1 == 0"
+    edits <- "x1 == 0"
   }
   
   if (n_cat){
-    edits <- c( "n1 >= 0"
+    edits <- c( "x1 >= 0"
               , edits
               , paste0(var_cat, " %in% c(TRUE,FALSE)")
-              , paste0("if (!", var_cat, ") ", tail(var_num,n_cat),"< 0")
+              , paste0("if (!", var_cat, ") ", head(var_num,n_cat),"< 0")
               )
   }
   editset(edits)

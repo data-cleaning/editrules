@@ -915,7 +915,7 @@ more then 50 variables en 4 errors. In contrast \code{"mip"}
 solves the problem with $100$ variables an $10$ errors within seconds.
 \code{bb} for up-to $2$ errors and 50 variables is reasonable. Note that the 
 performance of \code{bb} in practice often is better than in this test: when
-using  \code{weight}s: the variables with errors are likely
+using confidence \code{weight}s the variables with errors are likely
 to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Categorical edits}
@@ -923,12 +923,12 @@ Categorical edits often form a web of interconnected edits.
 To reflect this connectivity the categorical benchmark creates a 
 chain of edits of the form:
 \begin{eqnarray*}
-v_{1}\texttt{==TRUE}\\
-\texttt{if (}v_{1}\texttt{==TRUE) }v_{2} \texttt{== TRUE}\\
-\vdots\\
-\texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} \texttt{== TRUE}
+v_{1}&\texttt{==}&\texttt{TRUE}\\
+\texttt{if (}v_{1}\texttt{==TRUE) }v_{2} &\texttt{==}&\texttt{TRUE}\\
+&\vdots&\\
+\texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}
 \end{eqnarray*}
-The only solution to this system is the vector \code{(TRUE, ..., TRUE)}.
+The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, ..., TRUE)}.
 An error in the data can be introduced by setting a $v_i$ to \code{FALSE}.
 
 The benchmark was run for balance systems of size $1$ up to $50$. For each system
