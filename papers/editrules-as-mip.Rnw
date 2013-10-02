@@ -346,7 +346,7 @@ $\Delta_i=0$ we obtain the set of restrictions
 which states that $x_i$ equals $x_i^0$
 
 \begin{example}
-Consider record with business survey data, consisting of the variables
+Consider a record with business survey data, consisting of the variables
 \emph{Number of staff} $p$ and \emph{Personel cost}  $c$.  We have the rules
 $p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
 for each staf member, more than one monetary unit is spent. Given two observed
@@ -495,9 +495,9 @@ d_{\lambda^0}(v_i) =  1-\Delta_i,
 \end{equation}
 for $i=1,2,\ldots,m$.  Here, $\lambda^0\in D_i$ is the observed
 value for variable $v_i$. It is not difficult to check, using Eq.
-\eqref{eq:definedvec}, that the above equation can only hold for all $j$ when
-either $v_i=j^0$ and $\Delta_i=0$ (the original value is retained) or
-$v_i\not=j^0$ and $\Delta_i=1$ (the value changes).
+\eqref{eq:definedvec}, that the above equation can only hold for all $\lambda$ when
+either $v_i=\lambda^0$ and $\Delta_i=0$ (the original value is retained) or
+$v_i\not=\lambda^0$ and $\Delta_i=1$ (the value changes).
 
 \begin{example}
 Consider a two-variable record from the census with the variables \emph{Marital status} 
@@ -572,10 +572,8 @@ To obtain a positive reformulation, we first negate the set membership
 condition and apply basic rules of proposition logic:
 \begin{eqnarray}
 &&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in P \big)\nonumber\\
-&\Leftrightarrow& \lnot \big( \mathbf{v}\in \F \land \mathbf{x} \in P_1 \ldots \land \mathbf{x} \in P_{k})
-\nonumber\\
-&\Leftrightarrow& \mathbf{v} \not\in \F \lor \mathbf{x} \not\in P_1 \ldots \lor 
-\mathbf{x} \not\in P_{k}\nonumber\\
+&\Leftrightarrow& \lnot\big(\mathbf{v}\in \F \land \mathbf{a}^T_{1}\mathbf{x} > b_{1} 
+\land \ldots \land \mathbf{a}^T_{k}\mathbf{x} > b_{k}\big)\nonumber\\
 &\Leftrightarrow& \mathbf{v}\in \overline{\F} \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
 \lor \ldots \lor \mathbf{a}^T_{k}\mathbf{x}\leq b_{k}.
 \label{eq:implication}
@@ -618,7 +616,7 @@ edits like so:
 
 To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
-$\mathbf{a}^T_k\mathbf{x}\leq b$ or $\mathbf{x} \in P_j$:
+$\mathbf{a}^T_k\mathbf{x}\leq b$:
 \begin{equation}
 \ell_j = \left\{\begin{array}{l}
 0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
@@ -859,7 +857,7 @@ but for categorical and mixed records rapidly becomes unsatisfying for the typic
 problem sizes of 100 variables and 100 constraints.
 
 To compare the performance we conducted benchmarks for the three types of constraints
-using edits with synthetic data. However the benchmarks reflect properties of a 
+using edits with synthetic data. The benchmarks reflect properties of a 
 typical error localization problem in practice.  
 
 \subsection{Numerical linear edits}
@@ -877,7 +875,7 @@ x_1 & \geq & 0 \\
 x_1 & \geq & x_i
 \end{eqnarray*}
 A solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldots,0)$.
-An error is introduced in the data by setting an $x_i$ to $-1$. 
+An error is introduced in the data by setting a $x_i$ to $-1$. 
 
 The benchmark was run for balance systems of size $1$ up to $101$. For each system
 records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
