@@ -616,7 +616,7 @@ edits like so:
 
 To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
-$\mathbf{a}^T_k\mathbf{x}\leq b$:
+$\mathbf{a}^T_k\mathbf{x} > b$:
 \begin{equation}
 \ell_j = \left\{\begin{array}{l}
 0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
@@ -930,11 +930,11 @@ The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, .
 An error in the data can be introduced by setting a $v_i$ to \code{FALSE}.
 
 The benchmark was run for balance systems of size $1$ up to $50$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is higly dependant on the 
+records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
-<<echo=FALSE, fig.height=3.5, warning=FALSE>>=
+<<echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical benchmark">>=
 data(benchmip_categorical)
 dat <- benchmip_categorical
 sdat <- subset(dat, errorloc=="middle")
@@ -948,7 +948,7 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
 \subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
 \code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the constraints 
-$x_1 = \sum^{N}_{i=2}$ and $x_1 >= 0$ are added.
+$x_1 = \sum^{N}_{i=2} x_i$ and $x_1 \geq 0$ are added.
 
 \begin{eqnarray*}
 x_1 & \geq & 0\\
@@ -958,7 +958,7 @@ x_1 & = & \sum^{N/2}_{i=2}x_i\\
 \texttt{if (}x_{N/2} \geq 0 \texttt{)} && v_{N/2}\texttt{==TRUE }
 \end{eqnarray*}
 
-The solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
+A solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
 We can introduce an error by setting an $v_i$ to \code{FALSE} or setting a $x_i$
 to $-1$.
 
