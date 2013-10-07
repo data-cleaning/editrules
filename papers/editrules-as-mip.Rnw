@@ -353,13 +353,13 @@ for each staf member, more than one monetary unit is spent. Given two observed
 values $p^0$ and $c^0$, disobeying one or more of the rules, the MIP problem
 for error localization has the following form.
 \begin{displaymath}
- \Minimize_{(\mathbf{c},\mathbf{\Delta})\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c
+ \Minimize_{(\mathbf{x},\mathbf{\Delta})\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c
 \end{displaymath}
 \begin{equation*}
   \textrm{s.t. }\left[\begin{array}{rrrr}
     1 & -1 & 0 & 0\\
-    1 &  0 & 0 & 0\\
-    0 &  1 & 0 & 0\\
+   -1 &  0 & 0 & 0\\
+    0 & -1 & 0 & 0\\
     1 &  0 & -M & 0\\
    -1 &  0 & -M & 0\\
     0 &  1 & 0 & -M\\
