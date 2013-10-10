@@ -11,6 +11,10 @@
 \usepackage{todonotes}
 \makeindex
 
+% Footnote symbols to avoid confusion with superscript references.
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
@@ -213,7 +217,7 @@ A mixed integer programming problem is an optimization problem that can be
 written in the form
 \begin{equation}
 \begin{array}{r}
-\textrm{Minimize } \mathbf{c}^T\mathbf{z}; \\
+\textrm{Minimize } f(\mathbf{z}) = \mathbf{c}^T\mathbf{z}; \\
 \textrm{s.t. }\mathbf{Rz} \leq \mathbf{d},
 \label{eq:mipmin}
 \end{array}
@@ -256,6 +260,7 @@ for the three types of rules are different, but in each case the objective
 function is of the form 
 %
 \begin{equation}
+\label{eq:objfun}
 \mathbf{w}^T\mathbf{\Delta},
 \end{equation}
 where $\mathbf{w}$ is a vector of positive weights and $\mathbf{\Delta}$ a vector
@@ -713,48 +718,116 @@ change indicators.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical stability issues}
 \label{sec:linedits:num}
-Reformulating the error localization problem in terms of a mip problem
-introduces two constants: $M$ and $\epsilon$. These constants end up in the
-coefficient matrix of the mip solver.  Mathematically, there are no bounds on
-the values of $M$ and $\epsilon$, as long as they are chosen so that the
-problem remains feasible. In practice however, limitations on the accuracy with
-which numbers are represented on a computer put restrictions on the value range
-of numbers that enter the mip solver. In the \code{lpsolve} library (as well
-as in \R{}), numbers on the real line are represented as \code{double precision}
-numbers, meaning that there are about 15 decimal positions of precision. 
-
-To avoid significant round off errors, it is a good idea to restrict the range
-of input data. In fact, the authors of the \code{lpsolve} reference manual
-\citep{berkelaar:2010} state the following.
-%
-\begin{quote}
-The chance for numerical instability and rounding errors is considerably 
-larger when the input data contains both large and small numbers. 
-So to improve stability, one must try to work with numbers that are somewhat 
-in the same range. Ideally in the neighborhood of 1.
-[...]You should realize, that you the user are probably in a better position to 
-scale the problem than any computer algorithm. 
-\end{quote}
+An error localisation problem, in its original formulation, is an optimisation
+problem over $n$ decision variables that indicate which variables in a record
+should be adapted. Depending on the type of rules, its reformulation as a MIP
+problem adds at least $n$ variables and $2n$ restrictions). Moreover, the
+reformulation as a MIP problem introduces a constant $M$, the value of which
+has no mathematical significance but for which a value must be chosen in
+practice. Because of limitations on machine accuracy, typically on the order of
+$10^{-16}$, the range of problems that can be solved is limited as well. In
+particular, MIP problems that involve both very large and very small numbers in
+the objective function and/or the restriction matrix  may yield erroneous
+solutions or become numerically infeasible. Indeed, the manual of
+\code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve stability, one
+must try to work with numbers that are somewhat in the same range. Ideally in
+the neighbourhood of 1.}' The following subsections point out
+a number of sources of numerical instabilities and provides ways to handle
+them.
 
 
-\begin{equation}
-\left[\begin{array}{c|c}
-  \mathbf{A}^H &\mathbf{b}^H\\
-  \mathbf{A}^0 &\mathbf{b}^0
-\end{array}\right] 
-= 
-\left[\begin{array}{rr|r}
-  \multicolumn{1}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
-  \mathbbm{1} & -M\mathbbm{1}  &\mathbf{x}^0\\
-  -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
-\end{array}\right] 
-\end{equation}
-In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
-will 
-be sufficient for most purposes, since numerical values and coefficients of the
-constraints 
-in most cases will be in this range. If not, you should rescale some of your
-variables and constraints to make it so.
+\subsection{Scaling numerical records}
+In the MIP formulation of error localisation over numerical records under
+linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
+the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
+MIP solver from finding the actual minimal set of values to adapt or even
+render the MIP-problem unsolvable. As an example, consider the following error
+localisation problem on a two-variable record.
+\begin{displaymath}
+\left\{\begin{array}{l}
+x_1 \geq x_2\\
+\mathbf{x}^0 = (10^6,10^9).
+\end{array}\right.
+\end{displaymath}
+Obviously, the record can be made to obey the restriction by multiplying
+$x^0_1$ by $10^3$ or by dividing $x^0_2$ by the same amount. However, in
+\code{editrules} the default value for $M=10^7<10^9-10^6$ which renders the
+corresponding MIP problem unsolvable. Practical examples where such errors
+occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
+\euro{} instead of k\euro{}.).
+
+It is therefore advisable to remove such unit-of-measure errors prior to error
+localisation\footnote{Methods for detecting such errors exist, see for example
+\cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
+that all $|x|<M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
+one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
+by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
+$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
+may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
+localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
+do not vary over many orders of magnitude, such a scaling will suffice to
+numerically stabilize the MIP problem. However, for reasons to become apparent
+in the next subsection, if $\mathbf{b}\not=\mathbf{0}$, a scalar transformation
+may create numerical problems for the MIP solver.
+
+%A constant scaling factor may not always be appropriate, for example because
+%the entries in $\mathbf{x}$ vary over several orders of magnitude. This is not
+%uncommon when they describe different attributes such as \emph{number of persons
+%employed} and \emph{turnover}. In such cases one may attempt column scaling of the form
+%\begin{equation}
+%\label{eq:colscale}
+%\mathbf{ADD}^{-1}\mathbf{x} \leq \mathbf{b},
+%\end{equation} 
+%Here, $\mathbf{D}$ is a diagonal matrix with positive coefficients at the
+%diagonal. The optimal column scaling usually depends on the observed value
+%$\mathbf{x}^0$.
+
+
+\subsection{Setting numerical threshold values}
+A basic algorithmic step in the \code{lp\_solve} library involves application
+of the so-called \emph{revised Phase I - Phase II simplex algorithm}. Here, the
+term \emph{revised} indicates that a smart storage format is used for the data
+necessary to perform the simplex algorithm. Furthermore, Phase I and Phase II
+are algorithmically equivalent: in Phase I the simplex algorithm is used to
+bring the optimisation problem into its canonical form, which reveals an
+objective vector that obeys all the restrictions. In Phase II, the simplex
+algorithm is used to manipulate the initial canonical form to the optimal
+solution.  Phase II may be repeated many times since this procedure occurs in
+every node of a branch-and-bound algorithm that branches over the decision
+variables.
+
+The most elementary step in the simplex algorithm involves a \emph{pivot}
+operation on a so-called simplex tableau.
+
+
+\begin{displaymath}
+\left[\begin{array}{rrrrrrc}
+         1 &  \mathbf{0} & -\mathbf{w}^T& \mathbf{0}  & \mathbf{0}  & \mathbf{0}\\
+\mathbf{0} &  \mathbf{A} & \mathbf{0}   & \mathbb{1}_s& \mathbf{0}  & \mathbf{b}\\
+\mathbf{0} &  \mathbb{1} & -\mathbf{M}  & \mathbf{0}  & \mathbb{1}_s& \mathbf{x}^0\\
+\mathbf{0} &  \mathbb{1} & \mathbf{M}   & \mathbf{0}  &-\mathbb{1}_s& \mathbf{x}^0
+\end{array}\right]
+\end{displaymath}
+where $\mathbf{M}=\mathbb{1}M$ and $\mathbf{w}$ is defined in
+Eq.~\eqref{eq:objfun}.  The first row represents the objective function, and
+the other rows represent the restrictions on the values of the original, and
+slack variables. 
+
+
+Note that if all slack and artificial variables are set equal to
+$(\mathbf{b_=},\mathbf{b+\leq},\mathbf{x}^0,\mathbf{x}^0)$ and the original
+variables $(\mathbf{x},\mathbf{\Delta})=\mathbf{0}$. We have a valid, but
+non-optimal solution. A pivot operation operates on the tableau, moving the
+system from one valid solution to the next. In a single pivot, one row
+and column is chosen. This row is then scaled so the chosen column has value one.
+Next it is subtracted from all the other rows, possibly after rescaling, such
+that the whole column contains but a single 1. 
+
+
+
+
+
+
 
 \section{Usage}
 \subsection{Error localization}
