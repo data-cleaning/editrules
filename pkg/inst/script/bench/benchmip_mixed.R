@@ -89,9 +89,9 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
   }
 }
 
-if (file.exists(FILE)) file.remove(FILE)
+#if (file.exists(FILE)) file.remove(FILE)
 
-bench(100,10, method="mip")
+#bench(100,10, method="mip")
 bench(50,10, method="bb")
 
 dat <- read.table(FILE, header=TRUE)

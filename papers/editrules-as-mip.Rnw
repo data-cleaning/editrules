@@ -1038,16 +1038,18 @@ to $-1$.
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
 
-\todo[inline]{Mixed data graphs/data is not yet correct!}
+\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
+with weight less then nerrors.}
 <<echo=FALSE, warning=FALSE, fig.height=3.5>>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
-sdat <- subset(dat, errorloc=="middle")
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+#sdat <- subset(dat, errorloc=="middle")
+qplot( data=dat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+       facets=~errorloc
        ) +
        labs(title="", x="# variables", y="", color="") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,150))
+       scale_y_continuous(labels=function(x){paste0(x,"s")})
 @
 
 \section{Conclusion}
