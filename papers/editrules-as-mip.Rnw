@@ -16,6 +16,7 @@
 
 
 \DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator{\fl}{\textrm{fl}}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
@@ -721,7 +722,7 @@ change indicators.
 An error localisation problem, in its original formulation, is an optimisation
 problem over $n$ decision variables that indicate which variables in a record
 should be adapted. Depending on the type of rules, its reformulation as a MIP
-problem adds at least $n$ variables and $2n$ restrictions). Moreover, the
+problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
 reformulation as a MIP problem introduces a constant $M$, the value of which
 has no mathematical significance but for which a value must be chosen in
 practice. Because of limitations on machine accuracy, typically on the order of
@@ -783,45 +784,215 @@ may create numerical problems for the MIP solver.
 %$\mathbf{x}^0$.
 
 
+\subsection{A short overview of MIP-solving}
+Consider a set of linear restrictions on numerical data of the form
+$\mathbf{Ax}\leq\mathbf{b}$, where we assume $\mathbf{b}\geq\mathbf{0}$ and the
+restrictions consist solely of inequalities. In practice, these restrictions
+will not limit the type of linear rules covered by this discussion, since it
+can be shown that all linear rules can be brougth to this form, possibly by
+introducing dummy variables. Furthermore, suppose we have a record
+$\mathbf{x}^0\geq\mathbf{0}$ which doesn't obey the restrictions. The MIP
+formulation of the error localisation problem can be written as follows.
+\begin{equation}
+\begin{array}{l}
+  \textrm{Minimize }f = \mathbf{w}^T\mathbf{\Delta}\\
+  \textrm{s.t.}
+  \left[\begin{array}{rr}
+    \mathbf{A} & \mathbf{0}\\
+    \mathbb{1} &-\mathbf{M}\\
+   -\mathbb{1} &-\mathbf{M}\\
+    \mathbf{0} &\mathbb{1}
+  \end{array}\right]
+  \left[\begin{array}{c}
+    \mathbf{x}\\ \mathbf{\Delta}
+  \end{array}\right]
+  \leq
+  \left[\begin{array}{c}
+    \mathbf{b}\\ \mathbf{x}^0 \\ -\mathbf{x}^0\\ \mathbf{1}
+  \end{array}\right],
+\end{array}
+\label{eq:numxx}
+\end{equation}
+and $\mathbf{x},\mathbf{\Delta}\geq\mathbf{0}$. Also, $\mathbb{1}$ denotes the
+unit matrix, $\mathbf{1}$ a vector with all coefficients equal to $1$ and
+$\mathbf{M}=\mathbb{1}M$. The last row is added to force $\mathbf{\Delta}\leq
+\mathbf{1}$. This is necessary because we will initially treat the binary
+variables $\Delta_j$ as if they are real numbers in the range $[0,1]$.
+
+The \code{lp\_solve} library uses an approach based on the revised Phase I -
+Phase II simplex algorithm to solve MIP problems. In this approach every
+inequality of Eq.\ \eqref{eq:numxx} is transformed to an equality by adding
+dummy variables: each row $\mathbf{a}^T\mathbf{x}\leq b$ is replaced by
+$\mathbf{a}^T\mathbf{x}+s = b$, with $s\ge0$. Depending on the sign of the
+inequality, the extra variable $s$ is called a \emph{slack} or \emph{surplus}
+variable. It is customary to combine this new set of restrictions and the
+objective function in a single \emph{tableau} notation as follows.
+\begin{equation}
+\left[\begin{array}{r|rrrrrr|l}
+1   & \mathbf{0}    &-\mathbf{w}^T  & \mathbf{0}   & \mathbf{0}   & \mathbf{0} &\mathbf{0}      & 0\\
+\hline
+0   & \mathbf{A}    &  \mathbf{0}    & \mathbb{1} & \mathbf{0} & \mathbf{0}   &\mathbf{0} &\mathbf{b}\\
+0   & \mathbb{1}    & -\mathbf{M}    & \mathbf{0} & \mathbb{1} & \mathbf{0}   &\mathbf{0} &\mathbf{x}^0\\
+0   & \mathbb{1}    &  \mathbf{M}    & \mathbf{0} & \mathbf{0} & -\mathbb{1}  &\mathbf{0} &\mathbf{x}^0\\ 
+0   & \mathbf{0}    &  \mathbb{1}    & \mathbf{0} & \mathbf{0} & \mathbf{0}   &\mathbb{1} & \mathbf{1}\\ 
+\end{array}\right].
+\label{eq:tab1}
+\end{equation}
+%
+The tableau represents a set of linear equalities and may therefore be
+manipulated as such.  In fact, the simplex method is based on performing  a
+number of cleverly chosen Gauss-Jordan elimination steps on the tableau. For a
+complete discussion the reader is referred to one of the many textbooks
+discussing it (e.g. \citet{bradley:1977}), but in short the Phase I - Phase II simplex
+algorithm consists of the following steps.
+\begin{description}
+\item[Phase I:] Repeatedly apply Gauss-Jordan elimination steps (called \emph{pivots}) to derive an objective vector
+obeying all restrictions. 
+\item[Phase II:] Repeatedly apply pivots to move from the initial nonoptimal solution to the solution that minimizes the objective function $f$. 
+\end{description}
+%
+In Phase I, a decision vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})$ (with
+$\mathbf{s}$ the vector of slack and surplus variables) is derived that obeys all
+restrictions. This is done by adding extra variables and then manipulating the
+system of equalities represented by the tableau so that those extra variables
+are driven to zero. The binary variables $\mathbf{\Delta}$ are first treated as
+if they were real variables. In the appendix we show how an initial solution
+for Eq.~\eqref{eq:tab1} can be found, here we just state the result of a Phase
+- I operation:
+%
+\begin{equation}
+\left[\begin{array}{r|cccccc|l}
+1 & \mathbf{w}^T\mathbf{M}^{-1} & \mathbf{0} & \mathbf{0}   & \mathbf{0}   & -\mathbf{w}^T\mathbf{M}^{-1} &\mathbf{0} & \mathbf{w}^T\mathbf{M}^{-1}\mathbf{x}^0\\
+\hline
+0 & \mathbf{A}     & \mathbf{0} & \mathbb{1}   & \mathbf{0}   & \mathbf{0}       &\mathbf{0} & \mathbf{b}\\
+0 &2\mathbb{1}     & \mathbf{0} & \mathbf{0}   & \mathbb{1}   & -\mathbb{1}      &\mathbf{0} & 2\mathbf{x}^0\\
+0 &\mathbf{M}^{-1} &\mathbb{1}  & \mathbf{0}   & \mathbf{0}   & -\mathbf{M}^{-1} &\mathbf{0} & \mathbf{M}^{-1}\mathbf{x}^0\\
+0 &-\mathbf{M}^{-1}&\mathbf{0}  & \mathbf{0}   & \mathbf{0}   & \mathbf{M}^{-1}  &\mathbb{1} & \mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0 
+\end{array}\right].
+\end{equation}
+%
+This tableau immediately suggests a valid solution: it is easily confirmed by
+matrix multiplication that the vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})
+=
+(\mathbf{0},\mathbf{x}^0\mathbf{M}^{-1},[\mathbf{b},2\mathbf{x^0},\mathbf{0},\mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0])$
+obeys all restrictions. The above form of a tableau, where the restriction
+matrix contains a (column permutation of) the unit matrix, the right-hand-side
+has only nonnegative coefficients, and the cost vector equals zero for the
+columns above the unit matrix is called the \emph{canonical form}.
+
+Now, a \emph{pivot} operation consists of the following steps:
+\begin{enumerate}
+\item Select a positive element $R_{ij}$ from the restriction matrix.
+\item Multiply the $i$th row by $R_{ij}^{-1}$.
+\item Subtract the $i$th row, possibly after rescaling, from all other rows of the tableau such that
+their $j$th column equals zero.
+\end{enumerate}
+%
+The result of a pivot operation is again a tableau in canonical form but with
+possibly a different value for the cost function. 
+
+Up untill this point, we have treated the binary variables $\mathbf{\Delta}$ as if they were real variables,
+so the tableaux discussed above do not represent solutions to our original problem which demands
+that all $\Delta_j$ are either $0$ or $1$. In the \code{lp\_solve} library this is solved as follows. 
+\begin{enumerate}
+\item For each optimized value $\Delta_j^*$ test wether it is $0$ or $1$. If
+all $\Delta_j^*$ are integer, we have a valid solution of objective value
+$\mathbf{w}^T\mathbf{\Delta}$ and we are done.
+\item For the first variable $\Delta_j^*$ that is not integer, create two sub-models: one where
+the minumum value of $\Delta_j$ equals $1$ and one where the maximum value of $\Delta_j$ equals $0$.
+\item Optimize the two sub-models. If solutions exist, the result will contain an integer $\Delta_j$.
+\item For the sub-models that have a solution and whose current objective value
+does not exceed that of an earlier found solution, return to step 1.
+\end{enumerate}
+%
+The above \emph{branch-and-bound} approach completes this overview. The above
+discussion of pivot and branch-and-bound operations is purely mathematical: no
+choices have been made regaring issues like how to decide when the
+floating-point representation of a value is regarded zero. These issues will be
+discussed in the next subsection.
+
+
+%
 \subsection{Setting numerical threshold values}
-A basic algorithmic step in the \code{lp\_solve} library involves application
-of the so-called \emph{revised Phase I - Phase II simplex algorithm}. Here, the
-term \emph{revised} indicates that a smart storage format is used for the data
-necessary to perform the simplex algorithm. Furthermore, Phase I and Phase II
-are algorithmically equivalent: in Phase I the simplex algorithm is used to
-bring the optimisation problem into its canonical form, which reveals an
-objective vector that obeys all the restrictions. In Phase II, the simplex
-algorithm is used to manipulate the initial canonical form to the optimal
-solution.  Phase II may be repeated many times since this procedure occurs in
-every node of a branch-and-bound algorithm that branches over the decision
-variables.
+On most modern computer systems, real numbers are represented in
+\citet{ieee:2008} double precision format. In essence, real numbers are really
+represented as rounded-off fractions and arithmatic operations on such numbers
+always result in loss of precision and roundof errors. For example, even though
+mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
+representation (denoted $\fl(\cdot)$) we have
+$\fl(0.7)-\fl(0.5)-\fl(0.7)\not=\fl(0)$. In fact, the difference is on the
+order of $10^{-16}$ in this case. 
 
-The most elementary step in the simplex algorithm involves a \emph{pivot}
-operation on a so-called simplex tableau.
+This means that in practice one cannot rely on equality tests to determine
+wether twho floating point numbers are equal.  Rather, one assumes that two
+numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
+predefined tolerance. For this reason \code{lp\_solve} comes with a number of
+predefined tolerances that have default values but may be altered by the user.
+The toleracens implemented by \code{lp\_solve} are summarised in
+Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine wether
+an element of the restriction matrix is positive so it may be used as a
+pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
+Phase I, our restriction matrix by default contains elements on the order of
+$M^{-1}=10^{-7}$. For this reason, the value of \code{epspivot} is lowered in
+\code{editrules} by default, but users may override these settings again. For
+the same reason, the value of \code{epsint}, which determines when a value for
+one of the $\mathbf{\Delta}_j$ van be considered integer is lowered in
+\code{editrules} as well.  The other tolerance settings of \code{lp\_solve}: 
+\code{epsb} (to test if the right-hand-side of the restrictions
+differ from $0$), \code{epsd} (to test if two values of the objective function
+differ), \code{epsel} (all other values) and \code{mip\_gap} (to test whether a
+bound condition has been hit in the branch-and-bound algorithm) have not been altered.
 
 
-\begin{displaymath}
-\left[\begin{array}{rrrrrrc}
-         1 &  \mathbf{0} & -\mathbf{w}^T& \mathbf{0}  & \mathbf{0}  & \mathbf{0}\\
-\mathbf{0} &  \mathbf{A} & \mathbf{0}   & \mathbb{1}_s& \mathbf{0}  & \mathbf{b}\\
-\mathbf{0} &  \mathbb{1} & -\mathbf{M}  & \mathbf{0}  & \mathbb{1}_s& \mathbf{x}^0\\
-\mathbf{0} &  \mathbb{1} & \mathbf{M}   & \mathbf{0}  &-\mathbb{1}_s& \mathbf{x}^0
-\end{array}\right]
-\end{displaymath}
-where $\mathbf{M}=\mathbb{1}M$ and $\mathbf{w}$ is defined in
-Eq.~\eqref{eq:objfun}.  The first row represents the objective function, and
-the other rows represent the restrictions on the values of the original, and
-slack variables. 
+The limited precision inherent to floating point calculations imply that
+computations get more inaccurate as the operands differ more in magnitude. For
+example, on any system that uses double precision arithmatic the difference
+$\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to two
+contradictory demands on our translation of an error localisation problem to
+a MIP problem. On one hand, one would like to set $M$ as large as possible
+so the ranges $x^0_j\pm M$ contain a valid value of $x$. On the other hand,
+large values for $M$ may imply that MIP problems such as \eqref{eq:numxx}
+become numerically infeasable since the coefficients of $\mathbf{A}$ and $\mathbf{x}^0$
+may vary in orders of magnitude.
 
 
-Note that if all slack and artificial variables are set equal to
-$(\mathbf{b_=},\mathbf{b+\leq},\mathbf{x}^0,\mathbf{x}^0)$ and the original
-variables $(\mathbf{x},\mathbf{\Delta})=\mathbf{0}$. We have a valid, but
-non-optimal solution. A pivot operation operates on the tableau, moving the
-system from one valid solution to the next. In a single pivot, one row
-and column is chosen. This row is then scaled so the chosen column has value one.
-Next it is subtracted from all the other rows, possibly after rescaling, such
-that the whole column contains but a single 1. 
+In our experience, the settings denoted in Table \ref{tab:tols} have performed
+well in a range of problems where elements of $\mathbf{A}$ and $\mathbf{b}$ are
+on the order of $1$ and values of $\mathbf{x}^0$ are in the range $[1,10^8]$. 
+
+
+
+
+
+\begin{table}
+\begin{threeparttable}
+\caption{Numerical parameters for MIP-based error localisation.}
+\label{tab:tols}
+\begin{tabular}{lrrl}
+\hline
+&\multicolumn{2}{c}{Default value} \\
+\cline{2-3}
+Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
+\hline
+\code{M}       & \multicolumn{1}{c}{$-$}& $10^7$     & set bounds so $\mathbf{x}\in\mathbf{x}^0\pm M$\\
+\code{eps}     & \multicolumn{1}{c}{$-$}& $10^{-3}$  & translate $x<0$ to $x\leq\varepsilon$\\
+\code{epspivot}& $2\cdot10^{-7}$      & $10^{-15}$ & test if pivot element $R_{ij}>0$ \\
+\code{epsint}  & $10^{-7}$            & $10^{-15}$ & test if $\Delta_j\in\mathbb{N}$ \\
+\code{epsb}    & $10^{-10}$           & $10^{-10}$ & test if $b_i>0$ \\
+\code{epsd}    & $10^{-9}$            & $10^{-9}$  & test if obj. values $|f-f'|>0$ during simplex \\
+\code{epsel}   & $10^{-12}$           & $10^{-12}$ & test if other numbers $\neq0$\\
+\code{mip\_gap}& $10^{-11}$           & $10^{-11}$ & test if obj. values $|f-f'|>0$ during B\&B\\
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+
+
+
+
+
+
 
 
 
