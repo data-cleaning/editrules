@@ -907,7 +907,7 @@ does not exceed that of an earlier found solution, return to step 1.
 %
 The above \emph{branch-and-bound} approach completes this overview. The above
 discussion of pivot and branch-and-bound operations is purely mathematical: no
-choices have been made regaring issues like how to decide when the
+choices have been made regarding issues like how to decide when the
 floating-point representation of a value is regarded zero. These issues will be
 discussed in the next subsection.
 
@@ -915,8 +915,8 @@ discussed in the next subsection.
 %
 \subsection{Setting numerical threshold values}
 On most modern computer systems, real numbers are represented in
-\citet{ieee:2008} double precision format. In essence, real numbers are really
-represented as rounded-off fractions and arithmatic operations on such numbers
+\citet{ieee:2008} double precision format. In essence, real numbers are 
+represented as rounded-off fractions so arithmatic operations on such numbers
 always result in loss of precision and roundof errors. For example, even though
 mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
 representation (denoted $\fl(\cdot)$) we have
@@ -924,7 +924,7 @@ $\fl(0.7)-\fl(0.5)-\fl(0.7)\not=\fl(0)$. In fact, the difference is on the
 order of $10^{-16}$ in this case. 
 
 This means that in practice one cannot rely on equality tests to determine
-wether twho floating point numbers are equal.  Rather, one assumes that two
+wether two floating point numbers are equal.  Rather, one assumes that two
 numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
 predefined tolerance. For this reason \code{lp\_solve} comes with a number of
 predefined tolerances that have default values but may be altered by the user.
@@ -936,7 +936,7 @@ Phase I, our restriction matrix by default contains elements on the order of
 $M^{-1}=10^{-7}$. For this reason, the value of \code{epspivot} is lowered in
 \code{editrules} by default, but users may override these settings again. For
 the same reason, the value of \code{epsint}, which determines when a value for
-one of the $\mathbf{\Delta}_j$ van be considered integer is lowered in
+one of the $\mathbf{\Delta}_j$ can be considered integer is lowered in
 \code{editrules} as well.  The other tolerance settings of \code{lp\_solve}: 
 \code{epsb} (to test if the right-hand-side of the restrictions
 differ from $0$), \code{epsd} (to test if two values of the objective function
@@ -947,13 +947,13 @@ bound condition has been hit in the branch-and-bound algorithm) have not been al
 The limited precision inherent to floating point calculations imply that
 computations get more inaccurate as the operands differ more in magnitude. For
 example, on any system that uses double precision arithmatic the difference
-$\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to two
-contradictory demands on our translation of an error localisation problem to
-a MIP problem. On one hand, one would like to set $M$ as large as possible
+$\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
+two contradictory demands on our translation of an error localisation problem
+to a MIP problem. On one hand, one would like to set $M$ as large as possible
 so the ranges $x^0_j\pm M$ contain a valid value of $x$. On the other hand,
 large values for $M$ may imply that MIP problems such as \eqref{eq:numxx}
-become numerically infeasable since the coefficients of $\mathbf{A}$ and $\mathbf{x}^0$
-may vary in orders of magnitude.
+become numerically inaccurate or infeasible since the coefficients of
+$\mathbf{A}$ and $\mathbf{x}^0$ may vary in orders of magnitude.
 
 
 In our experience, the settings denoted in Table \ref{tab:tols} have performed
