@@ -7,9 +7,7 @@
 #' but does not return the degeneracy of a solution. However it does return an bonus: 
 #' \code{x_feasible}, a feasible solution.
 #'
-#' @section Note:
-#' If the maximim absolute value of \eqn{x\geq 10^9} 1E9, it is pre-scaled with
-#' a factor of \eqn{\sqrt{\max(|x|)}}.
+#' 
 #'
 #' @param E an \code{\link{editset}}, \code{\link{editmatrix}}, or \code{\link{editarray}}
 #' @param x named \code{numeric} with data
