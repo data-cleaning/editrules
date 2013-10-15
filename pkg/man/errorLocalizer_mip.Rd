@@ -3,7 +3,8 @@
 \title{Localize errors using a MIP approach.}
 \usage{
   errorLocalizer_mip(E, x, weight = rep(1, length(x)),
-    maxduration = 600L, verbose = "neutral", ...)
+    maxduration = 600L, verbose = "neutral",
+    lpcontrol = getOption("er.lpcontrol"), ...)
 }
 \arguments{
   \item{E}{an \code{\link{editset}},
@@ -18,6 +19,11 @@
 
   \item{verbose}{verbosity argument that will be passed on
   to \code{solve} lpSolveAPI}
+
+  \item{lpcontrol}{named \code{list} of arguments that will
+  be passed on to \code{\link[lpSolveAPI]{lp.control}}.
+  \code{maxduration} will override \code{lpSolve}'s
+  \code{timeout} argument.}
 
   \item{...}{other arguments that will be passed on to
   \code{solve}.}

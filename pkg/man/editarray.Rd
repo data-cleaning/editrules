@@ -1,4 +1,4 @@
-\name{as.matrix.editarray}
+\name{editarray}
 \alias{as.character.editarray}
 \alias{as.data.frame.editarray}
 \alias{as.expression.editarray}
@@ -9,10 +9,6 @@
 \alias{summary.editarray}
 \title{Parse textual, categorical edit rules to an editarray}
 \usage{
-  \method{as.matrix}{editarray} (x, ...)
-
-  \method{c}{editarray} (...)
-
   editarray(editrules, sep = ":", env = parent.frame())
 
   \method{as.character}{editarray} (x, useIf = TRUE,
@@ -21,6 +17,10 @@
   \method{as.data.frame}{editarray} (x, ...)
 
   \method{as.expression}{editarray} (x, ...)
+
+  \method{as.matrix}{editarray} (x, ...)
+
+  \method{c}{editarray} (...)
 
   \method{str}{editarray} (object, ...)
 
@@ -53,13 +53,13 @@
   \item{useBlocks}{\code{logical} Summarize each block?}
 }
 \value{
-  \code{as.matrix}: The boolean matrix part of the
-  \code{editarray}.
-
   \code{editarray} : An object of class \code{editarray}
 
   \code{as.data.frame}: \code{data.frame} with columns
   'name', 'edit' and 'description'.
+
+  \code{as.matrix}: The boolean matrix part of the
+  \code{editarray}.
 }
 \description{
   An \code{editarray} is a boolean array (with some extra
