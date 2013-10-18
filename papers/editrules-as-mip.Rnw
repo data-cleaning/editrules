@@ -65,8 +65,8 @@ set.seed(41)
 #library(xtable)
 @
 
-\title{Error localization as a mixed integer problem with the {\tt editrules} package}
-\author{Edwin de Jonge and Mark van der Loo}
+\title{Error localization as a mixed integer problem with the editrules package}
+\author{Edwin de Jonge\\  Mark van der Loo}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  START
@@ -725,63 +725,16 @@ should be adapted. Depending on the type of rules, its reformulation as a MIP
 problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
 reformulation as a MIP problem introduces a constant $M$, the value of which
 has no mathematical significance but for which a value must be chosen in
-practice. Because of limitations on machine accuracy, typically on the order of
+practice. Because of limitations in machine accuracy, typically on the order of
 $10^{-16}$, the range of problems that can be solved is limited as well. In
 particular, MIP problems that involve both very large and very small numbers in
 the objective function and/or the restriction matrix  may yield erroneous
 solutions or become numerically infeasible. Indeed, the manual of
-\code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve stability, one
-must try to work with numbers that are somewhat in the same range. Ideally in
-the neighbourhood of 1.}' The following subsections point out
+\code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve
+stability, one must try to work with numbers that are somewhat in the same
+range. Ideally in the neighbourhood of 1.}' The following subsections point out
 a number of sources of numerical instabilities and provides ways to handle
 them.
-
-
-\subsection{Scaling numerical records}
-In the MIP formulation of error localisation over numerical records under
-linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
-the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
-MIP solver from finding the actual minimal set of values to adapt or even
-render the MIP-problem unsolvable. As an example, consider the following error
-localisation problem on a two-variable record.
-\begin{displaymath}
-\left\{\begin{array}{l}
-x_1 \geq x_2\\
-\mathbf{x}^0 = (10^6,10^9).
-\end{array}\right.
-\end{displaymath}
-Obviously, the record can be made to obey the restriction by multiplying
-$x^0_1$ by $10^3$ or by dividing $x^0_2$ by the same amount. However, in
-\code{editrules} the default value for $M=10^7<10^9-10^6$ which renders the
-corresponding MIP problem unsolvable. Practical examples where such errors
-occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
-\euro{} instead of k\euro{}.).
-
-It is therefore advisable to remove such unit-of-measure errors prior to error
-localisation\footnote{Methods for detecting such errors exist, see for example
-\cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
-that all $|x|<M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
-one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
-by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
-$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
-may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
-localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
-do not vary over many orders of magnitude, such a scaling will suffice to
-numerically stabilize the MIP problem. However, for reasons to become apparent
-in the next subsection, if $\mathbf{b}\not=\mathbf{0}$, a scalar transformation
-may create numerical problems for the MIP solver.
-
-%A constant scaling factor may not always be appropriate, for example because
-%the entries in $\mathbf{x}$ vary over several orders of magnitude. This is not
-%uncommon when they describe different attributes such as \emph{number of persons
-%employed} and \emph{turnover}. In such cases one may attempt column scaling of the form
-%\begin{equation}
-%\label{eq:colscale}
-%\mathbf{ADD}^{-1}\mathbf{x} \leq \mathbf{b},
-%\end{equation} 
-%Here, $\mathbf{D}$ is a diagonal matrix with positive coefficients at the
-%diagonal. The optimal column scaling usually depends on the observed value
-%$\mathbf{x}^0$.
 
 
 \subsection{A short overview of MIP-solving}
@@ -869,6 +822,7 @@ for Eq.~\eqref{eq:tab1} can be found, here we just state the result of a Phase
 0 &\mathbf{M}^{-1} &\mathbb{1}  & \mathbf{0}   & \mathbf{0}   & -\mathbf{M}^{-1} &\mathbf{0} & \mathbf{M}^{-1}\mathbf{x}^0\\
 0 &-\mathbf{M}^{-1}&\mathbf{0}  & \mathbf{0}   & \mathbf{0}   & \mathbf{M}^{-1}  &\mathbb{1} & \mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0 
 \end{array}\right].
+\label{eq:phaseI}
 \end{equation}
 %
 This tableau immediately suggests a valid solution: it is easily confirmed by
@@ -889,11 +843,14 @@ their $j$th column equals zero.
 \end{enumerate}
 %
 The result of a pivot operation is again a tableau in canonical form but with
-possibly a different value for the cost function. 
+possibly a different value for the cost function. The simplex algorithm proceeds
+by selecting pivots that decrease the cost function untill the minumum is reached
+or the problem is shown to be unfeasible.
 
-Up untill this point, we have treated the binary variables $\mathbf{\Delta}$ as if they were real variables,
-so the tableaux discussed above do not represent solutions to our original problem which demands
-that all $\Delta_j$ are either $0$ or $1$. In the \code{lp\_solve} library this is solved as follows. 
+Up untill this point, we have treated the binary variables $\mathbf{\Delta}$ as
+if they were real variables, so the tableaux discussed above do not represent
+solutions to our original problem which demands that all $\Delta_j$ are either
+$0$ or $1$. In the \code{lp\_solve} library this is solved as follows. 
 \begin{enumerate}
 \item For each optimized value $\Delta_j^*$ test wether it is $0$ or $1$. If
 all $\Delta_j^*$ are integer, we have a valid solution of objective value
@@ -908,20 +865,52 @@ does not exceed that of an earlier found solution, return to step 1.
 The above \emph{branch-and-bound} approach completes this overview. The above
 discussion of pivot and branch-and-bound operations is purely mathematical: no
 choices have been made regarding issues like how to decide when the
-floating-point representation of a value is regarded zero. These issues will be
-discussed in the next subsection.
+floating-point representation of a value is regarded zero or how to handle
+badly scaled problems.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Scaling numerical records}
+In the MIP formulation of error localisation over numerical records under
+linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
+the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
+MIP solver from finding the actual minimal set of values to adapt or even
+render the MIP-problem unsolvable. As an example, consider the following error
+localisation problem on a two-variable record.
+\begin{displaymath}
+\left\{\begin{array}{l}
+x_1 \geq x_2\\
+\mathbf{x}^0 = (10^6,10^9).
+\end{array}\right.
+\end{displaymath}
+Obviously, the record can be made to obey the restriction by multiplying
+$x^0_1$ by $10^3$ or by dividing $x^0_2$ by the same amount. However, in
+\code{editrules} the default value for $M=10^7<10^9-10^6$ which renders the
+corresponding MIP problem unsolvable. Practical examples where such errors
+occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
+\euro{} instead of k\euro{}.).
+
+It is therefore advisable to remove such unit-of-measure errors prior to error
+localisation\footnote{Methods for detecting such errors exist, see for example
+\cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
+that all $|x^0|<M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
+one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
+by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
+$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
+may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
+localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
+do not vary over many orders of magnitude, such a scaling will suffice to
+numerically stabilize the MIP problem. 
 
 %
 \subsection{Setting numerical threshold values}
-On most modern computer systems, real numbers are represented in
+On most modern computer systems real numbers are represented in
 \citet{ieee:2008} double precision format. In essence, real numbers are 
 represented as rounded-off fractions so arithmatic operations on such numbers
 always result in loss of precision and roundof errors. For example, even though
 mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
 representation (denoted $\fl(\cdot)$) we have
-$\fl(0.7)-\fl(0.5)-\fl(0.7)\not=\fl(0)$. In fact, the difference is on the
-order of $10^{-16}$ in this case. 
+$\fl(0.7)-\fl(0.5)-\fl(0.2)\not=\fl(0)$. In fact, the difference is about
+$0.56\cdot10^{-16}$ in this case. 
 
 This means that in practice one cannot rely on equality tests to determine
 wether two floating point numbers are equal.  Rather, one assumes that two
@@ -932,7 +921,7 @@ The toleracens implemented by \code{lp\_solve} are summarised in
 Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine wether
 an element of the restriction matrix is positive so it may be used as a
 pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
-Phase I, our restriction matrix by default contains elements on the order of
+Phase I, our restriction matrix contains elements on the order of
 $M^{-1}=10^{-7}$. For this reason, the value of \code{epspivot} is lowered in
 \code{editrules} by default, but users may override these settings again. For
 the same reason, the value of \code{epsint}, which determines when a value for
@@ -943,22 +932,31 @@ differ from $0$), \code{epsd} (to test if two values of the objective function
 differ), \code{epsel} (all other values) and \code{mip\_gap} (to test whether a
 bound condition has been hit in the branch-and-bound algorithm) have not been altered.
 
-
 The limited precision inherent to floating point calculations imply that
 computations get more inaccurate as the operands differ more in magnitude. For
 example, on any system that uses double precision arithmatic the difference
 $\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
 two contradictory demands on our translation of an error localisation problem
 to a MIP problem. On one hand, one would like to set $M$ as large as possible
-so the ranges $x^0_j\pm M$ contain a valid value of $x$. On the other hand,
-large values for $M$ may imply that MIP problems such as \eqref{eq:numxx}
-become numerically inaccurate or infeasible since the coefficients of
-$\mathbf{A}$ and $\mathbf{x}^0$ may vary in orders of magnitude.
+so the ranges $x^0_j\pm M$ contain a valid value of $x_j$. On the other hand,
+large values for $M$ may imply that MIP problems such as Eq.~\eqref{eq:numxx}
+become numerically inaccurate. 
 
+In practice, the tableau used by \code{lp\_solve} will not be exactly the same
+as represented in Eq.~\eqref{eq:phaseI}. Over the years, many optimisations and
+heuristics have been developed to make solving linear programming problems fast
+and reliable, and several of those optimisations have been implemented in
+\code{lp\_solve}. However, the tableau of Eq.~\eqref{eq:phaseI} does
+fundamentally show how numerical instabilities may occur: the tableau
+simultaneously contains numbers on the order of $\mathbf{M}^{-1}$ and on the order of
+$\mathbf{x}^0$. It is not at all unlikely that the two differ in several orders
+of magnitude.
 
 In our experience, the settings denoted in Table \ref{tab:tols} have performed
 well in a range of problems where elements of $\mathbf{A}$ and $\mathbf{b}$ are
-on the order of $1$ and values of $\mathbf{x}^0$ are in the range $[1,10^8]$. 
+on the order of $1$ and values of $\mathbf{x}^0$ are in the range $[1,10^8]$.
+However, these settings have been made configurable so users may choose their
+own settings as needed.
 
 
 
@@ -1148,6 +1146,7 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        annotate("text", x=40, y=50, label="e=4")
 @
 \label{fig:numperf}
+\caption{Benchmark on numerical data}
 \end{figure}
 Figure \ref{fig:numperf} shows the performance of error localization for increasing
 number of variables and increasing number of errors. \code{mip} performance is vastly
@@ -1209,8 +1208,8 @@ to $-1$.
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
 
-\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
-with weight less then nerrors.}
+%\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
+%with weight less then nerrors.}
 <<echo=FALSE, warning=FALSE, fig.height=3.5>>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
