@@ -1,10 +1,10 @@
 
 
 E <- editarray(expression(
-    a \%in\% letters[1:4],
-    b \%in\% letters[5:8],
-    if ( a \%in\% c('a','b') ) b \%in\% c('e','f'),
-    if ( a \%in\% c('c','d') ) b \%in\% c('h')
+    a %in% letters[1:4],
+    b %in% letters[5:8],
+    if ( a %in% c('a','b') ) b %in% c('e','f'),
+    if ( a %in% c('c','d') ) b %in% c('h')
 ))
 
 generateEdits(E)
