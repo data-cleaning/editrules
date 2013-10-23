@@ -7,15 +7,15 @@
 #' but does not return the degeneracy of a solution. However it does return an bonus: 
 #' \code{x_feasible}, a feasible solution.
 #'
-#' @section Note:
-#' If the maximim absolute value of \eqn{x\geq 10^9} 1E9, it is pre-scaled with
-#' a factor of \eqn{\sqrt{\max(|x|)}}.
+#' 
 #'
 #' @param E an \code{\link{editset}}, \code{\link{editmatrix}}, or \code{\link{editarray}}
 #' @param x named \code{numeric} with data
 #' @param weight  \code{numeric} with weights
 #' @param maxduration number of seconds that is spent on finding a solution
 #' @param verbose verbosity argument that will be passed on to \code{solve} lpSolveAPI
+#' @param lpcontrol named \code{list}  of arguments that will be passed on to \code{\link[lpSolveAPI]{lp.control}}. \code{maxduration} will override
+#'  \code{lpSolve}'s \code{timeout} argument.
 #' @param ... other arguments that will be passed on to \code{solve}.
 #' @return list with solution weight \code{w}, \code{logical} \code{adapt} stating what to adapt,  
 #'  \code{x_feasible} and the lp problem (an \code{lpExtPtr} object)
@@ -36,6 +36,7 @@ errorLocalizer_mip <- function( E
                             , weight=rep(1, length(x))
                             , maxduration=600L
                             , verbose="neutral"
+                            , lpcontrol = getOption("er.lpcontrol")
                             , ...
                             ){
 
@@ -52,15 +53,10 @@ errorLocalizer_mip <- function( E
    
    lps <- as.lp.mip(elm)
    # end TODO
-   lp.control( lps
-             , presolve = "rows"    # move univariate constraints into bounds
-             , timeout = as.integer(maxduration)
-             , epsint = 1e-15
-#             , epssel = 1e-15
-#            , epsb = 1e-15
-#              , epsd = 1e-15
-             , epspivot = 1e-15
-   )
+
+   lpcontrol$timeout <- maxduration
+   lpcontrol$lprec <- lps
+   do.call(lp.control,lpcontrol)
 
    if (DUMP) write.lp(lps, "test3.lp")
    

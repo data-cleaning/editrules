@@ -51,7 +51,7 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
     if (any(nums)) { 
       A0_num <- editmatrix(expr[nums])
       rownames(A0_num) <- names(x)[nums]
-      A0_num <- softEdits(A0_num, prefix=prefix, postfix="0")
+      A0_num <- softEdits(A0_num, prefix=prefix, postfix="0",M=M)
     } else A0_num <- NULL
     
     cat_vars <- getVars(E, type="cat")

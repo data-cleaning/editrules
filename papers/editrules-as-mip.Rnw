@@ -11,7 +11,12 @@
 \usepackage{todonotes}
 \makeindex
 
+% Footnote symbols to avoid confusion with superscript references.
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
+
 \DeclareMathOperator*{\argmin}{\arg\!\min}
+\DeclareMathOperator{\fl}{\textrm{fl}}
 \DeclareMathOperator*{\Lor}{\lor}
 \DeclareMathOperator*{\Land}{\land}
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
@@ -54,14 +59,15 @@
 \hyphenation{
 }
 
-<<init, echo=FALSE, results='hide', message=FALSE>>=
+<<echo=FALSE, results='hide', message=FALSE>>=
 library(editrules)
+library(knitr)
 set.seed(41)
-#library(xtable)
+opts_chunk$set(size='small',highlight=FALSE)
 @
 
-\title{Error localization as a mixed integer problem with the {\tt editrules} package}
-\author{Edwin de Jonge and Mark van der Loo}
+\title{Error localization as a mixed integer problem with the editrules package}
+\author{Edwin de Jonge\\  Mark van der Loo}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  START
@@ -128,20 +134,18 @@ original values can be replaced in such a way that no rules are violated anymore
 This minimization problem is named after \cite{fellegi:1976}, who first
 formulated and solved the problem for the case of categorical data. Error
 localization has been extensively discussed in literature\footnote{See
-\citet{waal:2011} and references therein}, so we will suffice with a few
-remarks. First, note that the minimization problem is possibly over a search
-space of size $2^n$, with $n$ the number of fields, rendering a
-brute-force approach that runs through all
-possible solution candidates computationally unfeasible.
-Second, the problem is
-complicated by the occurrence of \emph{implied rules}. That is, the solution
-set must not only allow the record to obey the original, user-defined set of
-rules, but also rules that are logically or arithmetically implied by the
-original set. To cope with these complications, several algorithmic approaches
-have been developed, of which two are worth mentioning in this context:
-the first is the branch-and-bound approach, developed by \cite{waal:2003a}.
-The second is an approach based on mixed-integer programming (mip), described
-in \cite{waal:2011}.
+\citet{waal:2011} and references therein.}, so we will suffice with a few
+remarks. First, the search space related to the minimization problem grows
+exponentially with the number of fields, rendering a brute-force approach that
+runs through all possible solution candidates computationally infeasible.
+Second, the problem is complicated by the occurrence of \emph{implied rules}.
+That is, the solution set must not only allow the record to obey the original,
+user-defined set of rules, but also rules that are logically or arithmetically
+implied by the original set. To cope with these complications, several
+algorithmic approaches have been developed, of which two are worth mentioning
+in this context: the first is the branch-and-bound approach, developed by
+\cite{waal:2003a}.  The second is an approach based on mixed-integer
+programming (mip), described in \cite{waal:2011}.
 
 \subsection{The \code{editrules} package}
 Over the past five to ten years, the \R{} statistical environment received a
@@ -213,27 +217,28 @@ A mixed integer programming problem is an optimization problem that can be
 written in the form
 \begin{equation}
 \begin{array}{r}
-\textrm{Minimize } \mathbf{c}^T\mathbf{z}; \\
+\textrm{Minimize } f(\mathbf{z}) = \mathbf{c}^T\mathbf{z}; \\
 \textrm{s.t. }\mathbf{Rz} \leq \mathbf{d},
 \label{eq:mipmin}
 \end{array}
 \end{equation}
 %
 where $\mathbf{c}$ is a constant vector and $\mathbf{z}$ is a vector consisting
-of real and integer coefficients. The inner product $\mathbf{c}^T\mathbf{z}$ is
-referred to as the \emph{objective function}.  Furthermore, $\mathbf{R}$ is a
-coefficient matrix and $\mathbf{d}$ a vector of upper bounds. Formally, the
-elements of $\mathbf{c}$, $\mathbf{R}$ and $\mathbf{d}$ are limited to the rational
-numbers \citep{schrijver:1998}, which is never a problem in practice since we
-are always working with a computer representation of numbers. 
+of real and integer coefficients. One usually referres to $\mathbf{z}$ as the
+\emph{decision vector} and the inner product $\mathbf{c}^T\mathbf{z}$ as the
+\emph{objective function}.  Furthermore, $\mathbf{R}$ is a coefficient matrix
+and $\mathbf{d}$ a vector of upper bounds. Formally, the elements of
+$\mathbf{c}$, $\mathbf{R}$ and $\mathbf{d}$ are limited to the rational numbers
+\citep{schrijver:1998}, which is never a problem in practice since we are
+always working with a computer representation of numbers. 
 
 The name \emph{mixed-integer programming} stems from the fact that $\mathbf{z}$
 contains continuous as well as integer variables. When $\mathbf{z}$ consists
 solely of continuous or integer variables, Problem~\eqref{eq:mipmin} reduces
 respectively to a \emph{linear} or an \emph{integer programming} problem.  An
 important special case occurs when the integer coefficients of $\mathbf{z}$ may
-only take values from \{0,1\}. Such variables are often called binary variables
-or decision variables. It occurs as a special case since defining $\mathbf{z}$ to
+only take values from \{0,1\}. Such variables are often called binary variables. 
+It occurs as a special case since defining $\mathbf{z}$ to
 be integer and applying the appropriate restrictions yields the same problem.
 
 Mixed integer programming is well understood and several software packages
@@ -256,6 +261,7 @@ for the three types of rules are different, but in each case the objective
 function is of the form 
 %
 \begin{equation}
+\label{eq:objfun}
 \mathbf{w}^T\mathbf{\Delta},
 \end{equation}
 where $\mathbf{w}$ is a vector of positive weights and $\mathbf{\Delta}$ a vector
@@ -326,7 +332,7 @@ reason is that while \code{editrules} allows the user to define strict
 inequalities ($<$), the \code{lpsolve} library used by \code{editrules} only allows
 for inclusive inequalities ($\leq$). For this reason, strict inequalities of the
 form $\mathbf{a}^T\mathbf{x}<b$ are rewritten as $\mathbf{a}^T\mathbf{x}\leq
-b-\epsilon$, with $\epsilon$ a suitably small constant.
+b-\epsilon$, with $\epsilon$ a suitably small positive constant.
 
 In the case of linear edits, the set of constraints $\mathbf{R}^0\mathbf{z}\leq\mathbf{d}^0$
 consists of pairs of the form
@@ -336,7 +342,7 @@ consists of pairs of the form
 \label{eq:deltanum}
 \end{eqnarray}
 for $i=1,2,\ldots,n$. Here The $x^0_i$ are the actual observed values in the
-record and $M$ is a suitably large constant allowing $x_i$ to vary between
+record and $M$ is a suitably large positive constant allowing $x_i$ to vary between
 $x_i^0-M$ and $x_i^0+M$. It is not difficult to see that if $x_i$ is different
 from $x_i^0$ then $\Delta_i$ must equal 1. For, if we choose
 $\Delta_i=0$ we obtain the set of restrictions
@@ -350,7 +356,7 @@ Consider a record with business survey data, consisting of the variables
 \emph{Number of staff} $p$ and \emph{Personel cost}  $c$.  We have the rules
 $p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
 for each staf member, more than one monetary unit is spent. Given two observed
-values $p^0$ and $c^0$, disobeying one or more of the rules, the MIP problem
+values $p^0$ and $c^0$, disobeying one or more of the rules, the mip problem
 for error localization has the following form.
 \begin{displaymath}
  \Minimize_{(\mathbf{x},\mathbf{\Delta})\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c
@@ -409,7 +415,7 @@ Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
 not be) in contrast to linear edits which are positively formulated (they
 specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
-translate categorical edits to a MIP problem, we need to specify 
+translate categorical edits to a mip problem, we need to specify 
 $\overline{\F}$, such that if $\mathbf{v}\in\overline{\F}$ then
 $\mathbf{v}$ satisfies $e$.  Here, $\overline{\F}$ is the complement of
 $\F$ in $D$, which can be written as
@@ -438,7 +444,7 @@ Below, we
 will use this property and construct a linear relation that counts the number
 of $v_i\in\overline{F}_i$ over all variables.
 
-To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
+To be able to formulate the Felligi Holt-problem in terms of a mip problem, we
 first associate with each categorical variable $v_i$ a binary vector
 $\mathbf{d}$ of which the coefficients are defined as follows (see also Eq.\
 \eqref{eq:defineD}).
@@ -460,7 +466,7 @@ Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \right),
 \label{eq:ecat}
 \end{equation}
-where we interpret $1$ and $0$ as \code{true} and \code{false} respectively and
+where we interpret 1 and 0 as \code{true} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
 $\mathbf{e}$ represents the valid value combinations of variables contained in
@@ -513,7 +519,7 @@ F = F_m\times F_a =  \{\textsf{married}\}\times\{\textsf{child}\}
 \end{equation*}
 which gives $\overline{F}_m=\{\textrm{unmarried}\}$ and $\overline{F}_a=\{\textrm{adult}\}$.
 Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}=(0,1,0,1)$ and one may verify
-that $\mathbf{e}^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the MIP
+that $\mathbf{e}^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the mip
 problem for error localisation now looks like this.
 \begin{equation}
   \Minimize_{(\mathbf{v},\mathbf{\Delta})\in D\times \{0,1\}^2} \Delta_m + \Delta_a
@@ -554,7 +560,7 @@ taking values in $D\times\mathbb{R}^n$:
 \begin{equation}
 \mathbf{r} = (v_1,\ldots,v_m,x_1,\ldots,x_n) = (\mathbf{v},\mathbf{x}),
 \end{equation}
-where $D$ is defined in Eq.\ \eqref{eq:defineD}. Edits on $D\times\mathbb{R}^n$.
+where $D$ is defined in Eq.\ \eqref{eq:defineD}. 
 As stated above, categorical edits are usually defined negatively as a region of
 $D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
 are allowed. We may choose a negative formulation of edits containing
@@ -614,7 +620,7 @@ edits like so:
 \end{equation}
 
 
-To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
+To reformulate Eq. \eqref{eq:implication} as a restriction in a mip problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
 $\mathbf{a}^T_k\mathbf{x} > b$:
 \begin{equation}
@@ -638,9 +644,9 @@ also add
 \end{equation}
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
 $\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
-$\ell_j=1$ it is unimportant for the whole restriction to hold whether the
-inequality holds.  Finally, similar to the purely categorical case we need to
-add restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
+$\ell_j=1$ the whole restriction can hold regardless of whether the inequality
+holds.  Finally, similar to the purely categorical case we need to add
+restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
 \eqref{eq:linconsequent} and Eq.\ \eqref{eq:mixedit} constitute $\mathbf{R}^H$.
 
@@ -661,13 +667,15 @@ recorded values consists of the union of the restrictions for categorical variab
 \begin{example}
 We consider a record $\mathbf{r}$ with the variables \emph{type of business}
 $t$, which takes values in $D_t=\{\textrm{sp},\textrm{other}\}$, where ``sp''
-stands for ``sole proprietorship'', \emph{personnel cost} $c\in
-\mathbb{R}$ and \emph{number of staff} $p\in\mathbb{R}$. Hence, we have
-$\mathbf{r}=(t,p,c)\in D_t\times\mathbb{R}^2$. We impose the following rules on
-$\mathbf{r}$: $p\geq0$, $c\geq0$, $c\geq p$ and if the \emph{business type} is
-a sole proprietorship, then the number of staff must equal zero. This may
-be expressed as $(t \in \{\textrm{sp}\})\Rightarrow (p=0)$ or equivalently
-$(t\in\{\textrm{other}\})\lor (p=0)$.
+stands for ``sole proprietorship'', \emph{personnel cost} $c\in \mathbb{R}$ and
+\emph{number of staff} $p\in\mathbb{R}$. Hence, we have $\mathbf{r}=(t,p,c)\in
+D_t\times\mathbb{R}^2$. We impose the following rules on $\mathbf{r}$:
+$p\geq0$, $c\geq0$, $c\geq p$ and if the \emph{business type} is a sole
+proprietorship, then the number of staff must equal zero. This may be expressed
+as $(t \in \{\textrm{sp}\})\Rightarrow (p=0)$ or equivalently
+$(t\in\{\textrm{other}\})\lor (p=0)$. For a record
+$\mathbf{r}^{0}=(\textrm{sp},p^0,c^0)$, the error localisation problem takes
+the following form.
 \begin{equation*}
 \Minimize_{(\mathbf{r},\mathbf{\Delta},\ell)\in D_t\times\mathbb{R}^2\times\{0,1\}^4} \Delta_t + \Delta_p + \Delta_c
 \end{equation*}
@@ -713,48 +721,301 @@ change indicators.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical stability issues}
 \label{sec:linedits:num}
-Reformulating the error localization problem in terms of a mip problem
-introduces two constants: $M$ and $\epsilon$. These constants end up in the
-coefficient matrix of the mip solver.  Mathematically, there are no bounds on
-the values of $M$ and $\epsilon$, as long as they are chosen so that the
-problem remains feasible. In practice however, limitations on the accuracy with
-which numbers are represented on a computer put restrictions on the value range
-of numbers that enter the mip solver. In the \code{lpsolve} library (as well
-as in \R{}), numbers on the real line are represented as \code{double precision}
-numbers, meaning that there are about 15 decimal positions of precision. 
-
-To avoid significant round off errors, it is a good idea to restrict the range
-of input data. In fact, the authors of the \code{lpsolve} reference manual
-\citep{berkelaar:2010} state the following.
-%
-\begin{quote}
-The chance for numerical instability and rounding errors is considerably 
-larger when the input data contains both large and small numbers. 
-So to improve stability, one must try to work with numbers that are somewhat 
-in the same range. Ideally in the neighborhood of 1.
-[...]You should realize, that you the user are probably in a better position to 
-scale the problem than any computer algorithm. 
-\end{quote}
+An error localisation problem, in its original formulation, is an optimisation
+problem over $n$ decision variables that indicate which variables in a record
+should be adapted. Depending on the type of rules, its reformulation as a mip
+problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
+reformulation as a mip problem introduces a constant $M$, the value of which
+has no mathematical significance but for which a value must be chosen in
+practice. Because of limitations in machine accuracy, typically on the order of
+$10^{-16}$, the range of problems that can be solved is limited as well. In
+particular, mip problems that involve both very large and very small numbers in
+the objective function and/or the restriction matrix  may yield erroneous
+solutions or become numerically infeasible. Indeed, the manual of
+\code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve
+stability, one must try to work with numbers that are somewhat in the same
+range. Ideally in the neighbourhood of 1.}' The following subsections point out
+a number of sources of numerical instabilities and provides ways to handle
+them.
 
 
+\subsection{A short overview of mip-solving}
+Consider a set of linear restrictions on numerical data of the form
+$\mathbf{Ax}\leq\mathbf{b}$, where we assume $\mathbf{b}\geq\mathbf{0}$ and the
+restrictions consist solely of inequalities ($\leq$). In practice, these
+restrictions will not limit the type of linear rules covered by this
+discussion, since it can be shown that all linear rules can be brougth to this
+form, possibly by introducing dummy variables [see \emph{e.g.}
+\citet{schrijver:1998,bradley:1977}]. Furthermore, suppose we have a record
+$\mathbf{x}^0\geq\mathbf{0}$ which doesn't obey the restrictions. The mip
+formulation of the error localisation problem can be written as follows.
 \begin{equation}
-\left[\begin{array}{c|c}
-  \mathbf{A}^H &\mathbf{b}^H\\
-  \mathbf{A}^0 &\mathbf{b}^0
-\end{array}\right] 
-= 
-\left[\begin{array}{rr|r}
-  \multicolumn{1}{c}{ \mathbf{A}^H} & \multicolumn{1}{c|}{\mathbf{0}} & \mathbf{b}^H\\
-  \mathbbm{1} & -M\mathbbm{1}  &\mathbf{x}^0\\
-  -\mathbbm{1} & -M\mathbbm{1} &-\mathbf{x^0}
-\end{array}\right] 
+\begin{array}{l}
+  \textrm{Minimize }f = \mathbf{w}^T\mathbf{\Delta}\\
+  \textrm{s.t.}
+  \left[\begin{array}{rr}
+    \mathbf{A} & \mathbf{0}\\
+    \mathbb{1} &-\mathbf{M}\\
+   -\mathbb{1} &-\mathbf{M}\\
+    \mathbf{0} &\mathbb{1}
+  \end{array}\right]
+  \left[\begin{array}{c}
+    \mathbf{x}\\ \mathbf{\Delta}
+  \end{array}\right]
+  \leq
+  \left[\begin{array}{c}
+    \mathbf{b}\\ \mathbf{x}^0 \\ -\mathbf{x}^0\\ \mathbf{1}
+  \end{array}\right],
+\end{array}
+\label{eq:numxx}
 \end{equation}
-In {\sf editrules} by default $M = 10^7$ and $\epsilon = 10^{-3}$ is used. This 
-will 
-be sufficient for most purposes, since numerical values and coefficients of the
-constraints 
-in most cases will be in this range. If not, you should rescale some of your
-variables and constraints to make it so.
+and $\mathbf{x},\mathbf{\Delta}\geq\mathbf{0}$. Also, $\mathbb{1}$ denotes the
+unit matrix, $\mathbf{1}$ a vector with all coefficients equal to $1$ and
+$\mathbf{M}=\mathbb{1}M$. The last row is added to force $\mathbf{\Delta}\leq
+\mathbf{1}$. This is necessary because we will initially treat the binary
+variables $\Delta_j$ as if they are real numbers in the range $[0,1]$.
+
+The \code{lp\_solve} library uses an approach based on the revised Phase I -
+Phase II simplex algorithm to solve mip problems. In this approach every
+inequality of Eq.\ \eqref{eq:numxx} is transformed to an equality by adding
+dummy variables: each row $\mathbf{a}^T\mathbf{x}\leq b$ is replaced by
+$\mathbf{a}^T\mathbf{x}+s = b$, with $s\ge0$. Depending on the sign of the
+inequality, the extra variable $s$ is called a \emph{slack} or \emph{surplus}
+variable. It is customary to combine this new set of restrictions and the
+objective function in a single \emph{tableau} notation as follows.
+\begin{equation}
+\left[\begin{array}{r|rrrrrr|l}
+1   & \mathbf{0}    &-\mathbf{w}^T  & \mathbf{0}   & \mathbf{0}   & \mathbf{0} &\mathbf{0}      & 0\\
+\hline
+0   & \mathbf{A}    &  \mathbf{0}    & \mathbb{1} & \mathbf{0} & \mathbf{0}   &\mathbf{0} &\mathbf{b}\\
+0   & \mathbb{1}    & -\mathbf{M}    & \mathbf{0} & \mathbb{1} & \mathbf{0}   &\mathbf{0} &\mathbf{x}^0\\
+0   & \mathbb{1}    &  \mathbf{M}    & \mathbf{0} & \mathbf{0} & -\mathbb{1}  &\mathbf{0} &\mathbf{x}^0\\ 
+0   & \mathbf{0}    &  \mathbb{1}    & \mathbf{0} & \mathbf{0} & \mathbf{0}   &\mathbb{1} & \mathbf{1}\\ 
+\end{array}\right].
+\label{eq:tab1}
+\end{equation}
+%
+The tableau represents a set of linear equalities and may therefore be
+manipulated as such.  In fact, the simplex method is based on performing  a
+number of cleverly chosen Gauss-Jordan elimination steps on the tableau. For a
+complete discussion the reader is referred to one of the many textbooks
+discussing it (e.g. \citet{bradley:1977}), but in short the Phase I - Phase II
+simplex algorithm consists of the following steps.
+\begin{description}
+\item[Phase I:] Repeatedly apply Gauss-Jordan elimination steps (called
+\emph{pivots}) to derive a decision vector that obeys all restrictions. 
+A vector obeying all restrictions is called a \emph{basic solution}.
+\item[Phase II:] Repeatedly apply pivots to move from the initial nonoptimal
+solution to the solution that minimizes the objective function $f$. 
+\end{description}
+%
+In Phase I, a decision vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})$ (with
+$\mathbf{s}$ the vector of slack and surplus variables) is derived that obeys
+all restrictions. This is done by adding again extra variables where necessary
+and then manipulating the system of equalities represented by the tableau so
+that those extra variables are driven to zero. The binary variables
+$\mathbf{\Delta}$ are first treated as if they were real variables. In the
+appendix we show how an initial solution for Eq.~\eqref{eq:tab1} can be found,
+here we just state the result of a Phase-I operation:
+%
+\begin{equation}
+\left[\begin{array}{r|cccccc|l}
+1 & \mathbf{w}^T\mathbf{M}^{-1} & \mathbf{0} & \mathbf{0}   & \mathbf{0}   & -\mathbf{w}^T\mathbf{M}^{-1} &\mathbf{0} & \mathbf{w}^T\mathbf{M}^{-1}\mathbf{x}^0\\
+\hline
+0 & \mathbf{A}     & \mathbf{0} & \mathbb{1}   & \mathbf{0}   & \mathbf{0}       &\mathbf{0} & \mathbf{b}\\
+0 &2\mathbb{1}     & \mathbf{0} & \mathbf{0}   & \mathbb{1}   & -\mathbb{1}      &\mathbf{0} & 2\mathbf{x}^0\\
+0 &\mathbf{M}^{-1} &\mathbb{1}  & \mathbf{0}   & \mathbf{0}   & -\mathbf{M}^{-1} &\mathbf{0} & \mathbf{M}^{-1}\mathbf{x}^0\\
+0 &-\mathbf{M}^{-1}&\mathbf{0}  & \mathbf{0}   & \mathbf{0}   & \mathbf{M}^{-1}  &\mathbb{1} & \mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0 
+\end{array}\right].
+\label{eq:phaseI}
+\end{equation}
+%
+This tableau immediately suggests a valid solution: it is easily confirmed by
+matrix multiplication that the vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})
+=
+(\mathbf{0},\mathbf{x}^0\mathbf{M}^{-1},[\mathbf{b},2\mathbf{x^0},\mathbf{0},\mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0])$
+obeys all restrictions. The above form of a tableau, where the restriction
+matrix contains a (column permutation of) the unit matrix, the right-hand-side
+has only nonnegative coefficients, and the cost vector equals zero for the
+columns above the unit matrix is called the \emph{canonical form}.
+
+Now, a \emph{pivot} operation consists of the following steps:
+\begin{enumerate}
+\item Select a positive element $R_{ij}$ from the restriction matrix.
+\item Multiply the $i$th row by $R_{ij}^{-1}$.
+\item Subtract the $i$th row, possibly after rescaling, from all other rows of the tableau such that
+their $j$th column equals zero.
+\end{enumerate}
+%
+The result of a pivot operation is again a tableau in canonical form but with
+possibly a different value for the cost function. The simplex algorithm proceeds
+by selecting pivots that decrease the cost function untill the minumum is reached
+or the problem is shown to be infeasible.
+
+Up untill this point, we have treated the binary variables $\mathbf{\Delta}$ as
+if they were real variables, so the tableaux discussed above do not represent
+solutions to our original problem which demands that all $\Delta_j$ are either
+$0$ or $1$. In the \code{lp\_solve} library this is solved as follows. 
+\begin{enumerate}
+\item For each optimized value $\Delta_j^*$ test wether it is $0$ or $1$. If
+all $\Delta_j^*$ are integer, we have a valid solution of objective value
+$\mathbf{w}^T\mathbf{\Delta}$ and we are done.
+\item For the first variable $\Delta_j^*$ that is not integer, create two
+sub-models: one where the minumum value of $\Delta_j$ equals $1$ and one where
+the maximum value of $\Delta_j$ equals $0$.
+\item Optimize the two sub-models. If solutions exist, the result will contain
+an integer $\Delta_j$.
+\item For the sub-models that have a solution and whose current objective value
+does not exceed that of an earlier found solution, return to step 1.
+\end{enumerate}
+%
+The above \emph{branch-and-bound} approach completes this overview. The above
+discussion of pivot and branch-and-bound operations is purely mathematical: no
+choices have been made regarding issues like how to decide when the
+floating-point representation of a value is regarded zero or how to handle
+badly scaled problems.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Scaling numerical records}
+In the mip formulation of error localisation over numerical records under
+linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
+the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
+mip solver from finding the actual minimal set of values to adapt or even
+render the mip-problem unsolvable. As an example, consider the following error
+localisation problem on a two-variable record.
+\begin{displaymath}
+\left\{\begin{array}{l}
+x_1 \geq x_2\\
+\mathbf{x}^0 = (10^6,10^9).
+\end{array}\right.
+\end{displaymath}
+Obviously, the record can be made to obey the restriction by multiplying
+$x^0_1$ by $10^3$ or by dividing $x^0_2$ by the same amount. However, in
+\code{editrules} the default value for $M=10^7<10^9-10^6$ which renders the
+corresponding mip problem unsolvable. Practical examples where such errors
+occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
+\euro{} instead of k\euro{}.).
+
+It is therefore advisable to remove such unit-of-measure errors prior to error
+localisation\footnote{Methods for detecting such errors exist, see for example
+\cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
+that all $|x^0|<M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
+one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
+by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
+$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
+may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
+localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
+do not vary over many orders of magnitude, such a scaling will suffice to
+numerically stabilize the mip problem. 
+
+%
+\subsection{Setting numerical threshold values}
+On most modern computer systems real numbers are represented in
+\citet{ieee:2008} double precision format. In essence, real numbers are 
+represented as rounded-off fractions so arithmatic operations on such numbers
+always result in loss of precision and roundof errors. For example, even though
+mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
+representation (denoted $\fl(\cdot)$) we have
+$\fl(0.7)-\fl(0.5)-\fl(0.2)\not=\fl(0)$. In fact, the difference is about
+$0.56\cdot10^{-16}$ in this case. 
+
+This means that in practice one cannot rely on equality tests to determine
+wether two floating point numbers are equal.  Rather, one assumes that two
+numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
+predefined tolerance. For this reason \code{lp\_solve} comes with a number of
+predefined tolerances that have default values but may be altered by the user.
+
+The toleracens implemented by \code{lp\_solve} are summarised in
+Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine wether
+an element of the restriction matrix is positive so it may be used as a
+pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
+Phase I, our restriction matrix contains elements on the order of
+$M^{-1}=10^{-7}$. For this reason, the value of \code{epspivot} is lowered in
+\code{editrules} by default, but users may override these settings again. For
+the same reason, the value of \code{epsint}, which determines when a value for
+one of the $\mathbf{\Delta}_j$ can be considered integer is lowered in
+\code{editrules} as well.  The other tolerance settings of \code{lp\_solve}: 
+\code{epsb} (to test if the right-hand-side of the restrictions
+differ from $0$), \code{epsd} (to test if two values of the objective function
+differ), \code{epsel} (all other values) and \code{mip\_gap} (to test whether a
+bound condition has been hit in the branch-and-bound algorithm) have not been altered.
+
+The limited precision inherent to floating point calculations imply that
+computations get more inaccurate as the operands differ more in magnitude. For
+example, on any system that uses double precision arithmatic the difference
+$\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
+two contradictory demands on our translation of an error localisation problem
+to a mip problem. On one hand, one would like to set $M$ as large as possible
+so the ranges $x^0_j\pm M$ contain a valid value of $x_j$. On the other hand,
+large values for $M$ may imply that mip problems such as Eq.~\eqref{eq:numxx}
+become numerically inaccurate. 
+
+In practice, the tableau used by \code{lp\_solve} will not be exactly the same
+as represented in Eq.~\eqref{eq:phaseI}. Over the years, many optimisations and
+heuristics have been developed to make solving linear programming problems fast
+and reliable, and several of those optimisations have been implemented in
+\code{lp\_solve}. However, the tableau of Eq.~\eqref{eq:phaseI} does
+fundamentally show how numerical instabilities may occur: the tableau
+simultaneously contains numbers on the order of $M^{-1}$ and on the order of
+$\mathbf{x}^0$. It is not at all unlikely that the two differ in many orders of
+magnitude.
+
+The above discussion suggests the following rules of thumb to avoid numerical
+instabilities in error localisation problems.
+\begin{enumerate}
+\item Make sure that elements of $\mathbf{x}^0$ are expressed in units such
+that $\mathbf{A}$, $\mathbf{b}$ and $\mathbf{x}$ are on the order of 1 wherever
+possible.
+\item Choose a value of $M$ appropriate for $\mathbf{x}^0$.
+\item If the above does not help in stabalizing he problem, try lowering the
+numerical constants of Table \ref{tab:tols}.
+\end{enumerate}
+
+In our experience, the settings denoted in Table \ref{tab:tols} have performed
+well in a range of problems where elements of $\mathbf{A}$ and $\mathbf{b}$ are
+on the order of $1$ and values of $\mathbf{x}^0$ are in the range $[1,10^8]$.
+However, these settings have been made configurable so users may choose their
+own settings as needed.
+
+
+
+
+
+\begin{table}
+\begin{threeparttable}
+\caption{Numerical parameters for mip-based error localisation.}
+\label{tab:tols}
+\begin{tabular}{lrrl}
+\hline
+&\multicolumn{2}{c}{Default value} \\
+\cline{2-3}
+Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
+\hline
+\code{M}       & \multicolumn{1}{c}{$-$}& $10^7$     & set bounds so $\mathbf{x}\in\mathbf{x}^0\pm M$\\
+\code{eps}     & \multicolumn{1}{c}{$-$}& $10^{-3}$  & translate $x<0$ to $x\leq\varepsilon$\\
+\code{epspivot}& $2\cdot10^{-7}$      & $10^{-15}$ & test if pivot element $R_{ij}>0$ \\
+\code{epsint}  & $10^{-7}$            & $10^{-15}$ & test if $\Delta_j\in\mathbb{N}$ \\
+\code{epsb}    & $10^{-10}$           & $10^{-10}$ & test if $b_i>0$ \\
+\code{epsd}    & $10^{-9}$            & $10^{-9}$  & test if obj. values $|f-f'|>0$ during simplex \\
+\code{epsel}   & $10^{-12}$           & $10^{-12}$ & test if other numbers $\neq0$\\
+\code{mip\_gap}& $10^{-11}$           & $10^{-11}$ & test if obj. values $|f-f'|>0$ during B\&B\\
+\hline
+\end{tabular}
+\end{threeparttable}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Usage}
 \subsection{Error localization}
@@ -904,6 +1165,7 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        annotate("text", x=40, y=50, label="e=4")
 @
 \label{fig:numperf}
+\caption{Benchmark on numerical data}
 \end{figure}
 Figure \ref{fig:numperf} shows the performance of error localization for increasing
 number of variables and increasing number of errors. \code{mip} performance is vastly
@@ -965,16 +1227,18 @@ to $-1$.
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
 
-\todo[inline]{Mixed data graphs/data is not yet correct!}
+%\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
+%with weight less then nerrors.}
 <<echo=FALSE, warning=FALSE, fig.height=3.5>>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
-sdat <- subset(dat, errorloc=="middle")
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+#sdat <- subset(dat, errorloc=="middle")
+qplot( data=dat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+       facets=~errorloc
        ) +
        labs(title="", x="# variables", y="", color="") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,150))
+       scale_y_continuous(labels=function(x){paste0(x,"s")})
 @
 
 \section{Conclusion}
