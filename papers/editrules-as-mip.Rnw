@@ -1278,9 +1278,11 @@ f   & \mathbf{x}^T  &\mathbf{\Delta} & \mathbf{s}_x &\mathbf{s}_+  & \mathbf{s}_
 \label{eq:tab1again}
 \end{displaymath}
 %
-Here, $\mathbf{s}_i$ are slack or surplus variables, aimed to write the original restrictions as 
-equalities ($\mathbf{s}_x$), to write the upper and limits on $\mathbf{x}$ as equalities ($\mathbf{s}_\pm$) 
-and to write the upper on $\mathbf{\Delta}$ as equalities ($\mathbf{s}_\Delta$).
+Here, the $\mathbf{s}_i$ are slack or surplus variables, aimed to write the
+original inequality restrictions as equalities. The $\mathbf{s}_x$ are used to
+rewrite restrictions on observed variables, the $\mathbf{s}_\pm$ to write the
+upper and lower limits on $\mathbf{x}$ as equalities and $\mathbf{s}_\Delta$ to
+write the upper limits on $\mathbf{\Delta}$ as equalities.
 
 Observe that the above tableau \emph{almost} suggests a trivial solution. If we choose
 $\mathbf{s}_x=\mathbf{b}$, $\mathbf{s}_\pm=\pm\mathbf{x}^0$ and $\mathbf{s}_\Delta=\mathbf{1}$,
