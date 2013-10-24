@@ -1,6 +1,6 @@
 \name{getH}
-\alias{geth}
 \alias{getH}
+\alias{geth}
 \title{Returns the derivation history of an edit matrix or array}
 \usage{
   getH(E)

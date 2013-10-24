@@ -102,10 +102,10 @@ editarray(expression(
 )
 
 # or, shorter (and using a character vector as input): 
-editarray(c(
-    "gender \\\%in\\\% c('male','female')",
-    "pregnant \\\%in\\\% c(TRUE, FALSE)",
-    "if( gender == 'male' ) !pregnant"
+editarray(expression(
+    gender \%in\% c('male','female'),
+    pregnant \%in\% c(TRUE, FALSE),
+    if( gender == 'male' ) !pregnant
     )
 )
 
@@ -149,10 +149,10 @@ editarray(expression(
 )
 
 # or, shorter (and using a character vector as input): 
-editarray(c(
-    "gender \\\%in\\\% c('male','female')",
-    "pregnant \\\%in\\\% c(TRUE, FALSE)",
-    "if( gender == 'male' ) !pregnant"
+editarray(expression(
+    gender \%in\% c('male','female'),
+    pregnant \%in\% c(TRUE, FALSE),
+    if( gender == 'male' ) !pregnant
     )
 )
 
