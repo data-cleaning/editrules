@@ -1254,5 +1254,101 @@ the problem: otherwise the mip solver will become unstable.
 \bibliographystyle{chicago}
 \bibliography{editrules}
 
+
+\appendix
+\section{Derivation of Equation \ref{eq:phaseI}}
+In the Phase I Phase II simplex method, phase I is aimed to derive a valid
+solution which is then iteratively updated to an optimal solution in Phase II.
+Here, we derive a Phase I solution, specific for error localisation problems.
+
+
+Recall the tableau of Eq.~\eqref{eq:tab1}; for clarity, the top row indicates to what variables
+the columns of the tableau pertain.
+%
+\begin{displaymath}
+\left[\begin{array}{r|rrrrrr|l}
+f   & \mathbf{x}^T  &\mathbf{\Delta} & \mathbf{s}_x &\mathbf{s}_+  & \mathbf{s}_- &\mathbf{s}_\Delta\\
+1   & \mathbf{0}    &-\mathbf{w}^T   & \mathbf{0}   & \mathbf{0}   & \mathbf{0} &\mathbf{0}      & 0\\
+\hline
+0   & \mathbf{A}    &  \mathbf{0}    & \mathbb{1} & \mathbf{0} & \mathbf{0}   &\mathbf{0} &\mathbf{b}\\
+0   & \mathbb{1}    & -\mathbf{M}    & \mathbf{0} & \mathbb{1} & \mathbf{0}   &\mathbf{0} &\mathbf{x}^0\\
+0   & \mathbb{1}    &  \mathbf{M}    & \mathbf{0} & \mathbf{0} & -\mathbb{1}  &\mathbf{0} &\mathbf{x}^0\\ 
+0   & \mathbf{0}    &  \mathbb{1}    & \mathbf{0} & \mathbf{0} & \mathbf{0}   &\mathbb{1} & \mathbf{1}\\ 
+\end{array}\right].
+\label{eq:tab1again}
+\end{displaymath}
+%
+Here, $\mathbf{s}_i$ are slack or surplus variables, aimed to write the original restrictions as 
+equalities ($\mathbf{s}_x$), to write the upper and limits on $\mathbf{x}$ as equalities ($\mathbf{s}_\pm$) 
+and to write the upper on $\mathbf{\Delta}$ as equalities ($\mathbf{s}_\Delta$).
+
+Observe that the above tableau \emph{almost} suggests a trivial solution. If we choose
+$\mathbf{s}_x=\mathbf{b}$, $\mathbf{s}_\pm=\pm\mathbf{x}^0$ and $\mathbf{s}_\Delta=\mathbf{1}$,
+we may set $(\mathbf{x},\mathbf{\Delta})=\mathbf{0}$. However, recall that we demand all variables
+to be nonnegative so $\mathbf{s}_-$ may not be equal to ${-\mathbf{x}^0}$. To resolve this
+problem, we introduce a set of \emph{artificial} variables $\mathbf{a}_-$ and extend the
+restrictions involving $\mathbf{s}_-$ as follows:
+\begin{displaymath}
+\mathbf{x} + M\mathbf{1} - \mathbf{s}_- + \mathbf{a}_- = \mathbf{x}_0.
+\end{displaymath} 
+This yields the following tableau.
+\begin{displaymath}
+\left[\begin{array}{r|rrrrrrr|l}
+f   & \mathbf{x}^T  &\mathbf{\Delta} & \mathbf{s}_x &\mathbf{s}_+  & \mathbf{s}_- &\mathbf{s}_\Delta&\mathbf{a}_-\\
+1   & \mathbf{0}    &-\mathbf{w}^T   & \mathbf{0}   & \mathbf{0}   & \mathbf{0}   &\mathbf{0} &\mathbf{0}     & 0\\
+\hline
+0   & \mathbf{A}    &  \mathbf{0}    & \mathbb{1} & \mathbf{0} & \mathbf{0}   &\mathbf{0} &\mathbf{0} &\mathbf{b}\\
+0   & \mathbb{1}    & -\mathbf{M}    & \mathbf{0} & \mathbb{1} & \mathbf{0}   &\mathbf{0} &\mathbf{0} &\mathbf{x}^0\\
+0   & \mathbb{1}    &  \mathbf{M}    & \mathbf{0} & \mathbf{0} & -\mathbb{1}  &\mathbf{0} &\mathbb{1} &\mathbf{x}^0\\ 
+0   & \mathbf{0}    &  \mathbb{1}    & \mathbf{0} & \mathbf{0} & \mathbf{0}   &\mathbb{1} &\mathbf{0} & \mathbf{1}\\ 
+\end{array}\right].
+\label{eq:tab1again}
+\end{displaymath}
+%
+The essential point to note is that the tableau now contains a unit matrix in
+columns 4, 5, 7 and 8, so choosing $\mathbf{s}_x=\mathbf{b}$,
+$\mathbf{s}_+=\mathbf{x}^0$, $\mathbf{s}_\Delta=\mathbf{1}$ and
+$\mathbf{a}_-=\mathbf{x}^0$, and
+$(\mathbf{x},\mathbf{\Delta},\mathbf{s}_-)=\mathbf{0}$ is a solution obeying
+all restrictions. The artificial variables have no relation to the original
+problem, so we want them to be zero in the final solution. Since the tableau
+represents a set of linear equalities, we are allowed to multiply rows with a
+constant and add and subtract rows. If this is done in such a way that we are
+again left with a unit matrix in part of the columns, a new valid solution is
+generated. Here, we add the fourth row to row three and subtract $\mathbf{M}^{-1}$
+times the fourth row from the last row. Row four is multiplied with $\mathbf{M}^{-1}$.
+This gives
+\begin{displaymath}
+\left[\begin{array}{r|rrrrrrr|l}
+f   & \mathbf{x}^T   &\mathbf{\Delta}& \mathbf{s}_x &\mathbf{s}_+  & \mathbf{s}_- &\mathbf{s}_\Delta&\mathbf{a}_-\\
+1   & \mathbf{0}     &-\mathbf{w}^T  & \mathbf{0}   & \mathbf{0}   & \mathbf{0}   &\mathbf{0} &\mathbf{0}     & 0\\
+\hline
+0   & \mathbf{A}     &  \mathbf{0}   & \mathbb{1} & \mathbf{0} & \mathbf{0}       &\mathbf{0} &\mathbf{0} &\mathbf{b}\\
+0   & 2\mathbb{1}    &  \mathbf{0}   & \mathbf{0} & \mathbb{1} & \mathbf{0}       &\mathbf{0} &\mathbb{1} &2\mathbf{x}^0\\
+0   & \mathbf{M}^{-1}&  \mathbb{1}   & \mathbf{0} & \mathbf{0} & -\mathbf{M}^{-1} &\mathbf{0} &\mathbf{M}^{-1} &\mathbf{M}^{-1}\mathbf{x}^0\\ 
+0   &-\mathbf{M}^{-1}&  \mathbf{0}   & \mathbf{0} & \mathbf{0} & \mathbf{M}^{-1}  &\mathbb{1} &-\mathbf{M}^{-1} 
+                                                                                                    & \mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0\\ 
+\end{array}\right].
+\label{eq:tab1again}
+\end{displaymath}
+%
+This almost gives a new valid solution, except that the first row, representing the objective function has not
+vanished at the third column. However, we may re-express the objective function in terms of the other variables. Namely
+using row four, we have
+\begin{displaymath}
+\mathbf{w}^{T}
+\mathbf{\Delta} =\mathbf{w}^T \mathbf{M}^{-1}\mathbf{x}^0  +\mathbf{w}^T\mathbf{M}^{-1}(\mathbf{s}_- -\mathbf{x} -\mathbf{a}_-).
+\end{displaymath}
+Substituting this equation in the top row of the tableau shows that the
+solution $\mathbf{\Delta}=\mathbf{M}^{-1}\mathbf{x}^0$,
+$\mathbf{s}_x=\mathbf{b}$, $\mathbf{s}_+=2\mathbf{x}^0$ and
+$\mathbf{s}_\Delta=\mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0$, and
+$(\mathbf{x},\mathbf{s}_-,\mathbf{a}_-)=\mathbf{0}$ represents a valid solution.
+Since the artificial variables have vanishing values, we may now delete the corresponding
+column, and arrive at the tableau of Eq.~\eqref{eq:phaseI}.
+
+
+
+
 \end{document}
 
