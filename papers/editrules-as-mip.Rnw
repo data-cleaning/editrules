@@ -1036,40 +1036,93 @@ Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Usage}
-In the \code{editrules} package edits on numeric, categorical, or mixed data
-are stored in objects of class \code{editset}. Edits can be defined by the user
-either by reading them from a free-form textfile or directly through the \R{}
-console by passing a set of expressions to the \code{editset} function.  To
-read edits from a file into \code{R}, one simply uses the function
-\code{editfile}.
+In the \code{editrules} package, edits can be defined with the \code{editset}
+function. For example, the command
+<<>>=
+E <- editset(expression(
+   x + y == z
+  , if ( x > y ) y > 0
+))
+@
+defines two edits on the variable $x$, $y$ and $z$ and stores them in an object
+called \code{E}. Here, \code{E} is an object of type \code{editset} and it can
+be used to store and manipulate linear (in)equality edits, edits on categorical
+data as well as edits on mixed type data. Besides \code{editset} there are
+specialized functions called \code{editmatrix} and \code{editarray} which can
+be used to define rules on purely numerical or purely categorical data
+respectively. Edits are defined in basic \code{R} syntax; one may use
+multiplication, addition, \code{if}-\code{else} statements, logical operators
+and the \code{\%in\%} operator for set inclusion on categorical variables. 
+
+Besides defining rules on the command line, as in the example above,
+one may store the rules in a text file and read the rules into \R{} using
+the \code{editfile} function.
 <<eval=FALSE>>=
 E <- editfile('myedits.txt')
 @
 Here, \code{myedits.txt} is the name of a textfile containing the edits. The
-resulting object by default is of class \code{editset}. There are also special
-classes for linear (in)equality edits (\code{editmatrix}) and edits on
-categorical data (\code{editarray}). Such objects can also be read into \R{}
-using \code{editfile} by setting the \code{type} argument. They may also be
-defined on the commandline using functions \code{editarray} or
-\code{editmatrix} respectively.  In the examples below we use the functions on
-the commandline.
+resulting object by default is of class \code{editset}. If the extra argument
+\code{type} is set to \code{"num"} or \code{"cat"}, only numerical or
+categorical edits are read from the file. For a further discussion of the
+functions mentioned here we refer the reader to the technical manual and to
+\cite{loo:2011b, loo:2012a} for a precise description of allowed edit rules. 
 
 
 
 \subsection{Error localization}
-\code{editrules} provides the \code{localizeErrors} function for finding errors
-in a \code{data.frame} given an \code{editset}, \code{editmatrix} or \code{editarray}.
-This \code{localizeErrors} function has been extended to include an extra parameter
-\code{method}. The default value of \code{method} is \code{'bb'}: branch and bound.
-A user can switch the implementation by setting \code{method} to \code{'mip'}
-. The following example shows that this gives identical (but faster) result. 
+The \code{localizeErrors} function is the main interface to error localisation
+functionality. The function accepts a editrules in the form an \code{editset},
+\code{editmatrix} or \code{editarray} object, and a data set in the form of 
+a \code{data.frame}. By default the function localizes errors using the
+branch-and-bound algorithm. One may switch to the MIP-based approach by
+setting the parameter \code{method="mip"} as in the following example.
 <<num example>>=
 E <- editmatrix("x <= y")
 dat <- data.frame(x=10, y=1)
-
-localizeErrors(E, dat, method="bb")$adapt
-localizeErrors(E, dat, method="mip")$adapt
+el <- localizeErrors(E, dat, method="mip")
 @
+The object returned by \code{localizeErrors} contains the error locations as
+well as some details on how the algorithm ran. The error locations are stored
+in a boolean array called \code{\$adapt} which can be accessed as follows.
+<<>>=
+el$adapt
+@
+Here, the array has dimension $1\times2$ since the input data set consisted of
+a single record with two variables. Here, the result indicates that by altering
+the value for $x$, the record can be corrected to obey the edit rule stored in
+\code{E}.
+
+Details on the error localisation procedure are stored in a \code{data.frame}
+called \code{status}, which can be accessesed as follows.
+<<>>=
+el$status
+@
+The status \code{data.frame} contains one record of information for each record
+in the input data. It contains the value of the objective function
+(\code{weight}), the time it took to perform the calculation in seconds
+subdivided into user, system and ``wallclock'' time (elapsed), and a logical
+indicator (\code{maxDutationExceeded}) which indicates whether the time limit
+for finding a solution was exceeded. There are two status columns that have no
+relevance when the error localisation method is \code{mip}.  First, the
+indicator \code{memfail} can only be set to \code{true} when the
+branch-and-bound algorithm is used. It indicates that perhaps the optimal
+solution could not be found because of memory limitations. Second, and more
+importantly, the \code{degeneracy} parameter is not set when
+\code{method="mip"}. This parameter indicates how many equivalent solutions
+there are to each error localisation problem.  Contrary to the branch-and-bound
+method for error localisation, the \code{mip}-based approach does not return
+this information.
+
+The output of \code{localizeErrors} can be controlled with two paramters.
+Most importantly, positive weights for each variable and optionally
+for each record can be set; variables with lower weights attached to them are
+moe likely to be part of a chosen solution which is otherwise degenerate.
+Furthermore, a maximum search time for each solution can be specified, the
+default setting being 10 minutes.  
+
+
+
+
 When \code{method=mip} is specified \code{localizeErrors} internally 
 uses for each record the function \code{errorLocalizer\_mip}.
 Unlike {\em branch and bound} this is not a \code{backtracker} object
@@ -1279,6 +1332,9 @@ qplot( data=dat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors),
        scale_y_continuous(labels=function(x){paste0(x,"s")})
 @
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CONCLUSION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 This paper describes the error localization algorithm for linear, categorical and
 mixed edits as mip problems. It describes the usage and implementation in
