@@ -44,11 +44,6 @@
   degeneracy of a solution. However it does return an
   bonus: \code{x_feasible}, a feasible solution.
 }
-
-\section{Note}{
-  If the maximim absolute value of \eqn{x\geq 10^9} 1E9, it
-  is pre-scaled with a factor of \eqn{\sqrt{\max(|x|)}}.
-}
 \references{
   E. De Jonge and Van der Loo, M. (2012) Error localization
   as a mixed-integer program in editrules (included with

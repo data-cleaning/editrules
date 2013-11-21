@@ -1,4 +1,4 @@
-\name{editset}
+\name{c.editset}
 \alias{as.character.editset}
 \alias{as.data.frame.editset}
 \alias{c.editset}
@@ -6,14 +6,14 @@
 \alias{summary.editset}
 \title{Read general edits}
 \usage{
+  \method{c}{editset} (...)
+
   editset(editrules, env = new.env())
 
   \method{as.character}{editset} (x, datamodel = TRUE,
     useIf = TRUE, dummies = FALSE, ...)
 
   \method{as.data.frame}{editset} (x, ...)
-
-  \method{c}{editset} (...)
 
   \method{summary}{editset} (object, useBlocks = TRUE, ...)
 }
