@@ -28,7 +28,7 @@
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
 
 
-\renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
+\newcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \newcommand{\E}{E}
@@ -165,7 +165,7 @@ in this context: the first is the branch-and-bound approach, developed by
 \cite{waal:2003a}.  The second is an approach based on mixed-integer
 programming (mip), described in \cite{waal:2011}.
 
-\subsection{The \code{editrules} package}
+\subsection{The editrules package}
 Over the past five to ten years, the \R{} statistical environment received a
 surge in popularity and as a consequence it has been extended with many
 packages that allow for statistical analyses of data. However, the number of
@@ -341,6 +341,7 @@ The formulation of these edit rules is very close to the formulation of the orig
 mip problem of Eq.\ \eqref{eq:mipmin}.
 The vector to minimize over is defined as follows:
 \begin{equation}
+\label{eq:zlin}
 \mathbf{z} = (x_1,x_2,\ldots,x_n,\Delta_1,\Delta_2,\ldots,\Delta_n).
 \end{equation}
 with the $\Delta_i$ as in Eq.\ \eqref{eq:defineDelta}. The set of restrictions
@@ -1039,12 +1040,14 @@ Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
 \section{Usage}
 In the \code{editrules} package, edits can be defined with the \code{editset}
 function. For example, the command
+\begin{rcode}
 <<tidy=FALSE>>=
 E <- editset(expression(
    x + y == z
   , if ( x > y ) y > 0
 ))
 @
+\end{rcode}
 defines two edits on the variables $x$, $y$ and $z$ and stores them in an object
 called \code{E}. Here, \code{E} is an object of type \code{editset} and it can
 be used to store and manipulate linear (in)equality edits, edits on categorical
@@ -1058,9 +1061,11 @@ and the \code{\%in\%} operator for set inclusion on categorical variables.
 Besides defining rules on the command line, as in the example above,
 one may store the rules in a text file and read the rules into \R{} using
 the \code{editfile} function.
+\begin{rcode}
 <<eval=FALSE>>=
 E <- editfile('myedits.txt')
 @
+\end{rcode}
 Here, \code{myedits.txt} is the name of a textfile containing the edits. The
 resulting object is by default of class \code{editset}. If the extra argument
 \code{type="num"} or \code{type="cat"} is passed, only numerical or
@@ -1127,85 +1132,137 @@ Most importantly, positive weights for each variable and optionally
 for each record can be set; variables with lower weights attached to them are
 moe likely to be part of a chosen solution which is otherwise degenerate.
 Furthermore, a maximum search time for each solution can be specified, the
-default setting being 10 minutes.  
+default setting being 10 minutes. Finally, the optional parameter \code{lpcontrol}
+may contain a list of parameters to be passed to \code{lpSolveAPI}. The default settings
+can be listed as follows
+\begin{rcode}
+<<>>=
+options("er.lpcontrol")
+@
+\end{rcode}
+These options are precisely the values that differ from \code{lpSolve}'s
+default settings listed in Table \ref{tab:tols}. Changing or adding options can
+be done either by passing the \code{lpcontrol} parameter to
+\code{localizeErrors}, in which case it is only used for the current error
+localisation problem. To adapt a parameter for the remainder of the running
+R-session or untill the option is reset one can use the \code{options}
+function. For example, to alter the \code{epsb} parameter through localizeErrors,
+one may use either of the two calls below.
+\begin{rcode}
+<<eval=FALSE,tidy=FALSE>>=
+localizeErrors( E, dat, lpcontrol = c(epsb=1e-12, options("er.lpcontrol")) )
+options( er.lpcontrol = c(options("er.lpcontrol"), epsb=1e=12) )
+@
+\end{rcode}
+The important thing to note is that it is up to the user to merge new options
+with existing ones since \code{lpcontrol} completely overwrites the default settings.
+A precise description of possible options is also given in the reference manual of
+\code{lpSolveApi}.
 
 
 
 
-When \code{method=mip} is specified \code{localizeErrors} internally 
-uses for each record the function \code{errorLocalizer\_mip}.
-Unlike {\em branch and bound} this is not a \code{backtracker} object
-\citep[see][]{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
-and values into a mip problem,
-feeds it into the \code{lpSolveApi} and formats the resulting output.
+%When \code{method=mip} is specified \code{localizeErrors} internally 
+%uses for each record the function \code{errorLocalizer\_mip}.
+%Unlike {\em branch and bound} this is not a \code{backtracker} object
+%\citep[see][]{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
+%and values into a mip problem,
+%feeds it into the \code{lpSolveApi} and formats the resulting output.
+%<<num mip>>=
+%el <- errorLocalizer_mip(E, list(x=10,y=1))
+%ls.str(el)
+%@
+%Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
+%\code{editmatrix}, \code{editarray} or \code{editset} object.
+%
+%Note in the example above that the {\em mip} solver returns two extra properties that are
+%not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
+%When it has found a solution (which is usually the case), a set of feasible x 
+%values is available. It can be helpful to have an explicit solution, but note 
+%that it is in general not unique and that the feasible values 
+%lie on the boundary of a convex solution region. 
+%In many cases it is better to use a proper imputation method to generate
+%sensible values for the variables that need to be adjusted.
+%Secondly \code{errorlocalizer\_mip} returns the \code{lp} object. This object is 
+%a \code{lpSolveApi} object and can be further manipulated or written to disk.
+%For more information consult the manual of \code{lpSolveApi}
+%(\ref{lpSolveAPI:2011}).
+%
+%An advantage of the branch and bound algorithm is that it can generate all optimal
+%solutions for a given record.  The mip implementation only generates one of the 
+%best. In \code{editrules} this is implemented by adding a small uniform 
+%perturbation to the weights, so mip chooses one of the best at random. 
+%This is identical 
+%to the default behavior of \code{localizeErrors} for \code{method='bb'}.
+%
+
+
+\subsection{Fine-grained control options}
+For users who wish to exert more fine-grained control on the MIP-solver or who
+wish to interface \code{editrules} with another MIP-solving engine, two lower-level
+functionalities have been developed.
+
+The first is \code{errorLocalizer\_mip}. This function takes
+a set of edit rules in the form of an \code{editset}, \code{editmatrix}
+or \code{editarray} and a single data record in the form of a named list.
+\begin{rcode}
 <<num mip>>=
-el <- errorLocalizer_mip(E, list(x=10,y=1))
-ls.str(el)
+L <- errorLocalizer_mip(E, list(x=10,y=1))
 @
-Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
-\code{editmatrix}, \code{editarray} or \code{editset} object.
-
-Note in the example above that the {\em mip} solver returns two extra properties that are
-not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
-When it has found a solution (which is usually the case), a set of feasible x 
-values is available. It can be helpful to have an explicit solution, but note 
-that it is in general not unique and that the feasible values 
-lie on the boundary of a convex solution region. 
-In many cases it is better to use a proper imputation method to generate
-sensible values for the variables that need to be adjusted.
-Secondly \code{errorlocalizer\_mip} returns the \code{lp} object. This object is 
-a \code{lpSolveApi} object and can be further manipulated or written to disk.
-For more information consult the manual of \code{lpSolveApi}
-(\ref{lpSolveAPI:2011}).
-
-An advantage of the branch and bound algorithm is that it can generate all optimal
-solutions for a given record.  The mip implementation only generates one of the 
-best. In \code{editrules} this is implemented by adding a small uniform 
-perturbation to the weights, so mip chooses one of the best at random. 
-This is identical 
-to the default behavior of \code{localizeErrors} for \code{method='bb'}.
-
-\subsection{Setting up your own lp problem}
-\code{errorLocalizer\_mip} uses the function \code{as.mip}.
-\code{as.mip} implements the rewriting into the mip 
-formulations of section \ref{sec:mipproblem}.
-We illustrate this with a small example of a mixed-typed edit.
-
-<<tidy=FALSE>>=
-E <- editset(expression(
-  married %in% c(TRUE, FALSE),
-  if (married) age >= 17
-  ))
-@
-The hard restrictions \code{E} can be transformed into ${\bf R}^H$ with
-\code{as.mip}
+\end{rcode}
+Here, \code{errorLocalizer\_mip} translates the error localisation problem for
+a single record to a MIP problem, feeds it to \code{lpSolveAPI} and returns al
+the results in a list. The list contains two extra pieces of information not
+available in the output. The first is a parameter called \code{x\_feasible}, containing
+a record that actually obeys all the edit rules.
+\begin{rcode}
 <<>>=
-as.mip(E)
+L$x_feasible
 @
-\code{num1} states that variable \code{.l1} and \code{married} cannot both be true 
-($=1$).\\
-If \code{married==TRUE}, than is \code{.l1==0} and the restriction of line 2 
-turns into 
-\code{age >= 17}.
+\end{rcode}
+The second parameter is called \code{lp}. This is an object of class
+\code{lpExtPtr} which points to an object of \code{lpSolveApi}, stored outside
+of \R{}'s memory. It contains precise information on the definition of the MIP
+problem as interpreted by \code{lpSolveAPI} program. It can be manipulated or
+exported to a text file using \code{write.lp} of the \code{lpSolveAPI} package.
 
-Supplying values \code{x} to \code{as.mip} adds ${\bf R}^0$:
+The second functionality entails the functions \code{\code{as.mip}} and
+\code{as.lp.mip}.  The function \code{as.mip} allows users to translate the
+combinaiton of a set of editrules and a data record to a MIP problem.
+\begin{rcode}
 <<>>=
-as.mip(E, x=list(age=9, married=TRUE))
+mip <- as.mip(E,list(x=10,y=1))
+print(mip)
 @
-Two variables \code{delta.age} and \code{delta.married} are introduced, that
-will signify if variables \code{age} and \code{married} need to be adapted.\\
-Line 3 and 4 try to restrict \code{age}  to $9$. As can be seen the value of $M$
-is set to $10^7$. The value of $M$ can be supplied to \code{as.mip}.
-If \code{delta.age} is $1$  the value of \code{age} is not restricted
-to $9$, but to $[-10^7+9, 10^7+9]$.\\
-Line 5 tries to restrict 
-\code{married} to \code{TRUE}.\\
-The last line shows the objective function, which
-can be influenced by supplying \code{weight} to \code{as.mip}.
+\end{rcode}
+The object returned by \code{as.mip} can be used to inspect how
+\code{editrules} translates an error localisation problem to a MIP problem. The
+interested reader may want to compare the above representation with
+Eqs.~\eqref{eq:objfun}, \eqref{eq:zlin} and \eqref{eq:deltanum}.
 
-The mip object is transformed into a 
-\code{lp} object needed by \code{lpSolveAPI} with the function \code{as.lp.mip}.
+This representation of the MIP problem can be translated to a form that is
+suited for solving with \code{lpSolveAPI}.
+\begin{rcode}
+<<>>=
+lp <- as.lp.mip(mip)
+@
+\end{rcode} 
+The \code{lp} object can directly be used as input for \code{lpSolveAPI} or
+written to disk with \code{write.lp} as follows.
+\begin{rcode}
+<<eval=FALSE>>=
+write.lp(lp,file="myLPfile.lp")
+@
+\end{rcode}
+This command produces a text file that is written in a syntax understood by the
+\code{lp\_solve} commandline program.  \code{lp\_solve} also has facilities to
+translate this syntax to other formats, suitable for commercial LP solvers, for
+example.
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% benchmarks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Benchmarks}
 
 The \emph{branch and bound} and \emph{mip} method for error localization 
@@ -1220,7 +1277,6 @@ problem sizes of 100 variables and 100 constraints.
 To compare the performance we conducted benchmarks for the three types of constraints
 using edits with synthetic data. The benchmarks reflect properties of a 
 typical error localization problem in practice.  
-
 \subsection{Numerical linear edits}
 The synthetic edits used in this benchmark are a balance system. This type of edits
 are found frequently in business statistics and energy statistics. 
