@@ -28,7 +28,7 @@
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
 
 
-\renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
+\newcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \newcommand{\E}{E}
@@ -165,7 +165,7 @@ in this context: the first is the branch-and-bound approach, developed by
 \cite{waal:2003a}.  The second is an approach based on mixed-integer
 programming (mip), described in \cite{waal:2011}.
 
-\subsection{The \code{editrules} package}
+\subsection{The editrules package}
 Over the past five to ten years, the \R{} statistical environment received a
 surge in popularity and as a consequence it has been extended with many
 packages that allow for statistical analyses of data. However, the number of
