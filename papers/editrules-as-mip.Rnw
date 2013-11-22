@@ -28,7 +28,7 @@
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
 
 
-\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \newcommand{\E}{E}
@@ -40,12 +40,7 @@
 \newcommand{\FDc}{\overline{\mathbb{F}}}
 
 
-%\renewcommand{\mathbf}[1]{\ensuremath{\mathbf{#1}}}
-
 \usepackage{float} 
-\floatstyle{boxed}
-\newfloat{Rcode}{t!}{rco}
-\floatname{Rcode}{{\rm Figure}}
 
 \newtheorem{example}{Example}
 
@@ -79,7 +74,11 @@ opts_chunk$set(
 @
 
 \renewenvironment{kframe}{}{}
-\renewenvironment{knitrout}
+%\renewenvironment{knitrout}
+%  {\vspace{1ex}\basecolor\hrule\vspace{-3ex}}
+%  {\basecolor\hrule\vspace{-2ex}}
+
+\newenvironment{rcode}
   {\vspace{1ex}\basecolor\hrule\vspace{-3ex}}
   {\basecolor\hrule\vspace{-2ex}}
 
@@ -1038,13 +1037,13 @@ Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
 \section{Usage}
 In the \code{editrules} package, edits can be defined with the \code{editset}
 function. For example, the command
-<<>>=
+<<tidy=FALSE>>=
 E <- editset(expression(
    x + y == z
   , if ( x > y ) y > 0
 ))
 @
-defines two edits on the variable $x$, $y$ and $z$ and stores them in an object
+defines two edits on the variables $x$, $y$ and $z$ and stores them in an object
 called \code{E}. Here, \code{E} is an object of type \code{editset} and it can
 be used to store and manipulate linear (in)equality edits, edits on categorical
 data as well as edits on mixed type data. Besides \code{editset} there are
@@ -1061,52 +1060,60 @@ the \code{editfile} function.
 E <- editfile('myedits.txt')
 @
 Here, \code{myedits.txt} is the name of a textfile containing the edits. The
-resulting object by default is of class \code{editset}. If the extra argument
-\code{type} is set to \code{"num"} or \code{"cat"}, only numerical or
+resulting object is by default of class \code{editset}. If the extra argument
+\code{type="num"} or \code{type="cat"} is passed, only numerical or
 categorical edits are read from the file. For a further discussion of the
-functions mentioned here we refer the reader to the technical manual and to
-\cite{loo:2011b, loo:2012a} for a precise description of allowed edit rules. 
+functions mentioned here we refer the reader to the technical manual. Also see 
+the papers of \cite{loo:2011b, loo:2012a} for a precise description of the 
+edit-definition syntax.
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Error localization}
-The \code{localizeErrors} function is the main interface to error localisation
-functionality. The function accepts a editrules in the form an \code{editset},
-\code{editmatrix} or \code{editarray} object, and a data set in the form of 
-a \code{data.frame}. By default the function localizes errors using the
-branch-and-bound algorithm. One may switch to the MIP-based approach by
-setting the parameter \code{method="mip"} as in the following example.
+The the main interface to error localisation functionality is the
+\code{localizeErrors} function.  The function accepts editrules in the form
+an \code{editset}, \code{editmatrix} or \code{editarray} object, and a data set
+in the form of a \code{data.frame}. By default the function localizes errors
+using the branch-and-bound algorithm. One may switch to the MIP-based approach
+by setting the parameter \code{method="mip"} as in the following example.
+\begin{rcode}
 <<num example>>=
 E <- editmatrix("x <= y")
-dat <- data.frame(x=10, y=1)
+dat <- data.frame(x=c(10,3), y=c(1,5))
 el <- localizeErrors(E, dat, method="mip")
 @
+\end{rcode}
 The object returned by \code{localizeErrors} contains the error locations as
 well as some details on how the algorithm ran. The error locations are stored
-in a boolean array called \code{\$adapt} which can be accessed as follows.
+in a boolean array called \code{adapt} which can be accessed as follows.
+\begin{rcode}
 <<>>=
 el$adapt
 @
-Here, the array has dimension $1\times2$ since the input data set consisted of
-a single record with two variables. Here, the result indicates that by altering
-the value for $x$, the record can be corrected to obey the edit rule stored in
-\code{E}.
+\end{rcode}
+Here, the array has dimension $2\times2$ since the input data set consisted of
+a two records with two variables. Here, the result indicates for the first record
+that by altering the value for $x$, the record can be corrected to obey the edit rule stored in
+\code{E}. For the second record, no alterations are necessary.
 
 Details on the error localisation procedure are stored in a \code{data.frame}
 called \code{status}, which can be accessesed as follows.
+\begin{rcode}
 <<>>=
 el$status
 @
+\end{rcode}
 The status \code{data.frame} contains one record of information for each record
-in the input data. It contains the value of the objective function
-(\code{weight}), the time it took to perform the calculation in seconds
-subdivided into user, system and ``wallclock'' time (elapsed), and a logical
-indicator (\code{maxDutationExceeded}) which indicates whether the time limit
-for finding a solution was exceeded. There are two status columns that have no
+in the input data. The column \code{weight} contains the value of the objective
+function as defined by Eq.~\eqref{eq:objfun}. The time it took to perform the
+calculation is subdivided into user, system and elapsed time, where the latter
+corresponds to the actual time that has passed on the clock.  The boolean
+variable (\code{maxDurationExceeded})  indicates whether the time limit for
+finding a solution was exceeded.  There are two status columns that have no
 relevance when the error localisation method is \code{mip}.  First, the
 indicator \code{memfail} can only be set to \code{true} when the
 branch-and-bound algorithm is used. It indicates that perhaps the optimal
-solution could not be found because of memory limitations. Second, and more
+solution could not be found because of memory limitations.  Second, and more
 importantly, the \code{degeneracy} parameter is not set when
 \code{method="mip"}. This parameter indicates how many equivalent solutions
 there are to each error localisation problem.  Contrary to the branch-and-bound
