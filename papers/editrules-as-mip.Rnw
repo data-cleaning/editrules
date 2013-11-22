@@ -28,7 +28,7 @@
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
 
 
-\newcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
+\renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \newcommand{\E}{E}
@@ -98,7 +98,9 @@ the \R{} environment for statistical computing was recently extended with a modu
 that allows for error localization based on a mixed integer programming
 formulation (mip). In this paper we describe the mip formulation of the error
 localization problem for the case of numerical, categorical, or mixed numerical
-and categorical datasets. The new module is benchmarked against a previously
+and categorical datasets. We introduce a mip formulation that is a generalization
+of both linear as well as categorical edits. 
+The new module is benchmarked against a previously
 available module, which is based on a branch-and-bound approach. The benchmark
 shows that the mip-based approach is significantly faster and has a smaller memory
 footprint. Trade-offs between the branch-and-bound and mip approaches are discussed
@@ -585,7 +587,7 @@ both variable types by defining $\E$:
 \E = \{\mathbf{r}\in \D \times\mathbb{R}^n: 
 \mathbf{v}\in \F \land \mathbf{x} \in P \},
 \end{equation}
-where $\F \subseteq \D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by
+where $\F \subseteq \D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by a
 (possibly empty) set of $k$ linear inequalities of the form $\mathbf{a}^T\mathbf{x}
 > b$.  It is understood that if $\mathbf{r} \in \E$, then $\mathbf{r}$ violates
 the edit. 
@@ -1120,7 +1122,7 @@ there are to each error localisation problem.  Contrary to the branch-and-bound
 method for error localisation, the \code{mip}-based approach does not return
 this information.
 
-The output of \code{localizeErrors} can be controlled with two paramters.
+The output of \code{localizeErrors} can be controlled with two parameters.
 Most importantly, positive weights for each variable and optionally
 for each record can be set; variables with lower weights attached to them are
 moe likely to be part of a chosen solution which is otherwise degenerate.
@@ -1206,7 +1208,7 @@ The mip object is transformed into a
 
 \section{Benchmarks}
 
-The {\emph branch and bound} and {\emph mip} method for error localization 
+The \emph{branch and bound} and \emph{mip} method for error localization 
 have a different performance.
 Both the memory and time complexity is different. The performance of error 
 localization methods depends highly on the number of variables, the number of errors,
