@@ -149,6 +149,12 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
 # to the numerical editmatrix (since that editmatrix is only relevant when the
 # assumed condition is already fulfilled). Instead, the condition is 
 # added to the 'condition' attribute of the editset.
+  
+#TODO make it possible to supply value = list(x=1, A="a") which makes
+# substituting values in an editset a lot easier. Especially when we have 
+# used localizeErrors and want the solution space by substituting non adapted variables.
+
+    catidx <- var %in% getVars(E, type="cat")
 
     # the nonnumeric case is simple
     if ( !is.numeric(value) ){
