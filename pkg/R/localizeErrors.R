@@ -36,7 +36,8 @@
 #' @param method should errorlocalizer ("bb") or mix integer programming ("mip") be used? 
 #' @param retrieve Return the first found solution or the best solution? ("bb" method only).
 #' @param maxduration maximum time for \code{$searchBest()} to find the best solution for a single record.
-#' @param ... Further options to be passed to \code{\link{errorLocalizer}}
+#' @param ... Further options to be passed to \code{\link{errorLocalizer}} or \code{\link{errorLocalizer_mip}}. Specifically, when
+#'   \code{method='mip'}, the parameter \code{lpcontrol} is a list of options passed to \code{lpSolveAPI}.
 #'  
 #' @seealso \code{\link{errorLocalizer}}
 #' @return an object of class \code{\link{errorLocation}}
