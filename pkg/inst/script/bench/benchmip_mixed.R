@@ -71,18 +71,21 @@ bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=150){
   
   if (nerrors >= nvars) stop("nvars cannot be less than nerrors")
   for (nvar in seq_len(nvars)){
+    E <- generate_E(nvar)
+    max_dur <- logical(nrow(generate_data(E, 1)))
     for (ne in seq(1, min(nerrors, nvar))){
       try({
-        E <- generate_E(nvar)
-        data <- generate_data(E, ne)
+        if (all(max_dur)) break
+        data <- generate_data(E, ne)[!max_dur,,drop=FALSE]
         cat("\r nvar=", nvar, " ne=", ne, " method=", method)
         le <- localizeErrors(E, data, method=method, maxduration=maxduration)
+        max_dur[!max_dur] <- le$status$maxDurationExceeded
         rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
         
         write.table(rpt, file=txt, col.names=init, row.names=FALSE)
+        
         init <- FALSE
         flush(txt)
-      #print(rpt)
       })
       gc()
     }

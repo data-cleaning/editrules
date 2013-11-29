@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
-\documentclass[10pt, fleqn, english, rapport]{cbsreport}
+\documentclass[10pt, fleqn, english, rapport]{cbsdiscussionpaper}
 %\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amsthm}
@@ -20,7 +20,6 @@
 % Footnote symbols to avoid confusion with superscript references.
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
-
 \DeclareMathOperator*{\argmin}{\arg\!\min}
 \DeclareMathOperator{\fl}{\textrm{fl}}
 \DeclareMathOperator*{\Lor}{\lor}
@@ -28,7 +27,7 @@
 \DeclareMathOperator*{\Minimize}{\textrm{\sf Minimize}}
 
 
-\newcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
+\renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
 \newcommand{\E}{E}
@@ -84,6 +83,7 @@ opts_chunk$set(
 
 \title{Error localization as a mixed integer problem with the editrules package}
 \author{Edwin de Jonge\\  Mark van der Loo}
+\Number{2014}{01}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  START
@@ -681,8 +681,6 @@ Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the a
 recorded values consists of the union of the restrictions for categorical variables
 (Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
 
-
-
 \begin{example}
 We consider a record $\mathbf{r}$ with the variables \emph{type of business}
 $t$, which takes values in $D_t=\{\textrm{sp},\textrm{other}\}$, where ``sp''
@@ -1266,17 +1264,16 @@ example.
 \section{Benchmarks}
 
 The \emph{branch and bound} and \emph{mip} method for error localization 
-have a different performance.
-Both the memory and time complexity is different. The performance of error 
+have a different performance both in computing time as well in memory usage.
+The performance of error 
 localization methods depends highly on the number of variables, the number of errors,
 the number of constraints and the order of the variables.
-The performance of numerical error localization with branch and bound is reasonable,
-but for categorical and mixed records rapidly becomes unsatisfying for the typical
-problem sizes of 100 variables and 100 constraints.
 
-To compare the performance we conducted benchmarks for the three types of constraints
-using edits with synthetic data. The benchmarks reflect properties of a 
-typical error localization problem in practice.  
+To compare the performance of {\em branch and bound} and the {\em mip} method, 
+we conducted benchmarks for the three types of constraints using edits with 
+synthetic data. The benchmarks are constructed to reflect 
+properties of a typical error localization problem in official statistics practice.
+ 
 \subsection{Numerical linear edits}
 The synthetic edits used in this benchmark are a balance system. This type of edits
 are found frequently in business statistics and energy statistics. 
@@ -1312,16 +1309,20 @@ theme_cbs <- theme_bw() +
                   )
 data("benchmip_balance")
 sdat <- subset(benchmip_balance, errorloc=="middle")
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
+ann <- merge(ann, sdat)
+qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
        ) +
-       labs(title="", x="# variables", y="", color="") + 
+       labs(title="", x="number of variables", y="", color="method") + 
        theme_cbs + theme() + 
        scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,150)) + 
-       annotate("text", x=20, y=100, label="e=10") +
-       annotate("text", x=40, y=50, label="e=4")
+       annotate("text", x=ann$nvar+1,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 \label{fig:numperf}
-\caption{Benchmark on numerical data}
+\caption{Numerical edits: each line is a different number of errors. Errors in this
+graph are inject in middle of the number of variables.}
+
 \end{figure}
 Figure \ref{fig:numperf} shows the performance of error localization for increasing
 number of variables and increasing number of errors. \code{mip} performance is vastly
@@ -1345,7 +1346,7 @@ v_{1}&\texttt{==}&\texttt{TRUE}\\
 \texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}
 \end{eqnarray*}
 The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, ..., TRUE)}.
-An error in the data can be introduced by setting a $v_i$ to \code{FALSE}.
+An error in the data can be introduced by setting on of the $v_i$'s to \code{FALSE}.
 
 The benchmark was run for balance systems of size $1$ up to $50$. For each system
 records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
@@ -1356,45 +1357,53 @@ were added to the test set.
 data(benchmip_categorical)
 dat <- benchmip_categorical
 sdat <- subset(dat, errorloc=="middle")
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
+ann <- merge(ann, sdat)
+qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
        ) +
-       labs(title="", x="# variables", y="", color="") + 
+       labs(title="", x="number of variables", y="", color="") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,150))
+       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,155))+ 
+       annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 
 \subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
 \code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the constraints 
-$x_1 = \sum^{N}_{i=2} x_i$ and $x_1 \geq 0$ are added.
+$x_1 = \sum^{N}_{i=2} x_i$ and $x_N \geq 0$ are added. This creates a web of 
+connected constraints. Note that in practice mostly the number of mixed constraints
+will be less than the number of linear and categorical constraints.
 
 \begin{eqnarray*}
-x_1 & \geq & 0\\
+x_N & \geq & 0\\
 x_1 & = & \sum^{N/2}_{i=2}x_i\\
 \texttt{if (}x_{1} \geq 0 \texttt{)} && v_{1}\texttt{==TRUE } \\
 &\vdots\\
 \texttt{if (}x_{N/2} \geq 0 \texttt{)} && v_{N/2}\texttt{==TRUE }
 \end{eqnarray*}
-
 A solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
 We can introduce an error by setting an $v_i$ to \code{FALSE} or setting a $x_i$
-to $-1$.
+to $-1$. 
 
 This benchmark was run with the number of variables up to 100 and the number of errors
 up to 10.
 
 %\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
 %with weight less then nerrors.}
-<<echo=FALSE, warning=FALSE, fig.height=3.5>>=
+<<echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edit benchmark">>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
-#sdat <- subset(dat, errorloc=="middle")
-qplot( data=dat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom="line", 
-       facets=~errorloc
+sdat <- subset(dat, errorloc=="middle")
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
+ann <- merge(ann, sdat)
+qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
        ) +
        labs(title="", x="# variables", y="", color="") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")})
+       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,155))+ 
+       annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1402,9 +1411,11 @@ qplot( data=dat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors),
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 This paper describes the error localization algorithm for linear, categorical and
-mixed edits as mip problems. It describes the usage and implementation in
-\code{editrules}. This mip implementation is typically much faster than the
-branch and bound algorithm as can be seen from the benchmarks.
+mixed edits as mip problems. We derived a formulation for the Felligi Holt error
+localization problem that is a generalization of linear, categorical as well as
+mixed type edit rules.
+Benchmarks on typical synthetic problems show that performance of the mip algorithm
+is superior to the branch and bound in \code{editrules}. 
 
 For most problems mip will generate a good solution. However for problems where
 coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
@@ -1412,7 +1423,6 @@ the problem: otherwise the mip solver will become unstable.
 
 \bibliographystyle{chicago}
 \bibliography{editrules}
-
 
 \appendix
 \section{Derivation of Equation \ref{eq:phaseI}}
