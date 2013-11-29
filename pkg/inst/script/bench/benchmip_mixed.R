@@ -15,13 +15,13 @@ generate_E <- function(nvar=10){
   if (length(var_num) > 1){
     nsum <- paste(tail(var_num, -1), collapse="+")
     edits <- paste0("x1 == ", nsum)
-    edits <- c(edits, paste0("x1 >= ", tail(var_num, -1)))
+    edits <- c(edits, paste0(head(var_num, -1)," >= ", tail(var_num, -1)))
   } else {
     edits <- "x1 == 0"
   }
   
   if (n_cat){
-    edits <- c( "x1 >= 0"
+    edits <- c( paste0(tail(var_num, 1), ">= 0") 
               , edits
               , paste0(var_cat, " %in% c(TRUE,FALSE)")
               , paste0("if (!", var_cat, ") ", head(var_num,n_cat),"< 0")
@@ -61,7 +61,7 @@ generate_data <- function(E, nerrors=0){
 }
 
 
-bench <- function(nvars = 10, nerrors=10, method="bb"){
+bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=150){
   
   init <- !file.exists(FILE)
   txt <- file(FILE, "at")
@@ -76,7 +76,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
         E <- generate_E(nvar)
         data <- generate_data(E, ne)
         cat("\r nvar=", nvar, " ne=", ne, " method=", method)
-        le <- localizeErrors(E, data, method=method)
+        le <- localizeErrors(E, data, method=method, maxduration=maxduration)
         rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
         
         write.table(rpt, file=txt, col.names=init, row.names=FALSE)
@@ -91,15 +91,13 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
 
 #if (file.exists(FILE)) file.remove(FILE)
 
-#bench(100,10, method="mip")
+bench(50,10, method="mip")
 bench(50,10, method="bb")
 
 dat <- read.table(FILE, header=TRUE)
 library(ggplot2)
 qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc) + geom_jitter()
 ggsave("benchmip_categorical.png")
-
-
 
 
 ### quick testing
