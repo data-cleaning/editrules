@@ -263,17 +263,17 @@ Mixed integer programming is well understood and several software packages
 packages are available that implement efficient solvers.  Most mip software
 allows for a broader (but equivalent) formulation of the mip problem, allowing
 the set of restrictions to include inequalities as well as equalities. As a
-side note, we mention that under equality constraints, solutions for the
-integer part of $\mathbf{z}$ only exist when the equality constraints
+side note, we mention that under equality restrictions, solutions for the
+integer part of $\mathbf{z}$ only exist when the equality restrictions
 pertaining to the integer part of $\mathbf{z}$ are \emph{totally
 unimodular}\footnote{This means that every square submatrix of the coefficient
 matrix pertaining to the integer part of $\mathbf{z}$ has determinant 0 or
-$\pm1$.}. However, as we will see below, constraints that pertain to the real
+$\pm1$.}. However, as we will see below, restrictions that pertain to the real
 and/or integer part of $\mathbf{z}$ are always inequalities in our case, so this
 is of no particular concern to us.
 
 In this paper we reformulate Felligi Holt error localization
-\citep{fellegi:1976} for numerical, categorical and mixed constraints in terms
+\citep{fellegi:1976} for numerical, categorical and mixed restrictions in terms
 of mip problems.  The precise reformulations of the error localization problem
 for the three types of rules are different, but in each case the objective
 function is of the form 
@@ -610,7 +610,8 @@ satisfies $E$ if and only if
   \mathbf{r} \in \overline{\E} \Leftrightarrow 
 \bigvee_{i=1}^m v_i \in \overline{F}_i \:\lor\: \bigvee^{k}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j.
 \end{equation}
-This formulation is both a generalization of linear inequality and
+This formulation is both a generalization of linear inequality (Eq.\ \ref{eq:linedit})
+and
 categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing $k=0$, we get
 $P=\mathbb{R}^n$ and only the categorical part remains. Similarly, choosing
 $\F=\D$, only the linear inequalities remain. The definition in 
@@ -942,7 +943,7 @@ numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
 predefined tolerance. For this reason \code{lp\_solve} comes with a number of
 predefined tolerances that have default values but may be altered by the user.
 
-The toleracens implemented by \code{lp\_solve} are summarised in
+The tolerances implemented by \code{lp\_solve} are summarised in
 Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine wether
 an element of the restriction matrix is positive so it may be used as a
 pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
@@ -1226,7 +1227,7 @@ exported to a text file using \code{write.lp} of the \code{lpSolveAPI} package.
 
 The second functionality entails the functions \code{\code{as.mip}} and
 \code{as.lp.mip}.  The function \code{as.mip} allows users to translate the
-combinaiton of a set of editrules and a data record to a MIP problem.
+combination of a set of editrules and a data record to a MIP problem.
 \begin{rcode}
 <<>>=
 mip <- as.mip(E,list(x=10,y=1))
@@ -1267,10 +1268,10 @@ The \emph{branch and bound} and \emph{mip} method for error localization
 have a different performance both in computing time as well in memory usage.
 The performance of error 
 localization methods depends highly on the number of variables, the number of errors,
-the number of constraints and the order of the variables.
+the number of restrictions and the order of the variables.
 
 To compare the performance of {\em branch and bound} and the {\em mip} method, 
-we conducted benchmarks for the three types of constraints using edits with 
+we conducted benchmarks for the three types of restrictions using edits with 
 synthetic data. The benchmarks are constructed to reflect 
 properties of a typical error localization problem in official statistics practice.
  
@@ -1279,7 +1280,7 @@ The synthetic edits used in this benchmark are a balance system. This type of ed
 are found frequently in business statistics and energy statistics. 
 The numerical
 variables form a binary tree where the value of a node is the sum of its child node
-values. The value of the top node is constraint to be non-negative and always at least as
+values. The value of the top node is restricted to be non-negative and always at least as
 large as any other value.
 \begin{eqnarray*}
 x_1 & =    & x_2 + x_3 \\
@@ -1300,8 +1301,7 @@ The time for localizing the errors
 using \code{localizeErrors} with \code{method} set to \code{"bb"} and \code{"mip"}
 was measured.
 
-\begin{figure}
-<<echo=FALSE,warning=FALSE, fig.height=3.5>>=
+<<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Numerical edits: each line represents a different number of errors.">>=
 library(ggplot2)
 theme_cbs <- theme_bw() + 
              theme( panel.grid.major.x = element_blank()
@@ -1309,22 +1309,18 @@ theme_cbs <- theme_bw() +
                   )
 data("benchmip_balance")
 sdat <- subset(benchmip_balance, errorloc=="middle")
-ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- subset(sdat, method=="bb")
+ann$elapsed[ann$elapsed > 150] <- 150
 ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
 ann <- merge(ann, sdat)
 qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
        ) +
        labs(title="", x="number of variables", y="", color="method") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,150)) + 
+       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,151)) + 
        annotate("text", x=ann$nvar+1,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
-\label{fig:numperf}
-\caption{Numerical edits: each line is a different number of errors. Errors in this
-graph are inject in middle of the number of variables.}
-
-\end{figure}
-Figure \ref{fig:numperf} shows the performance of error localization for increasing
+Figure \ref{fig:numbench} shows the performance of error localization for increasing
 number of variables and increasing number of errors. \code{mip} performance is vastly
 superior for problem size of $100$ variables and $10$ errors. With \code{"bb"} no 
 (optimal) solution is found within 10 minutes for problems with 
@@ -1353,11 +1349,13 @@ records with $1$ to $10$ errors were created. Since \code{bb} is highly dependan
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
-<<echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical benchmark">>=
+<<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line represents a different number of errors.">>=
+
 data(benchmip_categorical)
 dat <- benchmip_categorical
 sdat <- subset(dat, errorloc=="middle")
-ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- subset(sdat, method=="bb")
+ann$elapsed[ann$elapsed > 150] <- 150
 ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
 ann <- merge(ann, sdat)
 qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
@@ -1370,10 +1368,10 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
 
 \subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
-\code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the constraints 
+\code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the restrictions 
 $x_1 = \sum^{N}_{i=2} x_i$ and $x_N \geq 0$ are added. This creates a web of 
-connected constraints. Note that in practice mostly the number of mixed constraints
-will be less than the number of linear and categorical constraints.
+connected restrictions. Note that in practice mostly the number of mixed restrictions
+will be less than the number of linear and categorical restrictions.
 
 \begin{eqnarray*}
 x_N & \geq & 0\\
@@ -1391,11 +1389,13 @@ up to 10.
 
 %\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
 %with weight less then nerrors.}
-<<echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edit benchmark">>=
+<<mixedbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edits: each line represents a different number of errors.">>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
 sdat <- subset(dat, errorloc=="middle")
-ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- subset(sdat, method=="bb")
+ann$elapsed[ann$elapsed > 150] <- 150
+
 ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
 ann <- merge(ann, sdat)
 qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
