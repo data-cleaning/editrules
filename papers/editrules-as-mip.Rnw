@@ -155,7 +155,7 @@ localization has been extensively discussed in literature\footnote{See
 \citet{waal:2011} and references therein.}, so we will suffice with a few
 remarks. First, the search space related to the minimization problem grows
 exponentially with the number of fields, rendering a brute-force approach that
-runs through all possible solution candidates computationally infeasible.
+runs through all possible solution candidates computationally unfeasible.
 Second, the problem is complicated by the occurrence of \emph{implied rules}.
 That is, the solution set must not only allow the record to obey the original,
 user-defined set of rules, but also rules that are logically or arithmetically
@@ -242,7 +242,7 @@ written in the form
 \end{equation}
 %
 where $\mathbf{c}$ is a constant vector and $\mathbf{z}$ is a vector consisting
-of real and integer coefficients. One usually referres to $\mathbf{z}$ as the
+of real and integer coefficients. One usually refers to $\mathbf{z}$ as the
 \emph{decision vector} and the inner product $\mathbf{c}^T\mathbf{z}$ as the
 \emph{objective function}.  Furthermore, $\mathbf{R}$ is a coefficient matrix
 and $\mathbf{d}$ a vector of upper bounds. Formally, the elements of
@@ -372,9 +372,9 @@ which states that $x_i$ equals $x_i^0$
 
 \begin{example}
 Consider a record with business survey data, consisting of the variables
-\emph{Number of staff} $p$ and \emph{Personel cost}  $c$.  We have the rules
+\emph{Number of staff} $p$ and \emph{Personnel cost}  $c$.  We have the rules
 $p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
-for each staf member, more than one monetary unit is spent. Given two observed
+for each staff member, more than one monetary unit is spent. Given two observed
 values $p^0$ and $c^0$, disobeying one or more of the rules, the mip problem
 for error localization has the following form.
 \begin{displaymath}
@@ -616,7 +616,7 @@ categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing $k=0$, we get
 $P=\mathbb{R}^n$ and only the categorical part remains. Similarly, choosing
 $\F=\D$, only the linear inequalities remain. The definition in 
 Eq.\ \eqref{eq:implication} can be rewritten as a ``conditional edit'' by using
-the implication replacement rule from propositinal logic  which states that
+the implication replacement rule from propositional logic  which states that
 $\lnot p\lor q$ may be replaced by $p\Rightarrow q$. If we limit
 Eq.\ \eqref{eq:implication} to a single inequality, we obtain the normal form of
 \cite{waal:2003}.
@@ -677,7 +677,7 @@ minimize over becomes
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
 \ell_1,\ldots,\ell_K),
 \end{equation}
-where $K$ is the total number of linear edits occuring in all the mixed-type edits.
+where $K$ is the total number of linear edits occurring in all the mixed-type edits.
 Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
 recorded values consists of the union of the restrictions for categorical variables
 (Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
@@ -739,7 +739,7 @@ change indicators.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical stability issues}
 \label{sec:linedits:num}
-An error localisation problem, in its original formulation, is an optimisation
+An error localisation problem, in its original formulation, is an optimization
 problem over $n$ decision variables that indicate which variables in a record
 should be adapted. Depending on the type of rules, its reformulation as a mip
 problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
@@ -749,10 +749,10 @@ practice. Because of limitations in machine accuracy, typically on the order of
 $10^{-16}$, the range of problems that can be solved is limited as well. In
 particular, mip problems that involve both very large and very small numbers in
 the objective function and/or the restriction matrix  may yield erroneous
-solutions or become numerically infeasible. Indeed, the manual of
+solutions or become numerically unfeasible. Indeed, the manual of
 \code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve
 stability, one must try to work with numbers that are somewhat in the same
-range. Ideally in the neighbourhood of 1.}' The following subsections point out
+range. Ideally in the neighborhood of 1.}' The following subsections point out
 a number of sources of numerical instabilities and provides ways to handle
 them.
 
@@ -762,7 +762,7 @@ Consider a set of linear restrictions on numerical data of the form
 $\mathbf{Ax}\leq\mathbf{b}$, where we assume $\mathbf{b}\geq\mathbf{0}$ and the
 restrictions consist solely of inequalities ($\leq$). In practice, these
 restrictions will not limit the type of linear rules covered by this
-discussion, since it can be shown that all linear rules can be brougth to this
+discussion, since it can be shown that all linear rules can be brought to this
 form, possibly by introducing dummy variables [see \emph{e.g.}
 \citet{schrijver:1998,bradley:1977}]. Furthermore, suppose we have a record
 $\mathbf{x}^0\geq\mathbf{0}$ which doesn't obey the restrictions. The mip
@@ -823,7 +823,7 @@ simplex algorithm consists of the following steps.
 \item[Phase I:] Repeatedly apply Gauss-Jordan elimination steps (called
 \emph{pivots}) to derive a decision vector that obeys all restrictions. 
 A vector obeying all restrictions is called a \emph{basic solution}.
-\item[Phase II:] Repeatedly apply pivots to move from the initial nonoptimal
+\item[Phase II:] Repeatedly apply pivots to move from the initial non-optimal
 solution to the solution that minimizes the objective function $f$. 
 \end{description}
 %
@@ -854,7 +854,7 @@ matrix multiplication that the vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})
 (\mathbf{0},\mathbf{x}^0\mathbf{M}^{-1},[\mathbf{b},2\mathbf{x^0},\mathbf{0},\mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0])$
 obeys all restrictions. The above form of a tableau, where the restriction
 matrix contains a (column permutation of) the unit matrix, the right-hand-side
-has only nonnegative coefficients, and the cost vector equals zero for the
+has only non-negative coefficients, and the cost vector equals zero for the
 columns above the unit matrix is called the \emph{canonical form}.
 
 Now, a \emph{pivot} operation consists of the following steps:
@@ -867,19 +867,19 @@ their $j$th column equals zero.
 %
 The result of a pivot operation is again a tableau in canonical form but with
 possibly a different value for the cost function. The simplex algorithm proceeds
-by selecting pivots that decrease the cost function untill the minumum is reached
-or the problem is shown to be infeasible.
+by selecting pivots that decrease the cost function until the minimum is reached
+or the problem is shown to be unfeasible.
 
-Up untill this point, we have treated the binary variables $\mathbf{\Delta}$ as
+Up until this point, we have treated the binary variables $\mathbf{\Delta}$ as
 if they were real variables, so the tableaux discussed above do not represent
 solutions to our original problem which demands that all $\Delta_j$ are either
 $0$ or $1$. In the \code{lp\_solve} library this is solved as follows. 
 \begin{enumerate}
-\item For each optimized value $\Delta_j^*$ test wether it is $0$ or $1$. If
+\item For each optimized value $\Delta_j^*$ test whether it is $0$ or $1$. If
 all $\Delta_j^*$ are integer, we have a valid solution of objective value
 $\mathbf{w}^T\mathbf{\Delta}$ and we are done.
 \item For the first variable $\Delta_j^*$ that is not integer, create two
-sub-models: one where the minumum value of $\Delta_j$ equals $1$ and one where
+sub-models: one where the minimum value of $\Delta_j$ equals $1$ and one where
 the maximum value of $\Delta_j$ equals $0$.
 \item Optimize the two sub-models. If solutions exist, the result will contain
 an integer $\Delta_j$.
@@ -930,21 +930,21 @@ numerically stabilize the mip problem.
 \subsection{Setting numerical threshold values}
 On most modern computer systems real numbers are represented in
 \citet{ieee:2008} double precision format. In essence, real numbers are 
-represented as rounded-off fractions so arithmatic operations on such numbers
-always result in loss of precision and roundof errors. For example, even though
+represented as rounded-off fractions so arithmetic operations on such numbers
+always result in loss of precision and round-off errors. For example, even though
 mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
 representation (denoted $\fl(\cdot)$) we have
 $\fl(0.7)-\fl(0.5)-\fl(0.2)\not=\fl(0)$. In fact, the difference is about
 $0.56\cdot10^{-16}$ in this case. 
 
 This means that in practice one cannot rely on equality tests to determine
-wether two floating point numbers are equal.  Rather, one assumes that two
+whether two floating point numbers are equal.  Rather, one assumes that two
 numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
 predefined tolerance. For this reason \code{lp\_solve} comes with a number of
 predefined tolerances that have default values but may be altered by the user.
 
-The tolerances implemented by \code{lp\_solve} are summarised in
-Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine wether
+The tolerances implemented by \code{lp\_solve} are summarized in
+Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine whether
 an element of the restriction matrix is positive so it may be used as a
 pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
 Phase I, our restriction matrix contains elements on the order of
@@ -960,7 +960,7 @@ bound condition has been hit in the branch-and-bound algorithm) have not been al
 
 The limited precision inherent to floating point calculations imply that
 computations get more inaccurate as the operands differ more in magnitude. For
-example, on any system that uses double precision arithmatic the difference
+example, on any system that uses double precision arithmetic the difference
 $\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
 two contradictory demands on our translation of an error localisation problem
 to a mip problem. On one hand, one would like to set $M$ as large as possible
@@ -969,9 +969,9 @@ large values for $M$ may imply that mip problems such as Eq.~\eqref{eq:numxx}
 become numerically inaccurate. 
 
 In practice, the tableau used by \code{lp\_solve} will not be exactly the same
-as represented in Eq.~\eqref{eq:phaseI}. Over the years, many optimisations and
+as represented in Eq.~\eqref{eq:phaseI}. Over the years, many optimizations and
 heuristics have been developed to make solving linear programming problems fast
-and reliable, and several of those optimisations have been implemented in
+and reliable, and several of those optimizations have been implemented in
 \code{lp\_solve}. However, the tableau of Eq.~\eqref{eq:phaseI} does
 fundamentally show how numerical instabilities may occur: the tableau
 simultaneously contains numbers on the order of $M^{-1}$ and on the order of
@@ -985,7 +985,7 @@ instabilities in error localisation problems.
 that $\mathbf{A}$, $\mathbf{b}$ and $\mathbf{x}$ are on the order of 1 wherever
 possible.
 \item Choose a value of $M$ appropriate for $\mathbf{x}^0$.
-\item If the above does not help in stabalizing he problem, try lowering the
+\item If the above does not help in stabilizing he problem, try lowering the
 numerical constants of Table \ref{tab:tols}.
 \end{enumerate}
 
@@ -1103,7 +1103,7 @@ that by altering the value for $x$, the record can be corrected to obey the edit
 \code{E}. For the second record, no alterations are necessary.
 
 Details on the error localisation procedure are stored in a \code{data.frame}
-called \code{status}, which can be accessesed as follows.
+called \code{status}, which can be accessed as follows.
 \begin{rcode}
 <<>>=
 el$status
@@ -1129,7 +1129,7 @@ this information.
 The output of \code{localizeErrors} can be controlled with two parameters.
 Most importantly, positive weights for each variable and optionally
 for each record can be set; variables with lower weights attached to them are
-moe likely to be part of a chosen solution which is otherwise degenerate.
+more likely to be part of a chosen solution which is otherwise degenerate.
 Furthermore, a maximum search time for each solution can be specified, the
 default setting being 10 minutes. Finally, the optional parameter \code{lpcontrol}
 may contain a list of parameters to be passed to \code{lpSolveAPI}. The default settings
@@ -1144,7 +1144,7 @@ default settings listed in Table \ref{tab:tols}. Changing or adding options can
 be done either by passing the \code{lpcontrol} parameter to
 \code{localizeErrors}, in which case it is only used for the current error
 localisation problem. To adapt a parameter for the remainder of the running
-R-session or untill the option is reset one can use the \code{options}
+R-session or until the option is reset one can use the \code{options}
 function. For example, to alter the \code{epsb} parameter through localizeErrors,
 one may use either of the two calls below.
 \begin{rcode}
@@ -1210,7 +1210,7 @@ L <- errorLocalizer_mip(E, list(x=10,y=1))
 @
 \end{rcode}
 Here, \code{errorLocalizer\_mip} translates the error localisation problem for
-a single record to a MIP problem, feeds it to \code{lpSolveAPI} and returns al
+a single record to a MIP problem, feeds it to \code{lpSolveAPI} and returns all
 the results in a list. The list contains two extra pieces of information not
 available in the output. The first is a parameter called \code{x\_feasible}, containing
 a record that actually obeys all the edit rules.
@@ -1293,7 +1293,7 @@ A solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldot
 An error is introduced in the data by setting a $x_i$ to $-1$. 
 
 The benchmark was run for balance systems of size $1$ up to $101$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
+records with $1$ to $10$ errors were created. Since \code{bb} is highly dependent on the 
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
@@ -1345,7 +1345,7 @@ The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, .
 An error in the data can be introduced by setting on of the $v_i$'s to \code{FALSE}.
 
 The benchmark was run for balance systems of size $1$ up to $50$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is highly dependant on the 
+records with $1$ to $10$ errors were created. Since \code{bb} is highly dependent on the 
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
@@ -1456,7 +1456,7 @@ write the upper limits on $\mathbf{\Delta}$ as equalities.
 Observe that the above tableau \emph{almost} suggests a trivial solution. If we choose
 $\mathbf{s}_x=\mathbf{b}$, $\mathbf{s}_\pm=\pm\mathbf{x}^0$ and $\mathbf{s}_\Delta=\mathbf{1}$,
 we may set $(\mathbf{x},\mathbf{\Delta})=\mathbf{0}$. However, recall that we demand all variables
-to be nonnegative so $\mathbf{s}_-$ may not be equal to ${-\mathbf{x}^0}$. To resolve this
+to be non-negative so $\mathbf{s}_-$ may not be equal to ${-\mathbf{x}^0}$. To resolve this
 problem, we introduce a set of \emph{artificial} variables $\mathbf{a}_-$ and extend the
 restrictions involving $\mathbf{s}_-$ as follows:
 \begin{displaymath}
