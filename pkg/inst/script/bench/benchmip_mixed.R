@@ -61,7 +61,7 @@ generate_data <- function(E, nerrors=0){
 }
 
 
-bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=150){
+bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=200){
   
   init <- !file.exists(FILE)
   txt <- file(FILE, "at")
@@ -77,10 +77,14 @@ bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=150){
       try({
         if (all(max_dur)) break
         data <- generate_data(E, ne)[!max_dur,,drop=FALSE]
+        # only select middle
+        data <- data[3,,drop=FALSE]
+        errorloc_m <- errorloc[3]
+        
         cat("\r nvar=", nvar, " ne=", ne, " method=", method)
         le <- localizeErrors(E, data, method=method, maxduration=maxduration)
         max_dur[!max_dur] <- le$status$maxDurationExceeded
-        rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc, le$status)
+        rpt <- cbind(method=method, nvar=nvar, nerrors=ne, errorloc=errorloc_m, le$status)
         
         write.table(rpt, file=txt, col.names=init, row.names=FALSE)
         
@@ -92,7 +96,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=150){
   }
 }
 
-#if (file.exists(FILE)) file.remove(FILE)
+if (file.exists(FILE)) file.remove(FILE)
 
 bench(50,10, method="mip")
 bench(50,10, method="bb")

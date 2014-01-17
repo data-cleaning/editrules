@@ -1272,12 +1272,14 @@ the number of restrictions and the order of the variables.
 
 To compare the performance of {\em branch and bound} and the {\em mip} method, 
 we conducted benchmarks for the three types of restrictions using edits with 
-synthetic data. The benchmarks are constructed to reflect 
+synthetic data. Each ot the benchmarks is constructed to reflect 
 properties of a typical error localization problem in official statistics practice.
  
-\subsection{Numerical linear edits}
-The synthetic edits used in this benchmark are a balance system. This type of edits
-are found frequently in business statistics and energy statistics. 
+\subsection{Linear edits}
+The synthetic edits used in this benchmark from a balance system.
+This type of edits
+are found frequently in business statistics and energy statistics, where the main
+variables a composites/sums of other variables. 
 The numerical
 variables form a binary tree where the value of a node is the sum of its child node
 values. The value of the top node is restricted to be non-negative and always at least as
@@ -1301,7 +1303,7 @@ The time for localizing the errors
 using \code{localizeErrors} with \code{method} set to \code{"bb"} and \code{"mip"}
 was measured.
 
-<<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Numerical edits: each line represents a different number of errors.">>=
+<<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Linear edits, each line is a different number of errors">>=
 library(ggplot2)
 theme_cbs <- theme_bw() + 
              theme( panel.grid.major.x = element_blank()
@@ -1309,19 +1311,20 @@ theme_cbs <- theme_bw() +
                   )
 data("benchmip_balance")
 sdat <- subset(benchmip_balance, errorloc=="middle")
-ann <- subset(sdat, method=="bb")
-ann$elapsed[ann$elapsed > 150] <- 150
+#sdat <- within(sdat, elapsed[weight == 0] <- 200)
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
 ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
 ann <- merge(ann, sdat)
 qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
        ) +
        labs(title="", x="number of variables", y="", color="method") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,151)) + 
+       scale_y_continuous(labels=function(x){paste0(x,"s")}) + coord_cartesian(ylim=c(0,150)) + 
        annotate("text", x=ann$nvar+1,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 Figure \ref{fig:numbench} shows the performance of error localization for increasing
-number of variables and increasing number of errors. \code{mip} performance is vastly
+number of variables and increasing number of errors with errors injected in 
+the middle. \code{mip} performance is vastly
 superior for problem size of $100$ variables and $10$ errors. With \code{"bb"} no 
 (optimal) solution is found within 10 minutes for problems with 
 more then 50 variables en 4 errors. In contrast \code{"mip"} 
@@ -1332,7 +1335,7 @@ using confidence \code{weight}s the variables with errors are likely
 to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Categorical edits}
-Categorical edits often form a web of interconnected edits. 
+Pure categorical edits form a web of interconnected edits. 
 To reflect this connectivity the categorical benchmark creates a 
 chain of edits of the form:
 \begin{eqnarray*}
@@ -1341,6 +1344,21 @@ v_{1}&\texttt{==}&\texttt{TRUE}\\
 &\vdots&\\
 \texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}
 \end{eqnarray*}
+<<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line represents a different number of errors.">>=
+
+data(benchmip_categorical)
+dat <- benchmip_categorical
+sdat <- subset(dat, errorloc=="middle")
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
+ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
+ann <- merge(ann, sdat)
+qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
+       ) +
+       labs(title="", x="number of variables", y="", color="") + 
+       theme_cbs + theme() + 
+       scale_y_continuous(labels=function(x){paste0(x,"s")})+ coord_cartesian(ylim=c(0,150)) + 
+       annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
+@
 The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, ..., TRUE)}.
 An error in the data can be introduced by setting on of the $v_i$'s to \code{FALSE}.
 
@@ -1349,29 +1367,24 @@ records with $1$ to $10$ errors were created. Since \code{bb} is highly dependen
 order of the (faulty) variables, records with errors at the beginning, middle or end
 were added to the test set.
 
-<<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line represents a different number of errors.">>=
-
-data(benchmip_categorical)
-dat <- benchmip_categorical
-sdat <- subset(dat, errorloc=="middle")
-ann <- subset(sdat, method=="bb")
-ann$elapsed[ann$elapsed > 150] <- 150
-ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
-ann <- merge(ann, sdat)
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
-       ) +
-       labs(title="", x="number of variables", y="", color="") + 
-       theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,155))+ 
-       annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
-@
+Figure \ref{fig:catbench} shows the performance of error localization for increasing
+number of variables and increasing number of errors with the errors inject in the middle
+\code{mip} performance is vastly
+superior for problem size of $50$ variables and $10$ errors. With \code{"bb"} no 
+(optimal) solution is found within 10 minutes for problems with 
+more then 30 variables en 4 errors. In contrast \code{"mip"} 
+solves the problem with $50$ variables an $10$ errors within seconds.
+\code{bb} for up-to $2$ errors and 50 variables is reasonable. Note that the 
+performance of \code{bb} in practice often is better than in this test: when
+using confidence \code{weight}s the variables with errors are likely
+to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Mixed-type edits}
 For mixed edits a set of edits of the following form was generated:
 \code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the restrictions 
 $x_1 = \sum^{N}_{i=2} x_i$ and $x_N \geq 0$ are added. This creates a web of 
-connected restrictions. Note that in practice mostly the number of mixed restrictions
-will be less than the number of linear and categorical restrictions.
+connected restrictions. Note that in real life the number of mixed restrictions
+typically will be less than the number of linear and categorical restrictions.
 
 \begin{eqnarray*}
 x_N & \geq & 0\\
@@ -1384,42 +1397,48 @@ A solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
 We can introduce an error by setting an $v_i$ to \code{FALSE} or setting a $x_i$
 to $-1$. 
 
-This benchmark was run with the number of variables up to 100 and the number of errors
+This benchmark was run with the number of variables up to 50 and the number of errors
 up to 10.
-
 %\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
 %with weight less then nerrors.}
 <<mixedbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edits: each line represents a different number of errors.">>=
 data(benchmip_mixed)
 dat <- benchmip_mixed
 sdat <- subset(dat, errorloc=="middle")
-ann <- subset(sdat, method=="bb")
-ann$elapsed[ann$elapsed > 150] <- 150
+sdat <- within(sdat, {elapsed[weight==0] <- 200})
+ann <- subset(sdat, elapsed <= 150 & method=="bb")
+#ann <- subset(sdat, method=="bb")
 
 ann <- aggregate(elapsed ~ nerrors, data=ann, FUN=max)
 ann <- merge(ann, sdat)
-qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point","line"), 
+qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors), geom=c("point", "line"), 
        ) +
        labs(title="", x="# variables", y="", color="") + 
        theme_cbs + theme() + 
-       scale_y_continuous(labels=function(x){paste0(x,"s")}, lim=c(0,155))+ 
+       scale_y_continuous(labels=function(x){paste0(x,"s")})+ coord_cartesian(ylim=c(0,150)) +
        annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONCLUSION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 This paper describes the error localization algorithm for linear, categorical and
-mixed edits as mip problems. We derived a formulation for the Felligi Holt error
+mixed edits as mip problems. We derived a new formulation for the Felligi Holt error
 localization problem that is a generalization of linear, categorical as well as
 mixed type edit rules.
-Benchmarks on typical synthetic problems show that performance of the mip algorithm
-is superior to the branch and bound in \code{editrules}. 
 
-For most problems mip will generate a good solution. However for problems where
-coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
-the problem: otherwise the mip solver will become unstable.
+The resulting mip problem can be solved with a mixed integer problem solver. However
+if the data and coefficients are not of the order of size, numerical stability
+issues may arise, due to numerical precision issue. We show when and how this
+happens and give guidance in handling such issues. 
+
+Benchmarks on typical synthetic but realistic problems show that performance of 
+the mip algorithm is vastly superior to the branch and bound in \code{editrules}.
+% For most problems mip will generate a good solution. However for problems where
+% coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
+% the problem: otherwise the mip solver will become unstable.
 
 \bibliographystyle{chicago}
 \bibliography{editrules}
@@ -1517,9 +1536,6 @@ $\mathbf{s}_\Delta=\mathbf{1}-\mathbf{M}^{-1}\mathbf{x}^0$, and
 $(\mathbf{x},\mathbf{s}_-,\mathbf{a}_-)=\mathbf{0}$ represents a valid solution.
 Since the artificial variables have vanishing values, we may now delete the corresponding
 column, and arrive at the tableau of Eq.~\eqref{eq:phaseI}.
-
-
-
 
 \end{document}
 

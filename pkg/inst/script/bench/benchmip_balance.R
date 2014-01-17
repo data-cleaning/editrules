@@ -68,7 +68,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb"){
 }
 
 ## quick testing
-start <- fucntion(){
+start <- function(){
   if (file.exists(FILE)) file.remove(FILE)
   
   bench(100,10, method="mip")
@@ -78,12 +78,10 @@ start <- fucntion(){
   library(ggplot2)
   qplot(data=dat, y=elapsed, x=nvar, color=method, facets=nerrors~method, shape=errorloc, geom=c("point", "line")) + geom_jitter()
   ggsave("benchmip_balance.png")
+  sdat <- subset(dat, errorloc=="middle")
+  qplot(data=sdat, x=nvar, y=elapsed, color=method, group=nerrors, geom="line", 
+        facets=~method, ylim=c(0,150))
 }
-
-sdat <- subset(dat, errorloc=="middle")
-qplot(data=sdat, x=nvar, y=elapsed, color=method, group=nerrors, geom="line", 
-      facets=~method, ylim=c(0,150))
-
 #View(dat)
 # n <- 4
 # (E <- generate_balance(n))
