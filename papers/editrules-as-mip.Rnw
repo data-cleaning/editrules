@@ -273,7 +273,7 @@ and/or integer part of $\mathbf{z}$ are always inequalities in our case, so this
 is of no particular concern to us.
 
 In this paper we reformulate Felligi Holt error localization
-\citep{fellegi:1976} for numerical, categorical and mixed restrictions in terms
+\citep{fellegi:1976} for numerical, categorical and mixed-type restrictions in terms
 of mip problems.  The precise reformulations of the error localization problem
 for the three types of rules are different, but in each case the objective
 function is of the form 
@@ -722,7 +722,7 @@ p\\c\\ \Delta_t \\ \Delta_p \\ \Delta_c \\ \ell
 0 \\ 0 \\ 0 \\  0 \\  1 \\ 0 \\ 1 \\ p^0 \\ -p^0 \\ c^0 \\ -c^0
 \end{array}\right]
 \end{equation*}
-The first row in the restriction represents the mixed rule, translated as shown
+The first row in the restriction represents the mixed-type rule, translated as shown
 in Eq.\ \eqref{eq:mixedit}. Row six connects the indicator variable $\ell$
 with the numerical edit in the consequent of
 $t\in\{\textrm{sp}\}\Rightarrow(p=0)$.  Rows two, three and four represent the
@@ -1050,7 +1050,7 @@ E <- editset(expression(
 defines two edits on the variables $x$, $y$ and $z$ and stores them in an object
 called \code{E}. Here, \code{E} is an object of type \code{editset} and it can
 be used to store and manipulate linear (in)equality edits, edits on categorical
-data as well as edits on mixed type data. Besides \code{editset} there are
+data as well as edits on mixed-type data. Besides \code{editset} there are
 specialized functions called \code{editmatrix} and \code{editarray} which can
 be used to define rules on purely numerical or purely categorical data
 respectively. Edits are defined in basic \code{R} syntax; one may use
@@ -1279,7 +1279,12 @@ properties of a typical error localization problem in official statistics practi
 The synthetic edits used in this benchmark from a balance system.
 This type of edits
 are found frequently in business statistics and energy statistics, where the main
-variables a composites/sums of other variables. 
+variables a composites/sums of other variables.
+\begin{example}
+The turnover of a car sale company is the sum of the turnover of each car brand 
+sold by this company.
+\end{example}
+
 The numerical
 variables form a binary tree where the value of a node is the sum of its child node
 values. The value of the top node is restricted to be non-negative and always at least as
@@ -1336,6 +1341,9 @@ to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Categorical edits}
 Pure categorical edits form a web of interconnected edits. 
+\begin{example}
+If you are married, then you are an adult.
+\end{example}
 To reflect this connectivity the categorical benchmark creates a 
 chain of edits of the form:
 \begin{eqnarray*}
@@ -1379,31 +1387,35 @@ performance of \code{bb} in practice often is better than in this test: when
 using confidence \code{weight}s the variables with errors are likely
 to be visited first and this increases performance for \code{bb} considerably.
 
-\subsection{Mixed-type edits}
-For mixed edits a set of edits of the following form was generated:
-\code{if ($v_i$ == TRUE) $x_i >= 0$}, furthermore the restrictions 
-$x_1 = \sum^{N}_{i=2} x_i$ and $x_N \geq 0$ are added. This creates a web of 
-connected restrictions. Note that in real life the number of mixed restrictions
-typically will be less than the number of linear and categorical restrictions.
+\subsection{Mixed-type restrictions}
+For mixed-type restrictions a set of edits of the following form was generated:
+\code{if ($x_i \geq 0$) $x_{i+1} \geq 0$}, and the restriction 
+$x_1 = \geq 0$ are added. Although all variables $x_i$ are numeric, the use
+of conditional edits make these edits mixed edits. 
+This type of edits are very common in business and social statistics. 
+\begin{example}
+If in a business record the variable salary is bigger than zero, then its number
+of employees must be higher than zero. 
+\end{example}
 
+The mixed benchmark creates a chain of 
+such restrictions. 
 \begin{eqnarray*}
-x_N & \geq & 0\\
-x_1 & = & \sum^{N/2}_{i=2}x_i\\
-\texttt{if (}x_{1} \geq 0 \texttt{)} && v_{1}\texttt{==TRUE } \\
+x_1 & \geq & 0\\
+\texttt{if (}x_{1} \geq 0 \texttt{)} && x_{2} \geq 0 \\
 &\vdots\\
-\texttt{if (}x_{N/2} \geq 0 \texttt{)} && v_{N/2}\texttt{==TRUE }
+\texttt{if (}x_{N-1} \geq 0 \texttt{)} && x_{N} \geq 0 \\
 \end{eqnarray*}
-A solution to this system is the vector \code{($0$, ..., $0$, TRUE, ..., TRUE)}.
-We can introduce an error by setting an $v_i$ to \code{FALSE} or setting a $x_i$
+A solution to this system is the vector \code{($0$, ..., $0$}.
+We can introduce an error by setting a $x_i$
 to $-1$. 
-
 This benchmark was run with the number of variables up to 50 and the number of errors
 up to 10.
 %\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
 %with weight less then nerrors.}
 <<mixedbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edits: each line represents a different number of errors.">>=
-data(benchmip_mixed)
-dat <- benchmip_mixed
+data(benchmip_mixed2)
+dat <- benchmip_mixed2
 sdat <- subset(dat, errorloc=="middle")
 sdat <- within(sdat, {elapsed[weight==0] <- 200})
 ann <- subset(sdat, elapsed <= 150 & method=="bb")
@@ -1419,20 +1431,27 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 
+Solving the error localization problem for mixed type restrictions using 
+{\emph branch and bound} is very 
+memory (and time) consuming. For each if-statement \code{bb} splits off two copies
+, one in which the condition is true and another one in which it is not true.
+The performance of \code{mip} is again vastly superior to the \code{bb} version.
+All benchmarks for \code{mip} are finished within seconds. In problems with more
+than 35 variables, the solution time for \code{bb} rapidly increases.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONCLUSION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 This paper describes the error localization algorithm for linear, categorical and
-mixed edits as mip problems. We derived a new formulation for the Felligi Holt error
+mixed-type edits as mip problems. We derived a new formulation for the Felligi Holt error
 localization problem that is a generalization of linear, categorical as well as
-mixed type edit rules.
+mixed-type edit rules.
 
 The resulting mip problem can be solved with a mixed integer problem solver. However
-if the data and coefficients are not of the order of size, numerical stability
-issues may arise, due to numerical precision issue. We show when and how this
-happens and give guidance in handling such issues. 
+if the data and coefficients are not of in the same order of size, 
+numerical stability issues arise, due to numerical precision. We show when 
+and how this happens and give directions in handling such issues. 
 
 Benchmarks on typical synthetic but realistic problems show that performance of 
 the mip algorithm is vastly superior to the branch and bound in \code{editrules}.
