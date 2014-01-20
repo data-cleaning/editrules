@@ -76,7 +76,7 @@ bench <- function(nvars = 10, nerrors=10, method="bb", maxduration=200){
 if (file.exists(FILE)) file.remove(FILE)
 
 bench(50,10, method="mip")
-#bench(50,10, method="bb")
+bench(50,10, method="bb")
 
 # dat <- read.table(FILE, header=TRUE)
 # library(ggplot2)
