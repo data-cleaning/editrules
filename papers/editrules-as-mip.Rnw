@@ -99,7 +99,9 @@ that allows for error localization based on a mixed integer programming
 formulation (mip). In this paper we describe the mip formulation of the error
 localization problem for the case of numerical, categorical, or mixed numerical
 and categorical datasets. We introduce a mip formulation that is a generalization
-of both linear as well as categorical edits. 
+of both linear as well as categorical restrictions. We derive the numerical
+boundaries in which a mip solver generates a stable solution and give directions
+on changing them to your own needs.
 The new module is benchmarked against a previously
 available module, which is based on a branch-and-bound approach. The benchmark
 shows that the mip-based approach is significantly faster and has a smaller memory
@@ -668,7 +670,7 @@ $\ell_j=1$ the whole restriction can hold regardless of whether the inequality
 holds.  Finally, similar to the purely categorical case we need to add
 restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
-\eqref{eq:linconsequent} and Eq.\ \eqref{eq:mixedit} constitute $\mathbf{R}^H$.
+ \eqref{eq:mixedit} and Eq.\ \eqref{eq:linconsequent} constitute $\mathbf{R}^H$.
 
 In general there may be $k$ multiple mixed-type edits yielding an equal number
 of indicator variables for inequalities in the consequent. So the vector to
@@ -1275,14 +1277,14 @@ we conducted benchmarks for the three types of restrictions using edits with
 synthetic data. Each ot the benchmarks is constructed to reflect 
 properties of a typical error localization problem in official statistics practice.
  
-\subsection{Linear edits}
+\subsection{Linear restrictions}
 The synthetic edits used in this benchmark from a balance system.
 This type of edits
 are found frequently in business statistics and energy statistics, where the main
-variables a composites/sums of other variables.
+variables a composites of other variables.
 \begin{example}
-The turnover of a car sale company is the sum of the turnover of each car brand 
-sold by this company.
+The turnover of a car sale company is the sum of the turnovers of the regions where
+this company is active.
 \end{example}
 
 The numerical
@@ -1339,7 +1341,7 @@ performance of \code{bb} in practice often is better than in this test: when
 using confidence \code{weight}s the variables with errors are likely
 to be visited first and this increases performance for \code{bb} considerably.
 
-\subsection{Categorical edits}
+\subsection{Categorical restrictions}
 Pure categorical edits form a web of interconnected edits. 
 \begin{example}
 If you are married, then you are an adult.
@@ -1389,19 +1391,21 @@ to be visited first and this increases performance for \code{bb} considerably.
 
 \subsection{Mixed-type restrictions}
 For mixed-type restrictions a set of edits of the following form was generated:
-\code{if ($x_i \geq 0$) $x_{i+1} \geq 0$}, and the restriction 
-$x_1 = \geq 0$ are added. Although all variables $x_i$ are numeric, the use
-of conditional edits make these edits mixed edits. 
-This type of edits are very common in business and social statistics. 
+\code{if ($x_i \geq 0$) $x_{i+1} \geq 0$}, with the extra restriction 
+$x_1 \geq 0$. Although all variables $x_i$ are numeric, the use
+of conditional edits makes these restrictions mixed edits. Since conditions
+are modeled internally with a boolean variable, the resulting error localization
+problem is technically equivalent with restrictions on a mixed-type record.
+This type of restriction is very common in business and social statistics. 
 \begin{example}
-If in a business record the variable salary is bigger than zero, then its number
-of employees must be higher than zero. 
+If in a business record the variable salary is bigger than zero, then the number
+of employees must be higher than zero (and vice versa).
 \end{example}
 
-The mixed benchmark creates a chain of 
-such restrictions. 
+The mixed-type restriction benchmark therefore creates a chain of 
+conditional restrictions. 
 \begin{eqnarray*}
-x_1 & \geq & 0\\
+&& x_1 \geq 0\\
 \texttt{if (}x_{1} \geq 0 \texttt{)} && x_{2} \geq 0 \\
 &\vdots\\
 \texttt{if (}x_{N-1} \geq 0 \texttt{)} && x_{N} \geq 0 \\
@@ -1444,9 +1448,9 @@ than 35 variables, the solution time for \code{bb} rapidly increases.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 This paper describes the error localization algorithm for linear, categorical and
-mixed-type edits as mip problems. We derived a new formulation for the Felligi Holt error
-localization problem that is a generalization of linear, categorical as well as
-mixed-type edit rules.
+mixed-type records as mixed integer problems. We derived a new formulation for 
+the Felligi Holt error localization problem that is a generalization of linear,
+categorical as well as mixed-type edit rules.
 
 The resulting mip problem can be solved with a mixed integer problem solver. However
 if the data and coefficients are not of in the same order of size, 
