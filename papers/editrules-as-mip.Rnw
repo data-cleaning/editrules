@@ -118,6 +118,7 @@ as well.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
+\label{sect:introduction}
 Analyses of data are often hindered by occurrences of incomplete or
 inconsistent raw data records.  The process of locating and correcting such
 errors is referred to as {\em data editing}, and it has been estimated that
@@ -172,16 +173,16 @@ Over the past five to ten years, the \R{} statistical environment received a
 surge in popularity and as a consequence it has been extended with many
 packages that allow for statistical analyses of data. However, the number of
 packages specifically aimed at data editing seems to be somewhat limited,
-except possibly in the area of imputation.  The {\sf R} package {\sf editrules}
+except possibly in the area of imputation.  The \R{} package {\sf editrules}
 \citep{jonge:2011a} was developed to help to bridge the gap between raw data
-retrieval and data analysis with {\sf R}.  The main purpose of the package is
+retrieval and data analysis with \R{}.  The main purpose of the package is
 to provide an easy and consistent interface to define data consistency rules
 (often referred to as \emph{edit rules}) in \R{} and to confront them with
 data. Furthermore, the package allows for basic rule manipulation (deriving new
 rules, finding inconsistencies, \emph{etc.}) and for error localization
 functionality.  As such, the package does not offer functionality
 to correct data.  Rather, it is aimed at identifying the set of solutions to an
-error correction problem: the second step mentioned in the data editing
+error localisation problem: the second step mentioned in the data editing
 strategy above. Previous developments of the package have been described
 in \cite{jonge:2011,loo:2011b} and \cite{loo:2011a}.
 
@@ -1266,31 +1267,35 @@ example.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Benchmarks}
 
-The \emph{branch and bound} and \emph{mip} method for error localization 
-have a different performance both in computing time as well in memory usage.
-The performance of error 
-localization methods depends highly on the number of variables, the number of errors,
-the number of restrictions and the order of the variables.
+As stated in section \ref{sect:introduction}, the \emph{branch and bound} and
+\emph{mip}-based implementation differ in consumption of memory and
+computational time.  `The performance of error localization methods depends on
+the number of variables, the number of erroneous fields, the number of violated
+restrictions, and the total number of restrictions. Furthermore, the order in
+which variables are treated by the algorithms affect the number of recursive or
+iterative steps necessary to find a solution. So in practice, the order of
+variables in a record may also influce performance in individual records.
 
-To compare the performance of {\em branch and bound} and the {\em mip} method, 
-we conducted benchmarks for the three types of restrictions using edits with 
-synthetic data. Each ot the benchmarks is constructed to reflect 
-properties of a typical error localization problem in official statistics practice.
+To compare the performance of the \emph{branch and bound} and \emph{mip}
+methods, benchmarks have been conducted for the three types of restrictions
+mentioned above.  Synthetic data was generated to study the increase in
+computational time as a function of the number of erroneous fields and the
+number of variables in a record.
+
  
 \subsection{Linear restrictions}
-The synthetic edits used in this benchmark from a balance system.
-This type of edits
-are found frequently in business statistics and energy statistics, where the main
-variables a composites of other variables.
-\begin{example}
-The turnover of a car sale company is the sum of the turnovers of the regions where
-this company is active.
-\end{example}
+The edits used in this benchmark form a balance system. Balance systems occur
+for example in energy or business statistics where main variables (total energy
+consumption, total turnover) are the sum of several other variables. Moreover,
+these main variables are also connected by linear restrictions (total energy
+production equals total energy consumption). In balance systems variables are
+therefore connected via a tree-like structure where the value corresponding to
+a node equals the sum of its child node values.
 
-The numerical
-variables form a binary tree where the value of a node is the sum of its child node
-values. The value of the top node is restricted to be non-negative and always at least as
-large as any other value.
+In our benchmark we generate a balance system on $2n+1$ variables. Here, the
+restrictions connect the variables through a binary tree where the value of a
+node is the sum of its child two node values. The value of the top node is
+restricted to be non-negative and always at least as large as any other value.
 \begin{eqnarray*}
 x_1 & =    & x_2 + x_3 \\
 &\vdots & \\
@@ -1298,7 +1303,10 @@ x_n &=     & x_{2n} + x_{2n+1} \\
 x_1 & \geq & 0 \\
 x_1 & \geq & x_i
 \end{eqnarray*}
-A solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldots,0)$.
+The structure of this restriction set is chosen so that it is easily extended
+(for every $n>0$, the restriction set is fixed).
+
+One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldots,0)$.
 An error is introduced in the data by setting a $x_i$ to $-1$. 
 
 The benchmark was run for balance systems of size $1$ up to $101$. For each system
