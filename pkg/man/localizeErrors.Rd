@@ -34,7 +34,10 @@
   to find the best solution for a single record.}
 
   \item{...}{Further options to be passed to
-  \code{\link{errorLocalizer}}}
+  \code{\link{errorLocalizer}} or
+  \code{\link{errorLocalizer_mip}}. Specifically, when
+  \code{method='mip'}, the parameter \code{lpcontrol} is a
+  list of options passed to \code{lpSolveAPI}.}
 }
 \value{
   an object of class \code{\link{errorLocation}}

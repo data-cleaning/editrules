@@ -330,7 +330,7 @@ problem, we need to properly define $\mathbf{z}$, the restriction set
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
 $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
-\subsection{Linear edit rules}
+\subsection{Linear restrictions}
 \label{sec:linedits:mip}
 For a numerical record $\mathbf{x}$ taking values in $\mathbb{R}^n$, a set of linear
 restrictions can be written as
@@ -408,7 +408,7 @@ with $p$ and $c$.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Categorical edit rules}
+\subsection{Categorical restrictions}
 \label{sec:catdataerror}
 Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
 \begin{equation}
@@ -574,7 +574,7 @@ of $m$ and $a$ (Eq.\ \ref{eq:deltacat}).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Mixed-type edit rules}
+\subsection{Mixed-type restrictions}
 \label{sec:mixdataerror}
 Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
 as a concatenation of numerical and categorical variables 
@@ -1266,21 +1266,32 @@ example.
 % benchmarks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Benchmarks}
+The \emph{branch and bound} and \emph{MIP}-based algorithms for error
+localisation have differ in consumption of memory and computational time. The
+performance of error localization methods depends on the number of variables,
+the number of erroneous fields, the number of violated restrictions, and the
+total number of restrictions. 
 
-As stated in section \ref{sect:introduction}, the \emph{branch and bound} and
-\emph{mip}-based implementation differ in consumption of memory and
-computational time.  `The performance of error localization methods depends on
-the number of variables, the number of erroneous fields, the number of violated
-restrictions, and the total number of restrictions. Furthermore, the order in
-which variables are treated by the algorithms affect the number of recursive or
-iterative steps necessary to find a solution. So in practice, the order of
-variables in a record may also influce performance in individual records.
+Below we describe benchmarks using edit sets which can be systematically
+extended to encompass more variables. The edit sets were designed so that
+synthetic records can be created where the size of the solution to the error
+localisation problem (the minimal number of fields to alter so the record can
+be made consistent) can be easily controlled as well. This then gives an
+impression of performance of the MIP and branch-and-bound approaches as a
+function of the number of variables/edits and the number of erroneous fields.
 
-To compare the performance of the \emph{branch and bound} and \emph{mip}
-methods, benchmarks have been conducted for the three types of restrictions
-mentioned above.  Synthetic data was generated to study the increase in
-computational time as a function of the number of erroneous fields and the
-number of variables in a record.
+
+Benchmarking the two approaches is further complicated by the fact that
+performance of especially the branch-and-bound algorithm is strongly affected
+by the order in which variables are treated by the algorithm. Indeed,
+preliminary tests showed that if the erroneous variables are treated first
+(which may be achieved by setting appropriate reliability weights), performance
+of the branch-and-bound method is largely on par with that of the MIP approach.
+If variables are ordered such that erroneous variables are treated halfway, or
+at the end of the variable set, the branch-and-bound method performs much
+slower than the MIP method. Below, we report on benchmarks where errors were
+injected into variables which were positioned around the center of the record.
+
 
  
 \subsection{Linear restrictions}
@@ -1289,36 +1300,35 @@ for example in energy or business statistics where main variables (total energy
 consumption, total turnover) are the sum of several other variables. Moreover,
 these main variables are also connected by linear restrictions (total energy
 production equals total energy consumption). In balance systems variables are
-therefore connected via a tree-like structure where the value corresponding to
+therefore connected through a tree-like structure where the value corresponding to
 a node equals the sum of its child node values.
 
 In our benchmark we generate a balance system on $2n+1$ variables. Here, the
 restrictions connect the variables through a binary tree where the value of a
-node is the sum of its child two node values. The value of the top node is
+node is the sum of its two child node values. The value of the top node is
 restricted to be non-negative and always at least as large as any other value.
 \begin{eqnarray*}
 x_1 & =    & x_2 + x_3 \\
 &\vdots & \\
 x_n &=     & x_{2n} + x_{2n+1} \\
 x_1 & \geq & 0 \\
-x_1 & \geq & x_i
+x_1 & \geq & x_i\textrm{, }\quad i=2,3,\ldots2n+1 
 \end{eqnarray*}
-The structure of this restriction set is chosen so that it is easily extended
-(for every $n>0$, the restriction set is fixed).
+This edit set is fully connected and completely fixed by choosing an $n>0$.
+Observe that the $x_1>0$ and $x_n>x_i$ for all $2\leq i\leq 2n+1$ implies that
+all $x_i\geq0$.
 
-One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) = (0,\ldots,0)$.
-An error is introduced in the data by setting a $x_i$ to $-1$. 
+One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) =
+(0,\ldots,0)$.  An error can be introduced in the data by setting some $x_i$ to
+$-1$.  Because of the implied nonnegativity contstraint, the number of
+variables in the optimal error localisation solution is exactly equal to the
+number of $x_i$ set to $-1$. The benchmark was performed for balance systems
+with $1$ to $101$ variables ($n=0$ to $50$). For each system records with $1$
+to $10$ errors were generated.  Errors were introduced in variables placed
+around the middle of the records.
 
-The benchmark was run for balance systems of size $1$ up to $101$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is highly dependent on the 
-order of the (faulty) variables, records with errors at the beginning, middle or end
-were added to the test set.
 
-The time for localizing the errors 
-using \code{localizeErrors} with \code{method} set to \code{"bb"} and \code{"mip"}
-was measured.
-
-<<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Linear edits, each line is a different number of errors">>=
+<<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Linear edits, each corresponds to a different number of errors">>=
 library(ggplot2)
 theme_cbs <- theme_bw() + 
              theme( panel.grid.major.x = element_blank()
@@ -1337,32 +1347,46 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        scale_y_continuous(labels=function(x){paste0(x,"s")}) + coord_cartesian(ylim=c(0,150)) + 
        annotate("text", x=ann$nvar+1,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
-Figure \ref{fig:numbench} shows the performance of error localization for increasing
-number of variables and increasing number of errors with errors injected in 
-the middle. \code{mip} performance is vastly
-superior for problem size of $100$ variables and $10$ errors. With \code{"bb"} no 
-(optimal) solution is found within 10 minutes for problems with 
-more then 50 variables en 4 errors. In contrast \code{"mip"} 
-solves the problem with $100$ variables an $10$ errors within seconds.
-\code{bb} for up-to $2$ errors and 50 variables is reasonable. Note that the 
-performance of \code{bb} in practice often is better than in this test: when
-using confidence \code{weight}s the variables with errors are likely
-to be visited first and this increases performance for \code{bb} considerably.
+%
+Figure \ref{fig:numbench} shows the mean time of error localization for
+increasing number of variables and increasing number of errors with errors
+injected in the middle variables, both for the branch-and-bound method and the
+MIP method.  The branch-and-bound method hits the ``exponential wall'' around
+30 variables and 5 errors and 20 variables with 10 errors, showing reasonable
+performance only when the number of errors is 2 or less. The branch-and-bound
+algorithm was broken off when no solution was found in less than 10 minutes
+which occurred at problems with more than 50 variables and 4 errors.  In
+contrast, the MIP-based approach performs well (under a few seconds) for all
+problems tested here. 
+
+We caution the reader to conclude that the MIP approach is better performant in
+all circumstances: when a good set of reliability weights can be determined,
+variables that are most likely to be erroneous can be treated early on by the
+algorithm, yielding a considerable performance boost.  In such a case, the
+optimal solution is found first by the algorithm and branches leading to
+suboptimal solutions can be quickly rejected. However, in the generic case
+where no reliability weights can be derived with great confidence, the
+MIP-approach is obviously better performant.
+
 
 \subsection{Categorical restrictions}
-Pure categorical edits form a web of interconnected edits. 
-\begin{example}
-If you are married, then you are an adult.
-\end{example}
-To reflect this connectivity the categorical benchmark creates a 
-chain of edits of the form:
+For this benchmark we use the a chain of interconnected edits:
 \begin{eqnarray*}
 v_{1}&\texttt{==}&\texttt{TRUE}\\
 \texttt{if (}v_{1}\texttt{==TRUE) }v_{2} &\texttt{==}&\texttt{TRUE}\\
 &\vdots&\\
-\texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}
+\texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}.
 \end{eqnarray*}
-<<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line represents a different number of errors.">>=
+Examples of such edit chains occur in practice, for example: \code{if}
+\emph{married}$==$\code{TRUE} \code{then} \emph{adult}$==$\code{TRUE} and
+\code{if} \emph{adult}$==$\code{TRUE} \code{then} \emph{allowed to drive a
+car}$==$\code{true}.  Here, we demand that $v_1==\code{true}$ which forces the
+only solution to this editset to be
+$(v_1,\ldots,v_n)=(\code{TRUE},\ldots,\code{TRUE})$. An error in the data can
+therefore be introduced by setting on of the $v_i$'s to \code{FALSE}.
+%
+%
+<<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line corresponds to a different number of errors.">>=
 
 data(benchmip_categorical)
 dat <- benchmip_categorical
@@ -1377,54 +1401,54 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        scale_y_continuous(labels=function(x){paste0(x,"s")})+ coord_cartesian(ylim=c(0,150)) + 
        annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
-The only solution to this system is the vector $(v_1,\ldots,v_n)=$\code{(TRUE, ..., TRUE)}.
-An error in the data can be introduced by setting on of the $v_i$'s to \code{FALSE}.
 
-The benchmark was run for balance systems of size $1$ up to $50$. For each system
-records with $1$ to $10$ errors were created. Since \code{bb} is highly dependent on the 
-order of the (faulty) variables, records with errors at the beginning, middle or end
-were added to the test set.
+Benchmarks have been performed for systems with $n=1$ to $n=50$ variables. For
+each system records with $1$ to $10$ errors were created. Again, the errors
+were introduced in variables with intermediate positions in the record.
 
-Figure \ref{fig:catbench} shows the performance of error localization for increasing
-number of variables and increasing number of errors with the errors inject in the middle
-\code{mip} performance is vastly
-superior for problem size of $50$ variables and $10$ errors. With \code{"bb"} no 
-(optimal) solution is found within 10 minutes for problems with 
-more then 30 variables en 4 errors. In contrast \code{"mip"} 
-solves the problem with $50$ variables an $10$ errors within seconds.
-\code{bb} for up-to $2$ errors and 50 variables is reasonable. Note that the 
-performance of \code{bb} in practice often is better than in this test: when
-using confidence \code{weight}s the variables with errors are likely
-to be visited first and this increases performance for \code{bb} considerably.
+The results shown in Figure~\ref{fig:catbench}  shows time spent on error
+localisation for the branch-and-bound and MIP-approaches as a function of
+number of variables and errors.  Again, the MIP-based algorithm outperforms the
+branch-and-bound approach in nearly every case.  Problems with more than 30
+variables and 4 errors yield no solution with the branch-and-bound approach
+within 10 minutes causing calculations to be terminated. The same caution holds
+here as for the benchmarks on linear edits described above: carfully chosen
+reliability weights can improve performance of the branch-and-bound method.
+Without such knowledge however, MIP is the better generic choice when
+performance is important.
+
+
 
 \subsection{Mixed-type restrictions}
-For mixed-type restrictions a set of edits of the following form was generated:
-\code{if ($x_i \geq 0$) $x_{i+1} \geq 0$}, with the extra restriction 
-$x_1 \geq 0$. Although all variables $x_i$ are numeric, the use
-of conditional edits makes these restrictions mixed edits. Since conditions
-are modeled internally with a boolean variable, the resulting error localization
-problem is technically equivalent with restrictions on a mixed-type record.
-This type of restriction is very common in business and social statistics. 
-\begin{example}
-If in a business record the variable salary is bigger than zero, then the number
-of employees must be higher than zero (and vice versa).
-\end{example}
-
-The mixed-type restriction benchmark therefore creates a chain of 
-conditional restrictions. 
+We use a chain of interconnected restrictions defined as follows:
 \begin{eqnarray*}
 && x_1 \geq 0\\
 \texttt{if (}x_{1} \geq 0 \texttt{)} && x_{2} \geq 0 \\
 &\vdots\\
-\texttt{if (}x_{N-1} \geq 0 \texttt{)} && x_{N} \geq 0 \\
+\texttt{if (}x_{N-1} \geq 0 \texttt{)} && x_{N} \geq 0. \\
 \end{eqnarray*}
-A solution to this system is the vector \code{($0$, ..., $0$}.
-We can introduce an error by setting a $x_i$
-to $-1$. 
-This benchmark was run with the number of variables up to 50 and the number of errors
-up to 10.
-%\todo[inline]{Mixed data graphs/data is not yet correct! Benchmark returns solutions
-%with weight less then nerrors.}
+Here, all $x_i$ are numeric but since the conditional restrictions are
+internally modeled using dummy boolean variables, it serves as a model for
+mixed-type variable restrictions. Examples of such chains do occur in practice,
+for example the following restriction is often found in the context of business
+statistics: \code{if} \emph{number of employees} $>0$ \code{then} \emph{amount
+of salary payed} $>0$.
+
+One viable solution for this system of edits is the zero vector
+$(x_i,\ldots,x_n)=(0,\ldots,0)$.  An error can be injected by setting one or
+more $x_i=-1$. The set of edits is engineerd such that if $k$ variables are set
+to $-1$, then $k$ variables must be adapted to re-establish a viable solution.
+However, setting $k$ variables to $-1$ does not mean that $k$ explicitly
+defined edits are violated.  For example, it is easily confirmed that for
+$n=4$ and $\mathbf{x}=(0,0,-1,-1)$ only the third (out of five) edit is
+violated. However both $x_3$ and $x_4$ need to be adapted in order to repair
+the record.
+
+The benchmark was performed with 1 to 50 variables and 1 to 10 errors
+introduced. Again, errors were injected at variables with intermediate
+positions in the records.
+
+%
 <<mixedbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Mixed type edits: each line represents a different number of errors.">>=
 data(benchmip_mixed2)
 dat <- benchmip_mixed2
@@ -1443,13 +1467,30 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        annotate("text", x=ann$nvar+0.5,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 
-Solving the error localization problem for mixed type restrictions using 
-{\emph branch and bound} is very 
-memory (and time) consuming. For each if-statement \code{bb} splits off two copies
-, one in which the condition is true and another one in which it is not true.
-The performance of \code{mip} is again vastly superior to the \code{bb} version.
-All benchmarks for \code{mip} are finished within seconds. In problems with more
-than 35 variables, the solution time for \code{bb} rapidly increases.
+
+The results of the benchmarks are shown in Figure \ref{fig:mixedbench}. Results
+are comparable with the benchmarks for linear and categorical data type edits,
+except for the `bump' computational time for the branch-and-bound method around
+10-25 variables. This is due to the fact that the branch-and-bound algorithm
+traverses a tree that branches over the variables for linear or categorical
+edits whereas for mixed-type edits there is also a bifurcation over each
+condition in the mixed-type edits. The algorithm works out the consequences of
+assuming that each combination of conditions in the edits is true or false,
+while also working out the consequences of assuming whether each $x_i$ value is
+assumed correct or erroneous. Assuming that correctness of $x_i$ is a simple
+step that simplifies the current problem by reducing the number of edits under
+treatment while assuming erroneousness generally increases the number of edits
+and hence the local bifurcation over edits.  The branch-and-bound algorithm is
+set up so that variables are first assumed correct.  Since errors are injected
+at variables positioned around the center of the record, increasing the number
+of variables while keeping the number of errors constant increases the number
+of variables that are correctly assumed correct from the beginning of the run.
+These simplifications compete with the bifurcation that is caused by the number
+of conditional edits under treatment. This ultimately causes a rise, then a
+drop and then a rise again in computational time as a function of total number
+of variables.
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONCLUSION
