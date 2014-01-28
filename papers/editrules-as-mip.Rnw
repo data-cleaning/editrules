@@ -1496,21 +1496,26 @@ of variables.
 % CONCLUSION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
-This paper describes the error localization algorithm for linear, categorical and
-mixed-type records as mixed integer problems. We derived a new formulation for 
-the Felligi Holt error localization problem that is a generalization of linear,
-categorical as well as mixed-type edit rules.
+We described a formulation of the error localisation problem for linear,
+categorical and mixed-type restriction in terms of mixed-integer programming
+problems. It was shown that in this formulation the mixed-type restrictions can
+be understood as a generalisation of both linear and categorical restrictions.
 
-The resulting mip problem can be solved with a mixed integer problem solver. However
-if the data and coefficients are not of in the same order of size, 
-numerical stability issues arise, due to numerical precision. We show when 
-and how this happens and give directions in handling such issues. 
+Although mixed integer programming problems can be solved by readily available
+software packages, there may a trade-off in numerical stability with respect to
+a branch-and-bound approach. This holds especially when typical default
+settings of such software is left unchanged and data records and/or linear
+coefficients of the restriction sets cover several orders of magnitude. In this
+paper we locate the origin of these instabilities and provide some pointers to
+avoiding such problems.
 
-Benchmarks on typical synthetic but realistic problems show that performance of 
-the mip algorithm is vastly superior to the branch and bound in \code{editrules}.
-% For most problems mip will generate a good solution. However for problems where
-% coefficients or values exceed the range of $[10^{-3} - 10^7]$ the user has to rescale
-% the problem: otherwise the mip solver will become unstable.
+The \code{lp\_solve} package has now been introduced as a MIP-solver backend to
+our \code{editrules} R package for error localisation and rule management. Our
+benchmarks indicate that in generic cases where no prior knowledge is available
+about which values in a record may be erroneous (as may be expressed by lower
+reliability weights), the MIP method is much faster than the previously
+implemented branch-and-bound based algorithms.
+
 
 \bibliographystyle{chicago}
 \bibliography{editrules}
