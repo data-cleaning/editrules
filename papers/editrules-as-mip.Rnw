@@ -30,10 +30,7 @@
 \renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
-\newcommand{\E}{E}
-\newcommand{\F}{F}
 \newcommand{\Fc}{\mathbf{\overline{F}}}
-\newcommand{\D}{D}
 \newcommand{\Ls}{\mathbf{L}}
 \newcommand{\FD}{\mathbb{F}}
 \newcommand{\FDc}{\overline{\mathbb{F}}}
@@ -94,19 +91,18 @@ opts_chunk$set(
 \begin{abstract}
 Error localization is the problem of finding out which fields in raw data
 records contain erroneous values. The \code{editrules} extension package for
-the \R{} environment for statistical computing was recently extended with a module
-that allows for error localization based on a mixed integer programming
-formulation (mip). In this paper we describe the mip formulation of the error
+the \R{} environment for statistical computing was recently extended with a
+module that allows for error localization based on a mixed integer programming
+formulation (MIP). In this paper we describe the MIP formulation of the error
 localization problem for the case of numerical, categorical, or mixed numerical
-and categorical datasets. We introduce a mip formulation that is a generalization
-of both linear as well as categorical restrictions. We derive the numerical
-boundaries in which a mip solver generates a stable solution and give directions
-on changing them to your own needs.
-The new module is benchmarked against a previously
-available module, which is based on a branch-and-bound approach. The benchmark
-shows that the mip-based approach is significantly faster and has a smaller memory
-footprint. Trade-offs between the branch-and-bound and mip approaches are discussed
-as well.
+and categorical datasets. We introduce a MIP formulation that is a
+generalization of both linear as well as categorical restrictions. We discuss
+the numerical boundaries within which a MIP solver generates a stable solution
+and give directions on changing them to your own needs.  The new module is
+benchmarked against a previously available module, which is based on a
+branch-and-bound approach. The benchmark shows that the MIP-based approach is
+significantly faster.  Trade-offs between the branch-and-bound and MIP
+approaches are discussed as well.
 \end{abstract}
 
 \newpage
@@ -132,7 +128,7 @@ attention is paid to the development of data editing methods that can be
 automated. 
 
 \subsection{Error localization}
-Automated (and even manual) data editing strategies typically consist of three steps:
+Automated as well as manual data editing strategies typically consist of three steps:
 \begin{enumerate}
 \item Find out which rules (expectations) a record violates;
 \item Find out which fields in a record cause those violations;
@@ -162,56 +158,56 @@ runs through all possible solution candidates computationally unfeasible.
 Second, the problem is complicated by the occurrence of \emph{implied rules}.
 That is, the solution set must not only allow the record to obey the original,
 user-defined set of rules, but also rules that are logically or arithmetically
-implied by the original set. To cope with these complications, several
-algorithmic approaches have been developed, of which two are worth mentioning
-in this context: the first is the branch-and-bound approach, developed by
+implied by the original set. To cope with these complications several
+algorithmic approaches have been developed, two of which are worth mentioning
+in this context. The first is the branch-and-bound approach developed by
 \cite{waal:2003a}.  The second is an approach based on mixed-integer
-programming (mip), described in \cite{waal:2011}.
+programming (MIP) described in \cite{waal:2011}.
 
 \subsection{The editrules package}
-Over the past five to ten years, the \R{} statistical environment received a
-surge in popularity and as a consequence it has been extended with many
-packages that allow for statistical analyses of data. However, the number of
-packages specifically aimed at data editing seems to be somewhat limited,
-except possibly in the area of imputation.  The \R{} package {\sf editrules}
+Over the past decade the \R{} statistical environment has received a surge in
+popularity. As a consequence it has been extended with many user-built packages
+that allow for statistical analyses of data. However, the number of packages
+specifically aimed at data editing seems to be somewhat limited, except
+possibly in the area of imputation.  The \R{} package {\sf editrules}
 \citep{jonge:2011a} was developed to help to bridge the gap between raw data
-retrieval and data analysis with \R{}.  The main purpose of the package is
-to provide an easy and consistent interface to define data consistency rules
-(often referred to as \emph{edit rules}) in \R{} and to confront them with
-data. Furthermore, the package allows for basic rule manipulation (deriving new
-rules, finding inconsistencies, \emph{etc.}) and for error localization
-functionality.  As such, the package does not offer functionality
-to correct data.  Rather, it is aimed at identifying the set of solutions to an
-error localisation problem: the second step mentioned in the data editing
-strategy above. Previous developments of the package have been described
-in \cite{jonge:2011,loo:2011b} and \cite{loo:2011a}.
+retrieval and data analysis with \R{}.  The main purpose of the package is to
+provide a convenient interface to define data consistency rules (often referred
+to as \emph{edit rules}) in \R{} and to confront them with data. Furthermore,
+the package allows for basic rule manipulation (deriving new rules, finding
+inconsistencies, \emph{etc.}) and for error localization functionality.  As
+such, the package does not offer functionality to correct data.  Rather, it is
+aimed at identifying the set of solutions to an error localisation problem: the
+second step mentioned in the data editing strategy above. Previous developments
+of the package have been described in \cite{jonge:2011,loo:2011b} and
+\cite{loo:2011a}.
 
 
-The \code{editrules} package offers a fairly complete toolbox, allowing users
-to work with numerical, categorical or mixed-type data editing rules. Up until
-now, error localization was performed by an implementation of the
-branch-and-bound algorithm described by \cite{waal:2003}. The main disadvantage
-of this approach is that the branch-and-bound algorithm has $\mathcal{O}(2^n)$
-worst-case time and memory complexity, where $n$ is the number of variables
-occurring in a connected set of rules. Moreover, the branch-and-bound solver is
-written in pure \R{}, making it intrinsically slower than a compiled language
+The \code{editrules} package offers a toolbox that allows users to work with
+numerical, categorical or mixed-type data editing rules. Up until now, error
+localization was performed by an implementation of the branch-and-bound
+algorithm described by \cite{waal:2003}. The main disadvantage of this approach
+is that the branch-and-bound algorithm has $\mathcal{O}(2^n)$ worst-case time
+and memory complexity, where $n$ is the number of variables occurring in a
+connected set of rules. Moreover, the branch-and-bound solver is written in
+pure \R{}, making it intrinsically slower than a compiled language
 implementation. The main advantages of this approach are the ease of
 implementation and the opportunity for users to exert fine-grained control over
 the algorithm.
 
-As stated before, the error localization problem can, under mild conditions, be
-translated to a mixed-integer programming problem, which offers the opportunity
-to reuse well-established results from the field of linear and mixed-integer
+As stated before, the error localization problem can be translated to a
+mixed-integer programming problem. This opens up the opportunity to reuse
+well-established results from the field of linear and mixed-integer
 programming. Indeed, many advanced algorithms for solving such problems have
-been developed and in many cases implementations in a compiled language are
+been developed, and in many cases implementations in a compiled language are
 available under a permissive license. In \code{editrules}, the solver of the
-\code{lpsolve} library \citep{berkelaar:2010} is used through \R{}'s
-\code{lpSolveAPI} package \citep{lpSolveAPI:2011}. The \code{lpsolve} library
+\code{lp\_solve} library \citep{berkelaar:2010} is used through \R{}'s
+\code{lpSolveAPI} package \citep{lpSolveAPI:2011}. The \code{lp\_solve} library
 is written in \code{ANSI} \code{C} and has been tried and tested extensively.
 
 The strategy to solve error localization problems through this library from 
 \R{} therefore consists of translating the problem to a suitable mixed-integer
-programming problem, feeding this problem to \code{lpSolveAPI} and translating
+programming problem, feeding this problem to \code{lpSolveAPI}, and translating
 the results back to an error location. It is necessary
 to distinguish between:
 \begin{itemize}
@@ -219,13 +215,17 @@ to distinguish between:
   \item restrictions on purely categorical data, and
   \item restrictions on mixed-type data,
 \end{itemize}
-since for each data type a different translation strategy is necessary.
+since each data type calls for a different strategy of translation to a MIP
+problem.
 
-The main part of this paper will focus on how to translate these types of error
-localization problems to a mixed-integer formulation, paying attention to both
-theoretical and practical details.  We will give examples of how users can
-apply this functionality to their own problem  in \R{} and benchmark the new
-mip-functionality against the existing branch-and-bound solution.
+The second part of this paper will focus on how to translate these types of
+error localization problems to a mixed-integer formulation, paying attention to
+both theoretical and practical details. In Section \ref{sec:linedits:num}
+attention is payed to numerical stability issues, Section \ref{sec:usage} is
+devoted to examples in \R{} code and Section \ref{sec:benchmarks} describes
+benchmark results.  Conclusions and a further outlook are described in Section
+\ref{sec:conclusion}.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,7 +250,7 @@ of real and integer coefficients. One usually refers to $\mathbf{z}$ as the
 \emph{objective function}.  Furthermore, $\mathbf{R}$ is a coefficient matrix
 and $\mathbf{d}$ a vector of upper bounds. Formally, the elements of
 $\mathbf{c}$, $\mathbf{R}$ and $\mathbf{d}$ are limited to the rational numbers
-\citep{schrijver:1998}, which is never a problem in practice since we are
+\citep{schrijver:1998}. This is never a problem in practice since we are
 always working with a computer representation of numbers. 
 
 The name \emph{mixed-integer programming} stems from the fact that $\mathbf{z}$
@@ -260,26 +260,26 @@ respectively to a \emph{linear} or an \emph{integer programming} problem.  An
 important special case occurs when the integer coefficients of $\mathbf{z}$ may
 only take values from \{0,1\}. Such variables are often called binary variables. 
 It occurs as a special case since defining $\mathbf{z}$ to
-be integer and applying the appropriate restrictions yields the same problem.
+be integer and applying the appropriate upper bounds yields the same problem.
 
 Mixed integer programming is well understood and several software packages
-packages are available that implement efficient solvers.  Most mip software
-allows for a broader (but equivalent) formulation of the mip problem, allowing
+packages are available that implement efficient solvers.  Most MIP software
+allows for a broader (but equivalent) formulation of the MIP problem, allowing
 the set of restrictions to include inequalities as well as equalities. As a
-side note, we mention that under equality restrictions, solutions for the
+side note we mention that under equality restrictions, solutions for the
 integer part of $\mathbf{z}$ only exist when the equality restrictions
 pertaining to the integer part of $\mathbf{z}$ are \emph{totally
 unimodular}\footnote{This means that every square submatrix of the coefficient
-matrix pertaining to the integer part of $\mathbf{z}$ has determinant 0 or
-$\pm1$.}. However, as we will see below, restrictions that pertain to the real
-and/or integer part of $\mathbf{z}$ are always inequalities in our case, so this
-is of no particular concern to us.
+matrix $\mathbf{R}$ pertaining to the integer part of $\mathbf{z}$ has
+determinant 0 or $\pm1$.}. However, as we will see below, restrictions that
+pertain to the real and/or integer part of $\mathbf{z}$ are always inequalities
+in our case, so this is of no particular concern to us.
 
 In this paper we reformulate Felligi Holt error localization
-\citep{fellegi:1976} for numerical, categorical and mixed-type restrictions in terms
-of mip problems.  The precise reformulations of the error localization problem
-for the three types of rules are different, but in each case the objective
-function is of the form 
+\citep{fellegi:1976} for numerical, categorical and mixed-type restrictions in
+terms of MIP problems.  The precise reformulations of the error localization
+problem for the three types of rules are different, but in each case the
+objective function is of the form 
 %
 \begin{equation}
 \label{eq:objfun}
@@ -287,18 +287,18 @@ function is of the form
 \end{equation}
 where $\mathbf{w}$ is a vector of positive weights and $\mathbf{\Delta}$ a vector
 of binary variables, one for each variable in the original record, that
-indicates whether its value should be adapted. More precisely,
+indicates whether its value should be replaced. More precisely,
 for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we have
 \begin{equation}
 \Delta_i =\left\{\begin{array}{l}
-1 \textrm{ if the value of }r_i\textrm{ must be adapted}\\
+1 \textrm{ if the value of }r_i\textrm{ must be replaced}\\
 0 \textrm{ otherwise}.
 \end{array}\right.
 \label{eq:defineDelta}
 \end{equation}
 %
 This objective function obviously  meets the requirement that the minimal
-(weighted) number of variables should be adapted. 
+(weighted) number of variables should be replaced. 
 
 For an error localization problem, the restrictions of Problem
 \eqref{eq:mipmin} consist of two parts, which we denote
@@ -315,9 +315,9 @@ For an error localization problem, the restrictions of Problem
 \end{equation}
 Here, the restrictions indicated with $H$ represent a matrix representation of
 the user-defined (hard) restrictions that the original record $\mathbf{r}$ must
-obey. The vector $\mathbf{z}$ is a numerical vector, containing at least a
+obey. Furthermore, $\mathbf{z}$ is a vector containing at least a
 numerical representation of the values in a record and the binary variables
-$\mathbf{\Delta}$. An algorithmic mip-solver will iteratively alter the values of
+$\mathbf{\Delta}$. An algorithmic MIP-solver will iteratively alter the values of
 $\mathbf{z}$ until a solution satisfying \eqref{eq:errlocasmip} is reached. To make
 sure that the objective function reflects the (weighted) number of variables
 altered in the process, the restrictions in $\mathbf{R}^0$ serve to make sure that
@@ -413,39 +413,38 @@ with $p$ and $c$.
 Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain 
 \begin{equation}
 \label{eq:defineD}
-\D = D_1\times D_2\times\cdots\times D_m,
+D = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
-categorical variable. The category names are unimportant in this formulation, 
-so for each $D_i$ we may write
+categorical variable. The category names are unimportant and we write
 \begin{equation}
 \label{eq:defineD}
 D_i = \{1,2,\ldots,|D_i|\}.
 \end{equation}
-The size of the domain, $|\D|$, for categorical records is equal to the
-product of the $|D_i|$.
+The total number of possible value combinations $|D|$ is equal to the product
+of the $|D_i|$.
 
-A categorical edit is a subset $\F$ of $\D$ where records are
+A categorical edit is a subset $F$ of $D$ where records are
 considered invalid, and we may write
 \begin{equation}
 \label{eq:defcatedit}
-\F = F_{1}\times F_{2}\times\cdots \times F_{m},
+F = F_{1}\times F_{2}\times\cdots \times F_{m},
 \end{equation}
 where each $F_{i}$ is a subset of $D_i$. It is understood that if a record
-$\mathbf{v}\in \F$ then the record violates the edit.
+$\mathbf{v}\in F$ then the record violates the edit.
 Hence, categorical edits are
 negatively formulated (they specify the region of $D$ where $\mathbf{v}$ may
 not be) in contrast to linear edits which are positively formulated (they
 specify the region of $\mathbb{R}^n$ where $\mathbf{x}$ must be). To be able to
-translate categorical edits to a mip problem, we need to specify 
-$\overline{\F}$, such that if $\mathbf{v}\in\overline{\F}$ then
-$\mathbf{v}$ satisfies $e$.  Here, $\overline{\F}$ is the complement of
-$\F$ in $D$, which can be written as
+translate categorical edits to a MIP problem, we need to specify 
+$\overline{F}$, such that if $\mathbf{v}\in\overline{F}$ then
+$\mathbf{v}$ satisfies $e$.  Here, $\overline{F}$ is the complement of
+$F$ in $D$, which can be written as
 %
 \begin{eqnarray}
 \label{eq:invedit}
 \lefteqn{
-\overline{\F} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
+\overline{F} = \overline{F}_{1}\times D_{2}\times\cdots \times D_{m}
 }\nonumber\\
 &\cup& D_{1}\times \overline{F}_{2}\times\cdots \times D_{m}\cup\cdots 
 \cup D_{1}\times D_{2}\times\cdots \times \overline{F}_{m},
@@ -455,16 +454,8 @@ $\F$ in $D$, which can be written as
 where for each variable $v_i$, $\overline{F}_{i}$ is the complement of
 $F_{i}$ in $D_i$.  Observe that Eq.\ \eqref{eq:complement} states that if at
 least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$. 
-%%% OPM: dit is extra notatie, die de zaak niet per se duidelijker maakt.
-%Membership to $\overline{\F}$ can also be 
-%written with the following logical statement:
-%\begin{equation}
-%\label{eq:cat_logical}
-%\mathbf{v} \in \overline{\F}= \bigvee^m_{i=1} v_i \in \overline{F}_i
-%\end{equation}
-Below, we
-will use this property and construct a linear relation that counts the number
-of $v_i\in\overline{F}_i$ over all variables.
+Below, we will use this property and construct a linear relation that counts
+the number of $v_i\in\overline{F}_i$ over all variables.
 
 To be able to formulate the Felligi Holt-problem in terms of a mip problem, we
 first associate with each categorical variable $v_i$ a binary vector
@@ -488,7 +479,7 @@ Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \right),
 \label{eq:ecat}
 \end{equation}
-where we interpret 1 and 0 as \code{true} and \code{false} respectively and
+where we interpret 1 and 0 as \code{TRUE} and \code{false} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
 $\mathbf{e}$ represents the valid value combinations of variables contained in
@@ -521,11 +512,11 @@ matrix $\mathbf{R}^0$ contains the restrictions
 \label{eq:deltacat}
 d_{\lambda^0}(v_i) =  1-\Delta_i,
 \end{equation}
-for $i=1,2,\ldots,m$.  Here, $\lambda^0\in D_i$ is the observed
-value for variable $v_i$. It is not difficult to check, using Eq.
-\eqref{eq:definedvec}, that the above equation can only hold for all $\lambda$ when
-either $v_i=\lambda^0$ and $\Delta_i=0$ (the original value is retained) or
-$v_i\not=\lambda^0$ and $\Delta_i=1$ (the value changes).
+for $i=1,2,\ldots,m$.  Here, $\lambda^0\in D_i$ is the observed value for
+variable $v_i$. One may check, using Eq.~\eqref{eq:definedvec}, that the above
+equation can only hold when either $v_i=\lambda^0$ and $\Delta_i=0$ (the
+original value is retained) or $v_i\not=\lambda^0$ and $\Delta_i=1$ (the value
+changes).
 
 \begin{example}
 Consider a two-variable record from the census with the variables \emph{Marital status} 
@@ -565,9 +556,9 @@ problem for error localisation now looks like this.
    1 \\ 1 \\ 1 \\ 1 \\ 1
   \end{array}\right].
 \end{equation*}
-Here, the first row represents the edit rule, the second and third force that each
-variable can take but one value (Eq.\ \ref{eq:hardcat}), the last two rows
-connect the indicator variables $\Delta_m$ and $\Delta_a$ with the value
+Here, the first row represents the edit rule, the second and third force that
+each variable can take but one value (Eq.\ \ref{eq:hardcat}), and the last two
+rows connect the indicator variables $\Delta_m$ and $\Delta_a$ with the value
 of $m$ and $a$ (Eq.\ \ref{eq:deltacat}).
 \hfill\qed
 \end{example}
@@ -576,9 +567,9 @@ of $m$ and $a$ (Eq.\ \ref{eq:deltacat}).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Mixed-type restrictions}
 \label{sec:mixdataerror}
-Records $\mathbf{r}$ containing both numerical and categorical data can be denoted
-as a concatenation of numerical and categorical variables 
-taking values in $D\times\mathbb{R}^n$: 
+Records $\mathbf{r}$ containing both numerical and categorical data can be
+denoted as a concatenation of categorical and numerical variables taking values
+in $D\times\mathbb{R}^n$: 
 \begin{equation}
 \mathbf{r} = (v_1,\ldots,v_m,x_1,\ldots,x_n) = (\mathbf{v},\mathbf{x}),
 \end{equation}
@@ -586,85 +577,108 @@ where $D$ is defined in Eq.\ \eqref{eq:defineD}.
 As stated above, categorical edits are usually defined negatively as a region of
 $D$ that is disallowed while linear edits define regions in $\mathbb{R}^n$ that
 are allowed. We may choose a negative formulation of edits containing
-both variable types by defining $\E$: 
+both variable types by defining a single edit $E$ as follows: 
 \begin{equation}
-\E = \{\mathbf{r}\in \D \times\mathbb{R}^n: 
-\mathbf{v}\in \F \land \mathbf{x} \in P \},
+E = \{\mathbf{r}\in D \times\mathbb{R}^n: 
+\mathbf{v}\in F \land \mathbf{x} \in P \},
 \end{equation}
-where $\F \subseteq \D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by a
+where $F \subseteq D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by a
 (possibly empty) set of $k$ linear inequalities of the form $\mathbf{a}^T\mathbf{x}
-> b$.  It is understood that if $\mathbf{r} \in \E$, then $\mathbf{r}$ violates
+> b$.  It is understood that if $\mathbf{r} \in E$, then $\mathbf{r}$ violates
 the edit. 
 
 To obtain a positive reformulation, we first negate the set membership
 condition and apply basic rules of proposition logic:
 \begin{eqnarray}
-&&\lnot\big(\mathbf{v}\in \F \land \mathbf{x} \in P \big)\nonumber\\
-&\Leftrightarrow& \lnot\big(\mathbf{v}\in \F \land \mathbf{a}^T_{1}\mathbf{x} > b_{1} 
-\land \ldots \land \mathbf{a}^T_{k}\mathbf{x} > b_{k}\big)\nonumber\\
-&\Leftrightarrow& \mathbf{v}\in \overline{\F} \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
-\lor \ldots \lor \mathbf{a}^T_{k}\mathbf{x}\leq b_{k}.
+&&\lnot\big(\mathbf{v}\in F \land \mathbf{x} \in P \big)\nonumber\\
+&\Leftrightarrow& \lnot\big(\mathbf{v}\in F \land \mathbf{a}^T_{1}\mathbf{x} > b_{1} 
+\land \cdots \land \mathbf{a}^T_{k}\mathbf{x} > b_{k}\big)\nonumber\\
+&\Leftrightarrow& \mathbf{v}\in \overline{F} \lor \mathbf{a}^T_{1}\mathbf{x}\leq b_{1} 
+\lor \cdots \lor \mathbf{a}^T_{k}\mathbf{x}\leq b_{k}.
 \label{eq:implication}
 \end{eqnarray}
 This then yields a positive formulation of $E$. That is, a record $\mathbf{r}$
 satisfies $E$ if and only if
 \begin{equation}
   \label{eq:mixedtype}
-  \mathbf{r} \in \overline{\E} \Leftrightarrow 
+  \mathbf{r} \in \overline{E} \Leftrightarrow 
 \bigvee_{i=1}^m v_i \in \overline{F}_i \:\lor\: \bigvee^{k}_{j=1} \mathbf{a}_j^T\mathbf{x} \leq b_j.
 \end{equation}
-This formulation is both a generalization of linear inequality (Eq.\ \ref{eq:linedit})
-and
-categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing $k=0$, we get
-$P=\mathbb{R}^n$ and only the categorical part remains. Similarly, choosing
-$\F=\D$, only the linear inequalities remain. The definition in 
-Eq.\ \eqref{eq:implication} can be rewritten as a ``conditional edit'' by using
-the implication replacement rule from propositional logic  which states that
-$\lnot p\lor q$ may be replaced by $p\Rightarrow q$. If we limit
-Eq.\ \eqref{eq:implication} to a single inequality, we obtain the normal form of
+Observe that this formulation allows one to define multiple disconnected
+regions in $D\times \mathbb{R}^n$ containing valid records using just a single
+edit. For example, one may define a numeric variable to be either smaller than
+0 or larger than 1. 
+
+
+This formulation is both a generalization of linear inequality (Eq.\
+\ref{eq:linedits}) and categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing
+$k=0$, we get $P=\mathbb{R}^n$ and only the categorical part remains.
+Similarly, choosing $F=\varnothing$, only the disjunction of linear
+inequalities remains. A system of linear equations that must simultaneously obeyed
+like in Eq.~\eqref{eq:linedits} is then obtained by defining multiple edits $E$,
+each containing a single linear restriction.
+
+
+The definition in Eq.\ \eqref{eq:implication} can be rewritten as a
+`conditional edit' by using the implication replacement rule from
+propositional logic  which states that $\lnot p\lor q$ may be replaced by
+$p\Rightarrow q$. If we limit Eq.\ \eqref{eq:implication} to a single
+inequality, we obtain the normal form of
 \cite{waal:2003}.
 \begin{equation}
-\mathbf{v} \in \F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b.
+\mathbf{v} \in F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b.
 \end{equation}
-If we choose $\overline{F}=D$ and leave two inequalities we obtain a conditional edit
+If we choose $F=\varnothing$ and leave two inequalities we obtain a conditional edit
 on numerical data:
 \begin{equation}
 \mathbf{a}_1^T\mathbf{x} > b_1 \Rightarrow \mathbf{a}_2^T\mathbf{x} \leq b_2.
 \end{equation}
-These conditional type edits are more natural for users as they can directly be
-translated to an \code{if} statement in a scripting language. Finally, note
-that equalities can be introduced by defining pairs of
+Writing mixed-type edits in such a conditional form seems more user-friendly as
+they can directly be translated to an \code{if} statement in a scripting
+language. Finally, note that equalities can be introduced by defining pairs of
 edits like so:
 \begin{equation}
 \left\{\begin{array}{l}
-\mathbf{v} \in \F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b\\
-\mathbf{v} \in \F\Rightarrow -\mathbf{a}^T\mathbf{x}\leq -b.
+\mathbf{v} \in F\Rightarrow \mathbf{a}^T\mathbf{x}\leq b\\
+\mathbf{v} \in F\Rightarrow -\mathbf{a}^T\mathbf{x}\leq -b.
 \end{array}\right.
 \end{equation}
-
 
 To reformulate Eq. \eqref{eq:implication} as a restriction in a mip problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
 $\mathbf{a}^T_k\mathbf{x} > b$:
+%
 \begin{equation}
 \ell_j = \left\{\begin{array}{l}
 0 \textrm{ when } \mathbf{a}^T_j\mathbf{x}\leq b_j\\
 1 \textrm{ when } \mathbf{a}^T_j\mathbf{x} > b_j %( = \mathbf{x} \in P_j)
 \end{array}\right.
 \end{equation}
-Using the or-form of the set condition (the second line of Eq.\ \eqref{eq:implication})
-and the definition of $\mathbf{e}$, we can write the mixed-data edit as
+%
+Using the or-form of the set condition (Eq.~\eqref{eq:implication}) we can
+write the mixed-data edit as
 \begin{equation}
 \label{eq:mixedit}
 \mathbf{e}^T\mathbf{d}(\mathbf{v}) + \sum^{k}_{j=1} (1-\ell_j) \geq 1.
 \end{equation}
+Recall from Eqs.~\eqref{eq:ecat} and \eqref{eq:definedvec} that $\mathbf{e}$ is
+the binary vector representation of a categorical edit and
+$\mathbf{d}(\mathbf{v})$ the binary vector representation of a categorical
+record. In the above equation, the `$+$' is the arithmetic translation of the
+logical `$\lor$' operator in Eq.~\eqref{eq:implication} that connects the
+categorical with the linear restrictions. When any of the two terms are
+positive, the edit $E$ is satisfied by the record under treatment.
+
+
 Rules of this form constitute the user-defined part of the $\mathbf{R}^H$ part
-of the restriction matrix. To connect $\ell_j$ with the linear restrictions we
-also add
+of the restriction matrix. To explicitly identify $\ell_j$ with the linear
+restrictions we also add
+%
 \begin{equation}
 \label{eq:linconsequent}
 \mathbf{a}^T_j\mathbf{x} \leq b_j + M\ell_j,
 \end{equation}
+%
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
 $\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
 $\ell_j=1$ the whole restriction can hold regardless of whether the inequality
@@ -673,17 +687,18 @@ restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
  \eqref{eq:mixedit} and Eq.\ \eqref{eq:linconsequent} constitute $\mathbf{R}^H$.
 
-In general there may be $k$ multiple mixed-type edits yielding an equal number
-of indicator variables for inequalities in the consequent. So the vector to
-minimize over becomes
+There may be multiple mixed-type edits, yielding one or more $l$ indicator
+variables for each edit. The decision vector for the MIP problem may therefore
+be written as
 \begin{equation}
 \mathbf{z} = (\mathbf{d}(\mathbf{v}),\mathbf{x},\Delta_1,\ldots,\Delta_m,\ldots,\Delta_{m+n},
 \ell_1,\ldots,\ell_K),
 \end{equation}
-where $K$ is the total number of linear edits occurring in all the mixed-type edits.
-Finally, the $\mathbf{R}^0$ matrix, connecting the $\Delta$ variables with the actual
-recorded values consists of the union of the restrictions for categorical variables
-(Eq.\ \eqref{eq:deltacat}) and those for numerical variables (Eq.\ \eqref{eq:deltanum}).
+where $K$ is the total number of linear edits occurring in all the mixed-type
+edits.  Finally, the $\mathbf{R}^0$ matrix connecting the change indicator
+variables ($\Delta$) with the actual recorded values consists of the union of
+the restrictions for categorical variables (Eq.\ \eqref{eq:deltacat}) and those
+for numerical variables (Eq.\ \eqref{eq:deltanum}).
 
 \begin{example}
 We consider a record $\mathbf{r}$ with the variables \emph{type of business}
@@ -743,24 +758,24 @@ change indicators.
 \section{Numerical stability issues}
 \label{sec:linedits:num}
 An error localisation problem, in its original formulation, is an optimization
-problem over $n$ decision variables that indicate which variables in a record
-should be adapted. Depending on the type of rules, its reformulation as a mip
+problem over $n$ binary decision variables that indicate which variables in a record
+should be adapted. Depending on the type of rules, its reformulation as a MIP
 problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
-reformulation as a mip problem introduces a constant $M$, the value of which
+reformulation as a MIP problem introduces a constant $M$, the value of which
 has no mathematical significance but for which a value must be chosen in
-practice. Because of limitations in machine accuracy, typically on the order of
+practice. Because of limitations in machine accuracy, which is typically on the order of
 $10^{-16}$, the range of problems that can be solved is limited as well. In
-particular, mip problems that involve both very large and very small numbers in
+particular, MIP problems that involve both very large and very small numbers in
 the objective function and/or the restriction matrix  may yield erroneous
 solutions or become numerically unfeasible. Indeed, the manual of
 \code{lp\_solve} \citep{berkelaar:2010} points out that `\emph{[...] to improve
 stability, one must try to work with numbers that are somewhat in the same
-range. Ideally in the neighborhood of 1.}' The following subsections point out
+range. Ideally in the neighborhood of 1}'. The following subsections point out
 a number of sources of numerical instabilities and provides ways to handle
 them.
 
 
-\subsection{A short overview of mip-solving}
+\subsection{A short overview of MIP-solving}
 Consider a set of linear restrictions on numerical data of the form
 $\mathbf{Ax}\leq\mathbf{b}$, where we assume $\mathbf{b}\geq\mathbf{0}$ and the
 restrictions consist solely of inequalities ($\leq$). In practice, these
@@ -802,8 +817,14 @@ inequality of Eq.\ \eqref{eq:numxx} is transformed to an equality by adding
 dummy variables: each row $\mathbf{a}^T\mathbf{x}\leq b$ is replaced by
 $\mathbf{a}^T\mathbf{x}+s = b$, with $s\ge0$. Depending on the sign of the
 inequality, the extra variable $s$ is called a \emph{slack} or \emph{surplus}
-variable. It is customary to combine this new set of restrictions and the
-objective function in a single \emph{tableau} notation as follows.
+variable. In Eq.~\eqref{eq:numxx} there are four sets of restrictions (rows).
+We therefore need to add four sets of surplus and slack variables (columns) in
+order to rewrite the whole system in terms of equalities.
+
+Note that after this transformation, the whole problem including the cost
+function is written in terms of equalities. It is customary to organize this
+set of equality objective function in a single \emph{tableau} notation as
+follows.
 \begin{equation}
 \left[\begin{array}{r|rrrrrr|l}
 1   & \mathbf{0}    &-\mathbf{w}^T  & \mathbf{0}   & \mathbf{0}   & \mathbf{0} &\mathbf{0}      & 0\\
@@ -816,12 +837,22 @@ objective function in a single \emph{tableau} notation as follows.
 \label{eq:tab1}
 \end{equation}
 %
-The tableau represents a set of linear equalities and may therefore be
-manipulated as such.  In fact, the simplex method is based on performing  a
-number of cleverly chosen Gauss-Jordan elimination steps on the tableau. For a
-complete discussion the reader is referred to one of the many textbooks
-discussing it (e.g. \citet{bradley:1977}), but in short the Phase I - Phase II
-simplex algorithm consists of the following steps.
+Here, the first row and column represents the cost function. Columns two and
+three correspond to the original set of variables in Eq.~\eqref{eq:numxx} while
+columns four to seven correspond to sets of slack and surplus variables.  The
+final column contains the constant vector. 
+
+A tableau representation shows all the numbers that are relevant in an
+LP-problem at a glance. By examining how LP-solvers typically manipulate these
+numbers we gain some insight into how and where numerical stability issues may
+arise. 
+
+Since the tableau represents a set of linear equalities, it may be manipulated
+as such.  In fact, the simplex method is based on performing  a number of
+cleverly chosen Gauss-Jordan elimination steps on the tableau. For a complete
+discussion the reader is referred to one of the many textbooks discussing it
+(e.g. \citet{bradley:1977}), but in short the Phase I - Phase II simplex
+algorithm consists of the following steps.
 \begin{description}
 \item[Phase I:] Repeatedly apply Gauss-Jordan elimination steps (called
 \emph{pivots}) to derive a decision vector that obeys all restrictions. 
@@ -832,12 +863,13 @@ solution to the solution that minimizes the objective function $f$.
 %
 In Phase I, a decision vector $(\mathbf{x},\mathbf{\Delta},\mathbf{s})$ (with
 $\mathbf{s}$ the vector of slack and surplus variables) is derived that obeys
-all restrictions. This is done by adding again extra variables where necessary
-and then manipulating the system of equalities represented by the tableau so
-that those extra variables are driven to zero. The binary variables
-$\mathbf{\Delta}$ are first treated as if they were real variables. In the
-appendix we show how an initial solution for Eq.~\eqref{eq:tab1} can be found,
-here we just state the result of a Phase-I operation:
+all restrictions. The precise algorithm need not be described here.  It
+involves adding again extra variables where necessary and then manipulating the
+system of equalities represented by the tableau so that those extra variables
+are driven to zero. The binary variables $\mathbf{\Delta}$ are first treated as
+if they are real variables. In the Appendix it is shown in detail how an
+initial solution for Eq.~\eqref{eq:tab1} can be found, here we just state the
+result of a Phase-I operation:
 %
 \begin{equation}
 \left[\begin{array}{r|cccccc|l}
@@ -862,7 +894,7 @@ columns above the unit matrix is called the \emph{canonical form}.
 
 Now, a \emph{pivot} operation consists of the following steps:
 \begin{enumerate}
-\item Select a positive element $R_{ij}$ from the restriction matrix.
+\item Select a positive element $R_{ij}$ from the restriction matrix. This is called the \emph{pivot element}.
 \item Multiply the $i$th row by $R_{ij}^{-1}$.
 \item Subtract the $i$th row, possibly after rescaling, from all other rows of the tableau such that
 their $j$th column equals zero.
@@ -889,20 +921,23 @@ an integer $\Delta_j$.
 \item For the sub-models that have a solution and whose current objective value
 does not exceed that of an earlier found solution, return to step 1.
 \end{enumerate}
-%
-The above \emph{branch-and-bound} approach completes this overview. The above
-discussion of pivot and branch-and-bound operations is purely mathematical: no
-choices have been made regarding issues like how to decide when the
-floating-point representation of a value is regarded zero or how to handle
-badly scaled problems.
+
+The above \emph{branch-and-bound} approach completes this overview. The
+discussion of pivot and branch-and-bound operations has so far been purely
+mathematical: no choices have been made regarding issues such as how to decide
+when the floating-point representation of a value is regarded zero or how to
+handle badly scaled problems. Do note however, that in the course of going from
+Phase-I to Phase-II, the LP-solver is handling numbers that may range from
+$M^-1$ to $M$ which typically differ many orders of magnitude
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Scaling numerical records}
-In the mip formulation of error localisation over numerical records under
+In the MIP formulation of error localisation over numerical records under
 linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
 the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
-mip solver from finding the actual minimal set of values to adapt or even
-render the mip-problem unsolvable. As an example, consider the following error
+MIP solver from finding the actual minimal set of values to adapt or even
+render the MIP-problem unsolvable. As an example, consider the following error
 localisation problem on a two-variable record.
 \begin{displaymath}
 \left\{\begin{array}{l}
@@ -920,14 +955,14 @@ occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
 It is therefore advisable to remove such unit-of-measure errors prior to error
 localisation\footnote{Methods for detecting such errors exist, see for example
 \cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
-that all $|x^0|<M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
+that all $|x^0|\ll M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
 one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
 by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
 $\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
 may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
 localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
 do not vary over many orders of magnitude, such a scaling will suffice to
-numerically stabilize the mip problem. 
+numerically stabilize the MIP problem. 
 
 %
 \subsection{Setting numerical threshold values}
@@ -941,10 +976,11 @@ $\fl(0.7)-\fl(0.5)-\fl(0.2)\not=\fl(0)$. In fact, the difference is about
 $0.56\cdot10^{-16}$ in this case. 
 
 This means that in practice one cannot rely on equality tests to determine
-whether two floating point numbers are equal.  Rather, one assumes that two
-numbers $v$ and $w$ must be equal when $|\fl(v)-\fl(w)|$ is smaller than a
-predefined tolerance. For this reason \code{lp\_solve} comes with a number of
-predefined tolerances that have default values but may be altered by the user.
+whether two floating point numbers are equal.  Rather, one considers two
+numbers $v$ and $w$ equal when $|\fl(v)-\fl(w)|$ is smaller than a predefined
+tolerance. For this reason \code{lp\_solve} comes with a number of predefined
+tolerances. These tolerances have default values but these may be altered by
+the user.
 
 The tolerances implemented by \code{lp\_solve} are summarized in
 Table~\ref{tab:tols}. The value of \code{epspivot} is used to determine whether
@@ -952,13 +988,13 @@ an element of the restriction matrix is positive so it may be used as a
 pivoting element. Its default value is $2\cdot10^{-7}$, but note that after
 Phase I, our restriction matrix contains elements on the order of
 $M^{-1}=10^{-7}$. For this reason, the value of \code{epspivot} is lowered in
-\code{editrules} by default, but users may override these settings again. For
+\code{editrules} by default, but users may override these settings. For
 the same reason, the value of \code{epsint}, which determines when a value for
 one of the $\mathbf{\Delta}_j$ can be considered integer is lowered in
 \code{editrules} as well.  The other tolerance settings of \code{lp\_solve}: 
 \code{epsb} (to test if the right-hand-side of the restrictions
 differ from $0$), \code{epsd} (to test if two values of the objective function
-differ), \code{epsel} (all other values) and \code{mip\_gap} (to test whether a
+differ), \code{epsel} (all other values) and \code{MIP\_gap} (to test whether a
 bound condition has been hit in the branch-and-bound algorithm) have not been altered.
 
 The limited precision inherent to floating point calculations imply that
@@ -966,10 +1002,10 @@ computations get more inaccurate as the operands differ more in magnitude. For
 example, on any system that uses double precision arithmetic the difference
 $\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
 two contradictory demands on our translation of an error localisation problem
-to a mip problem. On one hand, one would like to set $M$ as large as possible
+to a MIP problem. On one hand, one would like to set $M$ as large as possible
 so the ranges $x^0_j\pm M$ contain a valid value of $x_j$. On the other hand,
-large values for $M$ may imply that mip problems such as Eq.~\eqref{eq:numxx}
-become numerically inaccurate. 
+large values for $M$ imply that MIP problems such as Eq.~\eqref{eq:numxx}
+may become numerically unstable. 
 
 In practice, the tableau used by \code{lp\_solve} will not be exactly the same
 as represented in Eq.~\eqref{eq:phaseI}. Over the years, many optimizations and
@@ -1040,6 +1076,7 @@ Parameter       & \code{lp\_solve}  & \code{editrules} & meaning \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Usage}
+\label{sec:usage}
 In the \code{editrules} package, edits can be defined with the \code{editset}
 function. For example, the command
 \begin{rcode}
@@ -1070,11 +1107,11 @@ E <- editfile('myedits.txt')
 \end{rcode}
 Here, \code{myedits.txt} is the name of a textfile containing the edits. The
 resulting object is by default of class \code{editset}. If the extra argument
-\code{type="num"} or \code{type="cat"} is passed, only numerical or
-categorical edits are read from the file. For a further discussion of the
-functions mentioned here we refer the reader to the technical manual. Also see 
-the papers of \cite{loo:2011b, loo:2012a} for a precise description of the 
-edit-definition syntax.
+\code{type="num"} or \code{type="cat"} is passed, only numerical or categorical
+edits are read from the file. For a further discussion of the functions
+mentioned here we refer the reader to the technical manual that is included
+with the software. Also see the papers of \cite{loo:2011b, loo:2012a} for a
+precise description of the edit-definition syntax.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1101,7 +1138,7 @@ el$adapt
 @
 \end{rcode}
 Here, the array has dimension $2\times2$ since the input data set consisted of
-a two records with two variables. Here, the result indicates for the first record
+two records with two variables. Here, the result indicates for the first record
 that by altering the value for $x$, the record can be corrected to obey the edit rule stored in
 \code{E}. For the second record, no alterations are necessary.
 
@@ -1119,21 +1156,21 @@ calculation is subdivided into user, system and elapsed time, where the latter
 corresponds to the actual time that has passed on the clock.  The boolean
 variable (\code{maxDurationExceeded})  indicates whether the time limit for
 finding a solution was exceeded.  There are two status columns that have no
-relevance when the error localisation method is \code{mip}.  First, the
-indicator \code{memfail} can only be set to \code{true} when the
+relevance when the error localisation method is MIP.  First, the
+indicator \code{memfail} can only be set to \code{TRUE} when the
 branch-and-bound algorithm is used. It indicates that perhaps the optimal
 solution could not be found because of memory limitations.  Second, and more
 importantly, the \code{degeneracy} parameter is not set when
 \code{method="mip"}. This parameter indicates how many equivalent solutions
 there are to each error localisation problem.  Contrary to the branch-and-bound
-method for error localisation, the \code{mip}-based approach does not return
+method for error localisation, the MIP-based approach does not return
 this information.
 
 The output of \code{localizeErrors} can be controlled with two parameters.
 Most importantly, positive weights for each variable and optionally
 for each record can be set; variables with lower weights attached to them are
 more likely to be part of a chosen solution which is otherwise degenerate.
-Furthermore, a maximum search time for each solution can be specified, the
+Furthermore, a maximum search time per record can be specified, the
 default setting being 10 minutes. Finally, the optional parameter \code{lpcontrol}
 may contain a list of parameters to be passed to \code{lpSolveAPI}. The default settings
 can be listed as follows
@@ -1147,9 +1184,9 @@ default settings listed in Table \ref{tab:tols}. Changing or adding options can
 be done either by passing the \code{lpcontrol} parameter to
 \code{localizeErrors}, in which case it is only used for the current error
 localisation problem. To adapt a parameter for the remainder of the running
-R-session or until the option is reset one can use the \code{options}
-function. For example, to alter the \code{epsb} parameter through localizeErrors,
-one may use either of the two calls below.
+R-session or until the option is reset one can use \R{}'s \code{options}
+function. For example, to alter the \code{epsb} parameter through
+\code{localizeErrors}, one may use either of the two calls below.
 \begin{rcode}
 <<eval=FALSE,tidy=FALSE>>=
 localizeErrors( E, dat, lpcontrol = c(epsb=1e-12, options("er.lpcontrol")) )
@@ -1162,47 +1199,10 @@ A precise description of possible options is also given in the reference manual 
 \code{lpSolveApi}.
 
 
-
-
-%When \code{method=mip} is specified \code{localizeErrors} internally 
-%uses for each record the function \code{errorLocalizer\_mip}.
-%Unlike {\em branch and bound} this is not a \code{backtracker} object
-%\citep[see][]{jonge:2011}. \code{errorLocalizer\_mip} writes the constraints 
-%and values into a mip problem,
-%feeds it into the \code{lpSolveApi} and formats the resulting output.
-%<<num mip>>=
-%el <- errorLocalizer_mip(E, list(x=10,y=1))
-%ls.str(el)
-%@
-%Both \code{localizeErrors} as \code{errorLocalizer\_mip} can be executed with an 
-%\code{editmatrix}, \code{editarray} or \code{editset} object.
-%
-%Note in the example above that the {\em mip} solver returns two extra properties that are
-%not available in {\em branch and bound}: \code{lp} and \code{x\_feasible}.
-%When it has found a solution (which is usually the case), a set of feasible x 
-%values is available. It can be helpful to have an explicit solution, but note 
-%that it is in general not unique and that the feasible values 
-%lie on the boundary of a convex solution region. 
-%In many cases it is better to use a proper imputation method to generate
-%sensible values for the variables that need to be adjusted.
-%Secondly \code{errorlocalizer\_mip} returns the \code{lp} object. This object is 
-%a \code{lpSolveApi} object and can be further manipulated or written to disk.
-%For more information consult the manual of \code{lpSolveApi}
-%(\ref{lpSolveAPI:2011}).
-%
-%An advantage of the branch and bound algorithm is that it can generate all optimal
-%solutions for a given record.  The mip implementation only generates one of the 
-%best. In \code{editrules} this is implemented by adding a small uniform 
-%perturbation to the weights, so mip chooses one of the best at random. 
-%This is identical 
-%to the default behavior of \code{localizeErrors} for \code{method='bb'}.
-%
-
-
 \subsection{Fine-grained control options}
 For users who wish to exert more fine-grained control on the MIP-solver or who
 wish to interface \code{editrules} with another MIP-solving engine, two lower-level
-functionalities have been developed.
+functionalities have been exposed to the user.
 
 The first is \code{errorLocalizer\_mip}. This function takes
 a set of edit rules in the form of an \code{editset}, \code{editmatrix}
@@ -1215,8 +1215,9 @@ L <- errorLocalizer_mip(E, list(x=10,y=1))
 Here, \code{errorLocalizer\_mip} translates the error localisation problem for
 a single record to a MIP problem, feeds it to \code{lpSolveAPI} and returns all
 the results in a list. The list contains two extra pieces of information not
-available in the output. The first is a parameter called \code{x\_feasible}, containing
-a record that actually obeys all the edit rules.
+available in the output of \code{localizeErrors}. The first is a parameter
+called \code{x\_feasible}, containing a record that actually obeys all the edit
+rules.
 \begin{rcode}
 <<>>=
 L$x_feasible
@@ -1225,7 +1226,7 @@ L$x_feasible
 The second parameter is called \code{lp}. This is an object of class
 \code{lpExtPtr} which points to an object of \code{lpSolveApi}, stored outside
 of \R{}'s memory. It contains precise information on the definition of the MIP
-problem as interpreted by \code{lpSolveAPI} program. It can be manipulated or
+problem as interpreted by \code{lpSolveAPI}. It can be manipulated or
 exported to a text file using \code{write.lp} of the \code{lpSolveAPI} package.
 
 The second functionality entails the functions \code{\code{as.mip}} and
@@ -1258,27 +1259,29 @@ write.lp(lp,file="myLPfile.lp")
 \end{rcode}
 This command produces a text file that is written in a syntax understood by the
 \code{lp\_solve} commandline program.  \code{lp\_solve} also has facilities to
-translate this syntax to other formats, suitable for commercial LP solvers, for
-example.
+translate this syntax to other formats allowing export to other LP-solvers,
+including some commercial ones.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % benchmarks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Benchmarks}
+\label{sec:benchmarks}
 The \emph{branch and bound} and \emph{MIP}-based algorithms for error
-localisation have differ in consumption of memory and computational time. The
+localisation differ in consumption of both memory and computational time. The
 performance of error localization methods depends on the number of variables,
 the number of erroneous fields, the number of violated restrictions, and the
 total number of restrictions. 
 
-Below we describe benchmarks using edit sets which can be systematically
+Below we describe benchmarks based edit sets which can be systematically
 extended to encompass more variables. The edit sets were designed so that
 synthetic records can be created where the size of the solution to the error
 localisation problem (the minimal number of fields to alter so the record can
 be made consistent) can be easily controlled as well. This then gives an
-impression of performance of the MIP and branch-and-bound approaches as a
-function of the number of variables/edits and the number of erroneous fields.
+impression of computational time consumed by the MIP and branch-and-bound
+approaches as a function of the number of variables/edits and the number of
+erroneous fields.
 
 
 Benchmarking the two approaches is further complicated by the fact that
@@ -1324,9 +1327,7 @@ $-1$.  Because of the implied nonnegativity contstraint, the number of
 variables in the optimal error localisation solution is exactly equal to the
 number of $x_i$ set to $-1$. The benchmark was performed for balance systems
 with $1$ to $101$ variables ($n=0$ to $50$). For each system records with $1$
-to $10$ errors were generated.  Errors were introduced in variables placed
-around the middle of the records.
-
+to $10$ errors were generated.  
 
 <<numbench, echo=FALSE,warning=FALSE, fig.height=3.5, fig.cap="Linear edits, each corresponds to a different number of errors">>=
 library(ggplot2)
@@ -1348,16 +1349,15 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
        annotate("text", x=ann$nvar+1,y=ann$elapsed+1, label=ann$nerrors, size=2.5)
 @
 %
-Figure \ref{fig:numbench} shows the mean time of error localization for
-increasing number of variables and increasing number of errors with errors
-injected in the middle variables, both for the branch-and-bound method and the
-MIP method.  The branch-and-bound method hits the ``exponential wall'' around
-30 variables and 5 errors and 20 variables with 10 errors, showing reasonable
-performance only when the number of errors is 2 or less. The branch-and-bound
-algorithm was broken off when no solution was found in less than 10 minutes
-which occurred at problems with more than 50 variables and 4 errors.  In
-contrast, the MIP-based approach performs well (under a few seconds) for all
-problems tested here. 
+Figure \ref{fig:numbench} shows the time of error localization for increasing
+number of variables and increasing number of errors, both for the
+branch-and-bound method and the MIP method.  The branch-and-bound method hits
+the `exponential wall' around 30 variables and 5 errors or 20 variables with
+10 errors, showing reasonable performance only when the number of errors is 2
+or less. The branch-and-bound algorithm was broken off when no solution was
+found in less than 10 minutes which occurred at problems with more than 50
+variables and 4 errors.  In contrast, the MIP-based approach performs well
+(under a few seconds) for all problems tested here. 
 
 We caution the reader to conclude that the MIP approach is better performant in
 all circumstances: when a good set of reliability weights can be determined,
@@ -1370,17 +1370,20 @@ MIP-approach is obviously better performant.
 
 
 \subsection{Categorical restrictions}
+%
 For this benchmark we use the a chain of interconnected edits:
+%
 \begin{eqnarray*}
 v_{1}&\texttt{==}&\texttt{TRUE}\\
 \texttt{if (}v_{1}\texttt{==TRUE) }v_{2} &\texttt{==}&\texttt{TRUE}\\
 &\vdots&\\
 \texttt{if (}v_{n-1}\texttt{==TRUE) }v_{n} &\texttt{==}&\texttt{TRUE}.
 \end{eqnarray*}
+%
 Examples of such edit chains occur in practice, for example: \code{if}
 \emph{married}$==$\code{TRUE} \code{then} \emph{adult}$==$\code{TRUE} and
 \code{if} \emph{adult}$==$\code{TRUE} \code{then} \emph{allowed to drive a
-car}$==$\code{true}.  Here, we demand that $v_1==\code{true}$ which forces the
+car}$==$\code{TRUE}.  Here, we demand that $v_1==\code{TRUE}$ which forces the
 only solution to this editset to be
 $(v_1,\ldots,v_n)=(\code{TRUE},\ldots,\code{TRUE})$. An error in the data can
 therefore be introduced by setting on of the $v_i$'s to \code{FALSE}.
@@ -1406,16 +1409,15 @@ Benchmarks have been performed for systems with $n=1$ to $n=50$ variables. For
 each system records with $1$ to $10$ errors were created. Again, the errors
 were introduced in variables with intermediate positions in the record.
 
-The results shown in Figure~\ref{fig:catbench}  shows time spent on error
-localisation for the branch-and-bound and MIP-approaches as a function of
-number of variables and errors.  Again, the MIP-based algorithm outperforms the
-branch-and-bound approach in nearly every case.  Problems with more than 30
-variables and 4 errors yield no solution with the branch-and-bound approach
-within 10 minutes causing calculations to be terminated. The same caution holds
-here as for the benchmarks on linear edits described above: carfully chosen
-reliability weights can improve performance of the branch-and-bound method.
-Without such knowledge however, MIP is the better generic choice when
-performance is important.
+Figure~\ref{fig:catbench}  shows time spent on error localisation for the
+branch-and-bound and MIP-approaches as a function of number of variables and
+errors.  Again, the MIP-based algorithm outperforms the branch-and-bound
+approach in nearly every case.  Problems with more than 30 variables and 4
+errors yield no solution with the branch-and-bound approach within 10 minutes
+causing calculations to be terminated. The same caution holds here as for the
+benchmarks on linear edits described above: carefully chosen reliability weights
+can improve performance of the branch-and-bound method.  Without such knowledge
+however, MIP is the better generic choice when performance is important.
 
 
 
@@ -1496,6 +1498,7 @@ of variables.
 % CONCLUSION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
+\label{sec:conclusion}
 We described a formulation of the error localisation problem for linear,
 categorical and mixed-type restriction in terms of mixed-integer programming
 problems. It was shown that in this formulation the mixed-type restrictions can
@@ -1514,7 +1517,10 @@ our \code{editrules} R package for error localisation and rule management. Our
 benchmarks indicate that in generic cases where no prior knowledge is available
 about which values in a record may be erroneous (as may be expressed by lower
 reliability weights), the MIP method is much faster than the previously
-implemented branch-and-bound based algorithms.
+implemented branch-and-bound based algorithms. On the other hand, the
+branch-and-bound based approach returns extra information, most notably the
+number of equivalent solutions.  The latter can be used as a indicator for
+quality of automatic data editing.
 
 
 \bibliographystyle{chicago}
