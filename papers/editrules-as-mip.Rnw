@@ -1,6 +1,4 @@
-%\VignetteIndexEntry{Error localization for numerical and categorical edits as a mixed integer problem}
 \documentclass[10pt, fleqn, english, rapport]{cbsdiscussionpaper}
-%\usepackage{inconsolata}
 \usepackage[english]{babel}
 \usepackage{amsmath, amsthm}
 \usepackage{bbm} % mathbb numbers
@@ -30,10 +28,10 @@
 \renewcommand{\code}[1]{\textcolor{fgcolor}{\texttt{#1}}}
 \newcommand{\R}{\code{R}} %% call as \R{} to avoid extra spaces.
 
-\newcommand{\Fc}{\mathbf{\overline{F}}}
-\newcommand{\Ls}{\mathbf{L}}
-\newcommand{\FD}{\mathbb{F}}
-\newcommand{\FDc}{\overline{\mathbb{F}}}
+% \newcommand{\Fc}{\mathbf{\overline{F}}}
+% \newcommand{\Ls}{\mathbf{L}}
+% \newcommand{\FD}{\mathbb{F}}
+% \newcommand{\FDc}{\overline{\mathbb{F}}}
 
 
 \usepackage{float} 
@@ -119,33 +117,34 @@ Analyses of data are often hindered by occurrences of incomplete or
 inconsistent raw data records.  The process of locating and correcting such
 errors is referred to as {\em data editing}, and it has been estimated that
 National Statistics Institutes may spend up to 40\% of their resources on this
-process \citep{waal:2011}. Moreover, data are often required to obey many
+process \citep{waal:2011}. Moreover, data often must obey many
 cross-variable consistency rules which significantly complicate the data
-editing process. Indeed, \citet{winkler:1999} mentions practical cases
-(household surveys) where records have to obey 250, 300 or even 750
+editing process. Indeed, \citet{winkler:1999} mentions household surveys
+where records have to obey 250, 300 or even 750
 user-defined interrelated consistency rules.  For these reasons, considerable
 attention is paid to the development of data editing methods that can be
 automated. 
 
 \subsection{Error localization}
-Automated as well as manual data editing strategies typically consist of three steps:
+Automated as well as manual data editing strategies for a data record 
+typically consist of three steps:
 \begin{enumerate}
-\item Find out which rules (expectations) a record violates;
+\item Find out which consistency rules a record violates;
 \item Find out which fields in a record cause those violations;
-\item Replace the values in those fields with better estimates, such that no rules
-are violated anymore.
+\item Replace the values in those fields with better estimates, such that no rule
+is violated.
 \end{enumerate}
 The second step is usually referred to as the \emph{error localization}
 problem, which is the focus of the current paper.  Although it is widely
 recognized that data editing is a necessary step in the statistical process,
 the amount of changes made to the data should obviously be minimized to avoid
-introducing bias in estimations based on the edited data. This then, led to the
-development of the following minimization problem.
+introducing bias in estimations based on the edited data. This then leads to
+the following minimization problem.
 %
 \begin{quote}
 Given a record of $n$ variables, subject to a number of possibly multivariate
-consistency rules. Find the smallest (weighted) subset of fields, such that their
-original values can be replaced in such a way that no rules are violated anymore. 
+consistency rules. Find the smallest (weighted) subset of fields, such that 
+after replacement of their values, the record violates no rules. 
 \end{quote}
 %
 This minimization problem is named after \cite{fellegi:1976}, who first
@@ -177,7 +176,7 @@ to as \emph{edit rules}) in \R{} and to confront them with data. Furthermore,
 the package allows for basic rule manipulation (deriving new rules, finding
 inconsistencies, \emph{etc.}) and for error localization functionality.  As
 such, the package does not offer functionality to correct data.  Rather, it is
-aimed at identifying the set of solutions to an error localisation problem: the
+aimed at identifying the set of solutions to an error localization problem: the
 second step mentioned in the data editing strategy above. Previous developments
 of the package have been described in \cite{jonge:2011,loo:2011b} and
 \cite{loo:2011a}.
@@ -196,7 +195,7 @@ implementation and the opportunity for users to exert fine-grained control over
 the algorithm.
 
 As stated before, the error localization problem can be translated to a
-mixed-integer programming problem. This opens up the opportunity to reuse
+mixed-integer programming problem. This allows us to reuse
 well-established results from the field of linear and mixed-integer
 programming. Indeed, many advanced algorithms for solving such problems have
 been developed, and in many cases implementations in a compiled language are
@@ -213,9 +212,9 @@ to distinguish between:
 \begin{itemize}
   \item linear restrictions on purely numerical data,
   \item restrictions on purely categorical data, and
-  \item restrictions on mixed-type data,
+  \item conditional restrictions on mixed-type data,
 \end{itemize}
-since each data type calls for a different strategy of translation to a MIP
+since restriction for each data type calls for a different translation to a MIP
 problem.
 
 The second part of this paper will focus on how to translate these types of
@@ -264,7 +263,7 @@ be integer and applying the appropriate upper bounds yields the same problem.
 
 Mixed integer programming is well understood and several software packages
 packages are available that implement efficient solvers.  Most MIP software
-allows for a broader (but equivalent) formulation of the MIP problem, allowing
+support a broader, but equivalent, formulation of the MIP problem, allowing
 the set of restrictions to include inequalities as well as equalities. As a
 side note we mention that under equality restrictions, solutions for the
 integer part of $\mathbf{z}$ only exist when the equality restrictions
@@ -325,8 +324,8 @@ the values in $\mathbf{z}$ that represent values in $\mathbf{r}$ cannot be alter
 without setting the corresponding value in $\mathbf{\Delta}$ to 1.
 
 Summarizing, in order to translate the error localization problem for the cases
-of linear, categorical or conditional mixed restrictions to a mixed integer
-problem, we need to properly define $\mathbf{z}$, the restriction set
+of linear, categorical or conditional mixed-type restrictions to a mixed integer
+problem, for each we need to properly define $\mathbf{z}$, the restriction set
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
 $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
@@ -341,7 +340,7 @@ restrictions can be written as
 where in \code{editrules}, we allow the set of restrictions to contain equalities,
 inequalities ($\leq$) and strict inequalities ($<$). 
 The formulation of these edit rules is very close to the formulation of the original
-mip problem of Eq.\ \eqref{eq:mipmin}.
+MIP problem of Eq.\ \eqref{eq:mipmin}.
 The vector to minimize over is defined as follows:
 \begin{equation}
 \label{eq:zlin}
@@ -378,7 +377,7 @@ Consider a record with business survey data, consisting of the variables
 \emph{Number of staff} $p$ and \emph{Personnel cost}  $c$.  We have the rules
 $p\geq0$, $c\geq 0$ and $c\geq p$. The latter rule expresses the notion that
 for each staff member, more than one monetary unit is spent. Given two observed
-values $p^0$ and $c^0$, disobeying one or more of the rules, the mip problem
+values $p^0$ and $c^0$, disobeying one or more of the rules, the MIP problem
 for error localization has the following form.
 \begin{displaymath}
  \Minimize_{(\mathbf{x},\mathbf{\Delta})\in\mathbb{R}^2\times\{0,1\}^2} \Delta_p + \Delta_c
@@ -416,7 +415,7 @@ Categorical records $\mathbf{v}\in D$ take values in a Cartesian product domain
 D = D_1\times D_2\times\cdots\times D_m,
 \end{equation}
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
-categorical variable. The category names are unimportant and we write
+categorical variable. The category names are unimportant so we write
 \begin{equation}
 \label{eq:defineD}
 D_i = \{1,2,\ldots,|D_i|\}.
@@ -457,7 +456,7 @@ least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$.
 Below, we will use this property and construct a linear relation that counts
 the number of $v_i\in\overline{F}_i$ over all variables.
 
-To be able to formulate the Felligi Holt-problem in terms of a mip problem, we
+To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
 first associate with each categorical variable $v_i$ a binary vector
 $\mathbf{d}$ of which the coefficients are defined as follows (see also Eq.\
 \eqref{eq:defineD}).
@@ -479,7 +478,7 @@ Similarly, each edit can be represented by a binary vector $\mathbf{e}$ given by
 \right),
 \label{eq:ecat}
 \end{equation}
-where we interpret 1 and 0 as \code{TRUE} and \code{false} respectively and
+where we interpret 1 and 0 as \code{TRUE} and \code{FALSE} respectively and
 the logical 'or' ($\lor$) is applied element-wise to the coefficients of
 $\mathbf{d}$.  The above relation can be interpreted as stating that
 $\mathbf{e}$ represents the valid value combinations of variables contained in
@@ -532,8 +531,10 @@ F = F_m\times F_a =  \{\textsf{married}\}\times\{\textsf{child}\}
 \end{equation*}
 which gives $\overline{F}_m=\{\textrm{unmarried}\}$ and $\overline{F}_a=\{\textrm{adult}\}$.
 Using Eq.\ \eqref{eq:ecat} we get $\mathbf{e}=(0,1,0,1)$ and one may verify
-that $\mathbf{e}^T\mathbf{d}(\textsf{married, child})=0$. For $\mathbf{v}^0$, the mip
-problem for error localisation now looks like this.
+that $\mathbf{e}^T\mathbf{d}(\textsf{married, child})=0$ and therefore invalid
+(see \ref{eq:hardcat}).
+For $\mathbf{v}^0$, the MIP
+problem for error localiation now looks like this.
 \begin{equation}
   \Minimize_{(\mathbf{v},\mathbf{\Delta})\in D\times \{0,1\}^2} \Delta_m + \Delta_a
 \end{equation}
@@ -607,7 +608,8 @@ satisfies $E$ if and only if
 Observe that this formulation allows one to define multiple disconnected
 regions in $D\times \mathbb{R}^n$ containing valid records using just a single
 edit. For example, one may define a numeric variable to be either smaller than
-0 or larger than 1. 
+0 or larger than 1. These type of restriction cannot be formulated
+using just linear numerical restrictions.
 
 
 This formulation is both a generalization of linear inequality (Eq.\
@@ -644,7 +646,7 @@ edits like so:
 \end{array}\right.
 \end{equation}
 
-To reformulate Eq. \eqref{eq:implication} as a restriction in a mip problem, we
+To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
 $\mathbf{a}^T_k\mathbf{x} > b$:
 %
@@ -710,7 +712,7 @@ $p\geq0$, $c\geq0$, $c\geq p$ and if the \emph{business type} is a sole
 proprietorship, then the number of staff must equal zero. This may be expressed
 as $(t \in \{\textrm{sp}\})\Rightarrow (p=0)$ or equivalently
 $(t\in\{\textrm{other}\})\lor (p=0)$. For a record
-$\mathbf{r}^{0}=(\textrm{sp},p^0,c^0)$, the error localisation problem takes
+$\mathbf{r}^{0}=(\textrm{sp},p^0,c^0)$, the error localization problem takes
 the following form.
 \begin{equation*}
 \Minimize_{(\mathbf{r},\mathbf{\Delta},\ell)\in D_t\times\mathbb{R}^2\times\{0,1\}^4} \Delta_t + \Delta_p + \Delta_c
@@ -757,7 +759,7 @@ change indicators.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Numerical stability issues}
 \label{sec:linedits:num}
-An error localisation problem, in its original formulation, is an optimization
+An error localization problem, in its original formulation, is an optimization
 problem over $n$ binary decision variables that indicate which variables in a record
 should be adapted. Depending on the type of rules, its reformulation as a MIP
 problem adds at least $n$ variables and $2n$ restrictions. Moreover, the
@@ -783,8 +785,8 @@ restrictions will not limit the type of linear rules covered by this
 discussion, since it can be shown that all linear rules can be brought to this
 form, possibly by introducing dummy variables [see \emph{e.g.}
 \citet{schrijver:1998,bradley:1977}]. Furthermore, suppose we have a record
-$\mathbf{x}^0\geq\mathbf{0}$ which doesn't obey the restrictions. The mip
-formulation of the error localisation problem can be written as follows.
+$\mathbf{x}^0\geq\mathbf{0}$ which doesn't obey the restrictions. The MIP
+formulation of the error localization problem can be written as follows.
 \begin{equation}
 \begin{array}{l}
   \textrm{Minimize }f = \mathbf{w}^T\mathbf{\Delta}\\
@@ -812,7 +814,7 @@ $\mathbf{M}=\mathbb{1}M$. The last row is added to force $\mathbf{\Delta}\leq
 variables $\Delta_j$ as if they are real numbers in the range $[0,1]$.
 
 The \code{lp\_solve} library uses an approach based on the revised Phase I -
-Phase II simplex algorithm to solve mip problems. In this approach every
+Phase II simplex algorithm to solve MIP problems. In this approach every
 inequality of Eq.\ \eqref{eq:numxx} is transformed to an equality by adding
 dummy variables: each row $\mathbf{a}^T\mathbf{x}\leq b$ is replaced by
 $\mathbf{a}^T\mathbf{x}+s = b$, with $s\ge0$. Depending on the sign of the
@@ -933,12 +935,12 @@ $M^-1$ to $M$ which typically differ many orders of magnitude
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Scaling numerical records}
-In the MIP formulation of error localisation over numerical records under
+In the MIP formulation of error localization over numerical records under
 linear restrictions, Eq.~\eqref{eq:deltanum} restricts the search space around
 the original value $x^0$ to $|x-x^0|\leq M$. This restriction may prohibit a
 MIP solver from finding the actual minimal set of values to adapt or even
 render the MIP-problem unsolvable. As an example, consider the following error
-localisation problem on a two-variable record.
+localization problem on a two-variable record.
 \begin{displaymath}
 \left\{\begin{array}{l}
 x_1 \geq x_2\\
@@ -948,19 +950,19 @@ x_1 \geq x_2\\
 Obviously, the record can be made to obey the restriction by multiplying
 $x^0_1$ by $10^3$ or by dividing $x^0_2$ by the same amount. However, in
 \code{editrules} the default value for $M=10^7<10^9-10^6$ which renders the
-corresponding mip problem unsolvable. Practical examples where such errors
+corresponding MIP problem unsolvable. Practical examples where such errors
 occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
 \euro{} instead of k\euro{}.).
 
 It is therefore advisable to remove such unit-of-measure errors prior to error
-localisation\footnote{Methods for detecting such errors exist, see for example
+localization\footnote{Methods for detecting such errors exist, see for example
 \cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
 that all $|x^0|\ll M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
 one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
 by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
 $\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
 may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
-localisation. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
+localization. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
 do not vary over many orders of magnitude, such a scaling will suffice to
 numerically stabilize the MIP problem. 
 
@@ -1001,7 +1003,7 @@ The limited precision inherent to floating point calculations imply that
 computations get more inaccurate as the operands differ more in magnitude. For
 example, on any system that uses double precision arithmetic the difference
 $\fl(1)-\fl(10^{-17})$ is indistinguishable from $\fl(1)$. This then, leads to
-two contradictory demands on our translation of an error localisation problem
+two contradictory demands on our translation of an error localization problem
 to a MIP problem. On one hand, one would like to set $M$ as large as possible
 so the ranges $x^0_j\pm M$ contain a valid value of $x_j$. On the other hand,
 large values for $M$ imply that MIP problems such as Eq.~\eqref{eq:numxx}
@@ -1018,7 +1020,7 @@ $\mathbf{x}^0$. It is not at all unlikely that the two differ in many orders of
 magnitude.
 
 The above discussion suggests the following rules of thumb to avoid numerical
-instabilities in error localisation problems.
+instabilities in error localization problems.
 \begin{enumerate}
 \item Make sure that elements of $\mathbf{x}^0$ are expressed in units such
 that $\mathbf{A}$, $\mathbf{b}$ and $\mathbf{x}$ are on the order of 1 wherever
@@ -1040,7 +1042,7 @@ own settings as needed.
 
 \begin{table}
 \begin{threeparttable}
-\caption{Numerical parameters for mip-based error localisation.}
+\caption{Numerical parameters for MIP based error localization.}
 \label{tab:tols}
 \begin{tabular}{lrrl}
 \hline
@@ -1116,7 +1118,7 @@ precise description of the edit-definition syntax.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Error localization}
-The the main interface to error localisation functionality is the
+The the main interface to error localization functionality is the
 \code{localizeErrors} function.  The function accepts editrules in the form
 an \code{editset}, \code{editmatrix} or \code{editarray} object, and a data set
 in the form of a \code{data.frame}. By default the function localizes errors
@@ -1142,7 +1144,7 @@ two records with two variables. Here, the result indicates for the first record
 that by altering the value for $x$, the record can be corrected to obey the edit rule stored in
 \code{E}. For the second record, no alterations are necessary.
 
-Details on the error localisation procedure are stored in a \code{data.frame}
+Details on the error localization procedure are stored in a \code{data.frame}
 called \code{status}, which can be accessed as follows.
 \begin{rcode}
 <<>>=
@@ -1156,14 +1158,14 @@ calculation is subdivided into user, system and elapsed time, where the latter
 corresponds to the actual time that has passed on the clock.  The boolean
 variable (\code{maxDurationExceeded})  indicates whether the time limit for
 finding a solution was exceeded.  There are two status columns that have no
-relevance when the error localisation method is MIP.  First, the
+relevance when the error localization method is MIP.  First, the
 indicator \code{memfail} can only be set to \code{TRUE} when the
 branch-and-bound algorithm is used. It indicates that perhaps the optimal
 solution could not be found because of memory limitations.  Second, and more
 importantly, the \code{degeneracy} parameter is not set when
 \code{method="mip"}. This parameter indicates how many equivalent solutions
-there are to each error localisation problem.  Contrary to the branch-and-bound
-method for error localisation, the MIP-based approach does not return
+there are to each error localization problem.  Contrary to the branch-and-bound
+method for error localization, the MIP-based approach does not return
 this information.
 
 The output of \code{localizeErrors} can be controlled with two parameters.
@@ -1183,7 +1185,7 @@ These options are precisely the values that differ from \code{lpSolve}'s
 default settings listed in Table \ref{tab:tols}. Changing or adding options can
 be done either by passing the \code{lpcontrol} parameter to
 \code{localizeErrors}, in which case it is only used for the current error
-localisation problem. To adapt a parameter for the remainder of the running
+localization problem. To adapt a parameter for the remainder of the running
 R-session or until the option is reset one can use \R{}'s \code{options}
 function. For example, to alter the \code{epsb} parameter through
 \code{localizeErrors}, one may use either of the two calls below.
@@ -1212,7 +1214,7 @@ or \code{editarray} and a single data record in the form of a named list.
 L <- errorLocalizer_mip(E, list(x=10,y=1))
 @
 \end{rcode}
-Here, \code{errorLocalizer\_mip} translates the error localisation problem for
+Here, \code{errorLocalizer\_mip} translates the error localization problem for
 a single record to a MIP problem, feeds it to \code{lpSolveAPI} and returns all
 the results in a list. The list contains two extra pieces of information not
 available in the output of \code{localizeErrors}. The first is a parameter
@@ -1239,7 +1241,7 @@ print(mip)
 @
 \end{rcode}
 The object returned by \code{as.mip} can be used to inspect how
-\code{editrules} translates an error localisation problem to a MIP problem. The
+\code{editrules} translates an error localization problem to a MIP problem. The
 interested reader may want to compare the above representation with
 Eqs.~\eqref{eq:objfun}, \eqref{eq:zlin} and \eqref{eq:deltanum}.
 
@@ -1269,7 +1271,7 @@ including some commercial ones.
 \section{Benchmarks}
 \label{sec:benchmarks}
 The \emph{branch and bound} and \emph{MIP}-based algorithms for error
-localisation differ in consumption of both memory and computational time. The
+localization differ in consumption of both memory and computational time. The
 performance of error localization methods depends on the number of variables,
 the number of erroneous fields, the number of violated restrictions, and the
 total number of restrictions. 
@@ -1277,7 +1279,7 @@ total number of restrictions.
 Below we describe benchmarks based edit sets which can be systematically
 extended to encompass more variables. The edit sets were designed so that
 synthetic records can be created where the size of the solution to the error
-localisation problem (the minimal number of fields to alter so the record can
+localization problem (the minimal number of fields to alter so the record can
 be made consistent) can be easily controlled as well. This then gives an
 impression of computational time consumed by the MIP and branch-and-bound
 approaches as a function of the number of variables/edits and the number of
@@ -1324,7 +1326,7 @@ all $x_i\geq0$.
 One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) =
 (0,\ldots,0)$.  An error can be introduced in the data by setting some $x_i$ to
 $-1$.  Because of the implied nonnegativity contstraint, the number of
-variables in the optimal error localisation solution is exactly equal to the
+variables in the optimal error localization solution is exactly equal to the
 number of $x_i$ set to $-1$. The benchmark was performed for balance systems
 with $1$ to $101$ variables ($n=0$ to $50$). For each system records with $1$
 to $10$ errors were generated.  
@@ -1409,7 +1411,7 @@ Benchmarks have been performed for systems with $n=1$ to $n=50$ variables. For
 each system records with $1$ to $10$ errors were created. Again, the errors
 were introduced in variables with intermediate positions in the record.
 
-Figure~\ref{fig:catbench}  shows time spent on error localisation for the
+Figure~\ref{fig:catbench}  shows time spent on error localization for the
 branch-and-bound and MIP-approaches as a function of number of variables and
 errors.  Again, the MIP-based algorithm outperforms the branch-and-bound
 approach in nearly every case.  Problems with more than 30 variables and 4
@@ -1499,7 +1501,7 @@ of variables.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 \label{sec:conclusion}
-We described a formulation of the error localisation problem for linear,
+We described a formulation of the error localization problem for linear,
 categorical and mixed-type restriction in terms of mixed-integer programming
 problems. It was shown that in this formulation the mixed-type restrictions can
 be understood as a generalisation of both linear and categorical restrictions.
@@ -1513,7 +1515,7 @@ paper we locate the origin of these instabilities and provide some pointers to
 avoiding such problems.
 
 The \code{lp\_solve} package has now been introduced as a MIP-solver backend to
-our \code{editrules} R package for error localisation and rule management. Our
+our \code{editrules} R package for error localization and rule management. Our
 benchmarks indicate that in generic cases where no prior knowledge is available
 about which values in a record may be erroneous (as may be expressed by lower
 reliability weights), the MIP method is much faster than the previously
@@ -1530,7 +1532,7 @@ quality of automatic data editing.
 \section{Derivation of Equation \ref{eq:phaseI}}
 In the Phase I Phase II simplex method, phase I is aimed to derive a valid
 solution which is then iteratively updated to an optimal solution in Phase II.
-Here, we derive a Phase I solution, specific for error localisation problems.
+Here, we derive a Phase I solution, specific for error localization problems.
 
 
 Recall the tableau of Eq.~\eqref{eq:tab1}; for clarity, the top row indicates to what variables
