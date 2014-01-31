@@ -617,7 +617,7 @@ This formulation is both a generalization of linear inequality (Eq.\
 $k=0$, we get $P=\mathbb{R}^n$ and only the categorical part remains.
 Similarly, choosing $F=\varnothing$, only the disjunction of linear
 inequalities remains. A system of linear equations that must simultaneously obeyed
-like in Eq.~\eqref{eq:linedits} is then obtained by defining multiple edits $E$,
+like in Eq.~\eqref{eq:linedits} can be obtained by defining multiple edits $E$,
 each containing a single linear restriction.
 
 
@@ -635,8 +635,8 @@ on numerical data:
 \begin{equation}
 \mathbf{a}_1^T\mathbf{x} > b_1 \Rightarrow \mathbf{a}_2^T\mathbf{x} \leq b_2.
 \end{equation}
-Writing mixed-type edits in such a conditional form seems more user-friendly as
-they can directly be translated to an \code{if} statement in a scripting
+Writing mixed-type edits in conditional form seems more user-friendly as
+they can directly be translated into an \code{if} statement in a scripting
 language. Finally, note that equalities can be introduced by defining pairs of
 edits like so:
 \begin{equation}
@@ -646,7 +646,7 @@ edits like so:
 \end{array}\right.
 \end{equation}
 
-To reformulate Eq. \eqref{eq:implication} as a restriction in a MIP problem, we
+To reformulate Eq. \eqref{eq:implication} as a MIP problem, we
 first define binary variables $\ell_j$ that indicate whether $\mathbf{x}$ obeys
 $\mathbf{a}^T_k\mathbf{x} > b$:
 %
@@ -668,8 +668,8 @@ the binary vector representation of a categorical edit and
 $\mathbf{d}(\mathbf{v})$ the binary vector representation of a categorical
 record. In the above equation, the `$+$' is the arithmetic translation of the
 logical `$\lor$' operator in Eq.~\eqref{eq:implication} that connects the
-categorical with the linear restrictions. When any of the two terms are
-positive, the edit $E$ is satisfied by the record under treatment.
+categorical with the linear restrictions. When any of the two terms is
+positive, record $r$ satisfies edit $E$.
 
 
 Rules of this form constitute the user-defined part of the $\mathbf{R}^H$ part
@@ -682,14 +682,15 @@ restrictions we also add
 \end{equation}
 %
 to $\mathbf{R}^H$ with $M$ a suitably large positive constant. Indeed, if
-$\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced. When
+$\ell_j=0$, the inequality $\mathbf{a}^T_j\mathbf{x}\leq b_j$ is enforced and
+Eq. \ref{eq:mixedit} always is satisfied. When
 $\ell_j=1$ the whole restriction can hold regardless of whether the inequality
 holds.  Finally, similar to the purely categorical case we need to add
 restrictions on the binary representation of $\mathbf{v}$ as in Eq.\
 \eqref{eq:hardmaxcat}, so Eq.\ \eqref{eq:hardmaxcat}, Eq.\
  \eqref{eq:mixedit} and Eq.\ \eqref{eq:linconsequent} constitute $\mathbf{R}^H$.
 
-There may be multiple mixed-type edits, yielding one or more $l$ indicator
+There may be multiple mixed-type edits, each yielding one or more $l$ indicator
 variables for each edit. The decision vector for the MIP problem may therefore
 be written as
 \begin{equation}
@@ -956,11 +957,13 @@ occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
 
 It is therefore advisable to remove such unit-of-measure errors prior to error
 localization\footnote{Methods for detecting such errors exist, see for example
-\cite{waal:2011}, Chapter 2.} and to express numerical records on a scale such
+\cite{waal:2011}, Chapter 2. Another reason to remove these errors, is that they
+often involve multiple variables and do not obey the Felligi Holt principle} 
+and to express numerical records on a scale such
 that all $|x^0|\ll M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
 one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
 by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
-$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. Indeed, in the above example, one
+$\mathbf{A}(k\mathbf{x})\leq k\mathbf{b}$. In the above example, one
 may replace $\mathbf{x}^0$ by $10^{-6}\mathbf{x}^0$ for the purpose of error
 localization. If $\mathbf{b}=\mathbf{0}$ and the coefficients of $\mathbf{x}$
 do not vary over many orders of magnitude, such a scaling will suffice to
@@ -972,9 +975,9 @@ On most modern computer systems real numbers are represented in
 \citet{ieee:2008} double precision format. In essence, real numbers are 
 represented as rounded-off fractions so arithmetic operations on such numbers
 always result in loss of precision and round-off errors. For example, even though
-mathematically we have $0.7-0.5-0.2=0$ exactly, in the floating point
+mathematically we have $0.7-0.5=0.2$, in the floating point
 representation (denoted $\fl(\cdot)$) we have
-$\fl(0.7)-\fl(0.5)-\fl(0.2)\not=\fl(0)$. In fact, the difference is about
+$\fl(0.7)-\fl(0.5)\not=\fl(0.2)$. In fact, the difference is about
 $0.56\cdot10^{-16}$ in this case. 
 
 This means that in practice one cannot rely on equality tests to determine
@@ -1118,7 +1121,7 @@ precise description of the edit-definition syntax.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Error localization}
-The the main interface to error localization functionality is the
+The main interface to error localization functionality is the
 \code{localizeErrors} function.  The function accepts editrules in the form
 an \code{editset}, \code{editmatrix} or \code{editarray} object, and a data set
 in the form of a \code{data.frame}. By default the function localizes errors
@@ -1296,8 +1299,7 @@ If variables are ordered such that erroneous variables are treated halfway, or
 at the end of the variable set, the branch-and-bound method performs much
 slower than the MIP method. Below, we report on benchmarks where errors were
 injected into variables which were positioned around the center of the record.
-
-
+This mimics the case when there is no knowledge on the reliability of the variables. 
  
 \subsection{Linear restrictions}
 The edits used in this benchmark form a balance system. Balance systems occur
@@ -1320,7 +1322,7 @@ x_1 & \geq & 0 \\
 x_1 & \geq & x_i\textrm{, }\quad i=2,3,\ldots2n+1 
 \end{eqnarray*}
 This edit set is fully connected and completely fixed by choosing an $n>0$.
-Observe that the $x_1>0$ and $x_n>x_i$ for all $2\leq i\leq 2n+1$ implies that
+Observe that the $x_1 \geq 0$ and $x_1 \geq x_i$ for all $2\leq i\leq 2n+1$ implies that
 all $x_i\geq0$.
 
 One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) =
@@ -1373,7 +1375,7 @@ MIP-approach is obviously better performant.
 
 \subsection{Categorical restrictions}
 %
-For this benchmark we use the a chain of interconnected edits:
+For this benchmark we use a chain of interconnected edits:
 %
 \begin{eqnarray*}
 v_{1}&\texttt{==}&\texttt{TRUE}\\
@@ -1439,8 +1441,10 @@ statistics: \code{if} \emph{number of employees} $>0$ \code{then} \emph{amount
 of salary payed} $>0$.
 
 One viable solution for this system of edits is the zero vector
-$(x_i,\ldots,x_n)=(0,\ldots,0)$.  An error can be injected by setting one or
-more $x_i=-1$. The set of edits is engineerd such that if $k$ variables are set
+$(x_i,\ldots,x_n)=(0,\ldots,0)$.  Note that the restriction set implies that 
+$x_i \geq 0$ for $i=1 \ldots N$. An error can be injected by setting one or
+more $x_i=-1$. The set 
+of edits is engineered such that if $k$ variables are set
 to $-1$, then $k$ variables must be adapted to re-establish a viable solution.
 However, setting $k$ variables to $-1$ does not mean that $k$ explicitly
 defined edits are violated.  For example, it is easily confirmed that for
@@ -1507,7 +1511,7 @@ problems. It was shown that in this formulation the mixed-type restrictions can
 be understood as a generalisation of both linear and categorical restrictions.
 
 Although mixed integer programming problems can be solved by readily available
-software packages, there may a trade-off in numerical stability with respect to
+software packages, there may be a trade-off in numerical stability with respect to
 a branch-and-bound approach. This holds especially when typical default
 settings of such software is left unchanged and data records and/or linear
 coefficients of the restriction sets cover several orders of magnitude. In this
