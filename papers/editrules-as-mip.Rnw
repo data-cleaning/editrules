@@ -957,9 +957,9 @@ occur is when a value is recorded in the wrong unit of measure (\emph{e.g.} in
 
 It is therefore advisable to remove such unit-of-measure errors prior to error
 localization\footnote{Methods for detecting such errors exist, see for example
-\cite{waal:2011}, Chapter 2. Another reason to remove these errors, is that they
-often involve multiple variables and do not obey the Felligi Holt principle} 
-and to express numerical records on a scale such
+\cite{waal:2011}, Chapter 2. In fact, the principle of minimal change is not
+applicable here since a better value can be deduced from the cause of the
+error.} and to express numerical records on a scale such
 that all $|x^0|\ll M$.  Note that under linear restrictions (Eq.~\ref{eq:linedits})
 one may always apply a scaling factor $k>0$ to a numerical record $\mathbf{x}$
 by replacing $\mathbf{A}\mathbf{x}\leq \mathbf{b}$ with
