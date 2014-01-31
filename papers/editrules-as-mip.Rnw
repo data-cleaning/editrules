@@ -608,7 +608,7 @@ satisfies $E$ if and only if
 Observe that this formulation allows one to define multiple disconnected
 regions in $D\times \mathbb{R}^n$ containing valid records using just a single
 edit. For example, one may define a numeric variable to be either smaller than
-0 or larger than 1. These type of restriction cannot be formulated
+0 or larger than 1. This type of restriction cannot be formulated
 using just linear numerical restrictions.
 
 
@@ -999,7 +999,7 @@ one of the $\mathbf{\Delta}_j$ can be considered integer is lowered in
 \code{editrules} as well.  The other tolerance settings of \code{lp\_solve}: 
 \code{epsb} (to test if the right-hand-side of the restrictions
 differ from $0$), \code{epsd} (to test if two values of the objective function
-differ), \code{epsel} (all other values) and \code{MIP\_gap} (to test whether a
+differ), \code{epsel} (all other values) and \code{mip\_gap} (to test whether a
 bound condition has been hit in the branch-and-bound algorithm) have not been altered.
 
 The limited precision inherent to floating point calculations imply that
