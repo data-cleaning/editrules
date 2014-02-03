@@ -417,7 +417,7 @@ D = D_1\times D_2\times\cdots\times D_m,
 where each $D_i$ is a finite set of categories for the $i^\textrm{th}$
 categorical variable. The category names are unimportant so we write
 \begin{equation}
-\label{eq:defineD}
+\label{eq:defineD1}
 D_i = \{1,2,\ldots,|D_i|\}.
 \end{equation}
 The total number of possible value combinations $|D|$ is equal to the product
