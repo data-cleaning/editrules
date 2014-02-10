@@ -78,7 +78,7 @@ opts_chunk$set(
 
 \title{Error localization as a mixed integer problem with the editrules package}
 \author{Edwin de Jonge\\  Mark van der Loo}
-\Number{2014}{01}
+\Number{2014}{XX}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  START
@@ -261,20 +261,20 @@ only take values from \{0,1\}. Such variables are often called binary variables.
 It occurs as a special case since defining $\mathbf{z}$ to
 be integer and applying the appropriate upper bounds yields the same problem.
 
-Mixed integer programming is well understood and several software packages
+Mixed integer programming is well understood and several software 
 packages are available that implement efficient solvers.  Most MIP software
-support a broader, but equivalent, formulation of the MIP problem, allowing
-the set of restrictions to include inequalities as well as equalities. As a
-side note we mention that under equality restrictions, solutions for the
-integer part of $\mathbf{z}$ only exist when the equality restrictions
-pertaining to the integer part of $\mathbf{z}$ are \emph{totally
+support a broader, but equivalent, formulation of the MIP problem, allowing the
+set of restrictions to include inequalities as well as equalities. As a side
+note we mention that under equality restrictions, solutions for the integer
+part of $\mathbf{z}$ are only guaranteed to exist when the equality
+restrictions pertaining to the integer part of $\mathbf{z}$ are \emph{totally
 unimodular}\footnote{This means that every square submatrix of the coefficient
 matrix $\mathbf{R}$ pertaining to the integer part of $\mathbf{z}$ has
-determinant 0 or $\pm1$.}. However, as we will see below, restrictions that
-pertain to the real and/or integer part of $\mathbf{z}$ are always inequalities
-in our case, so this is of no particular concern to us.
+determinant 0 or $\pm1$.}. However, as we will see below, restrictions on
+$\mathbf{z}$ are always inequalities in our case, so this is of no particular
+concern to us.
 
-In this paper we reformulate Felligi Holt error localization
+In this paper we reformulate Fellegi Holt error localization
 \citep{fellegi:1976} for numerical, categorical and mixed-type restrictions in
 terms of MIP problems.  The precise reformulations of the error localization
 problem for the three types of rules are different, but in each case the
@@ -287,7 +287,7 @@ objective function is of the form
 where $\mathbf{w}$ is a vector of positive weights and $\mathbf{\Delta}$ a vector
 of binary variables, one for each variable in the original record, that
 indicates whether its value should be replaced. More precisely,
-for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we have
+for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we define
 \begin{equation}
 \Delta_i =\left\{\begin{array}{l}
 1 \textrm{ if the value of }r_i\textrm{ must be replaced}\\
@@ -297,7 +297,11 @@ for a record $\mathbf{r}=(r_1,r_2,\ldots,r_n)$ of $n$ variables, we have
 \end{equation}
 %
 This objective function obviously  meets the requirement that the minimal
-(weighted) number of variables should be replaced. 
+(weighted) number of variables should be replaced.  In general, a record may
+contain numeric, categorical or both types of data and restrictions may pertain
+to either one or both data types.  To distinguish between the data types below
+we shall write $\mathbf{r}=(\mathbf{v},\mathbf{x})$ where $\mathbf{v}$
+represents the categorical and $\mathbf{x}$ the numerical part of $\mathbf{r}$.
 
 For an error localization problem, the restrictions of Problem
 \eqref{eq:mipmin} consist of two parts, which we denote
@@ -309,25 +313,27 @@ For an error localization problem, the restrictions of Problem
 \left[\begin{array}{c}
   \mathbf{d}^H\\
   \mathbf{d}^0
-\end{array}\right]
+\end{array}\right].
 \label{eq:errlocasmip}
 \end{equation}
 Here, the restrictions indicated with $H$ represent a matrix representation of
 the user-defined (hard) restrictions that the original record $\mathbf{r}$ must
-obey. Furthermore, $\mathbf{z}$ is a vector containing at least a
-numerical representation of the values in a record and the binary variables
-$\mathbf{\Delta}$. An algorithmic MIP-solver will iteratively alter the values of
-$\mathbf{z}$ until a solution satisfying \eqref{eq:errlocasmip} is reached. To make
-sure that the objective function reflects the (weighted) number of variables
-altered in the process, the restrictions in $\mathbf{R}^0$ serve to make sure that
-the values in $\mathbf{z}$ that represent values in $\mathbf{r}$ cannot be altered
-without setting the corresponding value in $\mathbf{\Delta}$ to 1.
+obey. 
+The vector
+$\mathbf{z}$ contains at least a numerical representation of the values in a
+record $\mathbf{r}$ and the binary variables $\mathbf{\Delta}$. An algorithmic
+MIP-solver will iteratively alter the values of $\mathbf{z}$ until a solution
+satisfying \eqref{eq:errlocasmip} is reached. To make sure that the objective
+function reflects the (weighted) number of variables altered in the process,
+the restrictions in $\mathbf{R}^0$ serve to make sure that the values in
+$\mathbf{z}$ that represent values in $\mathbf{r}$ cannot be altered without
+setting the corresponding value in $\mathbf{\Delta}$ to 1. 
 
-Summarizing, in order to translate the error localization problem for the cases
-of linear, categorical or conditional mixed-type restrictions to a mixed integer
-problem, for each we need to properly define $\mathbf{z}$, the restriction set
-$\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and the restriction set
-$\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
+Summarizing, in order to translate the error localization problem for the
+special cases of linear, categorical or conditional mixed-type restrictions to
+a general mixed integer problem, for each case we need to properly define
+$\mathbf{z}$, the restriction set $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ and
+the restriction set $\mathbf{R}^0\mathbf{z}\leq \mathbf{d}^0$.
 
 \subsection{Linear restrictions}
 \label{sec:linedits:mip}
@@ -348,7 +354,7 @@ The vector to minimize over is defined as follows:
 \end{equation}
 with the $\Delta_i$ as in Eq.\ \eqref{eq:defineDelta}. The set of restrictions
 $\mathbf{R}^H\mathbf{z}\leq \mathbf{d}^H$ is equal to the set of restrictions
-of Eqn.\ \eqref{eq:linedits}, except in the case of strict inequalities. The
+of Eq.~\eqref{eq:linedits}, except in the case of strict inequalities. The
 reason is that while \code{editrules} allows the user to define strict
 inequalities ($<$), the \code{lpsolve} library used by \code{editrules} only allows
 for inclusive inequalities ($\leq$). For this reason, strict inequalities of the
@@ -456,7 +462,7 @@ least one $v_i\in\overline{F}_{i}$, then $\mathbf{v}$ satisfies $e$.
 Below, we will use this property and construct a linear relation that counts
 the number of $v_i\in\overline{F}_i$ over all variables.
 
-To be able to formulate the Felligi Holt-problem in terms of a MIP problem, we
+To be able to formulate the Fellegi Holt-problem in terms of a MIP problem, we
 first associate with each categorical variable $v_i$ a binary vector
 $\mathbf{d}$ of which the coefficients are defined as follows (see also Eq.\
 \eqref{eq:defineD}).
@@ -586,7 +592,11 @@ E = \{\mathbf{r}\in D \times\mathbb{R}^n:
 where $F \subseteq D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by a
 (possibly empty) set of $k$ linear inequalities of the form $\mathbf{a}^T\mathbf{x}
 > b$.  It is understood that if $\mathbf{r} \in E$, then $\mathbf{r}$ violates
-the edit. 
+the edit. An example of a restriction pertaining to a categorical and a numerical
+variable is `A company that is a sole proprietorship (sp), has zero personnel cost',
+The corresponding edit can be denoted as $\{\textrm{sp}\}\times\{c>0,-c>0\}$.
+
+
 
 To obtain a positive reformulation, we first negate the set membership
 condition and apply basic rules of proposition logic:
@@ -616,9 +626,9 @@ This formulation is both a generalization of linear inequality (Eq.\
 \ref{eq:linedits}) and categorical edits (Eq.\ \ref{eq:defcatedit}). Choosing
 $k=0$, we get $P=\mathbb{R}^n$ and only the categorical part remains.
 Similarly, choosing $F=\varnothing$, only the disjunction of linear
-inequalities remains. A system of linear equations that must simultaneously obeyed
-like in Eq.~\eqref{eq:linedits} can be obtained by defining multiple edits $E$,
-each containing a single linear restriction.
+inequalities remains. A system of linear equations that must simultaneously be
+obeyed like in Eq.~\eqref{eq:linedits} can be obtained by defining multiple
+edits $E$, each containing a single linear restriction.
 
 
 The definition in Eq.\ \eqref{eq:implication} can be rewritten as a
@@ -931,7 +941,7 @@ mathematical: no choices have been made regarding issues such as how to decide
 when the floating-point representation of a value is regarded zero or how to
 handle badly scaled problems. Do note however, that in the course of going from
 Phase-I to Phase-II, the LP-solver is handling numbers that may range from
-$M^-1$ to $M$ which typically differ many orders of magnitude
+$M^{-1}$ to $M$ which typically differ many orders of magnitude
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1122,7 +1132,7 @@ precise description of the edit-definition syntax.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Error localization}
 The main interface to error localization functionality is the
-\code{localizeErrors} function.  The function accepts editrules in the form
+\code{localizeErrors} function.  The function accepts editrules in the form of 
 an \code{editset}, \code{editmatrix} or \code{editarray} object, and a data set
 in the form of a \code{data.frame}. By default the function localizes errors
 using the branch-and-bound algorithm. One may switch to the MIP-based approach
@@ -1322,8 +1332,11 @@ x_1 & \geq & 0 \\
 x_1 & \geq & x_i\textrm{, }\quad i=2,3,\ldots2n+1 
 \end{eqnarray*}
 This edit set is fully connected and completely fixed by choosing an $n>0$.
-Observe that the $x_1 \geq 0$ and $x_1 \geq x_i$ for all $2\leq i\leq 2n+1$ implies that
-all $x_i\geq0$.
+The $x_1 \geq 0$ and $x_1 \geq x_i$ for all $2\leq i\leq 2n+1$ implies that all
+$x_i\geq0$. To see this, observe that since $x_1\geq0$ and and $x_1\geq x_3$,
+we cannot have $x_2<0$ without having $x_3>x_1$, which violates the
+restrictions saying that $x_1$ must be larger than or equal to $x_i$, $i>1$.
+This reasoning applies recursively to all $x_i$ because of the chained sum-rules.
 
 One solution to this system is the zero vector $(x_1, \ldots, x_{2n+1}) =
 (0,\ldots,0)$.  An error can be introduced in the data by setting some $x_i$ to
@@ -1363,18 +1376,17 @@ found in less than 10 minutes which occurred at problems with more than 50
 variables and 4 errors.  In contrast, the MIP-based approach performs well
 (under a few seconds) for all problems tested here. 
 
-We caution the reader to conclude that the MIP approach is better performant in
+We caution the reader to conclude that the MIP approach is better performing in
 all circumstances: when a good set of reliability weights can be determined,
 variables that are most likely to be erroneous can be treated early on by the
 algorithm, yielding a considerable performance boost.  In such a case, the
 optimal solution is found first by the algorithm and branches leading to
 suboptimal solutions can be quickly rejected. However, in the generic case
 where no reliability weights can be derived with great confidence, the
-MIP-approach is obviously better performant.
+MIP-approach is obviously better performing.
 
 
 \subsection{Categorical restrictions}
-%
 For this benchmark we use a chain of interconnected edits:
 %
 \begin{eqnarray*}
@@ -1391,7 +1403,7 @@ car}$==$\code{TRUE}.  Here, we demand that $v_1==\code{TRUE}$ which forces the
 only solution to this editset to be
 $(v_1,\ldots,v_n)=(\code{TRUE},\ldots,\code{TRUE})$. An error in the data can
 therefore be introduced by setting on of the $v_i$'s to \code{FALSE}.
-%
+
 %
 <<catbench, echo=FALSE, fig.height=3.5, warning=FALSE, fig.cap="Categorical edits: each line corresponds to a different number of errors.">>=
 
@@ -1479,24 +1491,23 @@ qplot( data=sdat, x=nvar, y=elapsed, color=method, group=paste0(method, nerrors)
 The results of the benchmarks are shown in Figure \ref{fig:mixedbench}. Results
 are comparable with the benchmarks for linear and categorical data type edits,
 except for the `bump' computational time for the branch-and-bound method around
-10-25 variables. This is due to the fact that the branch-and-bound algorithm
-traverses a tree that branches over the variables for linear or categorical
-edits whereas for mixed-type edits there is also a bifurcation over each
-condition in the mixed-type edits. The algorithm works out the consequences of
-assuming that each combination of conditions in the edits is true or false,
-while also working out the consequences of assuming whether each $x_i$ value is
-assumed correct or erroneous. Assuming that correctness of $x_i$ is a simple
-step that simplifies the current problem by reducing the number of edits under
-treatment while assuming erroneousness generally increases the number of edits
-and hence the local bifurcation over edits.  The branch-and-bound algorithm is
-set up so that variables are first assumed correct.  Since errors are injected
-at variables positioned around the center of the record, increasing the number
-of variables while keeping the number of errors constant increases the number
-of variables that are correctly assumed correct from the beginning of the run.
-These simplifications compete with the bifurcation that is caused by the number
-of conditional edits under treatment. This ultimately causes a rise, then a
-drop and then a rise again in computational time as a function of total number
-of variables.
+10-25 variables. Interpretation is difficult without precisely following the
+state of variables during the run of the algorithm, but a plausible explanation
+is fundamental difference between the branch-and-bound approaches for
+single-type and mixed-type edits. For linear and categorical edits the
+branch-and-bound algorithm traverses a tree that branches over the variables
+whereas for mixed-type edits there is also a bifurcation over each condition in
+the mixed-type edits. This bifurcation generates a lot of extra edits compared
+to the situation with single-type edits. On the other hand, branching over
+variables includes simplifying steps that reduce the number of edits. Tests
+have shown that interaction between these two effects strongly depends on the
+order of the variables and which variables contain the actual error. The
+observed `bump' should therefore be regarded an artefact of this specific
+benchmark. However, this does not alter the conclusion that the MIP approach
+performs consistently better.
+
+
+
 
 
 
