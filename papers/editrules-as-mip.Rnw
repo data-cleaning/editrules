@@ -593,8 +593,8 @@ where $F \subseteq D$ and $P$ is a convex subset of $\mathbb{R}^n$ defined by a
 (possibly empty) set of $k$ linear inequalities of the form $\mathbf{a}^T\mathbf{x}
 > b$.  It is understood that if $\mathbf{r} \in E$, then $\mathbf{r}$ violates
 the edit. An example of a restriction pertaining to a categorical and a numerical
-variable is `A company that is a sole proprietorship (sp), has zero personnel cost',
-The corresponding edit can be denoted as $\{\textrm{sp}\}\times\{c>0,-c>0\}$.
+variable is `A company employs staff if and only if it has positive personell cost',
+The corresponding edit can be denoted as $\{\textrm{no staff}\}\times\{c>0\}$.
 
 
 
