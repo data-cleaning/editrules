@@ -79,6 +79,8 @@ opts_chunk$set(
 \title{Error localization as a mixed integer problem with the editrules package}
 \author{Edwin de Jonge\\  Mark van der Loo}
 \Number{2014}{07}
+\DocumentNumber{60083201407 X-10}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  START
