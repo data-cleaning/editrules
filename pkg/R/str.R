@@ -11,7 +11,6 @@ str.editmatrix <- function(object,...){
 
 
 #' @method str editarray
-#' @rdname editarray
 #' @export
 str.editarray <- function(object,...){
     vars <- paste(getVars(object),collapse=", ")

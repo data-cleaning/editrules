@@ -1,4 +1,6 @@
 
+#' Combine editmatrices 
+#'
 #' @method c editmatrix
 #' @rdname editmatrix
 #' @export
@@ -32,11 +34,10 @@ c.editmatrix <- function(...){
   as.editmatrix(A=A, ops=ops, b=b)
 }
 
-#' 
-#' @rdname editarray
+#' Combine editarrays
 #' @method c editarray
 #' @export
-#' 
+#' @rdname editarray
 c.editarray <- function(...){
   ems <- list(...)
   ems <- ems[!sapply(ems,is.null)]

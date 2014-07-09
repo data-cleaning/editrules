@@ -3,7 +3,7 @@
 #' @include editset.R
 {}
 
-#' 
+#' convert to matrix
 #'
 #' @export
 #' @method as.matrix editmatrix
@@ -15,10 +15,9 @@ as.matrix.editmatrix <- function(x, ...){
 }
 
 
-#'
+#' convert to matrix
 #' @export
 #' @method as.matrix editarray
-#'
 #' @rdname editarray
 #' @return \code{as.matrix}: The boolean matrix part of the \code{editarray}.
 as.matrix.editarray <- function(x,...){

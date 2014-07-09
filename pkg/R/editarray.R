@@ -2,7 +2,6 @@
 #'
 #' An \code{editarray} is a boolean array (with some extra attributes) 
 #' where each row contains an edit restriction on purely categorical data. 
-#' 
 #' The function \code{editarray} converts (a vector of) edit(s)
 #' in \code{character} or \code{expression} from to an \code{editarray} object. 
 #' Edits may also be read from a \code{\link{data.frame}}, in which case it must have at least
@@ -128,6 +127,7 @@ ind2char <- function(ivd, ind=ivd, invert=logical(length(ivd)),useEqual=TRUE){
 }
 
 
+#' Convert to character
 #'
 #' @method as.character editarray
 #' @param x editarray object
@@ -187,12 +187,11 @@ as.character.editarray <- function(x, useIf=TRUE, datamodel=TRUE, ...){
 }
 
 
-#'
+#' convert to data.frame
 #' @method as.data.frame editarray
-#'
 #' 
-#' @return \code{as.data.frame}: \code{data.frame} with columns 'name', 'edit' and 'description'.
 #' @rdname editarray
+#' @return \code{as.data.frame}: \code{data.frame} with columns 'name', 'edit' and 'description'.
 #' @export 
 as.data.frame.editarray <- function(x, ...){
     edts <- as.character(x, ...)
@@ -206,12 +205,11 @@ as.data.frame.editarray <- function(x, ...){
     d
 }
 
-#' 
+#' Convert to expression 
 #'
-#' 
+#' @rdname editarray
 #' @export
 #' @method as.expression editarray
-#' @rdname editarray
 as.expression.editarray <- function(x, ...){
   return(
     tryCatch(parse(text=as.character(x, ...)), 

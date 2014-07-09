@@ -100,7 +100,7 @@ as.mip <- function( E, x=NULL, weight=NULL, M=1e7, epsilon=1e-3, prefix="delta."
   )
 }
 
-#' @S3method print mip
+#' @method print mip
 print.mip <- function(x, ...){
   print.editmatrix(x$E, textOnly=T)
   if (!is.null(x$objfn)) {

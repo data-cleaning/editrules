@@ -1,5 +1,5 @@
 
-#'
+#' summary
 #' @method summary editmatrix
 #' @param object an R object
 #' @param useBlocks \code{logical} Summarize each block?
@@ -33,13 +33,12 @@ summary.editmatrix <- function(object, useBlocks=TRUE, ...){
 }
 
 
-#' 
+#' summary
 #'
 #'
 #' @param object an R object
 #' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editarray
-#' 
 #' @rdname editarray
 #' @export
 #' @example ../examples/editarray.R
@@ -64,6 +63,7 @@ summary.editarray <- function(object, useBlocks=TRUE, ...){
         type ='editarray')
 }
 
+#' summary
 #' @param object an R object
 #' @param useBlocks \code{logical} Summarize each block?
 #' @method summary editset
@@ -96,7 +96,7 @@ summary.editset <- function(object, useBlocks=TRUE, ...){
 
 
 
-#'
+#' summary
 #' @method print editsummary
 #' @export
 #' @keywords internal
@@ -111,7 +111,7 @@ print.editsummary <- function(x,...){
 
 }
 
-#' 
+#' summary
 #' @param object an R object
 #' @method summary errorLocation
 #' @rdname errorLocation
@@ -140,7 +140,7 @@ summary.errorLocation <- function(object,...){
     )
 }
 
-#'
+#' summary
 #' @method print locationsummary
 #' @export
 #' @keywords internal

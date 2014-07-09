@@ -50,7 +50,7 @@ getVars.editarray <- function(E,type='cat',...){
    names(attr(E,"ind"))
 }
 
-#'
+#' getr variable names
 #'
 #' @method getVars editset
 #' @param type (editset- or list only) select which variables to return. \code{all} means all (except dummies), \code{num} means 
@@ -77,7 +77,7 @@ getVars.editset <- function(E, type=c('all','num','cat','mix','dummy'), ...){
     c(numvars, catvars)
 }
 
-#'
+#' get variable names
 #' @method getVars NULL
 #' @export
 #' @rdname getVars
@@ -85,7 +85,7 @@ getVars.NULL <- function(E,...){
     NULL
 }
 
-#'
+#' get variable names
 #' @export
 #' @method getVars editlist
 #' @keywords internal
