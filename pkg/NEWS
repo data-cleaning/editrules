@@ -1,4 +1,5 @@
 version 2.8.1
+- bugfix: edge case in substValue methods
 - bugfix: contains.editmatrix crashed on editmatrix containing 0 variables
 - bugfix: user-defined M was ignored in MIP version of error localizer.
 - mixed typed edits now have naming convention used in paper

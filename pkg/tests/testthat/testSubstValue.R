@@ -62,6 +62,14 @@ test_that("value substitution works for boolean data",{
    expect_true(nrow(getArr(substValue(E,'p',TRUE)))==0)
 })
 
-
+test_that("Bug reported by Sander Scholtus is fixed",{
+  # this used to cause a crash after upgrading to R>=3.x.x
+  E1 <- editset(expression(
+    A %in% letters[1:2],
+    B %in% letters[2:3],
+    if ( (A == 'a') ) x > y
+  ))
+  E1 <- substValue(E1, var = "x", val = 1)
+}
 
 

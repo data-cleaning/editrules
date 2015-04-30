@@ -1,7 +1,7 @@
 Package: editrules
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
 License: GPL-3
-Title: R package for parsing, applying, and manipulating data cleaning rules
+Title: R Package for Parsing, Applying, and Manipulating Data Cleaning Rules
 LazyData: no
 Type: Package
 LazyLoad: yes
@@ -17,4 +17,4 @@ Version: 2.8.1
 Depends: R (>= 2.12.0), igraph, lpSolveAPI
 URL: https://github.com/edwindj/editrules
 BugReports: https://github.com/edwindj/editrules/issues
-Date: 2011-09-25
+Date: 2015-04-29

@@ -1,4 +1,4 @@
-# # test for presence of igraph package.
+ # # test for presence of igraph package.
 # checkigraph <- function(){
 #     noigraph <- paste(
 #         "The igraph package is required for this function.", 

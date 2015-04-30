@@ -13,7 +13,6 @@
 #' \code{as.igraph} converts a set of edits to an \code{igraph} object directly.
 #'
 #'
-#'
 #' @param E \code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}
 #' @param nodetype adjacency between rules, vars or both?
 #' @param rules selection of edits

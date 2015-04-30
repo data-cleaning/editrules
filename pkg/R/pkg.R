@@ -68,7 +68,9 @@
 #'   \code{as.data.frame} \tab Store \code{character} representation in \code{data.frame} \cr
 #' }
 #'
+#' @import lpSolveAPI igraph
 #' @name editrules-package 
-#' @importFrom igraph as.igraph
 #' @docType package 
 {}
+
+

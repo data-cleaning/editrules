@@ -21,7 +21,6 @@
 #'  \code{x_feasible} and the lp problem (an \code{lpExtPtr} object)
 #'
 #' @seealso \code{\link{localizeErrors}}, \code{\link{errorLocalizer}}, \code{\link{errorLocation}}
-#' @import lpSolveAPI
 #'
 #' @references
 #'  E. De Jonge and Van der Loo, M. (2012) Error localization as a mixed-integer program in 

@@ -38,6 +38,9 @@ substValue <- function(E, var, value, ...){
 #' @rdname substValue 
 #' @export
 substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=TRUE, ...){
+  stopifnot(length(var)==length(value))
+  if (length(var) == 0) return(E)
+  
     v <- match(var, getVars(E), nomatch=0)
     if (any(v==0)){
         warning("Parameter var (", var[v==0], ") is not a variable of editmatrix E")
@@ -75,12 +78,14 @@ substValue.editmatrix <- function(E, var, value, reduce=FALSE, removeredundant=T
 #'
 #' @export
 substValue.editarray <- function(E, var, value, reduce=FALSE, ...){
-
-    ind <- getInd(E)
+  stopifnot(length(var)==length(value))
+  if (length(var) == 0) return(E)
+  
+  ind <- getInd(E)
     sep=getSep(E)
     A <- getArr(E)
     value <- as.character(value)
-    for ( i in 1:length(var) ){
+    for ( i in seq_along(var) ){
         vr <- var[i]
         vl <- value[i]
         J <- ind[[vr]]
@@ -153,7 +158,9 @@ substValue.editset <- function(E, var, value, simplify=TRUE, ...){
 #TODO make it possible to supply value = list(x=1, A="a") which makes
 # substituting values in an editset a lot easier. Especially when we have 
 # used localizeErrors and want the solution space by substituting non adapted variables.
-
+  stopifnot(length(var)==length(value))
+  if (length(var) == 0) return(E)
+  
     catidx <- var %in% getVars(E, type="cat")
 
     # the nonnumeric case is simple
