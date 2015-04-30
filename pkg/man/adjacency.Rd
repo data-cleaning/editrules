@@ -23,13 +23,13 @@ adjacency(E, nodetype = c("all", "rules", "vars"), rules = rownames(E),
   rules = c(rownames(E$num), rownames(E$mixcat)), vars = getVars(E), ...)
 
 \method{as.igraph}{editmatrix}(x, nodetype = c("all", "rules", "vars"),
-  rules = editnames(E), vars = getVars(E), weighted = TRUE, ...)
+  rules = editnames(x), vars = getVars(x), weighted = TRUE, ...)
 
 \method{as.igraph}{editarray}(x, nodetype = c("all", "rules", "vars"),
-  rules = editnames(E), vars = getVars(E), weighted = TRUE, ...)
+  rules = editnames(x), vars = getVars(x), weighted = TRUE, ...)
 
 \method{as.igraph}{editset}(x, nodetype = c("all", "rules", "vars"),
-  rules = editnames(E), vars = getVars(E), weighted = TRUE, ...)
+  rules = editnames(x), vars = getVars(x), weighted = TRUE, ...)
 }
 \arguments{
 \item{E}{\code{\link{editmatrix}}, \code{\link{editarray}} or \code{\link{editset}}}

@@ -1,4 +1,6 @@
 version 2.8.1
+- some updates on the NAMESPACE to comply to new CRAN policies.
+- bugfix in as.igraph methods for editmatrix, editarray, editset
 - bugfix: edge case in substValue methods
 - bugfix: contains.editmatrix crashed on editmatrix containing 0 variables
 - bugfix: user-defined M was ignored in MIP version of error localizer.

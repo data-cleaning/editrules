@@ -68,9 +68,14 @@
 #'   \code{as.data.frame} \tab Store \code{character} representation in \code{data.frame} \cr
 #' }
 #'
-#' @import lpSolveAPI igraph
+#' @import lpSolveAPI
+#' @importFrom igraph as.igraph
 #' @name editrules-package 
 #' @docType package 
 {}
+
+
+# not on imports: we need to DEPEND on igraph since are exporting methods of an igraph
+# generic (as.igraph).
 
 

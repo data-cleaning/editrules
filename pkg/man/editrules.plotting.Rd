@@ -10,21 +10,21 @@
 \method{plot}{editmatrix}(x, nodetype = "all", rules = editnames(x),
   vars = getVars(x), violated = logical(nedits(x)),
   adapt = logical(length(getVars(x))), nabbreviate = 5,
-  layout = layout.fruchterman.reingold, edgecolor = "steelblue",
+  layout = igraph::layout.fruchterman.reingold, edgecolor = "steelblue",
   rulecolor = "khaki1", varcolor = "lightblue1",
   violatedcolor = "sienna1", adaptcolor = "sienna1", ...)
 
 \method{plot}{editarray}(x, nodetype = "all", rules = editnames(x),
   vars = getVars(x), violated = logical(nedits(x)),
   adapt = logical(length(getVars(x))), nabbreviate = 5,
-  layout = layout.fruchterman.reingold, edgecolor = "steelblue",
+  layout = igraph::layout.fruchterman.reingold, edgecolor = "steelblue",
   rulecolor = "khaki1", varcolor = "lightblue1",
   violatedcolor = "sienna1", adaptcolor = "sienna1", ...)
 
 \method{plot}{editset}(x, nodetype = "all", rules = editnames(x),
   vars = getVars(x), violated = logical(nedits(x)),
   adapt = logical(length(getVars(x))), nabbreviate = 5,
-  layout = layout.fruchterman.reingold, edgecolor = "steelblue",
+  layout = igraph::layout.fruchterman.reingold, edgecolor = "steelblue",
   rulecolor = "khaki1", varcolor = "lightblue1",
   violatedcolor = "sienna1", adaptcolor = "sienna1", ...)
 }

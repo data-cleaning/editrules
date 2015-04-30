@@ -69,7 +69,7 @@ plot.editmatrix <- function(x,
     violated=logical(nedits(x)), 
     adapt=logical(length(getVars(x))),
     nabbreviate=5,
-    layout=layout.fruchterman.reingold,
+    layout=igraph::layout.fruchterman.reingold,
     edgecolor='steelblue',
     rulecolor='khaki1',
     varcolor='lightblue1',
@@ -107,7 +107,7 @@ plot.editarray <- function(
     violated=logical(nedits(x)), 
     adapt=logical(length(getVars(x))),
     nabbreviate=5,
-    layout=layout.fruchterman.reingold,
+    layout=igraph::layout.fruchterman.reingold,
     edgecolor='steelblue',
     rulecolor='khaki1',
     varcolor='lightblue1',
@@ -145,7 +145,7 @@ plot.editset <- function(
     violated=logical(nedits(x)), 
     adapt=logical(length(getVars(x))),
     nabbreviate=5,
-    layout=layout.fruchterman.reingold,
+    layout=igraph::layout.fruchterman.reingold,
     edgecolor='steelblue',
     rulecolor='khaki1',
     varcolor='lightblue1',
@@ -191,30 +191,30 @@ plotEditGraph <- function(
     if ( is.array(adapt) ) adapt <- adapt[1,]
 
     g <- as.igraph(x,nodetype, rules, vars=vars)
-    w <- E(g)$weight
+    w <- igraph::E(g)$weight
     if (sum(w) > 0 ){
         weight <- 1 + w + (max(w) - min(w))/max(w)
     } else {
         weight <- 2
     }
-    vars <- V(g)$vars
+    vars <- igraph::V(g)$vars
     if (is.null(vars)){
-      vars <- rep(FALSE, length(V(g)))
+      vars <- rep(FALSE, length(igraph::V(g)))
     }
     shape <- ifelse(vars, "circle","rectangle" )
     color <- ifelse(vars, varcolor, rulecolor)
 
     if ( nodetype != 'rules' ){
-         adapt <- adapt[match(names(adapt),V(g)$name[vars])]
+         adapt <- adapt[match(names(adapt),igraph::V(g)$name[vars])]
          color[which(vars)[adapt]] <- adaptcolor
     }
     if ( nodetype != 'vars' ){ 
-        violated <- violated[match(names(violated),V(g)$name[!vars])]
+        violated <- violated[match(names(violated),igraph::V(g)$name[!vars])]
         color[which(!vars)[violated]] <- violatedcolor
     }
     plot(g,
         layout=layout,
-        vertex.label=abbreviate(V(g)$name,nabbreviate),
+        vertex.label=abbreviate(igraph::V(g)$name,nabbreviate),
         vertex.label.font=2,
         vertex.color=color,
         vertex.shape=shape,
