@@ -20,8 +20,8 @@ Depends:
     igraph
 Imports:
     lpSolveAPI
-URL: https://github.com/edwindj/editrules
-BugReports: https://github.com/edwindj/editrules/issues
+URL: https://github.com/data-cleaning/editrules
+BugReports: https://github.com/data-cleaning/editrules/issues
 Date: 2015-04-29
 Collate:
     'adjacency.R'
