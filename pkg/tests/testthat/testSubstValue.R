@@ -70,6 +70,6 @@ test_that("Bug reported by Sander Scholtus is fixed",{
     if ( (A == 'a') ) x > y
   ))
   E1 <- substValue(E1, var = "x", val = 1)
-}
+})
 
 

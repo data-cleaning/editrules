@@ -57,10 +57,8 @@ but requires that upper and lower bounds are set on each numerical variable. Sen
 automatically (see the vignette on error localization as MIP), but could cause instabilities in very rare cases.
 }
 \note{
-The Branch and Bound method is potentially slow for large sets of connected edits, especially
-     when conditional edits are involved. Consider using \code{method="mip"} in such cases. The run-time
-     of the B&B algorithm is related to the number of uquivalent solutions, so setting different weights
-     (reducing the number of unique solutions) mey reduce computation time as well.
+As of version 2.8.1 method 'bb' is not available for conditional numeric (e.g: \code{if (x>0) y>0})
+ or conditional edits of mixed type (e.g. \code{if (A=='a') x>0}).
 }
 \examples{
 
