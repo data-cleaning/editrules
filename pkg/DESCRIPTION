@@ -1,7 +1,7 @@
 Package: editrules
 Maintainer: Edwin de Jonge <edwindjonge@gmail.com>
 License: GPL-3
-Title: R Package for Parsing, Applying, and Manipulating Data Cleaning Rules
+Title: Parsing, Applying, and Manipulating Data Cleaning Rules
 LazyData: no
 Type: Package
 LazyLoad: yes
