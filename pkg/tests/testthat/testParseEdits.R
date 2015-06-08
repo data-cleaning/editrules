@@ -66,4 +66,12 @@ test_that("assignments are parsed by editfile",{
   expect_equivalent(getA(e),array(c(-10,1),dim=c(1,2)))
 })
 
+test_that("empty files are parsed correctly",{
+  expect_equal(
+    nedits(editfile(textConnection("#test"),type='num'))    
+    , 0
+  )
+})
+
+
 

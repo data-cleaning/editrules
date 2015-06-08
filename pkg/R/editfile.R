@@ -26,9 +26,11 @@ editfile <- function(file,type=c("all","num","cat","mix"), ...){
     e <- new.env()
     lapply(p[ass],eval,envir=e)
     edits <- p[!ass]
-    # substitute constant assignments in rules.
-    edits <- sapply(edits,function(x) as.expression(do.call(substitute,list(x,e))) )
-    
+    # substitute constant assignments in rules. The if-statement prevents conversion to list()
+    # if the file being read has no actual rules in it.
+    if ( length(edits)>0 ){
+      edits <- sapply(edits,function(x) as.expression(do.call(substitute,list(x,e))) )
+    }
     et <- editTypes(edits)
     numedits <- edits[et == 'num']
     catedits <- edits[et == 'cat']
