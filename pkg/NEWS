@@ -1,4 +1,5 @@
 version 2.8.1
+- bugfix: editfile w/type='num' would crash on empty file input.
 - some updates on the NAMESPACE to comply to new CRAN policies.
 - bugfix in as.igraph methods for editmatrix, editarray, editset
 - bugfix: edge case in substValue methods
