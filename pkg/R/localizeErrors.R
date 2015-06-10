@@ -204,7 +204,7 @@ localize <- function(E, dat, verbose, pretext="Processing", call=sys.call(), wei
         }
         r <- as.list(dat[i,vars,drop=FALSE])
         wt <- weight[i,]
-        le <- errorLocalizer_mip(E, r, weight=wt, ...)
+        le <- errorLocalizer_mip(E, r, weight=wt, maxduration=maxduration, ...)
         if (!le$maxdurationExceeded){
           err[i,vars] <- le$adapt
           wgt[i] <- le$w
