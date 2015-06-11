@@ -18,4 +18,4 @@ Depends: R (>= 2.12.0), igraph
 Imports: lpSolveAPI
 URL: https://github.com/data-cleaning/editrules
 BugReports: https://github.com/data-cleaning/editrules/issues
-Date: 2015-04-29
+Date: 2015-06-11
