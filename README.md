@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/edwindj/editrules.svg)](https://travis-ci.org/edwindj/editrules)
+[![Build Status](https://travis-ci.org/data-cleaning/editrules.svg)](https://travis-ci.org/data-cleaning/editrules)
 
 editrules
 =========
