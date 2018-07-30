@@ -6,15 +6,16 @@ LazyData: no
 Type: Package
 LazyLoad: yes
 Author: Edwin de Jonge, Mark van der Loo
-Description: Facilitates reading and manipulating (multivariate) data
+Description: Please note: active development has moved to packages 'validate'
+    and 'errorlocate'. Facilitates reading and manipulating (multivariate) data
     restrictions (edit rules) on numerical and categorical data. Rules can be
     defined with common R syntax and parsed to an internal (matrix-like format).
     Rules can be manipulated with variable elimination and value substitution
     methods, allowing for feasibility checks and more. Data can be tested against
     the rules and erroneous fields can be found based on Fellegi and Holt's
     generalized principle. Rules dependencies can be visualized with using the
-    'igraph' package.
-Version: 2.9.1
+    'igraph' package. 
+Version: 2.9.2
 Depends:
     R (>= 2.12.0),
     igraph
@@ -22,13 +23,12 @@ Imports:
     lpSolveAPI
 URL: https://github.com/data-cleaning/editrules
 BugReports: https://github.com/data-cleaning/editrules/issues
-Date: 2015-06-11
 Collate:
     'adjacency.R'
     'as.igraph.R'
     'editset.R'
-    'editmatrix.R'
     'editarray.R'
+    'editmatrix.R'
     'as.matrix.R'
     'backtracker.R'
     'blocks.R'
@@ -81,3 +81,4 @@ Collate:
     'violatedEdits.R'
     'writeELAsMip.R'
     'zzz.R'
+RoxygenNote: 6.0.1
