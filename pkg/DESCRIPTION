@@ -45,7 +45,6 @@ Collate:
     'editfile.R'
     'editmatrixAttr.R'
     'editrules-data.R'
-    'editrules_pkg.R'
     'eliminate.R'
     'errorLocalizer.R'
     'errorLocalizer_mip.R'
