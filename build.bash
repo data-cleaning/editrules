@@ -19,7 +19,7 @@ rm -rf output
 
 
 echo "######## Generate documentation..."
-$R -e 'devtools::document("./pkg",clean=TRUE)'
+$R -e 'devtools::document("./pkg")'
 
 echo "######## Building package in output..."
 mkdir output
