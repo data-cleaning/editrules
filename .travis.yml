@@ -1,15 +1,34 @@
-language: r
 
-warnings_are_errors: false
+# travis config
+
+dist: trusty
+language: r
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - libxml2-dev
+
+r:
+ - release
 
 before_install:
-  - cp ./build/DESCRIPTION ./pkg
+  - R -e "install.packages(c('igraph','devtools','roxygen2','testthat','knitr','lpSolveAPI'))"
+  - R -e "devtools::document('./pkg')"
   - cd ./pkg
 
-sudo: required
+r_packages:
+  - covr
+  - rmarkdown
+
+
+after_success:
+  - Rscript -e 'library(covr);coveralls()'
 
 notifications:
   email:
     on_success: change
     on_failure: change
+
 
