@@ -2,6 +2,8 @@
 [![CRAN](http://www.r-pkg.org/badges/version/editrules)](http://cran.r-project.org/package=editrules/)
 [![Downloads](http://cranlogs.r-pkg.org/badges/editrules)](http://www.r-pkg.org/pkg/editrules) 
 
+**`editrules` has been succeeded by R packages: [validate](http://cran.r-project.org/package=validate) and [errorlocate](http://cran.r-project.org/package=errorlocate)**
+
 editrules
 =========
 
