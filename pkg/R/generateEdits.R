@@ -3,7 +3,7 @@
 #' Workhorse function for \code{\link{generateEdits}}
 #'
 #' @param E an editarray
-#' @param vars variable names still to be eliminated from E
+#' @param totreat variable names still to be eliminated from E
 #' @param env an environment where all editmatrices will be stored
 #'
 #' @seealso \code{\link{generateEdits}}, \code{\link{editarray}}

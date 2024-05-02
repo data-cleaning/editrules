@@ -27,8 +27,10 @@ isObviouslyRedundant <- function(E, duplicates=TRUE, ...){
 # @rdname isObviouslyRedundant
 # @keywords internal
 # @seealso \code{\link{isObviouslyRedundant}}, \code{\link{isObviouslyRedundant.editmatrix}}
+#' @export
 isObviouslyRedundant.matrix <- function(
     E, 
+    duplicates = TRUE,
     operators, 
     tol=sqrt(.Machine$double.eps), 
     ... ){

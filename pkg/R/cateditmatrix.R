@@ -138,7 +138,7 @@ toCat <- function(categories, sep=":"){
 
 #' parse categorial edit
 
-#' @param e \code{expression} with a single edit
+#' @param el \code{expression} with a single edit
 #' @return named \code{numeric} with coefficients
 #' @keywords internal
 parseCatEdit <- function(el){

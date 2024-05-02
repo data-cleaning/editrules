@@ -49,6 +49,7 @@ isObviouslyInfeasible.editarray <- function(E,...){
 }
 
  
+#' @export
 isObviouslyInfeasible.NULL <- function(E,...){
     FALSE
 }

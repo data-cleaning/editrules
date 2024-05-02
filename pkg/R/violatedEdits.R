@@ -94,6 +94,7 @@ violatedEdits.editmatrix <- function(E, dat, tol=0, ...){
 # @rdname violatedEdits
 # @method violatedEdits data.frame
 # @export
+#' @export
 violatedEdits.data.frame <- function(E, dat, ...){
     if ( !all(c("name","edit","description") %in% names(E)) ){
         stop("Invalid input data.frame see ?editmatrix for valid input format")

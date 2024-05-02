@@ -80,9 +80,9 @@
 #' @importFrom stats  density dist quantile runif
 #' @importFrom utils flush.console ls.str stack str
 #'
-#' @name editrules-package 
+#' @name editrules_package 
 #' @docType package 
-{}
+"_PACKAGE"
 
 
 # not on imports: we need to DEPEND on igraph since are exporting methods of an igraph

@@ -24,7 +24,7 @@ getSep <- function(E) attr(E,"sep")
 getArr <- function(E) unclass(E)[,,drop=FALSE]
 
 #' retrieve level names from editarray
-#' @param editarray \code{\link{editarray}}
+#' @param E \code{\link{editarray}}
 #' @return character vector
 #' @keywords internal
 getlevels <- function(E) colnames(E)

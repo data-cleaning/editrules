@@ -122,6 +122,7 @@ print.errorLocation <- function(x,...){
 # @keywords internal
 # 
 # @rdname plus
+#' @export
 `%+%.errorLocation` <- function(x,y,...){
     stopifnot( class(y) == 'errorLocation' )
     call <- unique(c(x$call,y$call))
@@ -150,6 +151,7 @@ print.errorLocation <- function(x,...){
 # @method `%+%` NULL
 # @keywords internal
 # @rdname plus
+#' @export
 `%+%.NULL` <- function(x,y,...){
     y
 }

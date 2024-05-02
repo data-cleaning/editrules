@@ -34,6 +34,7 @@ checkRows <- function(E, dat){
 # @rdname checkRows
 # @method checkRows editmatrix
 # 
+#' @export
 checkRows.editmatrix <- function(E, dat){
     stopifnot(is.data.frame(dat))
     vars <- getVars(E) %in% names(dat)
@@ -55,6 +56,7 @@ checkRows.editmatrix <- function(E, dat){
 # @rdname checkRows
 # @method checkRows character
 # 
+#' @export
 checkRows.character <- function(E, dat){
    ed <- parseEdits(E)
     check <- !logical(nrow(dat))
@@ -69,6 +71,7 @@ checkRows.character <- function(E, dat){
 # @rdname checkRows
 # @method checkRows data.frame
 # 
+#' @export
 checkRows.data.frame <- function(E, dat){
     checkRows(as.character(E$edit),dat)
 }
