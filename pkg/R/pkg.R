@@ -69,7 +69,7 @@
 #' \code{editrules} provides several methods for plotting and coercion.
 #' \tabular{ll}{
 #'   \code{\link{editrules.plotting}} \tab Plot edit-variable connectivity graph \cr
-#'   \code{\link{as.igraph}} \tab Coerce to edit-variable connectivity \code{igraph} object \cr
+#'   \code{\link[igraph]{as.igraph}} \tab Coerce to edit-variable connectivity \code{igraph} object \cr
 #'   \code{as.character} \tab Coerce edits to \code{character} representation \cr
 #'   \code{as.data.frame} \tab Store \code{character} representation in \code{data.frame} \cr
 #' }

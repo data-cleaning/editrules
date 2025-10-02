@@ -133,7 +133,7 @@ scale_fac <- function(x){
 #' 
 #' \code{as.lp.mip} transforms a mip object into a lpSolveApi object.
 #' @param mip object of type \code{mip}.
-#' @seealso \code{\link{as.mip}}, \code{\link{make.lp}}
+#' @seealso \code{\link{as.mip}}, \code{\link[lpSolveAPI]{make.lp}}
 #' @importFrom lpSolveAPI make.lp set.column
 #' @export
 as.lp.mip <- function(mip){

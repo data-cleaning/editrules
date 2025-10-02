@@ -74,29 +74,29 @@ contains.editarray <- function(E,var=NULL,...){
     ind <- getInd(E)
     if ( is.null(var)) var <- names(ind)
    
-    contains.boolmat(getArr(E),ind,var)
+    contains.boolmat(getArr(E),var = var, ind = ind)
 }
 
 #' Determine if a boolean matrix contains \code{var}
 #'
-#' @param A array
+#' @param E array
 #' @param ind index
 #' @param var variable name
+#' @export
 #' @keywords internal
-contains.boolmat <- function(A, ind, var){
+contains.boolmat <- function(E, var=NULL, ind, ...){
     ind <- ind[var]
-    v <- vapply(ind, function(ii) rowSums(A[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(A)))
+    v <- vapply(ind, function(ii) rowSums(E[,ii,drop=FALSE]) < length(ii), FUN.VALUE=logical(nrow(E)))
     if ( is.vector(v) ){ 
-        v <- array(v,dim=c(1,length(v)), dimnames=list(edit=rownames(A),var=names(v)))
+        v <- array(v,dim=c(1,length(v)), dimnames=list(edit=rownames(E),var=names(v)))
     } else {
-        dimnames(v) <- list(edit=rownames(A),variable=colnames(v))
+        dimnames(v) <- list(edit=rownames(E),variable=colnames(v))
     } 
   v
 }
 
 #' contains method for cateditmatrix
 #'
-#' @method contains editset
 #' @rdname contains 
 #' @export
 #' @keywords internal

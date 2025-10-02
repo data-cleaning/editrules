@@ -15,12 +15,14 @@ Description: Please note: active development has moved to packages 'validate'
     the rules and erroneous fields can be found based on Fellegi and Holt's
     generalized principle. Rules dependencies can be visualized with using the
     'igraph' package. 
-Version: 2.9.3
+Version: 2.9.6
 Depends:
     R (>= 2.12.0),
     igraph
 Imports:
     lpSolveAPI
+Suggests:
+    testthat
 URL: https://github.com/data-cleaning/editrules
 BugReports: https://github.com/data-cleaning/editrules/issues
 Collate:
@@ -81,5 +83,5 @@ Collate:
     'violatedEdits.R'
     'writeELAsMip.R'
     'zzz.R'
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Encoding: UTF-8

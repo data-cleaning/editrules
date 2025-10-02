@@ -13,6 +13,7 @@ RnwWeave: knitr
 LaTeX: XeLaTeX
 
 BuildType: Package
+PackageUseDevtools: Yes
 PackagePath: pkg
 PackageInstallArgs: --no-multiarch --with-keep.source
 PackageRoxygenize: rd,namespace
