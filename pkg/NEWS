@@ -1,3 +1,6 @@
+version 2.9.6
+- Fixed documentation issues (links to other packages)
+
 version 2.9.0
 - some updates on the NAMESPACE to comply to new CRAN policies.
 - bugfix: MIP method for error localisation ignored time constraint

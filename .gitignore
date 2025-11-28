@@ -1,5 +1,7 @@
 /output
 .Rproj.user
+.Rhistory
 /pkg/man
+.DS_Store
 
 

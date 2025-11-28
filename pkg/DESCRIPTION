@@ -5,7 +5,15 @@ Title: Parsing, Applying, and Manipulating Data Cleaning Rules
 LazyData: no
 Type: Package
 LazyLoad: yes
-Author: Edwin de Jonge, Mark van der Loo
+Authors@R: c(person(given = "Edwin",
+                        family = "de Jonge",
+                        role = c("aut", "cre"),
+                        email = "edwindjonge@gmail.com",
+                        comment=c(ORCID="0000-0002-6580-4718")
+              ),
+                 person(given = "Mark",
+                        family = "van der Loo",
+                        role = "aut"))
 Description: Please note: active development has moved to packages 'validate'
     and 'errorlocate'. Facilitates reading and manipulating (multivariate) data
     restrictions (edit rules) on numerical and categorical data. Rules can be
@@ -83,5 +91,5 @@ Collate:
     'violatedEdits.R'
     'writeELAsMip.R'
     'zzz.R'
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8

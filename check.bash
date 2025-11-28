@@ -14,8 +14,8 @@ do
     R CMD INSTALL $x
 done
 
-cd ../../deducorrect
-echo ""
-echo "######## Building and checking deducorrect..."
-echo ""
-bash build.bash
+#cd ../../deducorrect
+#echo ""
+#echo "######## Building and checking deducorrect..."
+#echo ""
+#bash build.bash
