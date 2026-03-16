@@ -1,0 +1,699 @@
+#------  short explanation -------
+
+# this code simplifies unnecessarily complicated edits and removes redundant edits
+# Step 0: Feasibility check: Are there any contradictory constraints? 
+
+# For feasible edit sets:
+# Step 1a: Determine Fixed variables: find variables that can attain only value.
+# Step 1b: Simplify compound edits. Find out whether one or more conditional / compound edits can be replaced by single / nonconditional edit statements.
+# Step 2: Identify and remove redundant edits. For example: the edit x<5 is redundant if there is also an edit x < 6.
+
+# for Infeasible edit sets:
+# step 3: find a subset of edits whose removal restores feasibility
+# step 4: find an IIS (irreducible inconsistent subset)- a small set of contradicting edits
+
+# The mainfunction is "CleanEdits".
+
+# Two parameters are : MCondConstr and MSoftconstr. These are so-called big M values, used in the MIP-formulation 
+# (McondConstr is used for conditional constraints and Msoftconstr for soft constraints in step 3 above)
+# defaultvalue is 10,000. 
+# if numerical problems occur a smaller value may be desirable.
+# however for constraints with large coefficients, it may be necessary to use a larger value than 10,000.
+
+# important: this code assumes that there are no variables with a point in its name. (other than categorical variables defined by editrules)
+
+#----Inititalisation
+
+setwd("G:/onderhanden_werk/gaafmaakonderzoek2013/editregelssander/openissue")
+setwd("G:/onderhanden_werk/gaafmaakonderzoek2013")
+path <- paste(getwd(),"/", sep="")
+.libPaths("//dmkv1f/dmk1/kennR/R/R2.15")
+library(editrules)
+library(deducorrect)
+library(lpSolveAPI)
+
+#----General helpfunctions ----------------------------------------------------------------------------------------#
+
+# isCatVar is an indicator for categorical variables in  the editmatrix E.
+isCatVar <- function(E){
+  CatVar <-  grepl(".",getVars(E), fixed=TRUE)   #Categorical variables are variables with a point in its name.
+  return(CatVar)}
+
+# isNumEdits is an indicator for numerical edits in editmatrix E
+isNumEdit <- function (E) {
+  numericals <- grepl("num",rownames(E), fixed=TRUE)  #Numerical edits are edits with "num" in its name
+  return(numericals)}
+
+# isCatEdit is an indicator for categorical edits in editmatrix E
+isCatEdit <- function(E){
+  catEdits <- !isNumEdit(E) 
+  return(catEdits)}  
+
+# ContainsCatVar is an indicator for the presence of categorical variables in the edits of an editmatrix E
+ContainsCatVar <- function(E){
+  EditCatVar <- FALSE
+  if (sum(isCatVar(E)) > 0 ) {
+    EditCatVar <-rowSums(contains(E,var=getVars(E)[isCatVar(E),drop=F]))>0
+  }      
+  return(EditCatVar)}
+
+#DeleteEdit removes edit i from an editmatrix E.
+DeleteEdit <- function (E, i){
+  return(E[c(1:nrow(E))!=i])
+}
+
+# isVarinEdit is an indicator for the presence of variables "var"  in the edits of editmatrix E.
+# if a variable appears in one of the edits belonging to a conditional constraint, the indicator value will also be one for all other constraints that belong to the same conditional edit.
+isVarinEdit <- function(E, var){
+  isVarinEdit <- as.matrix(rowSums(contains(E,var=var, drop=FALSE)) > 0) # indicator that shows whether an edit contains at least one of the variables in var 
+  isVarinCatEdit <- isVarinEdit & isCatEdit(E)
+  if (sum(isVarinCatEdit)>0){    #if variables in var appear in a categorical edit belonging to conditional constraint, the numerical edits belonging to the same conditional constraints are also selected. 
+    NamesofCatEditswithVars <- rownames(E) [ isVarinCatEdit  , drop=F] 
+    isCondNumEditwithVar <-   isNumEdit(E) & ContainsCatVar(E) &  as.matrix (rowSums(contains(E, var=  NamesofCatEditswithVars) > 0 ))
+    isVarinEdit <- isVarinEdit | isCondNumEditwithVar
+  }
+  isCondNumEditwithVar <- isNumEdit(E) & ContainsCatVar(E) & isVarinEdit
+  CatVarsinCondEdit <- names(which (colSums(contains(E[isCondNumEditwithVar,,drop=FALSE], var=  getVars(E)[isCatVar(E)])) > 0 )) # all categorical constraints are selected that belong to the same conditional edits
+  if (length(CatVarsinCondEdit)>0){isVarinEdit <- isVarinEdit | (rownames(E) %in% CatVarsinCondEdit)  }
+  return(isVarinEdit)    
+}
+
+#--------------Functions for the  LP/MIP solver
+# AdaptToMip changes the operators of the edits in an editmatrix E
+# the operator '==' is replaced by '='
+# the operator '<' is replaced by '<= rhs - epsilon'
+# the function is needed because the LP-solver can only deal with "<= and "="edits; not with "<" type of edits.
+AdaptToMip    <- function(E, epsilon=as.mip(E)$epsilon)  {
+  E <- normalize(E)
+  A <- getA(E)
+  ops  <- getOps(E)  	  # possible operators: 	"==" "'<",  "<=" , as edits are in normalform)			 
+  rhs <- getb(E)                  # right hand side of the edits 
+  rhs[ops== "<"] <-  rhs[ops== "<"] - epsilon  
+  ops[ops== "<"] <-  "<="  
+ ops[ops== "=="] <- "="   
+  E <- as.editmatrix(A=A,ops=ops,b=rhs)
+  return(E)
+}
+
+# FillMip creates a new lpSolve linear programming object p from an editmatrix E. objfunc is a vector containing coefficients for the objective function.
+FillMip <- function(E, objfunc=rep(0,ncol(E)-1))  {
+  A <- getA(E)
+  b <- getb(E)
+  ops <-getOps(E)
+  iscat <- isCatVar(E)
+  nvar <- ncol(A)    # number of variables 
+  ncon <- nrow(A)             #  number of constraints
+  p   <- make.lp(ncon, nvar)   #  a new lp object is created with nvar variables and ncon constraints 
+  for (j in 1: nvar)  {set.column(p, j, A[,j])}  # fill the constraintsmatrix column-wise
+  set.constr.type(p,ops)	
+  set.rhs(p,b)
+  set.objfn(p,objfunc)   # define objective function - the coefficients of the variables in the objective function are given in objfunc
+  set.bounds(p,lower= rep(-Inf,nvar))		# lower bound of each variable is -infinity 
+  set.bounds(p,upper= rep(Inf,nvar))		# upper bound of each variabele is +infinity
+  set.type(p,which(iscat),"binary")     # define binary variables
+  return(p)
+} 
+
+# IsFeasible is an indicator for the feasiblity of an optimization problem p.
+isFeasible <- function (p) {
+  lp.control(p, break.at.first = TRUE, epsint= 1.0e-15, epspivot=1.0e-15) #we only need to know whether or not one feasible solution exists. Therefore, we can stop if a solution is found. Break.at.first=TRUE
+  result <-solve(p)  # solve optimization problem
+  feas <- (result !=2)   # result = 2 means infeasibile. 
+  return(feas)
+}
+
+#-------------------General functions for finding the negate of an edit 
+
+#NegateSingelEdit replaces the i-th edit of an editmatrix E by the negate of that edit.
+NegateSingleEdit <- function (E, i, epsilon =as.mip(E)$epsilon) {
+  A <- getA(E)
+  ops_in <-getOps(E)
+  ops_out <-ops_in
+  b <- getb(E)
+  ops_out[i][ops_in[i]=="<="] <- ">="   # the negate of an "<=" edit is an ">" edit. But, because the solver cannot deal with ">" constraints, this type of constraints is converted into ">=".
+  b[i][ops_in[i]=="<="] <- b[i] + epsilon
+  ops_out[i][ops_in[i]==">="] <- "<="
+  b[i][ops_in[i]==">="] <- b[i] - epsilon    
+  E <- as.editmatrix(A=A, ops=ops_out, b=b)
+  return(E)
+}
+
+#NegateSingelEdit replaces the i-th edit of an editmatrix E by the negate of that edit.
+# edit i is assumed to be a composed edit, i.e. an ifthen edit, with categorical variables
+# Explanation: A composed edit is modelled as: C1 OR C2 or C3 or....
+# the negate of such an edit is given by: NOT C1 AND NOT C2 AND NOT C3 AND..
+# 
+NegateConditionalEdit <- function (E, i, epsilon =as.mip(E)$epsilon) {
+  A <- getA(E)  
+  ops <-getOps(E)  
+  b <- getb(E)
+  iscat<-isCatVar(E)
+  CatVarsinEditi <- names(which(A[i,]*iscat!=0))   # the names of the categorical variables in edit i 
+  CatEdits<- CatVarsinEditi             # For each categorical variable an categorical edit exists.
+  A[, CatVarsinEditi]<-0  # each of the categorical variabeles in edit i will get the value 0. By doing is a conditional edit is replaced by a number of unconditional edits.
+  ops[CatEdits] <- ">="   # replace each categorical edit, in Catedits by the negate of that edit.
+  b[CatEdits] <- b[CatEdits] + epsilon # the negate of a <= edit is a > edit. We use >= type of edits. There we need to add epsilon to the right hand side
+  E <- as.editmatrix(A=A, ops=ops, b=b)
+  return(E)
+}
+
+
+#------------------------------------------------------------------------------------------------------------------
+# functions for the transformation of the in- and output.
+
+# PrepareEdits creates an editmatrix E from an editset E and expresses the editmatrix in normalform.
+PrepareEdits<-function (E, epsilon=as.mip(E)$epsilon,MCondConstr=10000) {
+  E   <- as.mip(E, epsilon )$E    
+  E   <- normalize(E)      
+  A  <-  getA(E)    
+  A[A==-as.mip(E)$M]<- -MCondConstr # the big M values of the initial MIP problem are changed in order to prevent numerical problems
+  E <- as.editmatrix(A=A,ops=getOps(E), b=getb(E))
+  return(E)
+}
+
+# EditMatrixToEditSet coerces an editmatrix E to an editlist.
+# function will be used to write logfiles
+EditMatrixToEditSet <- function (E){
+  Es <- ""
+  if (nrow(E)>0) {
+    isNumEditNoCatVar <- isNumEdit(E)& !ContainsCatVar(E)
+    isNumEditWithCatVar <- isNumEdit(E)& ContainsCatVar(E)
+    NNumEditWithCatVar <- sum(isNumEditWithCatVar)
+    NNumEditNoCatVar <- sum(isNumEditNoCatVar)
+    EsNumEditsNoCatVar <- as.matrix(as.data.frame(as.editset(E[isNumEditNoCatVar,,drop=F])))  # Numerical edits without categorical variables in matrixformat
+    EsNumEditsWithCatVar <- as.matrix(as.data.frame(as.editset(E[isNumEditWithCatVar,,drop=F])))  # numerical edits with categorical variables in matrixformat
+    if (NNumEditWithCatVar >0){               # additional operations are needed for numerical edits with categorical varibiables. These are transformed into conditional `If THEN´ edits
+      for (i in 1 : NNumEditWithCatVar)  { 
+         IndexEdit <- which(isNumEditWithCatVar)[i]
+         CatVarsinEdit <- getVars(E)[isCatVar(E)][contains(E[IndexEdit,isCatVar(E)])]
+         for (j in 1: (length(CatVarsinEdit))) {
+           CatVar <- CatVarsinEdit[j]
+           CatEdit <- substValue(E[CatVar,,drop=F],CatVar,0, reduce=F, removeredundant=F)  # the categorical edit that has been defined for a categorical variable. In this edit the categorical variable is eliminated
+           if (j==1) {
+             CatEdit <- NegateSingleEdit(CatEdit,1)   # the first part will become the `if´ part. for this part the edit needs to be negated, i.e.  C1 or C2 is expressed as IF NOT C1 then C2
+             dfEdit <- as.data.frame(CatEdit)$edit   
+             dfEdit <- paste(" if (", dfEdit, ")", sep=" ") 
+           }
+           if (j>1){
+             dfEditNewPart <- as.data.frame(CatEdit)$edit 
+             dfEdit <- paste (dfEdit, dfEditNewPart , sep =" " )  
+             if (j < length(CatVarsinEdit)) { dfEdit <- paste(dfEdit, "|", sep=" ") }   
+           }                          
+         }
+         EsNumEditsWithCatVar[i,2]<-dfEdit
+      }          
+    }
+    if ((NNumEditWithCatVar>0) & (NNumEditNoCatVar >0)) {Es <- rbind(EsNumEditsNoCatVar,EsNumEditsWithCatVar)}
+    if ((NNumEditWithCatVar>0) & (NNumEditNoCatVar ==0)) {Es <-EsNumEditsWithCatVar}
+    if ((NNumEditWithCatVar==0) & (NNumEditNoCatVar >0)) {Es <-EsNumEditsNoCatVar}
+  }  
+  return(Es)
+}
+        
+#------Specific functions for step 0----feasibilitity of constraints
+
+# isEditsFeasible in an indicator for the feasibility of the edits in editmatrix E
+isEditsFeasible<-function(E) {  
+  E <- AdaptToMip(E)
+  p <-   FillMip(E) # lpsolve object is made
+  feasible <- isFeasible(p)    # test for feasilbility
+  return(feasible)
+}
+
+#------Specific functions for Step 1a---fixed variables, i.e. variables that can only attain one value.
+
+#MinimumValue gives the minimum value for variable i in editmatrix E
+MinimumValue <-function(E ,i){
+  minval <- -9999
+  objective <- rep(0, (ncol(E)-1))   # coefficients of objective function
+  objective[i] <- 1   
+  p <-   FillMip(E, objfunc=objective) 
+  result <-solve(p)
+  if (result ==0) {minval <- get.objective(p)} # result=0 means that a minimum value was found. 
+  if (result > 0) {minval <- -9999}   # if no minimum value is found, the result of the function is -9999
+  return(minval)
+}
+
+#MaximumValue gives the maximum value for variable i in Editmatrix E
+MaximumValue <-function(E ,i){
+  maxval <- 9999
+  objective <- rep(0, (ncol(E)-1))
+  objective[i] <- 1  #coefficients of objective function
+  p <-   FillMip(E, objfunc=objective)
+  lp.control(p, sense="max") 
+  result <-solve(p)
+  if (result ==0) {maxval <- get.objective(p)}  # result=0 means that a maximum value was found. 
+  if (result > 0) {maxval <- 9999} # if no maximum value is found, the result of the function is +9999
+  return(maxval)
+}
+
+# MinimizeEachVariable gives the minimum value for each numerical variable in Editmatrix E
+MinimizeEachVariable <- function (E){
+  smallest <- rep(-9999, (ncol(E)-1)) # initialisation
+  for (i in 1: (ncol(E)-1))  {
+    if (!isCatVar(E)[i]) {    smallest[i] <- MinimumValue(E, i)}  
+  }
+  return(smallest)}
+
+# MaximizeEachVariable gives the maximum value for each numerical variable in Editmatrix E
+MaximizeEachVariable <- function (E){
+  largest <- rep(9999, (ncol(E)-1)) # initialisation  
+  for (i in 1: (ncol(E)-1))  {
+    if (!isCatVar(E)[i]) {largest[i] <- MaximumValue(E, i)}  
+  }
+  return(largest)}
+
+# FixedValues gives the names of the fixed variables in editmatrix E, together with their values
+FixedValues <- function (E){
+  E <- AdaptToMip(E)  # 
+  minima <- MinimizeEachVariable (E) # a vector with minimum values
+  maxima <- MaximizeEachVariable (E) # a vector with maximum values
+  return(list("variables"=getVars(E)[minima==maxima],"values"=minima[minima==maxima]))  # as output are given: the names of the variables and their values
+}
+
+# Adds a constraint in editmatrix E for each fixed value. For example if the value of x has to be 10, the constraint x =10 is added.
+AddFixedValuesAsConstraints<-function(E, fixvars, fixvalues){
+  nfixed <- length(fixvars)
+  An <- matrix(0,nrow=nfixed, ncol=(ncol(E)-1))
+  rownames(An)<- rep("num",nrow(An))
+  colnames(An)<-colnames(getA(E))
+  for (i in 1:(nrow(An))) {An[i,colnames(An)==fixvars[i]]<-1}
+  opsn <- rep("==", nfixed)
+  bn<-fixvalues
+  An <- rbind(getA(E), An)
+  opsn <- c(getOps(E),opsn)
+  bn <- c(getb(E),bn)  
+  En <- as.editmatrix(A=An,ops=opsn,b=bn)
+  return("E"=En)
+}
+
+
+# Substitutes fixed values in editmatrix E. Fixed values are represented by a single constraint (e.g x=10) In all other constraints fixed variable are substituted (e.g.  the value 10 is filled in for x)
+SubstituteFixedValues<-function(E){
+  fixedvars <- ""   # initialise
+  fixedvals <- ""   # initialise
+  LogOriginalEditswithFixedVars <- ""  #initialise
+  LogAdjustedEditswithFixedVars <- ""
+  fixed <- FixedValues(E)
+  nedits <- nrow(E)
+  if (length (fixed$variables) > 0 ) { 
+    fixedvars <-fixed$variables 
+    fixedvals <-fixed$values 
+    isEditsWithFixedvars <- isVarinEdit(E,fixedvars)
+    LogOriginalEditswithFixedVars<-EditMatrixToEditSet(E[isEditsWithFixedvars,,drop=F])
+    E<-substValue(E,fixedvars,fixedvals,reduce=FALSE, removeredundant=FALSE) 
+    E <- AddFixedValuesAsConstraints(E,fixedvars,fixedvals)          
+    LogAdjustedEditswithFixedVars<-EditMatrixToEditSet(E[isEditsWithFixedvars,,drop=F])
+  }  
+  return(list("E"=E,"variables"=fixedvars,"values"=fixedvals, "OldEditsWithFixedVars"=LogOriginalEditswithFixedVars, "NewEditsWithFixedVars"= LogAdjustedEditswithFixedVars ))
+}
+
+#------functions for Step 1b---simplify conditional  edits / compound constraints
+# Conditional edits are written in the form C1 or C2 or ....which is also called a compound statement
+# isPartofConditionalEditAlwaysTrue  is an indicator for non constraining components; components that are always satisfied (given the Edits in E)
+
+isPartofConditionalEditAlwaysTrue<-function (E, i){   # i is a categorical edit that refers to a component of a compound edit
+  A <-getA(E) 
+  AlwaysSatisfied <- FALSE
+  iscat <- isCatVar(E)
+  if (isCatEdit(E)[i]==T) {    # THE COMPonents of a composed edits are expressed as categorical variables. 
+    nedits <- nrow(E)
+    CatHelpVariableInEdit <- names(which(A[i,]*iscat!=0))   # name of the categorical variable in edit i
+    E <- as.editmatrix(A=rbind(getA(E),getA(E)[i,,drop=F]), ops=c(getOps(E),getOps(E[i])), b=c(getb(E),getb(E)[i]))  # replicates edit i   
+    E[(nedits+1),]<-substValue(E[(nedits+1),,drop=F], CatHelpVariableInEdit , 0,   reduce = FALSE, removeredundant = FALSE) # by substitution of the categorical variable the conditional edit is replaced by an unconditional edit
+    E <- AdaptToMip(E)
+    E <- NegateSingleEdit (E, (nedits+1))  #the statement is always satisfied means that it is redundant. IN order to check for redundancy we replace the edit by the negate of that edit.
+    p <-   FillMip(E)  
+    AlwaysSatisfied <- !isFeasible(p) # if there is no solution than the statement of edit i is redundant (or in other words: always satisfied)
+  }
+  return(AlwaysSatisfied)} 
+  
+  # isPartofConditionalEditAlwaysViolated is an indicator for nonrelaxing components of a compound statement. These are components for which the edits in E imply that these are always violated ('false') .
+isPartofConditionalEditAlwaysViolated<-function (E, i){
+    A <-getA(E) 
+    AlwaysViolated <- FALSE
+    iscat <- isCatVar(E)  
+    if (isCatEdit(E)[i]==T) {# COMPonents of a composed edits are expressed as categorical variables.
+      nedits <- nrow(E)
+      CatVarInEdit <- names(which(A[i,]*iscat!=0))   # name of the categorical variable in edit i
+      E <- as.editmatrix(A=rbind(getA(E),getA(E)[i,,drop=F]), ops=c(getOps(E),getOps(E[i])), b=c(getb(E),getb(E)[i]))  # replicates edit i   
+      E[(nedits+1),]<-substValue(E[(nedits+1),,drop=F], CatVarInEdit , 0,   reduce = FALSE, removeredundant = FALSE) # by substitution of the categorical variable the conditional edit is replaced by an unconditional edit
+      E <- AdaptToMip(E)
+      p <-   FillMip(E)    
+      AlwaysViolated <- !isFeasible(p)   # if there is no solution, then the statement of edit i is always violated. Implicitly, it is assumed that the initial edits are noncontradictory.
+    }
+    return(AlwaysViolated)} 
+
+# LogRedundantParts creates an editset from an editmatrix E, containing the edits that are called Catvar. 
+LogCatVarEdit<-function(E, CatVar){
+   CatVarEdits <- E[rownames(E) %in% CatVar,,drop=F] #selection of edits with catvar in the name 
+   CatVarEdits   <- substValue( CatVarEdits    ,CatVar ,rep(0,length( CatVar)),reduce=TRUE, removeredundant=TRUE) # by this substitution a conditional edit is transfered into an unconditional edit.
+   rownames(CatVarEdits)<-gsub(".l", "num", rownames(CatVarEdits) )    # after substitution of the categorical variable, the edit becomes numeric 
+   CatVarEdits <- EditMatrixToEditSet(CatVarEdits)      # creating the editset   
+  return(CatVarEdits)
+}
+
+#Transform_CategoricalEdit_into_NumericEdit replaces a conditional, categorical edits by a numeric, unconditional edit, if possible. 
+# After simplification of a conditional edit an unconditional edit may be obtained. 
+# for example: the original edit may be C1 or C2 or C3. However, if it turns out that c2 and C3 cannot occur; the edit can  be simplified. It will be expressed as a single edit C1. This function transforms conditional edits into numerical, unconditional edits (if possible)
+Transform_CategoricalEdit_into_NumericEdit<- function(E){
+  LogNewUnconditional <-NA
+  LogCatVarUnconditionalEdit <-NA
+  A <-getA(E)
+  b <-getb(E)
+  iscat <-  isCatVar(E)
+  NumEdits <- isNumEdit(E)
+  isNewUnconditionalEdit <- NumEdits & ((rowSums(A[, iscat, drop=FALSE])>0)  & (b[, drop=FALSE]==0))
+  if (sum(isNewUnconditionalEdit )>0)  {
+    CatVarUnconditionalEdit <- getVars(E)[colSums(contains(E[ isNewUnconditionalEdit,,drop=F]))>0, drop=F]   
+    LogNewUnconditional <- LogCatVarEdit(E,  CatVarUnconditionalEdit)
+    RedundantNumEdit <- NumEdits & (rowSums(A[, CatVarUnconditionalEdit, drop=FALSE])>0)
+    LogCatVarUnconditionalEdit <-CatVarUnconditionalEdit    
+    E <- E[!RedundantNumEdit,]
+    if (length( CatVarUnconditionalEdit)>0){
+      E <-  substValue(E,CatVarUnconditionalEdit,rep(0, length(CatVarUnconditionalEdit)),reduce=TRUE, removeredundant=TRUE)  # by substitution of the categorical variable a conditional edit becomes an unconditional edit
+      rownames(E)[rownames(E)%in% CatVarUnconditionalEdit]<-paste ("num", gsub(".", "",   rownames(E)[rownames(E)%in% CatVarUnconditionalEdit], fixed=TRUE ), sep= "")  # the name of the edit is changed. The new name shows that the edit is numerical now.        
+    }
+  }  
+  return(list(E=E,LogNewUnconditional=LogNewUnconditional,LogCatVarUnconditionalEdit =LogCatVarUnconditionalEdit ))
+}
+
+#SimplifyCOnditionalEdits removes non-relaxing components of compound edits. (i.e. parts of a conditional edit that are always violated) 
+SimplifyConditionalEdits <- function (E){
+  LogNewUnconditional <- NA
+  LogRedundantNumEdit <-NA
+  iscat <-  isCatVar(E)  
+  isEditAlwaysViolated <- rep(FALSE,nrow(E))    #initialise
+  AlwaysViolatedEdits <- ""          #initialise
+  RedundantPartsinConditionalEdits <- ""   #initialise
+  ESimplified <- E  #initialise
+  LogSimplifiedEdits <- ""
+  LogRedundantPartsinConditionalEdits<-""
+  if (nrow(E)>0)  {
+    for (i in 1:nrow(E)){
+      if  (isCatEdit(E)[i]== TRUE) {isEditAlwaysViolated[i]<-isPartofConditionalEditAlwaysViolated(E, i)}   #for every categorical variable it is evaluated whether or it not it belongs to a statement (a part of a conditional edit) that is always violated.
+    }
+    AlwaysViolatedEdits <-  rownames(E)[isEditAlwaysViolated,drop=F]  #names of categorical edits that are always violated
+    CatVarAlwaysViolated <-  AlwaysViolatedEdits     #names of categorical variables. The names of the categorical variables are the same as the names of the edits.
+    ESimplified <- E[isEditAlwaysViolated==FALSE,,drop=F] 
+    if (length(AlwaysViolatedEdits ) >0) {
+      ESimplified  <- substValue(ESimplified , CatVarAlwaysViolated ,rep(1,length( CatVarAlwaysViolated )),reduce=TRUE, removeredundant=TRUE) # by this substitution, redundant parts of a conditional edit are removed from that edit
+      Transform <- Transform_CategoricalEdit_into_NumericEdit(ESimplified ) # conditional edits are replaced by unconditional edits, if possible (i.e. if there is only one component)
+      LogNewUnconditional<-Transform$LogNewUnconditional
+      ESimplified <-Transform$E
+      if (!is.na(Transform$LogCatVarUnconditionalEdit[1])) { LogRedundantNumEdit <-EditMatrixToEditSet(E[isVarinEdit(E,Transform$LogCatVarUnconditionalEdit),,drop=F])}      
+      LogSimplifiedEdits   <- EditMatrixToEditSet (E[isVarinEdit(E,CatVarAlwaysViolated),,drop=F])  # make a log file of the simplified edits
+      LogRedundantPartsinConditionalEdits <- LogCatVarEdit(E, CatVarAlwaysViolated)
+    }
+  }  
+  return(list("E"= ESimplified,"Simplifiededits"= LogSimplifiedEdits,"SimplifiededitsRedundant" = LogRedundantPartsinConditionalEdits, "NewUnconditional"=LogNewUnconditional,"RedundantConditional"=LogRedundantNumEdit) )
+}
+
+# ReplaceConditionalbyUnconditional replaces a redundant conditional edit by a numeric, nonconditional edit.
+# Conditional edits are stated as: C1 or C2 or....
+# if C1 is always true, then the conditional edit C1 or C2 or....is redundant and can be replaced by the unconditional edit C1.
+ReplaceConditionalbyUnconditional <- function  (E){
+  iscat <-  isCatVar(E)  
+  NumEdit <- isNumEdit(E)
+  LogSimplifiedEdits  <- ""  #initialise
+  LogNewUnconditional  <- ""     #initialise
+  isEditSimplified <- rep(FALSE,nrow(E))    #initialise
+  ESimplified <-E  #initialisatie
+  if (nrow(E)>0 ){
+    for (i in 1:nrow(E)){
+      if  (NumEdit[i]== FALSE) {isEditSimplified[i]<-isPartofConditionalEditAlwaysTrue(E, i)}  #for every statement in a categorical edit it is checked whether it is always true 
+    }
+    CatVarNewUnconditional  <-  rownames(E[isEditSimplified,,drop=F]) #names of the categorical edits/variables belonging to conditions that are always true.
+    if (length(CatVarNewUnconditional ) > 0) {
+      isNumEditRedundant<- NumEdit & rowSums( contains(E[,,drop=F], var=CatVarNewUnconditional))>0  # indicator for redundant conditional edits; conditional edits that are always true.
+      ESimplified <- E[!isNumEditRedundant,,drop=FALSE] 
+      ESimplified  <- substValue(ESimplified,CatVarNewUnconditional ,rep(0,length(CatVarNewUnconditional )),reduce=TRUE, removeredundant=TRUE)     # the imputation transforms a conditional edit into an unconditional edit
+      rownames(ESimplified)[rownames(ESimplified)%in% CatVarNewUnconditional]<-paste ("num", gsub(".", "",   rownames(ESimplified)[rownames(ESimplified)%in% CatVarNewUnconditional], fixed=TRUE ), sep= "")  # it is shown in the editname that the edit is numerical.        
+      RedundantCatVar <- names(which(colSums(ESimplified [isNumEdit(ESimplified),isCatVar(ESimplified)])==0)) #categorical variables that do not appear (anymore) in numerical edits can be removed.
+      ESimplified <- ESimplified[!(rownames(ESimplified) %in% RedundantCatVar),, drop=F]  # removing  redundant categorical edits     
+      LogSimplifiedEdits   <- EditMatrixToEditSet (E[isVarinEdit(E,CatVarNewUnconditional),,drop=F])  # Create logfile containing all edits that include a categorical variable belonging to a statement that is always true                                        
+      LogNewUnconditional <- LogCatVarEdit(E,CatVarNewUnconditional )             # create log of the parts of conditional edits that are always satisfied.
+    }
+    }
+  return(list("E"= ESimplified ,"ReplacedConditional"=LogSimplifiedEdits,  "NewUnconditional"= LogNewUnconditional ))
+}  
+
+# Main function for step 1b
+SimplifyCondEdits<- function(E){
+  Simplify<-SimplifyConditionalEdits(E)
+  Replace<-ReplaceConditionalbyUnconditional(E=Simplify$E)
+  return(list("E"=Replace$E,"Simplified"=Simplify$Simplifiededits, "RedundantParts_alwaysFALSE"=Simplify$SimplifiededitsRedundant,"NewUnconditional_step1"=Simplify$NewUnconditional,"RedundantConditional_Step1"=Simplify$RedundantConditional, "NewUnconditional_step2" = Replace$NewUnconditional,"RedundantConditional_step2"=Replace$ReplacedConditional  ))
+}
+
+#------functions for step 2----- remove redundant edits.
+
+# isUnconditionalEditRedundant is an indicator for redundancy of an edit i in editmatrix E, where edit i is a numeric, unconditional edit
+# An edit is redundant if the problem that is obtained by replacing an edit by its negate edit leads to a contradictory set of edits.
+# Equality constraints are repaced by two edits: a "<=" edit and a ">=" edit. An equality edit is infeasible if the corresponding "<="  and ">=" edits are infeasible.
+isUnconditionalEditRedundant <- function (E, i){ 
+  OpsIn <- getOps(E)
+  OpsOut1 <- OpsIn
+  if (OpsOut1[i] %in% c("=", "=="))  OpsOut1[i]<-"<="
+  E1 <- as.editmatrix(A=getA(E),b=getb(E), ops=OpsOut1)
+  En <- NegateSingleEdit(E1,i)
+  p <-   FillMip (En)
+  redundant <- !isFeasible(p)
+  if (OpsIn[i] == "=" & redundant==TRUE) {     
+    OpsOut2 <- OpsIn
+    if (OpsOut1[i] %in% c("=", "=="))  OpsOut1[i]<-">="   
+    E2 <- as.editmatrix(A=getA(E),b=getb(E), ops=OpsOut2)
+    En <- NegateSingleEdit(E2,i)
+    p <-   FillMip(En)
+    redundant <- !isFeasible(p) 
+  }
+  return(redundant)
+} 
+
+# isConditionalEditRedundant is an indicator for redundancy of an edit i in editmatrix E, where edit i is a numeric, conditional edit
+isConditionalEditRedundant <- function (E, i ){
+  E2 <- NegateConditionalEdit(E,i)
+  p <-   FillMip(E2)
+  redundant <- !isFeasible(p) 
+  return(redundant)
+}
+
+# isEditRedundant is an indicator for redundancy of a numerical edit i in editmatrix E, where i is a numerical edit
+isEditRedundant<-function(E, i) {
+  redundant<-FALSE   #initialise
+  E <- AdaptToMip(E)
+  NumEditwithCatVars <- isNumEdit(E) & ContainsCatVar(E) 
+  if  (isNumEdit(E)[i]==TRUE) {
+    if (NumEditwithCatVars[i]==FALSE) { 
+      redundant<-isUnconditionalEditRedundant(E, i )
+    }     else {
+      redundant<-  isConditionalEditRedundant(E, i ) 
+    } 
+  }
+  return(redundant)
+} 
+
+# isRedundant is an indicator for redundancy for all edits in editmatrix E
+isRedundant<-function(E) {
+  redundant<-rep(FALSE,nrow(E))   #initialiseer op FALSE
+  for (i in 1:nrow(E)){    redundant[i] <- isEditRedundant(E,i)}
+  return(redundant)
+} 
+  
+# RemoveRedundantEdits deletes all redundant edits from an editmatrix E
+RemoveRedundantEdits<-function(E){
+  Estart <- E
+  isRedundant<-rep(FALSE,nrow(E))   #initialise
+  LogRedundant <- ""  #initialise
+  NumberRedundant<-0  #initialise
+  if (nrow(E)>0) {
+    nedits <- nrow(E)    
+    for (i in nedits:1){               
+      if( isEditRedundant(E,i)){ 
+        NumberRedundant <-NumberRedundant +1
+        E <- DeleteEdit(E,i)   
+        isRedundant[i]<-TRUE         
+        RedundantCatVar <- names(which(colSums(E [isNumEdit(E),isCatVar(E)])==0)) #categorical variables that do not appear in numerical edits (anymore) can be left out.
+        E <- E[!(rownames(E) %in% RedundantCatVar),, drop=F]        
+      } 
+    }
+  }  
+  if (NumberRedundant >0) { 
+    CatVarinRedundantEdits <- names(colSums(Estart[isRedundant,isCatVar(Estart)]))
+    isRedundantext <- isRedundant | (rownames(Estart) %in%  CatVarinRedundantEdits)  # isRedundant is extended with all categorical edits that belong to the same conditional edits as the edits in inRedundant
+    LogRedundant <- EditMatrixToEditSet(Estart[isRedundantext,,drop=FALSE]) 
+  }
+  return(list("E"=E, "redundant"=LogRedundant))  
+} 
+
+
+#-------------------------------------------------------------------------------------------------------------------
+
+# function for step 3: find a subset of edits whose removal restores feasibility
+
+#---------------------------------------------------------------------------------
+
+#ReplaceEqualitiesbyTwoInequlities replaces all equality constraints by two "<=" inequality constraints. For example x = 6 is replaced by x <=6 and -x<=-6. The last edit is equivalent to x>= 6. Multiplication by -1 transforms the edit in normal form  THe columns in the constraintmatrix with includevariable=False are NOT multiplied bij -1.
+# the latter feature is necessary for soft constraints. The binary variable that is included to make a constraint a soft constraints does not has to be multiplied by -1  (e.g. the soft version of x=6 is given by x <= 6 + Mp1 and x>= -6 + Mp1. In both inequalities p1 has the same coefficient   ) 
+ReplaceEqualitiesbyTwoInequalities<-function(E, IncludeVariable =rep(TRUE,ncol(E)-1)){
+  E <- AdaptToMip(E)
+  A  <-  getA(E)    
+  ops <- getOps(E)
+  b   <- getb(E)
+  neq <- sum(ops=="=")
+  if (neq >0){
+    A <- rbind(A, A[ops=="=", ,drop=F])
+    A[((length(b)+1):nrow(A)),IncludeVariable]<--1* A[((length(b)+1):nrow(A)),IncludeVariable]
+    b <- c(b,-1*b[ops=="="])
+    ops <-c(ops,ops[ops=="="])
+    ops[ops=="="] <- "<=" 
+  }
+  E <- as.editmatrix(A=A,b=b,ops=ops)  
+  return(E)
+}
+
+#  TransformHardConstraintsintoSoftConstraints creates an editmatrix E in which all hard constraints are transformed into soft constraints. New binary variables are introduced that show whether or not an edit is violated 
+#   however constraints with forcehard=1 will not be transformed into a soft constraint. 
+TransformHardConstraintsintoSoftConstraints <- function(E, ForceHard=rep(FALSE, sum(isNumEdit(E))),MSoftConstr=as.mip(E)$M,MCondConstr=as.mip(E)$M)  {
+  iscat <- isCatVar(E)
+  nvar <- length(iscat)
+  isnumEdit<-isNumEdit(E)
+  NnumEdit <- sum(isnumEdit)
+  A  <-  getA(E)    
+  colnamesA <-c(colnames(A),paste(".l",seq(from=(nvar+1), to=(nvar+NnumEdit)), sep="")) # new colnames for new categorical variables.
+  A <- cbind(A, matrix(0,nrow=nrow(A),ncol=NnumEdit))  #extending the coefficientsmatrix..nw columns for new binary variables with value =1 for violated constraints
+  colnames(A)<- colnamesA
+  coef <- -MSoftConstr
+  A[isnumEdit,(nvar+1):(ncol(A))]<-diag(coef,NnumEdit)
+  E <- as.editmatrix(A=A,ops=getOps(E), b=getb(E))
+  if (sum(ForceHard)>0) {  #enforcing that certain constraints cannot be violated
+    subvar <- getVars(E)[(nvar+1):(ncol(E)-1)][ForceHard==TRUE]
+    E<- substValue(E,var=subvar, value= rep(0,length(subvar)),reduce=FALSE,removeredundant=FALSE)}
+  return(E)
+}
+
+#FindInconsistentEdits creates an editmatrix with a  minimum number of edits that need to be deleted from editset E in order to obtain a consistent editset.
+# Edits for which forcenotinconsistent=1 cannot be included in this editmatrix.
+FindInconsistentEdits<-function(E, ForceNotInconsistent=rep(FALSE, sum(isNumEdit(E))),MSoftConstr=10000,MCondConstr=10000) {  
+  EInitial <-E  
+  nedit <- nrow(E)
+  nvar <-ncol(E)-1
+  IsInconsistentEdit <- rep(NA, nrow(E))
+  E<- AdaptToMip(E)   
+  E<- TransformHardConstraintsintoSoftConstraints (E,  ForceHard=ForceNotInconsistent, MSoftConstr=MSoftConstr, MCondConstr=MCondConstr)
+  nvarnew<- ncol(E)-1
+  isNewCatVar <- c(rep(FALSE,nvar),rep(TRUE,(nvarnew-nvar)))
+  E<-  ReplaceEqualitiesbyTwoInequalities(E, IncludeVariable=!isNewCatVar)
+  ForceNotInconsistent <- c(ForceNotInconsistent,ForceNotInconsistent[getOps(EInitial)%in% c("=","==")]) # each equality constraint will be duplicated
+  ObjFuncCoef <- rep(1,(nvarnew))
+  ObjFuncCoef[1:nvar] <-0  # the last variables in E appear in the obtjective function. These variables correspond to the binary variables that indicate whether an edit is violated
+  p <-   FillMip(E,ObjFuncCoef) 
+  q<-solve(p)
+  if (q==0) {
+    q <- get.variables(p)[(nvar+1):(ncol(E)-1)]  # THE RANge (nvar+1):(ncol(E)-1) is for the added categorical variables  - índicators for violence of edits
+    if (sum(q)>0) {
+      InconsistentNumEdit <- rownames(EInitial[isNumEdit(EInitial),,drop=F][q==1])
+      IsInconsistentNumEdit  <- rownames(EInitial) %in%  InconsistentNumEdit     
+      CatVarinInconsistentEdits <-names(which(colSums(contains(EInitial[InconsistentNumEdit,,drop=F]))>0 & isCatVar(EInitial)==TRUE) )      # if a numerical edit contains categorical variables, the edits corresponding to these categorical variables are also selected  
+      IsInconsistentEdit <-  IsInconsistentNumEdit | (rownames(EInitial) %in%  CatVarinInconsistentEdits)     
+    }      
+  }
+  return(IsInconsistentEdit)
+}
+
+#--------------------------------------------------------------------------------------------
+# functions for step 4; determining an IIS - irreducible infeasible set
+# the main algorithms consists of two substeps, implemented in FindIISstep1 and FindIISstep2. SubStep 1 may be omitted. 
+# SubStep 1 is a preselection step. A number of edits are selected that contain at least one IIS. 
+# SubStep 2 determines all edits that belong to one IIS .
+
+# Substep 1.  selection of edits will be determined by applying the 'elastic filter' . 
+# it may happen that step 3 above was not succesfull, because of numerical problems. 
+# in that case all edits will be selected in this step. Actually, this means that only step 2 is conducted.
+# 
+FindIISStep1<-function(E,MSoftConstr=10000,MCondConstr=10000){
+  isEditSelected <- rep(TRUE, nrow(E))
+  isInconsistentEdit <- FindInconsistentEdits(E,MSoftConstr=MSoftConstr,MCondConstr=MCondConstr)  #find a minimum of edits that need to be removed in order to repair the contradiction.
+  if (is.na( isInconsistentEdit[1])) {print("Numerical problems! An IIS will be found. But it may contain more edits than necessary")}
+  if (!is.na( isInconsistentEdit[1])){
+     if (sum(isInconsistentEdit)>0 ) {
+       isEditSelected <- rep(FALSE, nrow(E))
+        ForceNotInconsistent <- isInconsistentEdit[isNumEdit(E)] 
+        isInconsistentEdit_i <-isInconsistentEdit
+        while   (is.na(isInconsistentEdit_i[1])!=TRUE) {
+           isInconsistentEdit_i <- FindInconsistentEdits(E, ForceNotInconsistent=ForceNotInconsistent,MSoftConstr=MSoftConstr,MCondConstr=MCondConstr )[isNumEdit(E)==TRUE]
+           if (is.na(isInconsistentEdit_i[1]  )!=TRUE) {  ForceNotInconsistent <- ForceNotInconsistent | isInconsistentEdit_i==TRUE }    
+        }
+        isEditSelected[isNumEdit(E)] <-ForceNotInconsistent
+        CatVarinIISEdits <-names(which(colSums(contains(E[isEditSelected,,drop=F]))>0 & isCatVar(E)==TRUE) )      # if a numerical edit contains categorical variables, the edits corresponding to these categorical variables are also selected  
+        isEditSelected <-   isEditSelected | (rownames(E) %in%  CatVarinIISEdits)   
+     }
+  }
+  return(isEditSelected)
+}
+
+# this second step is an implementation of the ' deletion filter' All edits not belonging to an IIS are deleted.
+FindIISStep2<-function(E,MSoftConstr=10000,MCondConstr=10000){
+  if (isEditsFeasible(E)==TRUE) {isEditInIIS<- rep(FALSE, nrow(E))}
+  if (isEditsFeasible(E)==FALSE) {
+      isEditInIIS<- rep(TRUE, nrow(E))
+      for (i in 1: nrow(E)){ #for each edit in insetInconsistent it is checked whether it can be removed.
+        if (isNumEdit(E)[i]==TRUE) {
+          rowindex <- isEditInIIS
+          rowindex[i] <- F
+          if (isEditsFeasible(E[rowindex,,drop=F])==F) {isEditInIIS[i]<-FALSE}   # if the  removal of an edit  still leaves behind an infeasible set, then that edit will be definitively removed             
+        }
+      }
+      isEditInIIS[!isNumEdit(E)] <-FALSE
+      CatVarinIISEdits <-names(which(colSums(contains(E[isEditInIIS,,drop=F]))>0 & isCatVar(E)==TRUE) )      # if a numerical edit contains categorical variables, the edits corresponding to these categorical variables are also selected  
+      isEditInIIS <-  isEditInIIS | (rownames(E) %in%  CatVarinIISEdits)      
+  }
+  return (isEditInIIS)
+}
+
+# if Step1=False, only step 2 will be perfomed.
+FindIIS <-function(E,MSoftConstr=10000,MCondConstr=10000, Step1=TRUE){
+  if (isEditsFeasible(E) == TRUE ) { isinIIS <- rep(FALSE,nrow(E))} # function is meant to be applied to infeasible edit sets.
+  if (isEditsFeasible(E) == FALSE ) {
+     isinIISSelection <- rep(TRUE,nrow(E))
+     if (Step1==T) {isinIISSelection<-FindIISStep1(E,MSoftConstr=MSoftConstr,MCondConstr=MCondConstr)}
+     isinIIS <- isinIISSelection
+     isinIIS[isinIIS==TRUE]<-FindIISStep2(E[isinIISSelection,,drop=F],MSoftConstr=MSoftConstr,MCondConstr=MCondConstr)
+  }  
+  return(isinIIS)
+}
+
+
+
+  
+
+
+#Main FUNCTION---------------------------------------------------------------------------------------------------
+CleanEdits <- function(E, MSoftConstr=10000  ,MCondConstr=10000){
+  E<-PrepareEdits(E, MCondConstr=MCondConstr)
+  if (isEditsFeasible(E)) {
+    SubstFixed <- SubstituteFixedValues(E)
+    SimpleConditional <- SimplifyCondEdits(SubstFixed$E)
+    RemoveRedundant <- RemoveRedundantEdits(SimpleConditional$E)
+    E <- EditMatrixToEditSet (RemoveRedundant$E)    
+    ListResult <- list("CleanedEdits" =E,"Fixedvariables"=SubstFixed$variables, "Fixedvalues"=SubstFixed$values, "Edits_Simplified_BecauseOfFixedVars"=SubstFixed$OldEditsWithFixedVars,"NewEdits_after_imputation_fixedvars"=SubstFixed$NewEditsWithFixed,    "RedundantParts_alwaysFALSE_partofCompoundstatement"=SimpleConditional$RedundantParts_alwaysFALSE, "Edits_Simplified_BecauseOf_Components_always_False"=SimpleConditional$Simplified,     "NewUnconditionalEdits_afterremovalcomponentsalwaysFalse"=SimpleConditional$NewUnconditional_step1,"RedundantConditionalEdits_becauseOfAlwaysFalseComponents"=SimpleConditional$RedundantConditional_Step1, "NewUnconditionalEdits_ObtainedfromCompoundstatementsAlwaysTRUE" =SimpleConditional$NewUnconditional_step2,"RedundantConditionalEdits_becauseofcomponentsalwaysTRUE"=SimpleConditional$RedundantConditional_step2   ,"RemovedEdits_BecauseofRedundancy"=RemoveRedundant$redundant)
+    }  else {
+    ContradictingEdits <- EditMatrixToEditSet (E[FindInconsistentEdits(E,MSoftConstr=MSoftConstr,MCondConstr=MCondConstr),,drop=F])
+    IIS <- EditMatrixToEditSet (E[FindIIS(E,MSoftConstr=MSoftConstr,MCondConstr=MCondConstr),,drop=F])
+    ListResult <- list("ContradictingEdit"=ContradictingEdits, "IIS"=IIS )
+  }
+  return(ListResult )}
+
+
+
+
+#----------------------------------------------------------VOORBEELDEN van een aanroep van CleanEdits-----------------------------
+
+E<-editfile("hardtegkort.txt")
+E<-editfile("testjeIn3.txt")
+CleanEdits(E,MSoftConstr=10000,MCondConstr=10000)
+
+
+#filename<-paste(path,"Set2Cleaned.txt")
+#write.csv2(HCE,file=filename, row.names=FALSE, sep=" ", quote=FALSE)
+
+
